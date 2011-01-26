@@ -13,8 +13,10 @@ def get_rdma_devices(refresh = False):
         return _cached_devices;
 
     import rdma.devices;
-    _cached_devices = tuple(rdma.devices.RDMADevice(I)
-                            for I in os.listdir(rdma.devices.SYS_INFINIBAND));
+    _cached_devices = rdma.devices.DemandList2(
+        rdma.devices.SYS_INFINIBAND,
+        lambda x:rdma.devices.RDMADevice(x),
+        lambda x:x);
     return _cached_devices;
 
 def get_umad(port,**kwargs):

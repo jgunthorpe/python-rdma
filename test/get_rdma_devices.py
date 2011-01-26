@@ -4,7 +4,9 @@ import rdma
 
 class get_rdma_devices_test(unittest.TestCase):
     def test_list(self):
-        for I in rdma.get_rdma_devices():
+        devs = rdma.get_rdma_devices()
+        print devs;
+        for I in devs:
             print "RDMA Device '%s'"%(I.name);
             for J in ['node_type', 'fw_ver','node_guid','node_desc','sys_image_guid','board_id','hw_ver']:
                 print "    %s: %s"%(J,repr(getattr(I,J)))

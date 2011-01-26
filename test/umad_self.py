@@ -10,7 +10,8 @@ class umad_self_test(unittest.TestCase):
 
     def setUp(self):
         if self.umad == None:
-            self.umad = rdma.get_umad(rdma.get_rdma_devices()[0].end_ports[0]);
+            self.end_port = rdma.get_rdma_devices().first().end_ports.first();
+            self.umad = rdma.get_umad(self.end_port);
             self.qp0 = self.umad.register_client(IBA.MAD_SUBNET,1);
             self.local_addr = self.umad.make_ah(0xFFFF,0);
 
