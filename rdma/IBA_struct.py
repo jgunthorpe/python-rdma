@@ -1231,15 +1231,21 @@ class MADHeader(rdma.binstruct.BinStruct):
 
 class MADHeaderDirected(rdma.binstruct.BinStruct):
     '''MAD Base Header Directed (section 13.4.3)'''
-    __slots__ = ('MADHeader1','D','status','hopPointer','hopCount','MADHeader2');
+    __slots__ = ('baseVersion','mgmtClass','classVersion','method','D','status','hopPointer','hopCount','transactionID','attributeID','reserved1','attributeModifier');
     MAD_LENGTH = 24;
     def zero(self):
-        self.MADHeader1 = 0;
+        self.baseVersion = 0;
+        self.mgmtClass = 0;
+        self.classVersion = 0;
+        self.method = 0;
         self.D = 0;
         self.status = 0;
         self.hopPointer = 0;
         self.hopCount = 0;
-        self.MADHeader2 = bytearray(16);
+        self.transactionID = 0;
+        self.attributeID = 0;
+        self.reserved1 = 0;
+        self.attributeModifier = 0;
 
     @property
     def _pack_0_32(self):
@@ -1253,22 +1259,24 @@ class MADHeaderDirected(rdma.binstruct.BinStruct):
         self.hopCount = (value >> 0) & 0xFF;
 
     def pack_into(self,buffer,offset=0):
-        buffer[offset + 8:offset + 24] = self.MADHeader2
-        struct.pack_into('>LL',buffer,offset+0,self.MADHeader1,self._pack_0_32);
+        struct.pack_into('>BBBBLQHHL',buffer,offset+0,self.baseVersion,self.mgmtClass,self.classVersion,self.method,self._pack_0_32,self.transactionID,self.attributeID,self.reserved1,self.attributeModifier);
 
     def unpack_from(self,buffer,offset=0):
         self._buf = buffer[offset:];
-        self.MADHeader2 = buffer[offset + 8:offset + 24]
-        (self.MADHeader1,self._pack_0_32,) = struct.unpack_from('>LL',buffer,offset+0);
+        (self.baseVersion,self.mgmtClass,self.classVersion,self.method,self._pack_0_32,self.transactionID,self.attributeID,self.reserved1,self.attributeModifier,) = struct.unpack_from('>BBBBLQHHL',buffer,offset+0);
 
     def printer(self,F,offset=0,*args):
         rdma.binstruct.BinStruct.printer(self,F,offset,*args);
-        label = "MADHeader1=%r"%(self.MADHeader1);
+        label = "baseVersion=%r,mgmtClass=%r,classVersion=%r,method=%r"%(self.baseVersion,self.mgmtClass,self.classVersion,self.method);
         self.dump(F,0,32,label,offset);
         label = "D=%r,status=%r,hopPointer=%r,hopCount=%r"%(self.D,self.status,self.hopPointer,self.hopCount);
         self.dump(F,32,64,label,offset);
-        label = "MADHeader2=%r"%(self.MADHeader2);
-        self.dump(F,64,192,label,offset);
+        label = "transactionID=%r"%(self.transactionID);
+        self.dump(F,64,128,label,offset);
+        label = "attributeID=%r,reserved1=%r"%(self.attributeID,self.reserved1);
+        self.dump(F,128,160,label,offset);
+        label = "attributeModifier=%r"%(self.attributeModifier);
+        self.dump(F,160,192,label,offset);
 
 class MADClassPortInfo(rdma.binstruct.BinStruct):
     '''Class Port Info (section 13.4.8.1)'''
@@ -1806,11 +1814,11 @@ class SMPFormatDirected(rdma.binstruct.BinStruct):
     MAD_CLASS = 0x81;
     MAD_CLASS_VERSION = 0x1;
     def __init__(self,*args):
-        self.MADHeader = MADHeader();
+        self.MADHeader = MADHeaderDirected();
         rdma.binstruct.BinStruct.__init__(self,*args);
 
     def zero(self):
-        self.MADHeader = MADHeader();
+        self.MADHeader = MADHeaderDirected();
         self.MKey = 0;
         self.drSLID = 0;
         self.drDLID = 0;

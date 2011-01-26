@@ -20,12 +20,20 @@
           bytes="24"
           desc="MAD Base Header Directed"
           sect="13.4.3">
-    <mb bits="32" off="0[0]">MADHeader1<!--MAD Header 1--></mb>
+    <mb bits="8" off="0[0]">baseVersion<!--BaseVersion--></mb>
+    <mb bits="8" off="0[8]">mgmtClass<!--MgmtClass--></mb>
+    <mb bits="8" off="0[16]">classVersion<!--ClassVersion--></mb>
+    <mb bits="8" off="0[24]">method<!--Method--></mb>
+
     <mb bits="1" off="0[32]">D<!--D--></mb>
     <mb bits="15" off="0[33]">status<!--Status--></mb>
     <mb bits="8" off="0[48]">hopPointer<!--Hop Pointer--></mb>
     <mb bits="8" off="0[56]">hopCount<!--Hop Count--></mb>
-    <mb bits="128" off="0[64]">MADHeader2<!--MAD Header 2--></mb>
+
+    <mb bits="64" off="0[64]">transactionID<!--TransactionID--></mb>
+    <mb bits="16" off="0[128]">attributeID<!--AttributeID--></mb>
+    <mb bits="16" off="0[144]"><!--Reserved--></mb>
+    <mb bits="32" off="0[160]">attributeModifier<!--AttributeModifier--></mb>
   </struct>
 
   <struct name="MADClassPortInfo"

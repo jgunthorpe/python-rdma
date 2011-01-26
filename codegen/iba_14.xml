@@ -39,7 +39,7 @@
           mgmtClass="0x81"
           mgmtClassVersion="1"
           mgmtClassName="MAD_SUBNET_DIRECTED">
-    <mb bits="192" off="0" type="struct MADHeader">MADHeader<!--Common MAD Header (Different classSpecific and status fields)--></mb>
+    <mb bits="192" off="0" type="struct MADHeaderDirected">MADHeader<!--Common MAD Header (Different classSpecific and status fields)--></mb>
     <mb bits="64" off="24">MKey<!--M_Key--></mb>
     <mb bits="16" off="32">drSLID<!--DrSLID--></mb>
     <mb bits="16" off="34">drDLID<!--DrDLID--></mb>
