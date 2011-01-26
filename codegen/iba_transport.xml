@@ -1,0 +1,99 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<makestructs type="IBA Transport Packets" output="iba_transport.h">
+  <struct name="HdrLRH" bytes="8" desc="Local Route Header" sect="7.7">
+    <mb bits="4" off="0[0]">VL</mb>
+    <mb bits="4" off="0[4]">LVer</mb>
+    <mb bits="4" off="0[8]">SL</mb>
+    <mb bits="2" off="0[12]"></mb>
+    <mb bits="2" off="0[14]">LNH</mb>
+    <mb bits="16" off="0[16]">DLID</mb>
+
+    <mb bits="5" off="4[0]"></mb>
+    <mb bits="11" off="4[5]">pktLen</mb>
+    <mb bits="16" off="4[16]">SLID</mb>
+  </struct>
+
+  <struct name="HdrRWH" bytes="4" desc="Raw Header" sect="5.3">
+    <mb bits="16" off="0[0]"></mb>
+    <mb bits="16" off="0[16]">etherType</mb>
+  </struct>
+
+  <struct name="HdrGRH" bytes="40" desc="Global Route Header" sect="8.3">
+    <mb bits="4" off="0[0]">IPVer</mb>
+    <mb bits="8" off="0[4]">TClass</mb>
+    <mb bits="20" off="0[12]">flowLabel</mb>
+
+    <mb bits="16" off="4">payLen</mb>
+    <mb bits="8" off="4[16]">nxtHdr</mb>
+    <mb bits="8" off="4[24]">hopLmt</mb>
+
+    <mb bits="128" off="8" type="HdrIPv6Addr">SGID</mb>
+    <mb bits="128" off="24" type="HdrIPv6Addr">DGID</mb>
+  </struct>
+
+  <struct name="HdrBTH" bytes="12" desc="Base Transport Header" sect="9.2">
+    <mb bits="3" off="0[0]">service</mb>
+    <mb bits="5" off="0[3]">function</mb>
+    <mb bits="1" off="0[8]">SE</mb>
+    <mb bits="1" off="0[9]">migReq</mb>
+    <mb bits="2" off="0[10]">padCnt</mb>
+    <mb bits="4" off="0[12]">TVer</mb>
+    <mb bits="16" off="0[16]">PKey</mb>
+
+    <mb bits="8" off="4"></mb>
+    <mb bits="24" off="4[8]">destQP</mb>
+
+    <mb bits="1" off="8">ackReq</mb>
+    <mb bits="7" off="8[1]"></mb>
+    <mb bits="24" off="8[8]">PSN</mb>
+  </struct>
+
+  <struct name="HdrRDETH" bytes="4" desc="Reliable Datagram Extended Transport Header" sect="9.3.1">
+    <mb bits="8" off="0[0]"></mb>
+    <mb bits="24" off="0[8]">EEC</mb>
+  </struct>
+
+  <struct name="HdrDETH" bytes="8" desc="Datagram Extended Transport Header" sect="9.3.2">
+    <mb bits="32" off="0[0]">QKey</mb>
+    <mb bits="8" off="0[32]"></mb>
+    <mb bits="24" off="0[40]">srcQP</mb>
+  </struct>
+
+  <struct name="HdrRETH" bytes="16" desc="RDMA Extended Transport Header" sect="9.3.3">
+    <mb bits="64" off="0[0]" type="IBA64bit">VA</mb>
+    <mb bits="32" off="0[64]">RKey</mb>
+    <mb bits="32" off="0[96]">DMALen</mb>
+  </struct>
+
+  <struct name="HdrAtomicETH" bytes="28" desc="Atomic Extended Transport Header" sect="9.3.4">
+    <mb bits="64" off="0[0]" type="IBA64bit">VA</mb>
+    <mb bits="32" off="0[64]">RKey</mb>
+    <mb bits="64" off="0[96]" type="IBA64bit">swapData</mb>
+    <mb bits="64" off="0[160]" type="IBA64bit">cmpData</mb>
+  </struct>
+
+  <struct name="HdrAETH" bytes="4" desc="ACK Extended Transport Header" sect="9.3.5">
+    <mb bits="8" off="0[0]">syndrome</mb>
+    <mb bits="24" off="0[8]">MSN</mb>
+  </struct>
+
+  <struct name="HdrAtomicAckETH" bytes="8" desc="Atomic Acknowledge Extended Transport Header" sect="9.5.3">
+    <mb bits="64" off="0[0]" type="IBA64bit">origRData</mb>
+  </struct>
+
+  <struct name="HdrImmDt" bytes="4" desc="Immediate Extended Transport Header" sect="9.3.6">
+    <mb bits="32" off="0[0]" >immediateData</mb>
+  </struct>
+
+  <struct name="HdrIETH" bytes="4" desc="Invalidate Extended Transport Header" sect="9.3.7">
+    <mb bits="32" off="0[0]" >RKey</mb>
+  </struct>
+
+  <struct name="HdrFlowControl" bytes="4" desc="Flow Control Packet" sect="7.9.4">
+    <mb bits="4" off="0[0]">op</mb>
+    <mb bits="12" off="0[4]">FCTBS</mb>
+    <mb bits="4" off="0[16]">VL</mb>
+    <mb bits="12" off="0[20]">FCCL</mb>
+  </struct>
+
+</makestructs>

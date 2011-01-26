@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<makestructs type="IBA SNMP Tunneling">
+  <struct name="SNMPFormat"
+          bytes="256"
+          desc="SNMP Tunneling MAD Format"
+          sect="16.4.1"
+          mgmtClass="0x08"
+          mgmtClassVersion="1"
+          mgmtClassName="MAD_SNMP">
+    <mb bits="192" off="0" type="struct MADHeader">MADHeader<!--Common MAD Header--></mb>
+    <mb bits="256" off="24"><!--Reserved--></mb>
+    <mb bits="32" off="56">RAddress<!--R Address--></mb>
+    <mb bits="8" off="60">payloadLength<!--PayloadLength--></mb>
+    <mb bits="8" off="61">segmentNumber<!--Segment Number--></mb>
+    <mb bits="16" off="62">sourceLID<!--Source LID--></mb>
+    <mb bits="1536" off="64" display="data">data<!--SNMP Data--></mb>
+  </struct>
+
+  <struct name="SNMPCommunityInfo"
+          bytes="64"
+          desc="Community Name Data Store"
+          sect="16.4.3.2"
+          attributeID="0x10"
+          attributeName="SNMP_COMMUNITY_INFO"
+          methods="SNMPSend">
+    <mb bits="8" off="0[0]" count="64" display="string">communityName<!--Community Name--></mb>
+  </struct>
+
+  <struct name="SNMPPDUInfo"
+          bytes="192"
+          desc="Data Segment"
+          sect="16.4.3.3"
+          attributeID="0x11"
+          attributeName="SNMP_PDU_INFO"
+          methods="SNMPSend">
+    <mb bits="1536" off="0[0]">PDUData<!--PDUData--></mb>
+  </struct>
+
+</makestructs>

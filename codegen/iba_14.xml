@@ -1,0 +1,442 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<makestructs type="IBA Subnet Management">
+  <struct name="SMPGUIDBlock"
+          bytes="8"
+          desc="GUID Block Element"
+          sect="14.2.5.5">
+    <mb bits="64" off="0[0]">GUID<!--GUID--></mb>
+  </struct>
+
+  <struct name="SMPLIDPortBlock"
+          bytes="4"
+          desc="LID/Port Block Element"
+          sect="14.2.5.11">
+    <mb bits="16" off="0[0]">LID<!--LID--></mb>
+    <mb bits="1" off="0[16]">valid<!--Valid--></mb>
+    <mb bits="3" off="0[17]">LMC<!--LMC--></mb>
+    <mb bits="4" off="0[20]"><!--Reserved--></mb>
+    <mb bits="8" off="0[24]">port<!--Port--></mb>
+  </struct>
+
+  <struct name="SMPFormat"
+          bytes="256"
+          desc="SMP Format - LID Routed"
+          sect="14.2.1.1"
+          mgmtClass="0x01"
+          mgmtClassVersion="1"
+          mgmtClassName="MAD_SUBNET">
+    <mb bits="192" off="0" type="struct MADHeader">MADHeader<!--Common MAD Header--></mb>
+    <mb bits="64" off="24">MKey<!--M_Key--></mb>
+    <mb bits="256" off="32"><!--Reserved--></mb>
+    <mb bits="512" off="64" display="data">data<!--SMP Data--></mb>
+    <mb bits="1024" off="128"><!--Reserved--></mb>
+  </struct>
+
+  <struct name="SMPFormatDirected"
+          bytes="256"
+          desc="SMP Format - Direct Routed"
+          sect="14.2.1.2"
+          mgmtClass="0x81"
+          mgmtClassVersion="1"
+          mgmtClassName="MAD_SUBNET_DIRECTED">
+    <mb bits="192" off="0" type="struct MADHeader">MADHeader<!--Common MAD Header (Different classSpecific and status fields)--></mb>
+    <mb bits="64" off="24">MKey<!--M_Key--></mb>
+    <mb bits="16" off="32">drSLID<!--DrSLID--></mb>
+    <mb bits="16" off="34">drDLID<!--DrDLID--></mb>
+    <mb bits="224" off="36"><!--Reserved--></mb>
+    <mb bits="512" off="64" display="data">data<!--SMP Data--></mb>
+    <mb bits="8" off="128" count="64">initialPath<!--Initial Path--></mb>
+    <mb bits="8" off="192" count="64">returnPath<!--Return Path--></mb>
+  </struct>
+
+  <struct name="MADNoticeTrap64"
+	  aliases="MADNoticeTrap65 MADNoticeTrap66 MADNoticeTrap67"
+          bytes="54"
+          desc="Notice DataDetails For Trap 64, 65, 66, and 67"
+          sect="14.2.5.1"
+          containerFile="iba_13_4.xml"
+          containerName="MADNotice">
+    <mb bits="16" off="0[0]"><!--Reserved--></mb>
+    <mb bits="32" off="0[16]"><!--Reserved--></mb>
+    <mb bits="128" off="0[48]" type="HdrIPv6Addr">gidAddr<!--GIDADDR--></mb>
+    <mb bits="256" off="0[176]">padding<!--Padding--></mb>
+  </struct>
+
+  <struct name="MADNoticeTrap128"
+          bytes="54"
+          desc="Notice DataDetails For Trap 128"
+          sect="14.2.5.1"
+          containerFile="iba_13_4.xml"
+          containerName="MADNotice">
+    <mb bits="16" off="0[0]">lidAddr<!--LIDADDR--></mb>
+    <mb bits="416" off="0[16]">padding<!--Padding--></mb>
+  </struct>
+
+  <struct name="MADNoticeTrap129"
+	  aliases="MADNoticeTrap130 MADNoticeTrap131"
+          bytes="54"
+          desc="Notice DataDetails For Trap 129, 130 and 131"
+          sect="14.2.5.1"
+          containerFile="iba_13_4.xml"
+          containerName="MADNotice">
+    <mb bits="16" off="0[0]"><!--Reserved--></mb>
+    <mb bits="16" off="0[16]">lidAddr<!--LIDADDR--></mb>
+    <mb bits="8" off="0[32]">portNum<!--PORTNO--></mb>
+    <mb bits="8" off="0[40]"><!--Padding--></mb>
+    <mb bits="384" off="0[48]"><!--Padding--></mb>
+  </struct>
+
+  <struct name="MADNoticeTrap144"
+          bytes="54"
+          desc="Notice DataDetails For Trap 144"
+          sect="14.2.5.1"
+          containerFile="iba_13_4.xml"
+          containerName="MADNotice">
+    <mb bits="16" off="0[0]"><!--Reserved--></mb>
+    <mb bits="16" off="0[16]">lidAddr<!--LIDADDR--></mb>
+    <mb bits="8" off="0[32]"><!--Reserved--></mb>
+    <mb bits="7" off="0[40]"><!--Reserved--></mb>
+    <mb bits="1" off="0[47]">otherLocalChanges<!--OtherLocalChanges--></mb>
+    <mb bits="32" off="0[48]">capabilityMask<!--CAPABILITYMASK--></mb>
+    <mb bits="8" off="0[80]"><!--Reserved--></mb>
+    <mb bits="4" off="0[88]"><!--Reserved--></mb>
+    <mb bits="1" off="0[92]">smPriorityChange<!--SMPriorityChange--></mb>
+    <mb bits="1" off="0[93]">linkSpeedEnabledChange<!--LinkSpeedEnabledChange--></mb>
+    <mb bits="1" off="0[94]">linkWidthEnabledChange<!--LinkWidthEnabledChange--></mb>
+    <mb bits="1" off="0[95]">nodeDescriptionChange<!--NodeDescriptionChange--></mb>
+    <mb bits="16" off="0[96]"><!--Padding--></mb>
+    <mb bits="320" off="0[112]"><!--Padding--></mb>
+  </struct>
+
+  <struct name="MADNoticeTrap145"
+          bytes="54"
+          desc="Notice DataDetails For Trap 145"
+          sect="14.2.5.1"
+          containerFile="iba_13_4.xml"
+          containerName="MADNotice">
+    <mb bits="16" off="0[0]"><!--Reserved--></mb>
+    <mb bits="16" off="0[16]">lidAddr<!--LIDADDR--></mb>
+    <mb bits="16" off="0[32]"><!--Reserved--></mb>
+    <mb bits="64" off="0[48]">systemImageGUID<!--CAPABILITYMASK--></mb>
+    <mb bits="320" off="0[112]"><!--Padding--></mb>
+  </struct>
+
+  <struct name="MADNoticeTrap256"
+          bytes="54"
+          desc="Notice DataDetails For Trap 256"
+          sect="14.2.5.1"
+          containerFile="iba_13_4.xml"
+          containerName="MADNotice">
+    <mb bits="16" off="0[0]"><!--Reserved--></mb>
+    <mb bits="16" off="0[16]">lidAddr<!--LIDADDR--></mb>
+    <mb bits="16" off="0[32]">drSLID<!--DRSLID--></mb>
+    <mb bits="8" off="0[48]">method<!--METHOD--></mb>
+    <mb bits="8" off="0[56]"><!--Reserved--></mb>
+    <mb bits="16" off="0[64]">attributeID<!--ATTRIBUTEID--></mb>
+    <mb bits="32" off="0[80]">attributeModifier<!--ATTRIBUTEMODIFIER--></mb>
+    <mb bits="64" off="0[112]">MKey<!--MKEY--></mb>
+    <mb bits="8" off="0[176]"><!--Reserved--></mb>
+    <mb bits="1" off="0[184]">drNotice<!--DRNotice--></mb>
+    <mb bits="1" off="0[185]">drPathTruncated<!--DRPathTruncated--></mb>
+    <mb bits="6" off="0[186]">drHopCount<!--DRHopCount--></mb>
+    <mb bits="8" off="0[192]">drNoticeReturnPath0<!--DRNoticeReturnPath0--></mb>
+    <mb bits="8" off="0[200]">drNoticeReturnPath1<!--DRNoticeReturnPath1--></mb>
+    <mb bits="8" off="0[208]">drNoticeReturnPath2<!--DRNoticeReturnPath2--></mb>
+    <mb bits="8" off="0[216]">drNoticeReturnPath3<!--DRNoticeReturnPath3--></mb>
+    <mb bits="8" off="0[224]">drNoticeReturnPath4<!--DRNoticeReturnPath4--></mb>
+    <mb bits="8" off="0[232]">drNoticeReturnPath5<!--DRNoticeReturnPath5--></mb>
+    <mb bits="8" off="0[240]">drNoticeReturnPath6<!--DRNoticeReturnPath6--></mb>
+    <mb bits="8" off="0[248]">drNoticeReturnPath7<!--DRNoticeReturnPath7--></mb>
+    <mb bits="8" off="0[256]">drNoticeReturnPath8<!--DRNoticeReturnPath8--></mb>
+    <mb bits="8" off="0[264]">drNoticeReturnPath9<!--DRNoticeReturnPath9--></mb>
+    <mb bits="8" off="0[272]">drNoticeReturnPath10<!--DRNoticeReturnPath10--></mb>
+    <mb bits="8" off="0[280]">drNoticeReturnPath11<!--DRNoticeReturnPath11--></mb>
+    <mb bits="8" off="0[288]">drNoticeReturnPath12<!--DRNoticeReturnPath12--></mb>
+    <mb bits="8" off="0[296]">drNoticeReturnPath13<!--DRNoticeReturnPath13--></mb>
+    <mb bits="8" off="0[304]">drNoticeReturnPath14<!--DRNoticeReturnPath14--></mb>
+    <mb bits="8" off="0[312]">drNoticeReturnPath15<!--DRNoticeReturnPath15--></mb>
+    <mb bits="8" off="0[320]">drNoticeReturnPath16<!--DRNoticeReturnPath16--></mb>
+    <mb bits="8" off="0[328]">drNoticeReturnPath17<!--DRNoticeReturnPath17--></mb>
+    <mb bits="8" off="0[336]">drNoticeReturnPath18<!--DRNoticeReturnPath18--></mb>
+    <mb bits="8" off="0[344]">drNoticeReturnPath19<!--DRNoticeReturnPath19--></mb>
+    <mb bits="8" off="0[352]">drNoticeReturnPath20<!--DRNoticeReturnPath20--></mb>
+    <mb bits="8" off="0[360]">drNoticeReturnPath21<!--DRNoticeReturnPath21--></mb>
+    <mb bits="8" off="0[368]">drNoticeReturnPath22<!--DRNoticeReturnPath22--></mb>
+    <mb bits="8" off="0[376]">drNoticeReturnPath23<!--DRNoticeReturnPath23--></mb>
+    <mb bits="8" off="0[384]">drNoticeReturnPath24<!--DRNoticeReturnPath24--></mb>
+    <mb bits="8" off="0[392]">drNoticeReturnPath25<!--DRNoticeReturnPath25--></mb>
+    <mb bits="8" off="0[400]">drNoticeReturnPath26<!--DRNoticeReturnPath26--></mb>
+    <mb bits="8" off="0[408]">drNoticeReturnPath27<!--DRNoticeReturnPath27--></mb>
+    <mb bits="8" off="0[416]">drNoticeReturnPath28<!--DRNoticeReturnPath28--></mb>
+    <mb bits="8" off="0[424]">drNoticeReturnPath29<!--DRNoticeReturnPath29--></mb>
+  </struct>
+
+  <struct name="MADNoticeTrap257"
+	  aliases="MADNoticeTrap258"
+          bytes="54"
+          desc="Notice DataDetails For Trap 257 and 258"
+          sect="14.2.5.1"
+          containerFile="iba_13_4.xml"
+          containerName="MADNotice">
+    <mb bits="16" off="0[0]"><!--Reserved--></mb>
+    <mb bits="16" off="0[16]">lidAddr1<!--LIDADDR--></mb>
+    <mb bits="16" off="0[32]">lidAddr2<!--DRSLID--></mb>
+    <mb bits="32" off="0[48]">key<!--METHOD--></mb>
+    <mb bits="4" off="0[80]">SL<!--SL--></mb>
+    <mb bits="4" off="0[84]"><!--Reserved--></mb>
+    <mb bits="24" off="0[88]">qp1<!--QP1--></mb>
+    <mb bits="8" off="0[112]"><!--Reserved--></mb>
+    <mb bits="24" off="0[120]">qp2<!--QP2--></mb>
+    <mb bits="128" off="0[144]" type="HdrIPv6Addr">gidAddr1<!--GIDADDR1--></mb>
+    <mb bits="128" off="0[272]" type="HdrIPv6Addr">gidAddr2<!--GIDADDR2--></mb>
+    <mb bits="32" off="0[400]">padding<!--Padding--></mb>
+  </struct>
+
+  <struct name="MADNoticeTrap259"
+          bytes="54"
+          desc="Notice DataDetails For Trap 259"
+          sect="14.2.5.1"
+          containerFile="iba_13_4.xml"
+          containerName="MADNotice">
+    <mb bits="16" off="0[0]">dataValid<!--DataValid--></mb>
+    <mb bits="16" off="0[16]">lidAddr1<!--LIDADDR1--></mb>
+    <mb bits="16" off="0[32]">lidAddr2<!--LIDADDR2--></mb>
+    <mb bits="16" off="0[48]">PKey<!--PKEY--></mb>
+    <mb bits="4" off="0[64]">SL<!--SL--></mb>
+    <mb bits="4" off="0[68]"><!--Reserved--></mb>
+    <mb bits="24" off="0[72]">qp1<!--QP1--></mb>
+    <mb bits="8" off="0[96]"><!--Reserved--></mb>
+    <mb bits="24" off="0[104]">qp2<!--QP2--></mb>
+    <mb bits="128" off="0[128]" type="HdrIPv6Addr">gidAddr1<!--GIDADDR1--></mb>
+    <mb bits="128" off="0[256]" type="HdrIPv6Addr">gidAddr2<!--GIDADDR2--></mb>
+    <mb bits="16" off="0[384]">swLidAddr<!--SWLIDADDR--></mb>
+    <mb bits="8" off="0[400]">portNum<!--PORTNO--></mb>
+    <mb bits="24" off="0[408]">padding<!--Padding--></mb>
+  </struct>
+
+  <struct name="SMPNodeDescription"
+          bytes="64"
+          desc="Node Description String"
+          sect="14.2.5.2"
+          attributeID="0x10"
+          attributeName="SMP_NODE_DESCRIPTION"
+          methods="SubnGet">
+    <mb bits="8" off="0[0]" count="64" display="string">nodeString<!--NodeString--></mb>
+  </struct>
+
+  <struct name="SMPNodeInfo"
+          bytes="40"
+          desc="Generic Node Data"
+          sect="14.2.5.3"
+          attributeID="0x11"
+          attributeName="SMP_NODE_INFO"
+          methods="SubnGet">
+    <mb bits="8" off="0[0]">baseVersion<!--BaseVersion--></mb>
+    <mb bits="8" off="0[8]">classVersion<!--ClassVersion--></mb>
+    <mb bits="8" off="0[16]">nodeType<!--NodeType--></mb>
+    <mb bits="8" off="0[24]">numPorts<!--NumPorts--></mb>
+    <mb bits="64" off="0[32]">systemImageGUID<!--SystemImageGUID--></mb>
+    <mb bits="64" off="0[96]">nodeGUID<!--NodeGUID--></mb>
+    <mb bits="64" off="0[160]">portGUID<!--PortGUID--></mb>
+    <mb bits="16" off="0[224]">partitionCap<!--PartitionCap--></mb>
+    <mb bits="16" off="0[240]">deviceID<!--DeviceID--></mb>
+    <mb bits="32" off="0[256]">revision<!--Revision--></mb>
+    <mb bits="8" off="0[288]">localPortNum<!--LocalPortNum--></mb>
+    <mb bits="24" off="0[296]">vendorID<!--VendorID--></mb>
+  </struct>
+
+  <struct name="SMPSwitchInfo"
+          bytes="20"
+          desc="Switch Information"
+          sect="14.2.5.4"
+          attributeID="0x12"
+          attributeName="SMP_SWITCH_INFO"
+          methods="SubnGet SubnSet">
+    <mb bits="16" off="0[0]">linearFDBCap<!--LinearFDBCap--></mb>
+    <mb bits="16" off="0[16]">randomFDBCap<!--RandomFDBCap--></mb>
+    <mb bits="16" off="0[32]">multicastFDBCap<!--MulticastFDBCap--></mb>
+    <mb bits="16" off="0[48]">linearFDBTop<!--LinearFDBTop--></mb>
+    <mb bits="8" off="0[64]">defaultPort<!--DefaultPort--></mb>
+    <mb bits="8" off="0[72]">defaultMulticastPrimaryPort<!--DefaultMulticastPrimaryPort--></mb>
+    <mb bits="8" off="0[80]">defaultMulticastNotPrimaryPort<!--DefaultMulticastNotPrimaryPort--></mb>
+    <mb bits="5" off="0[88]">lifeTimeValue<!--LifeTimeValue--></mb>
+    <mb bits="1" off="0[93]">portStateChange<!--PortStateChange--></mb>
+    <mb bits="1" off="0[94]"><!--Reserved--></mb>
+    <mb bits="1" off="0[95]">optimizedSLtoVLMappingProgramming<!--OptimizedSLtoVLMappingProgramming--></mb>
+    <mb bits="16" off="0[96]">LIDsPerPort<!--LIDsPerPort--></mb>
+    <mb bits="16" off="0[112]">partitionEnforcementCap<!--PartitionEnforcementCap--></mb>
+    <mb bits="1" off="0[128]">inboundEnforcementCap<!--InboundEnforcementCap--></mb>
+    <mb bits="1" off="0[129]">outboundEnforcementCap<!--OutboundEnforcementCap--></mb>
+    <mb bits="1" off="0[130]">filterRawInboundCap<!--FilterRawPacketInboundCap--></mb>
+    <mb bits="1" off="0[131]">filterRawOutboundCap<!--FilterRawPacketOutboundCap--></mb>
+    <mb bits="1" off="0[132]">enhancedPort0<!--EnhancedPort0--></mb>
+    <mb bits="3" off="0[133]"><!--Reserved--></mb>
+    <mb bits="24" off="0[136]"><!--Reserved (Padding)--></mb>
+  </struct>
+
+  <struct name="SMPGUIDInfo"
+          bytes="64"
+          desc="Assigned GUIDs"
+          sect="14.2.5.5"
+          attributeID="0x14"
+          attributeName="SMP_GUID_INFO"
+          methods="SubnGet SubnSet">
+    <mb bits="64" off="0[0]" count="8" type="struct SMPGUIDBlock">GUIDBlock<!--GUID Block--></mb>
+  </struct>
+
+  <struct name="SMPPortInfo"
+          bytes="56"
+          desc="Port Information"
+          sect="14.2.5.6"
+          attributeID="0x15"
+          attributeName="SMP_PORT_INFO"
+          methods="SubnGet SubnSet">
+    <mb bits="64" off="0[0]">MKey<!--M_Key--></mb>
+    <mb bits="64" off="0[64]">GIDPrefix<!--GIDPrefix--></mb>
+    <mb bits="16" off="0[128]">LID<!--LID--></mb>
+    <mb bits="16" off="0[144]">masterSMLID<!--MasterSMLID--></mb>
+    <mb bits="32" off="0[160]">capabilityMask<!--CapabilityMask--></mb>
+    <mb bits="16" off="0[192]">diagCode<!--DiagCode--></mb>
+    <mb bits="16" off="0[208]">MKeyLeasePeriod<!--M_KeyLeasePeriod--></mb>
+    <mb bits="8" off="0[224]">localPortNum<!--LocalPortNum--></mb>
+    <mb bits="8" off="0[232]">linkWidthEnabled<!--LinkWidthEnabled--></mb>
+    <mb bits="8" off="0[240]">linkWidthSupported<!--LinkWidthSupported--></mb>
+    <mb bits="8" off="0[248]">linkWidthActive<!--LinkWidthActive--></mb>
+    <mb bits="4" off="0[256]">linkSpeedSupported<!--LinkSpeedSupported--></mb>
+    <mb bits="4" off="0[260]">portState<!--PortState--></mb>
+    <mb bits="4" off="0[264]">portPhysicalState<!--PortPhysicalState--></mb>
+    <mb bits="4" off="0[268]">linkDownDefaultState<!--LinkDownDefaultState--></mb>
+    <mb bits="2" off="0[272]">MKeyProtectBits<!--M_KeyProtectBits--></mb>
+    <mb bits="3" off="0[274]"><!--Reserved--></mb>
+    <mb bits="3" off="0[277]">LMC<!--LMC--></mb>
+    <mb bits="4" off="0[280]">linkSpeedActive<!--LinkSpeedActive--></mb>
+    <mb bits="4" off="0[284]">linkSpeedEnabled<!--LinkSpeedEnabled--></mb>
+    <mb bits="4" off="0[288]">neighborMTU<!--NeighborMTU--></mb>
+    <mb bits="4" off="0[292]">masterSMSL<!--MasterSMSL--></mb>
+    <mb bits="4" off="0[296]">VLCap<!--VLCap--></mb>
+    <mb bits="4" off="0[300]">initType<!--InitType--></mb>
+    <mb bits="8" off="0[304]">VLHighLimit<!--VLHighLimit--></mb>
+    <mb bits="8" off="0[312]">VLArbitrationHighCap<!--VLArbitrationHighCap--></mb>
+    <mb bits="8" off="0[320]">VLArbitrationLowCap<!--VLArbitrationLowCap--></mb>
+    <mb bits="4" off="0[328]">initTypeReply<!--InitTypeReply--></mb>
+    <mb bits="4" off="0[332]">MTUCap<!--MTUCap--></mb>
+    <mb bits="3" off="0[336]">VLStallCount<!--VLStallCount--></mb>
+    <mb bits="5" off="0[339]">HOQLife<!--HOQLife--></mb>
+    <mb bits="4" off="0[344]">operationalVLs<!--OperationalVLs--></mb>
+    <mb bits="1" off="0[348]">partitionEnforcementInbound<!--PartitionEnforcementInbound--></mb>
+    <mb bits="1" off="0[349]">partitionEnforcementOutbound<!--PartitionEnforcementOutbound--></mb>
+    <mb bits="1" off="0[350]">filterRawInbound<!--FilterRawInbound--></mb>
+    <mb bits="1" off="0[351]">filterRawOutbound<!--FilterRawOutbound--></mb>
+    <mb bits="16" off="0[352]">MKeyViolations<!--M_KeyViolations--></mb>
+    <mb bits="16" off="0[368]">PKeyViolations<!--P_KeyViolations--></mb>
+    <mb bits="16" off="0[384]">QKeyViolations<!--Q_KeyViolations--></mb>
+    <mb bits="8" off="0[400]">GUIDCap<!--GUIDCap--></mb>
+    <mb bits="1" off="0[408]">clientReregister<!--ClientReregister--></mb>
+    <mb bits="2" off="0[409]"><!--Reserved--></mb>
+    <mb bits="5" off="0[411]">subnetTimeOut<!--SubnetTimeOut--></mb>
+    <mb bits="3" off="0[416]"><!--Reserved--></mb>
+    <mb bits="5" off="0[419]">respTimeValue<!--RespTimeValue--></mb>
+    <mb bits="4" off="0[424]">localPhyErrors<!--LocalPhyErrors--></mb>
+    <mb bits="4" off="0[428]">overrunErrors<!--OverrunErrors--></mb>
+    <mb bits="16" off="0[432]"><!--Reserved (Padding)--></mb>
+  </struct>
+
+  <struct name="SMPPKeyTable"
+          bytes="64"
+          desc="Partition Table"
+          sect="14.2.5.7"
+          attributeID="0x16"
+          attributeName="SMP_PARTITION_TABLE"
+          methods="SubnGet SubnSet">
+    <mb bits="16" off="0[0]" count="32">PKeyBlock<!--P_KeyBlock--></mb>
+  </struct>
+
+  <struct name="SMPSLToVLMappingTable"
+          bytes="8"
+          desc="Service Level to Virtual Lane mapping Information"
+          sect="14.2.5.8"
+          attributeID="0x17"
+          attributeName="SMP_SL_TO_VL_MAPPING_TABLE"
+          methods="SubnGet SubnSet">
+    <mb bits="4" off="0[0]" count="16">SLtoVL<!--SLtoVL--></mb>
+  </struct>
+
+  <struct name="SMPVLArbitrationTable"
+          bytes="64"
+          desc="List of Weights"
+          sect="14.2.5.9"
+          attributeID="0x18"
+          attributeName="SMP_VL_ARBITRATION_TABLE"
+          methods="SubnGet SubnSet">
+    <mb bits="16" off="0[0]" count="32">VLWeightBlock<!--VL Weight Block--></mb>
+  </struct>
+
+  <struct name="SMPLinearForwardingTable"
+          bytes="64"
+          desc="Linear Forwarding Table Information"
+          sect="14.2.5.10"
+          attributeID="0x19"
+          attributeName="SMP_LINEAR_FORWARDING_TABLE"
+          methods="SubnGet SubnSet">
+    <mb bits="8" off="0[0]" count="64">portBlock<!--Port Block--></mb>
+  </struct>
+
+  <struct name="SMPRandomForwardingTable"
+          bytes="64"
+          desc="Random Forwarding Table Information"
+          sect="14.2.5.11"
+          attributeID="0x1A"
+          attributeName="SMP_RANDOM_FORWARDING_TABLE"
+          methods="SubnGet SubnSet">
+    <mb bits="32" off="0[0]" count="16" type="struct SMPLIDPortBlock">LIDPortBlock<!--LID Port Block--></mb>
+  </struct>
+
+  <struct name="SMPMulticastForwardingTable"
+          bytes="64"
+          desc="Multicast Forwarding Table Information"
+          sect="14.2.5.12"
+          attributeID="0x1B"
+          attributeName="SMP_MULTICAST_FORWARDING_TABLE"
+          methods="SubnGet SubnSet">
+    <mb bits="16" off="0[0]" count="32">portMaskBlock<!--Port Mask Block--></mb>
+  </struct>
+
+  <struct name="SMPSMInfo"
+          bytes="24"
+          desc="Subnet Management Information"
+          sect="14.2.5.13"
+          attributeID="0x20"
+          attributeName="SMP_SMINFO"
+          methods="SubnGet SubnSet">
+    <mb bits="64" off="0[0]">GUID<!--GUID--></mb>
+    <mb bits="64" off="0[64]">SMKey<!--SM_Key--></mb>
+    <mb bits="32" off="0[128]">actCount<!--ActCount--></mb>
+    <mb bits="4" off="0[160]">priority<!--Priority--></mb>
+    <mb bits="4" off="0[164]">SMState<!--SMState--></mb>
+    <mb bits="24" off="0[168]"><!--Reserved (Padding)--></mb>
+  </struct>
+
+  <struct name="SMPVendorDiag"
+          bytes="64"
+          desc="Vendor Specific Diagnostic"
+          sect="14.2.5.14"
+          attributeID="0x30"
+          attributeName="SMP_VENDOR_DIAG"
+          methods="SubnGet">
+    <mb bits="16" off="0[0]">nextIndex<!--NextIndex--></mb>
+    <mb bits="16" off="0[16]"><!--Miss-Aligned DiagData--></mb>
+    <mb bits="480" off="0[32]">diagData<!--DiagData--></mb>
+  </struct>
+
+  <struct name="SMPLedInfo"
+          bytes="4"
+          desc="Turn on/off LED"
+          sect="14.2.5.15"
+          attributeID="0x31"
+          attributeName="SMP_LED_INFO"
+          methods="SubnGet SubnSet">
+    <mb bits="1" off="0[0]">ledMask<!--LedMask--></mb>
+    <mb bits="31" off="0[1]"><!--Reserved--></mb>
+  </struct>
+
+</makestructs>

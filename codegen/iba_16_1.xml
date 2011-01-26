@@ -1,0 +1,279 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<makestructs type="IBA Performance Management">
+  <struct name="PMFormat"
+          bytes="256"
+          desc="Performance Management MAD Format"
+          sect="16.1.1"
+          mgmtClass="0x04"
+          mgmtClassVersion="1"
+          mgmtClassName="MAD_PERFORMANCE">
+    <mb bits="192" off="0" type="struct MADHeader">MADHeader<!--Common MAD Header--></mb>
+    <mb bits="320" off="24"><!--Reserved--></mb>
+    <mb bits="1536" off="64" display="data">data<!--Perf Data--></mb>
+  </struct>
+
+  <struct name="PMPortSamplesCtl"
+          bytes="192"
+          desc="Port Performance Data Sampling Control"
+          sect="16.1.3.2"
+          attributeID="0x10"
+          attributeName="PM_PORT_SAMPLES_CTL"
+          methods="PerformanceGet PerformanceSet">
+    <mb bits="8" off="0[0]">opCode<!--OpCode--></mb>
+    <mb bits="8" off="0[8]">portSelect<!--PortSelect--></mb>
+    <mb bits="8" off="0[16]">tick<!--Tick--></mb>
+    <mb bits="5" off="0[24]"><!--Reserved--></mb>
+    <mb bits="3" off="0[29]">counterWidth<!--CounterWidth--></mb>
+    <mb bits="2" off="0[32]"><!--Reserved--></mb>
+    <mb bits="3" off="0[34]">counterMask0<!--CounterMask0--></mb>
+    <mb bits="3" off="0[37]">counterMask1<!--CounterMask1--></mb>
+    <mb bits="3" off="0[40]">counterMask2<!--CounterMask2--></mb>
+    <mb bits="3" off="0[43]">counterMask3<!--CounterMask3--></mb>
+    <mb bits="3" off="0[46]">counterMask4<!--CounterMask4--></mb>
+    <mb bits="3" off="0[49]">counterMask5<!--CounterMask5--></mb>
+    <mb bits="3" off="0[52]">counterMask6<!--CounterMask6--></mb>
+    <mb bits="3" off="0[55]">counterMask7<!--CounterMask7--></mb>
+    <mb bits="3" off="0[58]">counterMask8<!--CounterMask8--></mb>
+    <mb bits="3" off="0[61]">counterMask9<!--CounterMask9--></mb>
+    <mb bits="1" off="0[64]"><!--Reserved--></mb>
+    <mb bits="3" off="0[65]">counterMask10<!--CounterMask10--></mb>
+    <mb bits="3" off="0[68]">counterMask11<!--CounterMask11--></mb>
+    <mb bits="3" off="0[71]">counterMask12<!--CounterMask12--></mb>
+    <mb bits="3" off="0[74]">counterMask13<!--CounterMask13--></mb>
+    <mb bits="3" off="0[77]">counterMask14<!--CounterMask14--></mb>
+    <mb bits="8" off="0[80]">sampleMechanisms<!--SampleMechanisms--></mb>
+    <mb bits="6" off="0[88]"><!--Reserved--></mb>
+    <mb bits="2" off="0[94]">sampleStatus<!--SampleStatus--></mb>
+    <mb bits="64" off="0[96]">optionMask<!--OptionMask--></mb>
+    <mb bits="64" off="0[160]">vendorMask<!--VendorMask--></mb>
+    <mb bits="32" off="0[224]">sampleStart<!--SampleStart--></mb>
+    <mb bits="32" off="0[256]">sampleInterval<!--SampleInterval--></mb>
+    <mb bits="16" off="0[288]">tag<!--Tag--></mb>
+    <mb bits="16" off="0[304]">counterSelect0<!--CounterSelect0--></mb>
+    <mb bits="16" off="0[320]">counterSelect1<!--CounterSelect1--></mb>
+    <mb bits="16" off="0[336]">counterSelect2<!--CounterSelect2--></mb>
+    <mb bits="16" off="0[352]">counterSelect3<!--CounterSelect3--></mb>
+    <mb bits="16" off="0[368]">counterSelect4<!--CounterSelect4--></mb>
+    <mb bits="16" off="0[384]">counterSelect5<!--CounterSelect5--></mb>
+    <mb bits="16" off="0[400]">counterSelect6<!--CounterSelect6--></mb>
+    <mb bits="16" off="0[416]">counterSelect7<!--CounterSelect7--></mb>
+    <mb bits="16" off="0[432]">counterSelect8<!--CounterSelect8--></mb>
+    <mb bits="16" off="0[448]">counterSelect9<!--CounterSelect9--></mb>
+    <mb bits="16" off="0[464]">counterSelect10<!--CounterSelect10--></mb>
+    <mb bits="16" off="0[480]">counterSelect11<!--CounterSelect11--></mb>
+    <mb bits="16" off="0[496]">counterSelect12<!--CounterSelect12--></mb>
+    <mb bits="16" off="0[512]">counterSelect13<!--CounterSelect13--></mb>
+    <mb bits="16" off="0[528]">counterSelect14<!--CounterSelect14--></mb>
+    <mb bits="32" off="0[544]"><!--Reserved--></mb>
+    <mb bits="64" off="0[576]">samplesOnlyOptionMask<!--SamplesOnlyOptionMask--></mb>
+    <mb bits="896" off="0[640]"><!--Reserved--></mb>
+  </struct>
+
+  <struct name="PMPortSamplesRes"
+          bytes="64"
+          desc="Port Performance Data Sampling Results"
+          sect="16.1.3.4"
+          attributeID="0x11"
+          attributeName="PM_PORT_SAMPLES_RES"
+          methods="PerformanceGet">
+    <mb bits="16" off="0[0]">tag<!--Tag--></mb>
+    <mb bits="14" off="0[16]"><!--Reserved--></mb>
+    <mb bits="2" off="0[30]">sampleStatus<!--SampleStatus--></mb>
+    <mb bits="32" off="0[32]" count="15">counter<!--Counter--></mb>
+  </struct>
+
+  <struct name="PMPortCounters"
+          bytes="44"
+          desc="Port Basic Performance and Error Counters"
+          sect="16.1.3.5"
+          attributeID="0x12"
+          attributeName="PM_PORT_COUNTERS"
+          methods="PerformanceGet PerformanceSet">
+    <mb bits="8" off="0[0]"><!--Reserved--></mb>
+    <mb bits="8" off="0[8]">portSelect<!--PortSelect--></mb>
+    <mb bits="16" off="0[16]">counterSelect<!--CounterSelect--></mb>
+    <mb bits="16" off="0[32]">symbolErrorCounter<!--SymbolErrorCounter--></mb>
+    <mb bits="8" off="0[48]">linkErrorRecoveryCounter<!--LinkErrorRecoveryCounter--></mb>
+    <mb bits="8" off="0[56]">linkDownedCounter<!--LinkDownedCounter--></mb>
+    <mb bits="16" off="0[64]">portRcvErrors<!--PortRcvErrors--></mb>
+    <mb bits="16" off="0[80]">portRcvRemotePhysicalErrors<!--PortRcvRemotePhysicalErrors--></mb>
+    <mb bits="16" off="0[96]">portRcvSwitchRelayErrors<!--PortRcvSwitchRelayErrors--></mb>
+    <mb bits="16" off="0[112]">portXmitDiscards<!--PortXmitDiscards--></mb>
+    <mb bits="8" off="0[128]">portXmitConstraintErrors<!--PortXmitConstraintErrors--></mb>
+    <mb bits="8" off="0[136]">portRcvConstraintErrors<!--PortRcvConstraintErrors--></mb>
+    <mb bits="8" off="0[144]">counterSelect2<!--CounterSelect2--></mb>
+    <mb bits="4" off="0[152]">localLinkIntegrityErrors<!--LocalLinkIntegrityErrors--></mb>
+    <mb bits="4" off="0[156]">excessiveBufferOverrunErrors<!--ExcessiveBufferOverrunErrors--></mb>
+    <mb bits="16" off="0[160]"><!--Reserved--></mb>
+    <mb bits="16" off="0[176]">VL15Dropped<!--VL15Dropped--></mb>
+    <mb bits="32" off="0[192]">portXmitData<!--PortXmitData--></mb>
+    <mb bits="32" off="0[224]">portRcvData<!--PortRcvData--></mb>
+    <mb bits="32" off="0[256]">portXmitPkts<!--PortXmitPkts--></mb>
+    <mb bits="32" off="0[288]">portRcvPkts<!--PortRcvPkts--></mb>
+    <mb bits="32" off="0[320]">portXmitWait<!--PortXmitWait--></mb>
+  </struct>
+
+  <struct name="PMPortRcvErrorDetails"
+          bytes="16"
+          desc="Port Detailed Error Counters"
+          sect="16.1.4.1"
+          attributeID="0x15"
+          attributeName="PM_PORT_RCV_ERROR_DETAILS"
+          methods="PerformanceGet PerformanceSet">
+    <mb bits="8" off="0[0]"><!--Reserved--></mb>
+    <mb bits="8" off="0[8]">portSelect<!--PortSelect--></mb>
+    <mb bits="16" off="0[16]">counterSelect<!--CounterSelect--></mb>
+    <mb bits="16" off="0[32]">portLocalPhysicalErrors<!--PortLocalPhysicalErrors--></mb>
+    <mb bits="16" off="0[48]">portMalformedPacketErrors<!--PortMalformedPacketErrors--></mb>
+    <mb bits="16" off="0[64]">portBufferOverrunErrors<!--PortBufferOverrunErrors--></mb>
+    <mb bits="16" off="0[80]">portDLIDMappingErrors<!--PortDLIDMappingErrors--></mb>
+    <mb bits="16" off="0[96]">portVLMappingErrors<!--PortVLMappingErrors--></mb>
+    <mb bits="16" off="0[112]">portLoopingErrors<!--PortLoopingErrors--></mb>
+  </struct>
+
+  <struct name="PMPortXmitDiscardDetails"
+          bytes="12"
+          desc="Port Transmit Discard Counters"
+          sect="16.1.4.2"
+          attributeID="0x16"
+          attributeName="PM_PORT_XMIT_DISCARD_DETAILS"
+          methods="PerformanceGet PerformanceSet">
+    <mb bits="8" off="0[0]"><!--Reserved--></mb>
+    <mb bits="8" off="0[8]">portSelect<!--PortSelect--></mb>
+    <mb bits="16" off="0[16]">counterSelect<!--CounterSelect--></mb>
+    <mb bits="16" off="0[32]">portInactiveDiscards<!--PortInactiveDiscards--></mb>
+    <mb bits="16" off="0[48]">portNeighborMTUDiscards<!--PortNeighborMTUDiscards--></mb>
+    <mb bits="16" off="0[64]">portSwLifetimeLimitDiscards<!--PortSwLifetimeLimitDiscards--></mb>
+    <mb bits="16" off="0[80]">portSwHOQLimitDiscards<!--PortSwHOQLimitDiscards--></mb>
+  </struct>
+
+  <struct name="PMPortOpRcvCounters"
+          bytes="12"
+          desc="Port Receive Counters per Op Code"
+          sect="16.1.4.3"
+          attributeID="0x17"
+          attributeName="PM_PORT_OP_RCV_COUNTERS"
+          methods="PerformanceGet PerformanceSet">
+    <mb bits="8" off="0[0]">opCode<!--OpCode--></mb>
+    <mb bits="8" off="0[8]">portSelect<!--PortSelect--></mb>
+    <mb bits="16" off="0[16]">counterSelect<!--CounterSelect--></mb>
+    <mb bits="32" off="0[32]">portOpRcvPkts<!--PortOpRcvPkts--></mb>
+    <mb bits="32" off="0[64]">portOpRcvData<!--PortOpRcvData--></mb>
+  </struct>
+
+  <struct name="PMPortFlowCtlCounters"
+          bytes="12"
+          desc="Port Flow Control Counters"
+          sect="16.1.4.4"
+          attributeID="0x18"
+          attributeName="PM_PORT_FLOW_CTL_COUNTERS"
+          methods="PerformanceGet PerformanceSet">
+    <mb bits="8" off="0[0]"><!--Reserved--></mb>
+    <mb bits="8" off="0[8]">portSelect<!--PortSelect--></mb>
+    <mb bits="16" off="0[16]">counterSelect<!--CounterSelect--></mb>
+    <mb bits="32" off="0[32]">portXmitFlowPkts<!--PortXmitFlowPkts--></mb>
+    <mb bits="32" off="0[64]">portRcvFlowPkts<!--PortRcvFlowPkts--></mb>
+  </struct>
+
+  <struct name="PMPortVLOpPackets"
+          bytes="36"
+          desc="Port Packets Received per Op Code per VL"
+          sect="16.1.4.5"
+          attributeID="0x19"
+          attributeName="PM_PORT_VL_OP_PACKETS"
+          methods="PerformanceGet PerformanceSet">
+    <mb bits="8" off="0[0]">opCode<!--OpCode--></mb>
+    <mb bits="8" off="0[8]">portSelect<!--PortSelect--></mb>
+    <mb bits="16" off="0[16]">counterSelect<!--CounterSelect--></mb>
+    <mb bits="16" off="0[32]" count="16">portVLOpPackets<!--PortVLOpPackets--></mb>
+  </struct>
+
+  <struct name="PMPortVLOpData"
+          bytes="68"
+          desc="Port Kilobytes Received per Op Code per VL"
+          sect="16.1.4.6"
+          attributeID="0x1A"
+          attributeName="PM_PORT_VL_OP_DATA"
+          methods="PerformanceGet PerformanceSet">
+    <mb bits="8" off="0[0]">opCode<!--OpCode--></mb>
+    <mb bits="8" off="0[8]">portSelect<!--PortSelect--></mb>
+    <mb bits="16" off="0[16]">counterSelect<!--CounterSelect--></mb>
+    <mb bits="32" off="0[32]" count="16">portVLOpData<!--PortVLOpData--></mb>
+  </struct>
+
+  <struct name="PMPortVLXmitFlowCtlUpdateErrors"
+          bytes="8"
+          desc="Port Flow Control update errors per VL"
+          sect="16.1.4.7"
+          attributeID="0x1B"
+          attributeName="PM_PORT_VL_XMIT_FLOW_CTL_UPDATE_ERRORS"
+          methods="PerformanceGet PerformanceSet">
+    <mb bits="8" off="0[0]"><!--Reserved--></mb>
+    <mb bits="8" off="0[8]">portSelect<!--PortSelect--></mb>
+    <mb bits="16" off="0[16]">counterSelect<!--CounterSelect--></mb>
+    <mb bits="2" off="0[32]" count="16">portVLXmitFlowCtlUpdateErrors<!--PortVLXmitFlowCtlUpdateErrors--></mb>
+  </struct>
+
+  <struct name="PMPortVLXmitWaitCounters"
+          bytes="36"
+          desc="Port Ticks Waiting to Transmit Counters per VL"
+          sect="16.1.4.8"
+          attributeID="0x1C"
+          attributeName="PM_PORT_VL_XMIT_WAIT_COUNTERS"
+          methods="PerformanceGet PerformanceSet">
+    <mb bits="8" off="0[0]"><!--Reserved--></mb>
+    <mb bits="8" off="0[8]">portSelect<!--PortSelect--></mb>
+    <mb bits="16" off="0[16]">counterSelect<!--CounterSelect--></mb>
+    <mb bits="16" off="0[32]" count="16">portVLXmitWait<!--PortVLXmitWait--></mb>
+  </struct>
+
+  <struct name="PMSwPortVLCongestion"
+          bytes="36"
+          desc="Switch Port Congestion per VL"
+          sect="16.1.4.9"
+          attributeID="0x30"
+          attributeName="PM_SW_PORT_VL_CONGESTION"
+          methods="PerformanceGet PerformanceSet">
+    <mb bits="8" off="0[0]"><!--Reserved--></mb>
+    <mb bits="8" off="0[8]">portSelect<!--PortSelect--></mb>
+    <mb bits="16" off="0[16]">counterSelect<!--CounterSelect--></mb>
+    <mb bits="16" off="0[32]" count="16">swPortVLCongestion<!--SwPortVLCongestion--></mb>
+  </struct>
+
+  <struct name="PMPortSamplesResExt"
+          bytes="128"
+          desc="Extended Port Samples Result"
+          sect="16.1.4.10"
+          attributeID="0x1E"
+          attributeName="PM_PORT_SAMPLES_RES_EXT"
+          methods="PerformanceGet PerformanceSet">
+    <mb bits="16" off="0[0]">tag<!--Tag--></mb>
+    <mb bits="14" off="0[16]"><!--Reserved--></mb>
+    <mb bits="2" off="0[30]">sampleStatus<!--SampleStatus--></mb>
+    <mb bits="2" off="0[32]">extendedWidth<!--ExtendedWidth--></mb>
+    <mb bits="30" off="0[34]"><!--Reserved--></mb>
+    <mb bits="64" off="0[64]" count="15">counter<!--Counter--></mb>
+  </struct>
+
+  <struct name="PMPortCountersExt"
+          bytes="72"
+          desc="Extended Port Counters"
+          sect="16.1.4.11"
+          attributeID="0x1D"
+          attributeName="PM_PORT_COUNTERS_EXT"
+          methods="PerformanceGet PerformanceSet">
+    <mb bits="8" off="0[0]"><!--Reserved--></mb>
+    <mb bits="8" off="0[8]">portSelect<!--Reserved--></mb>
+    <mb bits="16" off="0[16]">counterSelect<!--CounterSelect--></mb>
+    <mb bits="32" off="0[32]"><!--Reserved--></mb>
+    <mb bits="64" off="0[64]">portXmitData<!--PortXmitData--></mb>
+    <mb bits="64" off="0[128]">portRcvData<!--PortRcvData--></mb>
+    <mb bits="64" off="0[192]">portXmitPkts<!--PortXmitPkts--></mb>
+    <mb bits="64" off="0[256]">portRcvPkts<!--PortRcvPkts--></mb>
+    <mb bits="64" off="0[320]">portUnicastXmitPkts<!--PortUnicastXmitPkts--></mb>
+    <mb bits="64" off="0[384]">portUnicastRcvPkts<!--PortUnicastRcvPkts--></mb>
+    <mb bits="64" off="0[448]">portMulticastXmitPkts<!--PortUnicastXmitPkts--></mb>
+    <mb bits="64" off="0[512]">portMulticastRcvPkts<!--PortUnicastRcvPkts--></mb>
+  </struct>
+
+</makestructs>

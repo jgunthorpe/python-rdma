@@ -1,0 +1,247 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<makestructs type="IBA Communication Management">
+  <struct name="CMFormat"
+          bytes="256"
+          desc="Request for Communication"
+          sect="16.7.1"
+          mgmtClass="0x07"
+          mgmtClassVersion="2"
+          mgmtClassName="MAD_COMMUNICATIONS">
+    <mb bits="192" off="0" type="struct MADHeader">MADHeader<!--Common MAD Header--></mb>
+    <mb bits="1856" off="24" display="data">data<!--CommMgt Data--></mb>
+  </struct>
+
+  <struct name="CMPath"
+          bytes="44"
+          desc="Path Information"
+          sect="12.6">
+    <mb bits="16" off="0">SLID<!--Local Port LID--></mb>
+    <mb bits="16" off="2">DLID<!--Remote Port LID--></mb>
+    <mb bits="128" off="4" type="HdrIPv6Addr">SGID<!--Local Port GID--></mb>
+    <mb bits="128" off="20" type="HdrIPv6Addr">DGID<!--Remote Port GID--></mb>
+    <mb bits="20" off="36">flowLabel<!--Flow Label--></mb>
+    <mb bits="4" off="38[4]"><!--Reserved--></mb>
+    <mb bits="2" off="39"><!--Reserved--></mb>
+    <mb bits="6" off="39[2]">PD<!--Packet Rate (IPD)--></mb>
+    <mb bits="8" off="40">TClass<!--Traffic Class--></mb>
+    <mb bits="8" off="41">hopLimit<!--Hop Limit--></mb>
+    <mb bits="4" off="42">SL<!--SL--></mb>
+    <mb bits="1" off="42[4]">subnetLocal<!--Subnet Local--></mb>
+    <mb bits="3" off="42[5]"><!--Reserved--></mb>
+    <mb bits="5" off="43">localACKTimeout<!--Local ACK Timeout--></mb>
+    <mb bits="3" off="43[5]"><!--Reserved--></mb>
+  </struct>
+
+  <struct name="CMREQ"
+          bytes="232"
+          desc="Request for Communication"
+          sect="12.6.5"
+          attributeID="0x10"
+          attributeName="CM_REQ"
+          methods="CommMgtSend">
+    <mb bits="32" off="0">LCID<!--Local Communication ID--></mb>
+    <mb bits="32" off="4"><!--Reserved--></mb>
+    <mb bits="64" off="8">serviceID<!--ServiceID--></mb>
+    <mb bits="64" off="16">LGUID<!--Local CA GUID--></mb>
+    <mb bits="32" off="24">localCMQKey<!--Local CM Q_Key--></mb>
+    <mb bits="32" off="28">localQKey<!--Local Q_Key--></mb>
+    <mb bits="24" off="32">localQPN<!--Local QPN--></mb>
+    <mb bits="8" off="35">responderResources<!--Responder Resources--></mb>
+    <mb bits="24" off="36">localEECN<!--Local EECN--></mb>
+    <mb bits="8" off="39">initiatorDepth<!--Initiator Depth--></mb>
+    <mb bits="24" off="40">remoteEECN<!--Remote EECN--></mb>
+    <mb bits="5" off="43">remoteResponseTimeout<!--Remote CM Response Timeout--></mb>
+    <mb bits="2" off="43[5]">transportService<!--Transport Service Type--></mb>
+    <mb bits="1" off="43[7]">flowControl<!--End-to-End Flow Control--></mb>
+    <mb bits="24" off="44">startingPSN<!--Starting PSN--></mb>
+    <mb bits="5" off="47">localResponseTimeout<!--Local CM Response Timeout--></mb>
+    <mb bits="3" off="47[5]">retryCount<!--Retry Count--></mb>
+    <mb bits="16" off="48">PKey<!--Partition Key--></mb>
+    <mb bits="4" off="50">pathPacketMTU<!--Path Packet Payload MTU--></mb>
+    <mb bits="1" off="50[4]">RDCExists<!--RDC Exists--></mb>
+    <mb bits="3" off="50[5]">RNRRetryCount<!--RNR Retry Count--></mb>
+    <mb bits="4" off="51">maxCMRetries<!--Max CM Retries--></mb>
+    <mb bits="4" off="51[4]"><!--Reserved--></mb>
+    <mb bits="352" off="52" type="struct CMPath">primaryPath<!--Primary Path--></mb>
+    <mb bits="352" off="96" type="struct CMPath">alternatePath<!--Alternate Path--></mb>
+    <mb bits="736" off="140">privateData<!--PrivateData--></mb>
+  </struct>
+
+  <struct name="CMMRA"
+          bytes="232"
+          desc="Message Receipt Acknowledgement"
+          sect="12.6.6"
+          attributeID="0x11"
+          attributeName="CM_MRA"
+          methods="CommMgtSend">
+    <mb bits="32" off="0">LCID<!--Local Communication ID--></mb>
+    <mb bits="32" off="4">RCID<!--Remote CommunicationID--></mb>
+    <mb bits="2" off="8">messageMRAed<!--Message MRAed--></mb>
+    <mb bits="6" off="8[2]"><!--Reserved--></mb>
+    <mb bits="5" off="9">serviceTimeout<!--ServiceTimeout--></mb>
+    <mb bits="3" off="9[5]"><!--Reserved--></mb>
+    <mb bits="16" off="10"><!--Miss-Aligned PrivateData--></mb>
+    <mb bits="1760" off="12">privateData<!--PrivateData--></mb>
+  </struct>
+
+  <struct name="CMREJ"
+          bytes="232"
+          desc="Reject"
+          sect="12.6.7"
+          attributeID="0x12"
+          attributeName="CM_REJ"
+          methods="CommMgtSend">
+    <mb bits="32" off="0">LCID<!--Local Communication ID--></mb>
+    <mb bits="32" off="4">RCID<!--Remote CommunicationID--></mb>
+    <mb bits="2" off="8">messageRejected<!--Message REJected--></mb>
+    <mb bits="6" off="8[2]"><!--Reserved--></mb>
+    <mb bits="7" off="9">rejectInfoLength<!--Reject Info Length--></mb>
+    <mb bits="1" off="9[7]"><!--Reserved--></mb>
+    <mb bits="16" off="10">reason<!--Reason--></mb>
+    <mb bits="576" off="12">ARI<!--Additional Reject Information (ARI)--></mb>
+    <mb bits="1184" off="84">privateData<!--PrivateData--></mb>
+  </struct>
+
+  <struct name="CMREP"
+          bytes="232"
+          desc="Reply To Request For Communication"
+          sect="12.6.8"
+          attributeID="0x13"
+          attributeName="CM_REP"
+          methods="CommMgtSend">
+    <mb bits="32" off="0">LCID<!--Local Communication ID--></mb>
+    <mb bits="32" off="4">RCID<!--Remote Communication ID--></mb>
+    <mb bits="32" off="8">localQKey<!--Local Q_Key--></mb>
+    <mb bits="24" off="12">localQPN<!--Local QPN--></mb>
+    <mb bits="8" off="15"><!--Reserved--></mb>
+    <mb bits="24" off="16">localEEContext<!--Local EE Context Number--></mb>
+    <mb bits="8" off="19"><!--Reserved--></mb>
+    <mb bits="24" off="20">startingPSN<!--Starting PSN--></mb>
+    <mb bits="8" off="23"><!--Reserved--></mb>
+    <mb bits="8" off="24">responderResources<!--Responder Resources--></mb>
+    <mb bits="8" off="25">initiatorDepth<!--Initiator Depth--></mb>
+    <mb bits="5" off="26">targetACKDelay<!--Target ACK Delay--></mb>
+    <mb bits="2" off="26[5]">failoverAccepted<!--Failover Accepted--></mb>
+    <mb bits="1" off="26[7]">flowControl<!--End-To-End Flow Control--></mb>
+    <mb bits="3" off="27">RNRRetryCount<!--RNR Retry Count--></mb>
+    <mb bits="5" off="27[3]"><!--Reserved--></mb>
+    <mb bits="64" off="28">LGUID<!--Local CA GUID--></mb>
+    <mb bits="1568" off="36">privateData<!--PrivateData--></mb>
+  </struct>
+
+  <struct name="CMRTU"
+          bytes="232"
+          desc="Ready To Use"
+          sect="12.6.9"
+          attributeID="0x14"
+          attributeName="CM_RTU"
+          methods="CommMgtSend">
+    <mb bits="32" off="0">LCID<!--Local Communication ID--></mb>
+    <mb bits="32" off="4">RCID<!--Remote CommunicationID--></mb>
+    <mb bits="1792" off="8">privateData<!--PrivateData--></mb>
+  </struct>
+
+  <struct name="CMDREQ"
+          bytes="232"
+          desc="Request For Communication Release (Disconnection Request)"
+          sect="12.6.10"
+          attributeID="0x15"
+          attributeName="CM_DREQ"
+          methods="CommMgtSend">
+    <mb bits="32" off="0">LCID<!--Local Communication ID--></mb>
+    <mb bits="32" off="4">RCID<!--Remote CommunicationID--></mb>
+    <mb bits="24" off="8">remoteQPN<!--Remote QPN/EECN--></mb>
+    <mb bits="8" off="11"><!--Reserved--></mb>
+    <mb bits="1760" off="12">privateData<!--PrivateData--></mb>
+  </struct>
+
+  <struct name="CMDREP"
+          bytes="232"
+          desc="Reply To Request For Communication Release"
+          sect="12.6.11"
+          attributeID="0x16"
+          attributeName="CM_DREP"
+          methods="CommMgtSend">
+    <mb bits="32" off="0">LCID<!--Local Communication ID--></mb>
+    <mb bits="32" off="4">RCID<!--Remote CommunicationID--></mb>
+    <mb bits="1792" off="8">privateData<!--PrivateData--></mb>
+  </struct>
+
+  <struct name="CMLAP"
+          bytes="232"
+          desc="Load Alternate Path"
+          sect="12.8.1"
+          attributeID="0x19"
+          attributeName="CM_LAP"
+          methods="CommMgtSend">
+    <mb bits="32" off="0">LCID<!--Local Communication ID--></mb>
+    <mb bits="32" off="4">RCID<!--Remote Communication ID--></mb>
+    <mb bits="32" off="8">QKey<!--Local CM Q_KEY--></mb>
+    <mb bits="24" off="12">RQPN<!--Remote QPN/EECN--></mb>
+    <mb bits="5" off="15">RCMTimeout<!--Remote CM Response Timeout--></mb>
+    <mb bits="3" off="15[5]"><!--Reserved--></mb>
+    <mb bits="32" off="16"><!--Reserved--></mb>
+    <mb bits="16" off="20">altSLID<!--Alternate Local Port LID--></mb>
+    <mb bits="16" off="22">altDLID<!--Alternate Remote Port LID--></mb>
+    <mb bits="128" off="24" type="HdrIPv6Addr">altSGID<!--Alternate Local Port GID--></mb>
+    <mb bits="128" off="40" type="HdrIPv6Addr">altDGID<!--Alternate Remote Port GID--></mb>
+    <mb bits="20" off="56">altFlowLabel<!--Alternate Flow Label--></mb>
+    <mb bits="4" off="58[4]"><!--Reserved--></mb>
+    <mb bits="8" off="59">altTClass<!--Alternate Traffic Class--></mb>
+    <mb bits="8" off="60">altHopLimit<!--Alternate Hop Limit--></mb>
+    <mb bits="2" off="61"><!--Reserved--></mb>
+    <mb bits="6" off="61[2]">altIPD<!--Alternate Packet Rate (IPD)--></mb>
+    <mb bits="4" off="62">altSL<!--Alternate SL--></mb>
+    <mb bits="1" off="62[4]">altSubnetLocal<!--Alternate Subnet Local--></mb>
+    <mb bits="3" off="62[5]"><!--Reserved--></mb>
+    <mb bits="5" off="63">altLocalACKTimeout<!--Alternate Local ACK Timeout--></mb>
+    <mb bits="3" off="63[5]"><!--Reserved--></mb>
+    <mb bits="1344" off="64">privateData<!--Private Data--></mb>
+  </struct>
+
+  <struct name="CMAPR"
+          bytes="232"
+          desc="Alternate Path Response"
+          sect="12.8.2"
+          attributeID="0x1A"
+          attributeName="CM_APR"
+          methods="CommMgtSend">
+    <mb bits="32" off="0">LCID<!--Local Communication ID--></mb>
+    <mb bits="32" off="4">RCID<!--Remote Communication ID--></mb>
+    <mb bits="8" off="8">additionalInfoLength<!--Additional Information Length--></mb>
+    <mb bits="8" off="9">APstatus<!--AP status--></mb>
+    <mb bits="16" off="10"><!--Reserved--></mb>
+    <mb bits="576" off="12">additionalInfo<!--Additional Information--></mb>
+    <mb bits="1184" off="84">privateData<!--Private Data--></mb>
+  </struct>
+
+  <struct name="CMSIDR_REQ"
+          bytes="232"
+          desc="Service ID Resolution Request"
+          sect="12.11.1"
+          attributeID="0x17"
+          attributeName="CM_SIDR_REQ"
+          methods="CommMgtSend">
+    <mb bits="32" off="0">requestID<!--RequestID--></mb>
+    <mb bits="32" off="4"><!--Reserved--></mb>
+    <mb bits="64" off="8">serviceID<!--ServiceID--></mb>
+    <mb bits="1728" off="16">privateData<!--Private Data--></mb>
+  </struct>
+
+  <struct name="CMSIDR_REP"
+          bytes="232"
+          desc="Service ID Resolution Response"
+          sect="12.11.2"
+          attributeID="0x18"
+          attributeName="CM_SIDR_REP"
+          methods="CommMgtSend">
+    <mb bits="32" off="0">requestID<!--RequestID--></mb>
+    <mb bits="24" off="4">QPN<!--QPN--></mb>
+    <mb bits="8" off="7">status<!--Status--></mb>
+    <mb bits="64" off="8">serviceID<!--ServiceID--></mb>
+    <mb bits="32" off="16">QKey<!--Q_Key--></mb>
+    <mb bits="576" off="20" type="struct MADClassPortInfo">classPortinfo<!--ClassPortinfo--></mb>
+    <mb bits="1120" off="92">privateData<!--Private Data--></mb>
+  </struct>
+
+</makestructs>

@@ -1,0 +1,347 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<makestructs type="IBA Subnet Administration">
+  <struct name="SAHeader"
+          bytes="56"
+          desc="SA Header"
+          sect="15.2.1.1"
+          mgmtClass="0x03"
+          mgmtClassVersion="2"
+          mgmtClassName="MAD_SUBNET_ADMIN">
+    <mb bits="288" off="0" type="struct RMPPHeader">RMPPHeader<!--RMPP Data--></mb>
+    <mb bits="64" off="36">SMKey<!--SM_Key--></mb>
+    <mb bits="16" off="44">attributeOffset<!--AttributeOffset--></mb>
+    <mb bits="16" off="46"><!--Reserved--></mb>
+    <mb bits="64" off="48">componentMask<!--ComponentMask--></mb>
+  </struct>
+
+  <struct name="SAFormat"
+          bytes="256"
+          desc="SA Format"
+          sect="15.2.1.1">
+    <mb bits="448" off="0" type="struct SAHeader">SAHeader<!--RMPP Data--></mb>
+    <mb bits="1600" off="56" display="data">data<!--SubnetAdminData--></mb>
+  </struct>
+
+  <struct name="SANodeRecord"
+          bytes="108"
+          desc="Container for NodeInfo"
+          sect="15.2.5.2"
+          attributeID="0x11"
+          attributeName="SA_NODE_RECORD"
+          methods="SubnAdmGet SubnAdmGetTable">
+    <mb bits="16" off="0[0]">LID<!--LID--></mb>
+    <mb bits="16" off="0[16]"><!--Reserved--></mb>
+    <mb bits="320" off="0[32]" type="struct SMPNodeInfo">nodeInfo<!--NodeInfo--></mb>
+    <mb bits="512" off="0[352]" type="struct SMPNodeDescription">nodeDescription<!--NodeDescription--></mb>
+  </struct>
+
+  <struct name="SAPortInfoRecord"
+          bytes="60"
+          desc="Container for PortInfo"
+          sect="15.2.5.3"
+          attributeID="0x12"
+          attributeName="SA_PORT_INFO_RECORD"
+          methods="SubnAdmGet SubnAdmGetTable">
+    <mb bits="16" off="0[0]">endportLID<!--EndportLID--></mb>
+    <mb bits="8" off="0[16]">portNum<!--PortNum--></mb>
+    <mb bits="8" off="0[24]"><!--Reserved--></mb>
+    <mb bits="448" off="0[32]" type="struct SMPPortInfo">portInfo<!--PortInfo--></mb>
+  </struct>
+
+  <struct name="SASLToVLMappingTableRecord"
+          bytes="16"
+          desc="Container for SLtoVLMappingTable entry"
+          sect="15.2.5.4"
+          attributeID="0x13"
+          attributeName="SA_SL_TO_VL_MAPPING_TABLE_RECORD"
+          methods="SubnAdmGet SubnAdmGetTable">
+    <mb bits="16" off="0[0]">LID<!--LID--></mb>
+    <mb bits="8" off="0[16]">inputPortNum<!--InputPortNum--></mb>
+    <mb bits="8" off="0[24]">outputPortNum<!--OutputPortNum--></mb>
+    <mb bits="32" off="0[32]"><!--Reserved--></mb>
+    <mb bits="64" off="0[64]" type="struct SMPSLToVLMappingTable">SLToVLMappingTable<!--SLToVLMappingTable--></mb>
+  </struct>
+
+  <struct name="SASwitchInfoRecord"
+          bytes="24"
+          desc="Container for SwitchInfo"
+          sect="15.2.5.5"
+          attributeID="0x14"
+          attributeName="SA_SWITCH_INFO_RECORD"
+          methods="SubnAdmGet SubnAdmGetTable">
+    <mb bits="16" off="0[0]">LID<!--LID--></mb>
+    <mb bits="16" off="0[16]"><!--Reserved--></mb>
+    <mb bits="160" off="0[32]" type="struct SMPSwitchInfo">switchInfo<!--SwitchInfo--></mb>
+  </struct>
+
+  <struct name="SALinearForwardingTableRecord"
+          bytes="72"
+          desc="Container for LinearForwardingTable entry"
+          sect="15.2.5.6"
+          attributeID="0x15"
+          attributeName="SA_LINEAR_FORWARDING_TABLE_RECORD"
+          methods="SubnAdmGet SubnAdmGetTable">
+    <mb bits="16" off="0[0]">LID<!--LID--></mb>
+    <mb bits="16" off="0[16]">blockNum<!--BlockNum--></mb>
+    <mb bits="32" off="0[32]"><!--Reserved--></mb>
+    <mb bits="512" off="0[64]" type="struct SMPLinearForwardingTable">linearForwardingTable<!--LinearForwardingTable--></mb>
+  </struct>
+
+  <struct name="SARandomForwardingTableRecord"
+          bytes="72"
+          desc="Container for RandomForwardingTable entry"
+          sect="15.2.5.7"
+          attributeID="0x16"
+          attributeName="SA_RANDOM_FORWARDING_TABLE_RECORD"
+          methods="SubnAdmGet SubnAdmGetTable">
+    <mb bits="16" off="0[0]">LID<!--LID--></mb>
+    <mb bits="16" off="0[16]">blockNum<!--BlockNum--></mb>
+    <mb bits="32" off="0[32]"><!--Reserved--></mb>
+    <mb bits="512" off="0[64]" type="struct SMPRandomForwardingTable">randomForwardingTable<!--RandomForwardingTable--></mb>
+  </struct>
+
+  <struct name="SAMulticastForwardingTableRecord"
+          bytes="72"
+          desc="Container for MulticastForwardingTable entry"
+          sect="15.2.5.8"
+          attributeID="0x17"
+          attributeName="SA_MULTICAST_FORWARDING_TABLE_RECORD"
+          methods="SubnAdmGet SubnAdmGetTable">
+    <mb bits="16" off="0[0]">LID<!--LID--></mb>
+    <mb bits="2" off="0[16]"><!--Reserved--></mb>
+    <mb bits="4" off="0[18]">position<!--Position--></mb>
+    <mb bits="10" off="0[22]">blockNum<!--BlockNum--></mb>
+    <mb bits="32" off="0[32]"><!--Reserved--></mb>
+    <mb bits="512" off="0[64]" type="struct SMPMulticastForwardingTable">multicastForwardingTable<!--MulticastForwardingTable--></mb>
+  </struct>
+
+  <struct name="SAVLArbitrationTableRecord"
+          bytes="72"
+          desc="Container for VLArbitrationTable entry"
+          sect="15.2.5.9"
+          attributeID="0x36"
+          attributeName="SA_VL_ARBITRATION_TABLE_RECORD"
+          methods="SubnAdmGet SubnAdmGetTable">
+    <mb bits="16" off="0[0]">LID<!--LID--></mb>
+    <mb bits="8" off="0[16]">outputPortNum<!--OutputPortNum--></mb>
+    <mb bits="8" off="0[24]">blockNum<!--BlockNum--></mb>
+    <mb bits="32" off="0[32]"><!--Reserved--></mb>
+    <mb bits="512" off="0[64]" type="struct SMPVLArbitrationTable">VLArbitrationTable<!--VLArbitrationTable--></mb>
+  </struct>
+
+  <struct name="SASMInfoRecord"
+          bytes="28"
+          desc="Container for SMInfo"
+          sect="15.2.5.10"
+          attributeID="0x18"
+          attributeName="SA_SM_INFO_RECORD"
+          methods="SubnAdmGet SubnAdmGetTable">
+    <mb bits="16" off="0[0]">LID<!--LID--></mb>
+    <mb bits="16" off="0[16]"><!--Reserved--></mb>
+    <mb bits="192" off="0[32]" type="struct SMPSMInfo">SMInfo<!--SMInfo--></mb>
+  </struct>
+
+  <struct name="SAInformInfoRecord"
+          bytes="80"
+          desc="Container for InformInfo"
+          sect="15.2.5.12"
+          attributeID="0xF3"
+          attributeName="SA_INFORM_INFO_RECORD"
+          methods="SubnAdmGet SubnAdmGetTable">
+    <mb bits="128" off="0[0]" type="HdrIPv6Addr">subscriberGID<!--SubscriberGID--></mb>
+    <mb bits="16" off="0[128]">enumeration<!--Enumeration--></mb>
+    <mb bits="16" off="0[144]"><!--Reserved--></mb>
+    <mb bits="32" off="0[160]"><!--Reserved--></mb>
+    <mb bits="288" off="0[192]" type="struct MADInformInfo">informInfo<!--InformInfo--></mb>
+    <mb bits="160" off="0[480]"><!--Reserved (Extra Space)--></mb>
+  </struct>
+
+  <struct name="SALinkRecord"
+          bytes="8"
+          desc="Inter-node linkage information"
+          sect="15.2.5.13"
+          attributeID="0x20"
+          attributeName="SA_LINK_RECORD"
+          methods="SubnAdmGet SubnAdmGetTable">
+    <mb bits="16" off="0[0]">fromLID<!--FromLID--></mb>
+    <mb bits="8" off="0[16]">fromPort<!--FromPort--></mb>
+    <mb bits="8" off="0[24]">toPort<!--ToPort--></mb>
+    <mb bits="16" off="0[32]">toLID<!--ToLID--></mb>
+    <mb bits="16" off="0[48]"><!--Reserved (Padding)--></mb>
+  </struct>
+
+  <struct name="SAGUIDInfoRecord"
+          bytes="72"
+          desc="Container for port GUIDInfo"
+          sect="15.2.5.18"
+          attributeID="0x30"
+          attributeName="SA_GUID_INFO_RECORD"
+          methods="SubnAdmGet SubnAdmGetTable">
+    <mb bits="16" off="0[0]">LID<!--LID--></mb>
+    <mb bits="8" off="0[16]">blockNum<!--BlockNum--></mb>
+    <mb bits="8" off="0[24]"><!--Reserved--></mb>
+    <mb bits="32" off="0[32]"><!--Reserved--></mb>
+    <mb bits="512" off="0[64]" type="struct SMPGUIDInfo">GUIDInfo<!--GUIDInfo--></mb>
+  </struct>
+
+  <struct name="SAServiceRecord"
+          bytes="176"
+          desc="Information on advertised services"
+          sect="15.2.5.14"
+          attributeID="0x31"
+          attributeName="SA_SERVICE_RECORD"
+          methods="SubnAdmGet SubnAdmSet SubnAdmGetTable SubnAdmDelete">
+    <mb bits="64" off="0[0]">serviceID<!--ServiceID--></mb>
+    <mb bits="128" off="0[64]" type="HdrIPv6Addr">serviceGID<!--ServiceGID--></mb>
+    <mb bits="16" off="0[192]">servicePKey<!--ServiceP_Key--></mb>
+    <mb bits="16" off="0[208]"><!--Reserved--></mb>
+    <mb bits="32" off="0[224]">serviceLease<!--ServiceLease--></mb>
+    <mb bits="128" off="0[256]" type="HdrIPv6Addr">serviceKey<!--ServiceKey--></mb>
+    <mb bits="8" off="0[384]" count="64" display="string">serviceName<!--ServiceName--></mb>
+    <mb bits="8" off="0[896]" count="16">serviceData8<!--ServiceData8--></mb>
+    <mb bits="16" off="0[1024]" count="8">serviceData16<!--ServiceData16--></mb>
+    <mb bits="32" off="0[1152]" count="4">serviceData32<!--ServiceData32--></mb>
+    <mb bits="64" off="0[1280]" count="2">serviceData64<!--ServiceData64--></mb>
+  </struct>
+
+  <struct name="SAPKeyTableRecord"
+          bytes="72"
+          desc="Container for P_Key Table"
+          sect="15.2.5.11"
+          attributeID="0x33"
+          attributeName="SA_P_KEY_TABLE_RECORD"
+          methods="SubnAdmGet SubnAdmGetTable">
+    <mb bits="16" off="0[0]">LID<!--LID--></mb>
+    <mb bits="16" off="0[16]">blockNum<!--BlockNum--></mb>
+    <mb bits="8" off="0[32]">portNum<!--PortNum--></mb>
+    <mb bits="24" off="0[40]"><!--Reserved--></mb>
+    <mb bits="512" off="0[64]" type="struct SMPPKeyTable">PKeyTable<!--P_Key Table--></mb>
+  </struct>
+
+  <struct name="SAPathRecord"
+          bytes="64"
+          desc="Information on paths through the subnet"
+          sect="15.2.5.16"
+          attributeID="0x35"
+          attributeName="SA_PATH_RECORD"
+          methods="SubnAdmGet SubnAdmGetTable">
+    <mb bits="32" off="0[0]"><!--Reserved--></mb>
+    <mb bits="32" off="0[32]"><!--Reserved--></mb>
+    <mb bits="128" off="0[64]" type="HdrIPv6Addr">DGID<!--DGID--></mb>
+    <mb bits="128" off="0[192]" type="HdrIPv6Addr">SGID<!--SGID--></mb>
+    <mb bits="16" off="0[320]">DLID<!--DLID--></mb>
+    <mb bits="16" off="0[336]">SLID<!--SLID--></mb>
+    <mb bits="1" off="0[352]">rawTraffic<!--RawTraffic--></mb>
+    <mb bits="3" off="0[353]"><!--Reserved--></mb>
+    <mb bits="20" off="0[356]">flowLabel<!--FlowLabel--></mb>
+    <mb bits="8" off="0[376]">hopLimit<!--HopLimit--></mb>
+    <mb bits="8" off="0[384]">TClass<!--TClass--></mb>
+    <mb bits="1" off="0[392]">reversible<!--Reversible--></mb>
+    <mb bits="7" off="0[393]">numbPath<!--NumbPath--></mb>
+    <mb bits="16" off="0[400]">PKey<!--P_Key--></mb>
+    <mb bits="12" off="0[416]"><!--Reserved--></mb>
+    <mb bits="4" off="0[428]">SL<!--SL--></mb>
+    <mb bits="2" off="0[432]">MTUSelector<!--MTUSelector--></mb>
+    <mb bits="6" off="0[434]">MTU<!--MTU--></mb>
+    <mb bits="2" off="0[440]">rateSelector<!--RateSelector--></mb>
+    <mb bits="6" off="0[442]">rate<!--Rate--></mb>
+    <mb bits="2" off="0[448]">packetLifeTimeSelector<!--PacketLifeTimeSelector--></mb>
+    <mb bits="6" off="0[450]">packetLifeTime<!--PacketLifeTime--></mb>
+    <mb bits="8" off="0[456]">preference<!--Preference--></mb>
+    <mb bits="16" off="0[464]"><!--Reserved--></mb>
+    <mb bits="32" off="0[480]"><!--Reserved--></mb>
+  </struct>
+
+  <struct name="SAMCMemberRecord"
+          bytes="68"
+          desc="Multicast member attribute"
+          sect="15.2.5.17"
+          attributeID="0x38"
+          attributeName="SA_MC_MEMBER_RECORD"
+          methods="SubnAdmGet SubnAdmSet SubnAdmGetTable SubnAdmDelete">
+    <mb bits="128" off="0[0]" type="HdrIPv6Addr">MGID<!--MGID--></mb>
+    <mb bits="128" off="0[128]" type="HdrIPv6Addr">portGID<!--PortGID--></mb>
+    <mb bits="128" off="0[256]" type="HdrIPv6Addr">requesterGID<!--RequesterGID--></mb>
+    <mb bits="32" off="0[384]">QKey<!--Q_Key--></mb>
+    <mb bits="16" off="0[416]">MLID<!--MLID--></mb>
+    <mb bits="2" off="0[432]">MTUSelector<!--MTUSelector--></mb>
+    <mb bits="6" off="0[434]">MTU<!--MTU--></mb>
+    <mb bits="8" off="0[440]">TClass<!--TClass--></mb>
+    <mb bits="16" off="0[448]">PKey<!--P_Key--></mb>
+    <mb bits="2" off="0[464]">rateSelector<!--RateSelector--></mb>
+    <mb bits="6" off="0[466]">rate<!--Rate--></mb>
+    <mb bits="2" off="0[472]">packetLifeTimeSelector<!--PacketLifeTimeSelector--></mb>
+    <mb bits="6" off="0[474]">packetLifeTime<!--PacketLifeTime--></mb>
+    <mb bits="4" off="0[480]">SL<!--SL--></mb>
+    <mb bits="20" off="0[484]">flowLabel<!--FlowLabel--></mb>
+    <mb bits="8" off="0[504]">hopLimit<!--HopLimit--></mb>
+    <mb bits="4" off="0[512]">scope<!--Scope--></mb>
+    <mb bits="4" off="0[516]">joinState<!--JoinState--></mb>
+    <mb bits="24" off="0[520]"><!--Reserved--></mb>
+  </struct>
+
+  <struct name="SATraceRecord"
+          bytes="48"
+          desc="Path trace information"
+          sect="15.2.5.19"
+          attributeID="0x39"
+          attributeName="SA_TRACE_RECORD"
+          methods="SubnAdmGetTraceTable">
+    <mb bits="64" off="0[0]">GIDPrefix<!--GIDPrefix--></mb>
+    <mb bits="16" off="0[64]">IDGeneration<!--IDGeneration--></mb>
+    <mb bits="8" off="0[80]"><!--Reserved--></mb>
+    <mb bits="8" off="0[88]">nodeType<!--NodeType--></mb>
+    <mb bits="64" off="0[96]">nodeID<!--NodeID--></mb>
+    <mb bits="64" off="0[160]">chassisID<!--ChassisID--></mb>
+    <mb bits="64" off="0[224]">entryPortID<!--EntryPortID--></mb>
+    <mb bits="64" off="0[288]">exitPortID<!--ExitPortID--></mb>
+    <mb bits="8" off="0[352]">entryPort<!--EntryPort--></mb>
+    <mb bits="8" off="0[360]">exitPort<!--ExitPort--></mb>
+    <mb bits="16" off="0[368]"><!--Reserved (Padding)--></mb>
+  </struct>
+
+  <struct name="SAMultiPathRecord"
+          bytes="40"
+          desc="Request for multiple paths"
+          sect="15.2.5.20"
+          attributeID="0x3A"
+          attributeName="SA_MULTI_PATH_RECORD"
+          methods="SubnAdmGetMulti">
+    <mb bits="1" off="0[0]">rawTraffic<!--RawTraffic--></mb>
+    <mb bits="3" off="0[1]"><!--Reserved--></mb>
+    <mb bits="20" off="0[4]">flowLabel<!--FlowLabel--></mb>
+    <mb bits="8" off="0[24]">hopLimit<!--HopLimit--></mb>
+    <mb bits="8" off="0[32]">TClass<!--TClass--></mb>
+    <mb bits="1" off="0[40]">reversible<!--Reversible--></mb>
+    <mb bits="7" off="0[41]">numbPath<!--NumbPath--></mb>
+    <mb bits="16" off="0[48]">PKey<!--P_Key--></mb>
+    <mb bits="12" off="0[64]"><!--Reserved--></mb>
+    <mb bits="4" off="0[76]">SL<!--SL--></mb>
+    <mb bits="2" off="0[80]">MTUSelector<!--MTUSelector--></mb>
+    <mb bits="6" off="0[82]">MTU<!--MTU--></mb>
+    <mb bits="2" off="0[88]">rateSelector<!--RateSelector--></mb>
+    <mb bits="6" off="0[90]">rate<!--Rate--></mb>
+    <mb bits="2" off="0[96]">packetLifeTimeSelector<!--PacketLifeTimeSelector--></mb>
+    <mb bits="6" off="0[98]">packetLifeTime<!--PacketLifeTime--></mb>
+    <mb bits="8" off="0[104]"><!--Reserved--></mb>
+    <mb bits="2" off="0[112]">independenceSelector<!--IndependenceSelector--></mb>
+    <mb bits="6" off="0[114]"><!--Reserved--></mb>
+    <mb bits="8" off="0[120]">SGIDCount<!--SGIDCount--></mb>
+    <mb bits="8" off="0[128]">DGIDCount<!--DGIDCount--></mb>
+    <mb bits="24" off="0[136]"><!--Reserved--></mb>
+    <mb bits="32" off="0[160]"><!--Reserved--></mb>
+    <mb bits="128" off="0[192]" count="1" type="HdrIPv6Addr">SDGID<!--SDGID--></mb>
+  </struct>
+
+  <struct name="SAServiceAssociationRecord"
+          bytes="80"
+          desc="ServiceRecord ServiceName/ServiceKey association"
+          sect="15.2.5.15"
+          attributeID="0x3B"
+          attributeName="SA_SERVICE_ASSOCIATION_RECORD"
+          methods="SubnAdmGet SubnAdmGetTable">
+    <mb bits="128" off="0[0]" type="HdrIPv6Addr">serviceKey<!--ServiceKey--></mb>
+    <mb bits="8" off="0[128]" count="64" display="string">serviceName<!--ServiceName--></mb>
+  </struct>
+
+</makestructs>

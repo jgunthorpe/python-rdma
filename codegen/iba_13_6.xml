@@ -1,0 +1,69 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<makestructs type="Reliable Multi-Packet Transaction Protocol">
+  <struct name="RMPPHeader"
+          bytes="36"
+          desc="RMPP Header Fields"
+          sect="13.6.2.1">
+    <mb bits="192" off="0" type="struct MADHeader">MADHeader<!--Common MAD Header--></mb>
+    <mb bits="8" off="24">RMPPVersion<!--RMPPVersion--></mb>
+    <mb bits="8" off="25">RMPPType<!--RMPPType--></mb>
+    <mb bits="5" off="26">RRespTime<!--RRespTime--></mb>
+    <mb bits="3" off="26[5]">RMPPFlags<!--RMPPFlags--></mb>
+    <mb bits="8" off="27">RMPPStatus<!--RMPPStatus--></mb>
+    <mb bits="32" off="28">data1<!--data1--></mb>
+    <mb bits="32" off="32">data2<!--data2--></mb>
+  </struct>
+
+  <struct name="RMPPShortHeader"
+          bytes="28"
+          desc="RMPP Header Fields"
+          sect="13.6.2.1">
+    <mb bits="192" off="0" type="struct MADHeader">MADHeader<!--Common MAD Header--></mb>
+    <mb bits="8" off="24">RMPPVersion<!--RMPPVersion--></mb>
+    <mb bits="8" off="25">RMPPType<!--RMPPType--></mb>
+    <mb bits="5" off="26">RRespTime<!--RRespTime--></mb>
+    <mb bits="3" off="26[5]">RMPPFlags<!--RMPPFlags--></mb>
+    <mb bits="8" off="27">RMPPStatus<!--RMPPStatus--></mb>
+  </struct>
+
+  <struct name="RMPPData"
+          bytes="256"
+          desc="RMPP Data Packet"
+          sect="13.6.2.3">
+    <mb bits="224" off="0" type="struct RMPPShortHeader">RMPPHeader<!--Common RMPP Header--></mb>
+    <mb bits="32" off="28">segmentNumber<!--Segment Number--></mb>
+    <mb bits="32" off="32">payLoadLength<!--Payload Length--></mb>
+    <mb bits="1760" off="36" display="data">data</mb>
+  </struct>
+
+  <struct name="RMPPAck"
+          bytes="256"
+          desc="RMPP Data Packet"
+          sect="13.6.2.3">
+    <mb bits="224" off="0" type="struct RMPPShortHeader">RMPPHeader<!--Common RMPP Header--></mb>
+    <mb bits="32" off="28">segmentNumber<!--Segment Number--></mb>
+    <mb bits="32" off="32">newWindowLast<!--New Window Last--></mb>
+    <mb bits="1760" off="36" display="data"></mb>
+  </struct>
+
+  <struct name="RMPPAbort"
+          bytes="256"
+          desc="RMPP Data Packet"
+          sect="13.6.2.3">
+    <mb bits="224" off="0" type="struct RMPPShortHeader">RMPPHeader<!--Common RMPP Header--></mb>
+    <mb bits="32" off="28"><!--Reserved--></mb>
+    <mb bits="32" off="32"><!--Reserved--></mb>
+    <mb bits="1760" off="36" display="data">errorData</mb>
+  </struct>
+
+  <struct name="RMPPStop"
+          bytes="256"
+          desc="RMPP Data Packet"
+          sect="13.6.2.3">
+    <mb bits="224" off="0" type="struct RMPPShortHeader">RMPPHeader<!--Common RMPP Header--></mb>
+    <mb bits="32" off="28"><!--Reserved--></mb>
+    <mb bits="32" off="32"><!--Reserved--></mb>
+    <mb bits="1760" off="36" display="data">errorData</mb>
+  </struct>
+
+</makestructs>

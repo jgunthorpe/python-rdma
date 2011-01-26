@@ -1,0 +1,131 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<makestructs type="IBA Device Management">
+  <struct name="DMFormat"
+          bytes="256"
+          desc="Device Management MAD Format"
+          sect="16.3.1"
+          mgmtClass="0x06"
+          mgmtClassVersion="1"
+          mgmtClassName="MAD_DEVICE">
+    <mb bits="192" off="0" type="struct MADHeader">MADHeader<!--Common MAD Header--></mb>
+    <mb bits="320" off="24"><!--Reserved--></mb>
+    <mb bits="1536" off="64" display="data">data<!--DevMgt Data--></mb>
+  </struct>
+
+  <struct name="DMServiceEntry"
+          bytes="48"
+          desc="Service Entry"
+          sect="16.3.3">
+    <mb bits="8" off="0[0]" count="40" display="string">serviceName<!--ServiceName--></mb>
+    <mb bits="64" off="0[320]">serviceID<!--ServiceID--></mb>
+  </struct>
+
+  <struct name="DMIOUnitInfo"
+          bytes="132"
+          desc="List of all I/O Controllers in a I/O Unit"
+          sect="16.3.3.3"
+          attributeID="0x10"
+          attributeName="DM_IO_UNIT_INFO"
+          methods="DevMgtGet">
+    <mb bits="16" off="0[0]">changeID<!--Change_ID--></mb>
+    <mb bits="8" off="0[16]">maxControllers<!--Max Controllers--></mb>
+    <mb bits="6" off="0[24]"><!--Reserved--></mb>
+    <mb bits="1" off="0[30]">diagDeviceID<!--DiagDeviceID--></mb>
+    <mb bits="1" off="0[31]">optionROM<!--Option ROM--></mb>
+    <mb bits="1024" off="0[32]">controllerList<!--ControllerList--></mb>
+  </struct>
+
+  <struct name="DMIOControllerProfile"
+          bytes="128"
+          desc="I/O Controller Profile Information"
+          sect="16.3.3.4"
+          attributeID="0x11"
+          attributeName="DM_IO_CONTROLLER_PROFILE"
+          methods="DevMgtGet">
+    <mb bits="64" off="0[0]">GUID<!--GUID--></mb>
+    <mb bits="24" off="0[64]">vendorID<!--VendorID--></mb>
+    <mb bits="8" off="0[88]"><!--Reserved--></mb>
+    <mb bits="32" off="0[96]">deviceID<!--DeviceID--></mb>
+    <mb bits="16" off="0[128]">deviceVersion<!--Device Version--></mb>
+    <mb bits="16" off="0[144]"><!--Reserved--></mb>
+    <mb bits="24" off="0[160]">subsystemVendorID<!--Subsystem VendorID--></mb>
+    <mb bits="8" off="0[184]"><!--Reserved--></mb>
+    <mb bits="32" off="0[192]">subsystemID<!--SubsystemID--></mb>
+    <mb bits="16" off="0[224]">IOClass<!--IO Class--></mb>
+    <mb bits="16" off="0[240]">IOSubclass<!--IO Subclass--></mb>
+    <mb bits="16" off="0[256]">protocol<!--Protocol--></mb>
+    <mb bits="16" off="0[272]">protocolVersion<!--Protocol Version--></mb>
+    <mb bits="16" off="0[288]"><!--Reserved--></mb>
+    <mb bits="16" off="0[304]"><!--Reserved--></mb>
+    <mb bits="16" off="0[320]">sendMessageDepth<!--Send Message Depth--></mb>
+    <mb bits="8" off="0[336]"><!--Reserved--></mb>
+    <mb bits="8" off="0[344]">RDMAReadDepth<!--RDMA Read Depth--></mb>
+    <mb bits="32" off="0[352]">sendMessageSize<!--Send Message Size--></mb>
+    <mb bits="32" off="0[384]">RDMATransferSize<!--RDMA Transfer Size--></mb>
+    <mb bits="8" off="0[416]">controllerOperationsMask<!--Controller Operations Mask--></mb>
+    <mb bits="8" off="0[424]"><!--Reserved--></mb>
+    <mb bits="8" off="0[432]">serviceEntries<!--Service Entries--></mb>
+    <mb bits="8" off="0[440]"><!--Reserved--></mb>
+    <mb bits="64" off="0[448]"><!--Reserved--></mb>
+    <mb bits="8" off="0[512]" count="64" display="string">IDString<!--ID String--></mb>
+  </struct>
+
+  <struct name="DMServiceEntries"
+          bytes="192"
+          desc="List of Supported Services and Their Associated Service IDs"
+          sect="16.3.3.5"
+          attributeID="0x12"
+          attributeName="DM_SERVICE_ENTRIES"
+          methods="DevMgtGet">
+    <mb bits="384" off="0[0]" count="4" type="struct DMServiceEntry">serviceEntry<!--ServiceEntry--></mb>
+  </struct>
+
+  <struct name="DMDiagnosticTimeout"
+          bytes="4"
+          desc="Get the Maximum Time for Completion of a Diagnostic Test"
+          sect="16.3.3.6"
+          attributeID="0x20"
+          attributeName="DM_DIAGNOSTIC_TIMEOUT"
+          methods="DevMgtGet">
+    <mb bits="32" off="0[0]">maxDiagTime<!--MaxDiagTime--></mb>
+  </struct>
+
+  <struct name="DMPrepareToTest"
+          bytes="0"
+          desc="Prepare Device for Test"
+          sect="16.3.3.7"
+          attributeID="0x21"
+          attributeName="DM_PREPARE_TO_TEST"
+          methods="DevMgtGet DevMgtSet">
+  </struct>
+
+  <struct name="DMTestDeviceOnce"
+          bytes="0"
+          desc="Test Device Once"
+          sect="16.3.3.8"
+          attributeID="0x22"
+          attributeName="DM_TEST_DEVICE_ONCE"
+          methods="DevMgtSet">
+  </struct>
+
+  <struct name="DMTestDeviceLoop"
+          bytes="0"
+          desc="Test Device Continuously"
+          sect="16.3.3.9"
+          attributeID="0x23"
+          attributeName="DM_TEST_DEVICE_LOOP"
+          methods="DevMgtSet">
+  </struct>
+
+  <struct name="DMDiagCode"
+          bytes="4"
+          desc="Vendor-Specific Device Diagnostic Information"
+          sect="16.3.3.10"
+          attributeID="0x24"
+          attributeName="DM_DIAG_CODE"
+          methods="DevMgtGet">
+    <mb bits="16" off="0[0]">diagCode<!--DiagCode--></mb>
+    <mb bits="16" off="0[16]"><!--Reserved--></mb>
+  </struct>
+
+</makestructs>

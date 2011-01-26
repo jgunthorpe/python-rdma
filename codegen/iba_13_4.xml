@@ -1,0 +1,104 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<makestructs type="IBA General Management Datagrams">
+  <struct name="MADHeader"
+          bytes="24"
+          desc="MAD Base Header"
+          sect="13.4.3">
+    <mb bits="8" off="0[0]">baseVersion<!--BaseVersion--></mb>
+    <mb bits="8" off="0[8]">mgmtClass<!--MgmtClass--></mb>
+    <mb bits="8" off="0[16]">classVersion<!--ClassVersion--></mb>
+    <mb bits="8" off="0[24]">method<!--Method--></mb>
+    <mb bits="16" off="0[32]">status<!--Status--></mb>
+    <mb bits="16" off="0[48]">classSpecific<!--ClassSpecific--></mb>
+    <mb bits="64" off="0[64]">transactionID<!--TransactionID--></mb>
+    <mb bits="16" off="0[128]">attributeID<!--AttributeID--></mb>
+    <mb bits="16" off="0[144]"><!--Reserved--></mb>
+    <mb bits="32" off="0[160]">attributeModifier<!--AttributeModifier--></mb>
+  </struct>
+
+  <struct name="MADHeaderDirected"
+          bytes="24"
+          desc="MAD Base Header Directed"
+          sect="13.4.3">
+    <mb bits="32" off="0[0]">MADHeader1<!--MAD Header 1--></mb>
+    <mb bits="1" off="0[32]">D<!--D--></mb>
+    <mb bits="15" off="0[33]">status<!--Status--></mb>
+    <mb bits="8" off="0[48]">hopPointer<!--Hop Pointer--></mb>
+    <mb bits="8" off="0[56]">hopCount<!--Hop Count--></mb>
+    <mb bits="128" off="0[64]">MADHeader2<!--MAD Header 2--></mb>
+  </struct>
+
+  <struct name="MADClassPortInfo"
+          bytes="72"
+          desc="Class Port Info"
+          sect="13.4.8.1"
+          attributeID="0x01"
+          attributeName="MAD_CLASS_PORT_INFO"
+          methods="CommMgtGet CommMgtSet PerformanceGet BMGet BMSet DevMgtGet DevMgtSet SNMPGet SubnAdmGet">
+    <mb bits="8" off="0[0]">baseVersion<!--BaseVersion--></mb>
+    <mb bits="8" off="0[8]">classVersion<!--ClassVersion--></mb>
+    <mb bits="16" off="0[16]">capabilityMask<!--CapabilityMask--></mb>
+    <mb bits="27" off="0[32]"><!--Reserved--></mb>
+    <mb bits="5" off="0[59]">respTimeValue<!--RespTimeValue--></mb>
+    <mb bits="128" off="0[64]" type="HdrIPv6Addr">redirectGID<!--RedirectGID--></mb>
+    <mb bits="8" off="0[192]">redirectTC<!--RedirectTC--></mb>
+    <mb bits="4" off="0[200]">redirectSL<!--RedirectSL--></mb>
+    <mb bits="20" off="0[204]">redirectFL<!--RedirectFL--></mb>
+    <mb bits="16" off="0[224]">redirectLID<!--RedirectLID--></mb>
+    <mb bits="16" off="0[240]">redirectPKey<!--RedirectP_Key--></mb>
+    <mb bits="8" off="0[256]"><!--Reserved--></mb>
+    <mb bits="24" off="0[264]">redirectQP<!--RedirectQP--></mb>
+    <mb bits="32" off="0[288]">redirectQKey<!--RedirectQ_Key--></mb>
+    <mb bits="128" off="0[320]" type="HdrIPv6Addr">trapGID<!--TrapGID--></mb>
+    <mb bits="8" off="0[448]">trapTC<!--TrapTC--></mb>
+    <mb bits="4" off="0[456]">trapSL<!--TrapSL--></mb>
+    <mb bits="20" off="0[460]">trapFL<!--TrapFL--></mb>
+    <mb bits="16" off="0[480]">trapLID<!--TrapLID--></mb>
+    <mb bits="16" off="0[496]">trapPKey<!--TrapP_Key--></mb>
+    <mb bits="8" off="0[512]">trapHL<!--TrapHL--></mb>
+    <mb bits="24" off="0[520]">trapQP<!--TrapQP--></mb>
+    <mb bits="32" off="0[544]">trapQKey<!--TrapQ_Key--></mb>
+  </struct>
+
+  <container name="MADNotice"
+          bytes="80"
+          desc="Notice"
+          sect="13.4.8.2"
+          attributeID="0x02"
+          attributeName="MAD_NOTICE"
+          methods="BMGet BMSet BMTrap DevMgtGet DevMgtSet DevMgtTrap SubnGet SubnSet SubnTrap SubnTrapRepress SubnAdmReport"
+          parameter="dataDetails">
+    <mb bits="1" off="0[0]">isGeneric<!--IsGeneric--></mb>
+    <mb bits="7" off="0[1]">noticeType<!--NoticeType--></mb>
+    <mb bits="24" off="0[8]">nodeType<!--NodeType / VendorID--></mb>
+    <mb bits="16" off="0[32]">trapNumber<!--TrapNumber / DeviceID--></mb>
+    <mb bits="16" off="0[48]">issuerLID<!--IssuerLID--></mb>
+    <mb bits="1" off="0[64]">noticeToggle<!--NoticeToggle--></mb>
+    <mb bits="15" off="0[65]">noticeCount<!--NoticeCount--></mb>
+    <mb bits="432" off="0[80]">dataDetails<!--DataDetails--></mb>
+    <mb bits="128" off="0[512]" type="HdrIPv6Addr">issuerGID<!--IssuerGID--></mb>
+  </container>
+
+  <struct name="MADInformInfo"
+          bytes="36"
+          desc="InformInfo"
+          sect="13.4.8.3"
+          attributeID="0x03"
+          attributeName="MAD_INFORM_INFO"
+          methods="SubnAdmSet">
+    <mb bits="128" off="0[0]" type="HdrIPv6Addr">GID<!--GID--></mb>
+    <mb bits="16" off="0[128]">LIDRangeBegin<!--LIDRangeBegin--></mb>
+    <mb bits="16" off="0[144]">LIDRangeEnd<!--LIDRangeEnd--></mb>
+    <mb bits="16" off="0[160]"><!--Reserved--></mb>
+    <mb bits="8" off="0[176]">isGeneric<!--IsGeneric--></mb>
+    <mb bits="8" off="0[184]">subscribe<!--Subscribe--></mb>
+    <mb bits="16" off="0[192]">type<!--Type--></mb>
+    <mb bits="16" off="0[208]">trapNumber<!--TrapNumber / DeviceID--></mb>
+    <mb bits="24" off="0[224]">QPN<!--QPN--></mb>
+    <mb bits="3" off="0[248]"><!--Reserved--></mb>
+    <mb bits="5" off="0[251]">respTimeValue<!--RespTimeValue--></mb>
+    <mb bits="8" off="0[256]"><!--Reserved--></mb>
+    <mb bits="24" off="0[264]">producerType<!--ProducerType / VendorID--></mb>
+  </struct>
+
+</makestructs>
