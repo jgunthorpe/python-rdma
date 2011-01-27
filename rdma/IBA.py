@@ -84,6 +84,30 @@ MAD_STATUS_UNSUP_METHOD_ATTR_COMBO = 3<<2;
 MAD_STATUS_INVALID_ATTR_OR_MODIFIER = 7<<2;
 MAD_STATUS_DIRECTED_RESPONSE = 1<<15;
 
+# Used internally
+MAD_XSTATUS_INVALID_REP_SIZE = 1<<16;
+def mad_status_to_str(status):
+    """Decode a MAD status"""
+    if status == MAD_XSTATUS_INVALID_REP_SIZE:
+        return "Invalid reply size";
+    res = "";
+    if status & MAD_STATUS_BUSY:
+        res = res + "BUSY ";
+    if status & MAD_STATUS_REDIRECT:
+        res = res + "REDIECT ";
+    code = (status >> 2) & 7;
+    if code == 0:
+        return res + "Ok";
+    if code == 1:
+        return res + "Bad version";
+    if code == 2:
+        return res + "Unsupported method";
+    if code == 3:
+        return res + "Unsupported method+attr";
+    if code == 7:
+        return res + "Invalid attr or modifier";
+    return res + "??";
+
 # MAD Classes. Try not to use, the structs have these embedded
 MAD_SUBNET = 0x01;
 MAD_SUBNET_DIRECTED = 0x81;
