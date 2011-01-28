@@ -3,7 +3,7 @@ from __future__ import with_statement;
 
 import rdma,rdma.tools,rdma.path,rdma.madtransactor;
 import rdma.IBA as IBA;
-import fcntl,struct,copy;
+import fcntl,struct,copy,errno;
 from socket import htonl as cpu_to_be32;
 from socket import htons as cpu_to_be16;
 
@@ -49,7 +49,7 @@ class LazyIBPath(rdma.path.IBPath):
             del self.SGID
             self.DGID = self.end_port.gids[DGID_index];
             self.flow_label = cpu_to_be32(flow_label);
-        
+
 class UMad(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
     '''Handle to a umad kernel interface. This supports the context manager protocol.'''
     IB_IOCTL_MAGIC = 0x1b
@@ -93,7 +93,7 @@ class UMad(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
             break;
         else:
             raise rdma.RDMAError("Unable to open umad device for %s"%(repr(parent)));
-        
+
         with open(SYS_INFINIBAND_MAD + "abi_version") as F:
             self.abi_version = int(F.read().strip());
         if self.abi_version < 5:
@@ -194,7 +194,7 @@ class UMad(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
             raise RDMAError("umad send failure code=%d for %s"%(status,repr(buf)));
         return (buf[64:],path);
 
-    def _genError(self,buf,path):
+    def _gen_error(self,buf,path):
         """Sadly the kernel can return EIO if it could not process the MAD,
         eg if you ask for PortInfo of the local CA with an invalid attributeID
         the Mellanox driver will return EIO rather than construct an error
@@ -207,17 +207,22 @@ class UMad(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
         path.reverse();
         return (buf,path);
 
-    def _execute(self,buf,path):
+    def _execute(self,buf,path,sendOnly = False):
         """Send the fully formed MAD in buf to path and copy the reply
         into buf. Return path of the reply. This is a synchronous method, all
         MADs received during this call are discarded until the reply is seen."""
-        rmatch = self._getReplyMatchKey(buf);
         try:
             self.sendto(buf,path);
-        except IOError:
-            return self._genError(buf,path);
+        except IOError as err:
+            if err.errno == errno.EINVAL:
+                return self._gen_error(buf,path);
+            raise
+
+        if sendOnly:
+            return None;
 
         # FIXME: Timeout/resend
+        rmatch = self._getReplyMatchKey(buf);
         while True:
             rbuf,rpath = self.recvfrom();
             if rmatch == self._getMatchKey(rbuf):
