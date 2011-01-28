@@ -28,10 +28,9 @@ class umad_self_test(unittest.TestCase):
         for I in range(1,ports):
             inf = self.umad.SubnGet(IBA.SMPPortInfo,self.local_path,I);
 
-        try:
-            inf = self.umad.SubnGet(IBA.SMPPortInfo,self.local_path,ports+1);
-        except rdma.madtransactor.MADError as err:
-            print "Got expected error",err;
+        self.assertRaises(rdma.madtransactor.MADError,
+                          self.umad.SubnGet,IBA.SMPPortInfo,
+                          self.local_path,ports+1);
 
 if __name__ == '__main__':
     unittest.main()
