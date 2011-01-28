@@ -20,7 +20,7 @@ def get_rdma_devices(refresh = False):
     return _cached_devices;
 
 def get_umad(port,**kwargs):
-    '''Create a umade instance for the associated EndPort'''
+    '''Create a umad instance for the associated EndPort'''
     import rdma.umad;
     return rdma.umad.UMad(port,**kwargs);
 

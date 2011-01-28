@@ -8,12 +8,16 @@ import os,stat,socket,re,collections
 SYS_INFINIBAND = "/sys/class/infiniband/";
 
 def conv_gid(s):
+    """Convert the content of a sysfs GID file to our representation."""
     return socket.inet_pton(socket.AF_INET6,s.strip());
 def conv_guid(s):
+    """Convert the content of a sysfs GUID file to our representation."""
     return s.strip();
 def conv_hex(s):
+    """Convert the content of a sysfs hex integer file to our representation."""
     return int(s,16);
 def conv_int_desc(s):
+    """Convert the content of a sysfs device major:minor file to our representation."""
     t = s.split(':');
     return (int(t[0]),t[1].strip());
 
@@ -92,7 +96,7 @@ class DemandList2(DemandList):
             ret = self._conv(idx);
             self._data[idx] = ret;
         return ret;
-    
+
 class EndPort(SysFSCache):
     '''A RDMA end port. An end port can issue RDMA operations, has a port GID,
     etc. For an IB switch this will be port 0, for *CA it will be port 1 or
@@ -103,7 +107,7 @@ class EndPort(SysFSCache):
         self.port_id = port_id;
         self.pkeys = DemandList(self._dir + "pkeys/",conv_hex);
         self.gids = DemandList(self._dir + "gids/",conv_gid);
-        
+
     def _iterate_services_device(self,dir,matcher):
         return self.parent._iterate_services_device(dir,matcher);
     def _iterate_services_end_port(self,dir,matcher):
@@ -133,7 +137,7 @@ class EndPort(SysFSCache):
 
     def pkey_index(self,pkey):
         # FIXME: We don't really need to read all the pkey entries to do
-        # this, searching the directory 
+        # this, searching the directory
         return self.pkeys.index(pkey);
 
     def __str__(self):
@@ -147,8 +151,6 @@ class EndPort(SysFSCache):
                 id(self));
 
 class RDMADevice(SysFSCache):
-    NODE_CA = 1;
-
     def __init__(self,name):
         SysFSCache.__init__(self,SYS_INFINIBAND + name + "/");
         self.name = name;
