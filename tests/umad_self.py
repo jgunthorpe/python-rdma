@@ -17,38 +17,21 @@ class umad_self_test(unittest.TestCase):
                                                  umad_agent_id = self.qp0);
 
     def test_node_info(self):
-        inf = IBA.SMPPortInfo();
-        self.subnGet(inf,self.local_path);
-        (tmp,path) = self.umad.recvfrom();
-        
-        pkt2 = IBA.SMPFormatDirected(tmp);
-        inf2 = IBA.SMPPortInfo(pkt2.data);
-        inf2.printer(sys.stdout);
+        inf = self.umad.SubnGet(IBA.SMPNodeInfo(),self.local_path);
+        inf.printer(sys.stdout);
+        ports = inf.numPorts;
 
-    def subnGet(self,payload,path):
-        if isinstance(path,rdma.path.IBDRPath):
-            fmt = IBA.SMPFormatDirected();
-            fmt.drSLID = path.drSLID;
-            fmt.drDLID = path.drDLID;
-            fmt.initialPath[:len(path.drPath)] = path.drPath;
-            fmt.MADHeader.hopCount = len(path.drPath);
-        else:
-            fmt = IBA.SMPFormat();
-        self.sendMad(fmt,payload,payload.MAD_SUBNGET,path,0);
+        inf = self.umad.SubnGet(IBA.SMPPortInfo,self.local_path);
+        inf.printer(sys.stdout);
 
-    def sendMad(self,fmt,payload,method,path,qpn):
-        fmt.MADHeader.baseVersion = IBA.MAD_BASE_VERSION;
-        fmt.MADHeader.mgmtClass = fmt.MAD_CLASS;
-        fmt.MADHeader.classVersion = fmt.MAD_CLASS_VERSION;
-        fmt.MADHeader.method = method;
-        fmt.MADHeader.attributeID = payload.MAD_ATTRIBUTE_ID;
-        fmt.MADHeader.transactionID = self.tid;
-        self.tid = self.tid + 1;
-        payload.pack_into(fmt.data);
+        self.assertEqual(ports,len(self.end_port.parent.end_ports));
+        for I in range(1,ports):
+            inf = self.umad.SubnGet(IBA.SMPPortInfo,self.local_path,I);
 
-        buf = bytearray(fmt.MAD_LENGTH);
-        fmt.pack_into(buf);
-        self.umad.sendto(buf,path);
+        try:
+            inf = self.umad.SubnGet(IBA.SMPPortInfo,self.local_path,ports+1);
+        except rdma.madtransactor.MADError as err:
+            print "Got expected error",err;
 
 if __name__ == '__main__':
     unittest.main()

@@ -12,6 +12,12 @@ class Path(object):
         for k,v in kwargs.iteritems():
             setattr(self,k,v);
 
+    def drop_cache(self):
+        """Release any cached information stored in the Path"""
+        for I in self.__dict__.keys():
+            if I.startswith("_cached"):
+                self.__delattr__(I);
+
 class IBPath(Path):
     """Describe a path in an IB network with a LRH and GRH and BTH
 
@@ -47,6 +53,15 @@ class IBPath(Path):
     # traffic_class = 0;
     # flow_label = 0;
 
+    def reverse(self):
+        """Reverse this path in-place according to 13.5.4"""
+        self.DLID,self.SLID = self.SLID,self.DLID;
+        self.dqpn ,self.sqpn = self.sqpn,self.dqpn;
+        if self.has_grh:
+            self.DGID,self.SGID = self.SGID,self.DGID;
+            self.hop_limit = 0xff;
+        self.drop_cache();
+        
     @property
     def SGID_index(self):
         """Cache and return the index of the SGID for the associated end_port"""
@@ -92,6 +107,7 @@ class IBDRPath(IBPath):
     def __init__(self,end_port,**kwargs):
         self.drPath = bytes();
         self.dqpn = 0;
+        self.sqpn = 0;
         self.qkey = IBA.IB_DEFAULT_QP0_QKEY;
         IBPath.__init__(self,end_port,**kwargs);
 

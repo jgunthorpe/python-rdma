@@ -1,9 +1,9 @@
 #!/usr/bin/python
 from __future__ import with_statement;
 
-import rdma,rdma.tools;
+import rdma,rdma.tools,rdma.path,rdma.madtransactor;
 import rdma.IBA as IBA;
-import fcntl,struct;
+import fcntl,struct,copy;
 from socket import htonl as cpu_to_be32;
 from socket import htons as cpu_to_be16;
 
@@ -50,7 +50,7 @@ class LazyIBPath(rdma.path.IBPath):
             self.DGID = self.end_port.gids[DGID_index];
             self.flow_label = cpu_to_be32(flow_label);
         
-class UMad(rdma.tools.SysFSDevice):
+class UMad(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
     '''Handle to a umad kernel interface. This supports the context manager protocol.'''
     IB_IOCTL_MAGIC = 0x1b
     IB_USER_MAD_REGISTER_AGENT = rdma.tools._IOC(3,IB_IOCTL_MAGIC,1,28);
@@ -86,6 +86,8 @@ class UMad(rdma.tools.SysFSDevice):
     ib_mad_addr_local_t = struct.Struct("=LLHBBxxxx16x4xH6x");
 
     def __init__(self,parent):
+        rdma.madtransactor.MADTransactor.__init__(self);
+
         for I in parent._iterate_services_end_port(SYS_INFINIBAND_MAD,"umad\d+"):
             rdma.tools.SysFSDevice.__init__(self,parent,I);
             break;
@@ -99,8 +101,7 @@ class UMad(rdma.tools.SysFSDevice):
         if not self._ioctl_enable_pkey():
             raise RDMAError("UMAD ABI is not compatible, we need PKey support.");
 
-        self.sbuf = bytearray(4096);
-        self.rbuf = bytearray(4096);
+        self.sbuf = bytearray(320);
 
     def _ioctl_enable_pkey(self):
         return fcntl.ioctl(self.dev.fileno(),self.IB_USER_MAD_ENABLE_PKEY) == 0;
@@ -179,19 +180,48 @@ class UMad(rdma.tools.SysFSDevice):
         self.dev.write(self.sbuf);
 
     def recvfrom(self):
-        '''Recv a MAD packet. Returns a tuple of (payload,path)'''
-        rc = self.dev.readinto(self.rbuf);
+        '''Recv a MAD packet into buf. Returns (buf,path).'''
+        buf = bytearray(320);
+        rc = self.dev.readinto(buf);
 
         path = rdma.path.IBPath(self.parent);
         (path.umad_agent_id,status,timeout_ms,retries,length,
-         path._cache_umad_ah) = self.ib_user_mad_t.unpack_from(bytes(self.rbuf),0);
+         path._cache_umad_ah) = self.ib_user_mad_t.unpack_from(bytes(buf),0);
         path.__class__ = LazyIBPath;
 
-        buf = bytes(self.rbuf[64:]);
         if status != 0:
             # With a 0 timeout this should never happen.
             raise RDMAError("umad send failure code=%d for %s"%(status,repr(buf)));
+        return (buf[64:],path);
+
+    def _genError(self,buf,path):
+        """Sadly the kernel can return EIO if it could not process the MAD,
+        eg if you ask for PortInfo of the local CA with an invalid attributeID
+        the Mellanox driver will return EIO rather than construct an error
+        MAD. I consider this to be a bug in the kernel, but we fix it here
+        by constructing an error MAD."""
+        buf[3] = buf[3] | IBA.MAD_METHOD_RESPONSE;
+        buf[4] = 0;
+        buf[5] = IBA.MAD_STATUS_INVALID_ATTR_OR_MODIFIER; # Guessing.
+        path = copy.copy(path);
+        path.reverse();
         return (buf,path);
+
+    def _execute(self,buf,path):
+        """Send the fully formed MAD in buf to path and copy the reply
+        into buf. Return path of the reply. This is a synchronous method, all
+        MADs received during this call are discarded until the reply is seen."""
+        rmatch = self._getReplyMatchKey(buf);
+        try:
+            self.sendto(buf,path);
+        except IOError:
+            return self._genError(buf,path);
+
+        # FIXME: Timeout/resend
+        while True:
+            rbuf,rpath = self.recvfrom();
+            if rmatch == self._getMatchKey(rbuf):
+                return (rbuf,rpath);
 
     def __repr__(self):
         return "<%s.%s object for %s at 0x%x>"%\
