@@ -4,9 +4,9 @@
 from rdma.IBA_struct import *;
 
 # see NodeInfo.nodeType
-CA = 1;
-SWITCH = 2;
-ROUTER = 3;
+NODE_CA = 1;
+NODE_SWITCH = 2;
+NODE_ROUTER = 3;
 
 MAX_PORTS = 254; # maximum number of physical ports on a device
 INVALID_PORT = 255;
