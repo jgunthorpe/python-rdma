@@ -62,7 +62,7 @@ class MADTransactor(object):
         x = MADTransactor._getMatchKey(buf)
         return (x[0],x[1] | IBA.MAD_METHOD_RESPONSE,x[2]);
 
-    def _doMad(self,fmt,payload,path,attributeModifier,method):
+    def _prepareMad(self,fmt,payload,attributeModifier,method):
         fmt.MADHeader.baseVersion = IBA.MAD_BASE_VERSION;
         fmt.MADHeader.mgmtClass = fmt.MAD_CLASS;
         fmt.MADHeader.classVersion = fmt.MAD_CLASS_VERSION;
@@ -76,32 +76,40 @@ class MADTransactor(object):
         # inputs.
         if not isinstance(payload,type):
             payload.pack_into(fmt.data);
-        buf = bytearray(fmt.MAD_LENGTH);
-        fmt.pack_into(buf);
-        
-        rbuf,self.reply_path = self._execute(buf,path);
+        fmt._buf = bytearray(fmt.MAD_LENGTH);
+        fmt.pack_into(fmt._buf);
 
+    def _completeMad(self,rbuf,fmt,path,newer,completer):
         # The try wrappers the unpack incase the MAD is busted somehow.
         try:
             if len(rbuf) != fmt.MAD_LENGTH:
-                raise MADError(buf,rbuf,path=path,status=MAD_XSTATUS_INVALID_REPLY_SIZE);
+                raise MADError(fmt,rbuf,path=path,status=MAD_XSTATUS_INVALID_REPLY_SIZE);
             self.reply_fmt = fmt.__class__(bytes(rbuf));
 
             # FIXME: Handle BUSY
             # FIXME: Handle redirect
             if self.reply_fmt.MADHeader.status & 0x1F != 0:
-                raise MADError(buf,rbuf,path=path,
+                raise MADError(fmt,rbuf,path=path,
                                status=self.reply_fmt.MADHeader.status);
-            if isinstance(payload,type):
-                rpayload = payload(self.reply_fmt.data);
-            else:
-                rpayload = payload.__class__(self.reply_fmt.data);
+            rpayload = newer(self.reply_fmt.data);
         except MADError:
             raise
         except:
-            raise MADError(buf,rbuf,path=path,exc_info=sys.exc_info());
+            raise MADError(fmt,rbuf,path=path,exc_info=sys.exc_info());
 
+        if completer:
+            return completer(rpayload);
         return rpayload;
+
+    def _doMad(self,fmt,payload,path,attributeModifier,method,completer=None):
+        """To support the asynchronous MADTransactor models the RPC wrapper
+        caller must always return _doMad(). If for some reason there is some
+        post-processing work to do then a completer function must be specified
+        to do it."""
+        self._prepareMad(fmt,payload,attributeModifier,method);
+        rbuf,self.reply_path = self._execute(fmt._buf,path);
+        newer = payload if isinstance(payload,type) else payload.__class__;
+        return self._completeMad(rbuf,fmt,path,newer,completer);
 
     def _subnDo(self,payload,path,attributeModifier,method):
         if isinstance(path,rdma.path.IBDRPath):
