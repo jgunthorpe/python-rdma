@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import os;
+import os,os.path;
 
 class RDMAError(Exception):
     '''General exception class for RDMA related errors.'''
@@ -32,10 +32,13 @@ _cached_devices = None;
 def get_rdma_devices(refresh = False):
     '''Return a container of RDMADevice objects for all devices in the system'''
     global _cached_devices;
-    if _cached_devices and not refresh:
+    if _cached_devices is not None and not refresh:
         return _cached_devices;
 
     import rdma.devices;
+    if not os.path.exists(rdma.devices.SYS_INFINIBAND):
+        return ();
+
     _cached_devices = rdma.devices.DemandList2(
         rdma.devices.SYS_INFINIBAND,
         lambda x:rdma.devices.RDMADevice(x),
