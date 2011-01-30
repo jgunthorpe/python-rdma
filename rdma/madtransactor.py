@@ -47,7 +47,7 @@ class MADTransactor(object):
         x = MADTransactor._getMatchKey(buf)
         return (x[0],x[1] | IBA.MAD_METHOD_RESPONSE,x[2]);
 
-    def _prepareMad(self,fmt,payload,attributeModifier,method):
+    def _prepareMAD(self,fmt,payload,attributeModifier,method):
         fmt.MADHeader.baseVersion = IBA.MAD_BASE_VERSION;
         fmt.MADHeader.mgmtClass = fmt.MAD_CLASS;
         fmt.MADHeader.classVersion = fmt.MAD_CLASS_VERSION;
@@ -64,7 +64,7 @@ class MADTransactor(object):
         fmt._buf = bytearray(fmt.MAD_LENGTH);
         fmt.pack_into(fmt._buf);
 
-    def _completeMad(self,ret,fmt,path,newer,completer):
+    def _completeMAD(self,ret,fmt,path,newer,completer):
         if ret is None:
             raise rdma.MADTimeoutError(fmt,path);
         rbuf,self.reply_path = ret;
@@ -90,15 +90,15 @@ class MADTransactor(object):
             return completer(rpayload);
         return rpayload;
 
-    def _doMad(self,fmt,payload,path,attributeModifier,method,completer=None):
+    def _doMAD(self,fmt,payload,path,attributeModifier,method,completer=None):
         """To support the asynchronous MADTransactor models the RPC wrapper
-        caller must always return _doMad(). If for some reason there is some
+        caller must always return _doMAD(). If for some reason there is some
         post-processing work to do then a completer function must be specified
         to do it."""
-        self._prepareMad(fmt,payload,attributeModifier,method);
+        self._prepareMAD(fmt,payload,attributeModifier,method);
         ret = self._execute(fmt._buf,path);
         newer = payload if isinstance(payload,type) else payload.__class__;
-        return self._completeMad(ret,fmt,path,newer,completer);
+        return self._completeMAD(ret,fmt,path,newer,completer);
 
     def _subnDo(self,payload,path,attributeModifier,method):
         if isinstance(path,rdma.path.IBDRPath):
@@ -109,7 +109,7 @@ class MADTransactor(object):
             fmt.MADHeader.hopCount = len(path.drPath)-1;
         else:
             fmt = IBA.SMPFormat();
-        return self._doMad(fmt,payload,path,attributeModifier,method);
+        return self._doMAD(fmt,payload,path,attributeModifier,method);
 
     def SubnGet(self,payload,path,attributeModifier=0):
         return self._subnDo(payload,path,attributeModifier,
@@ -119,10 +119,10 @@ class MADTransactor(object):
                            payload.MAD_SUBNSET);
 
     def PerformanceGet(self,payload,path,attributeModifier=0):
-        return self._doMad(PMFormat(),payload,path,attributeModifier,
+        return self._doMAD(PMFormat(),payload,path,attributeModifier,
                            payload.MAD_PERFORMANCEGET);
     def PerformanceSet(self,payload,path,attributeModifier=0):
-        return self._doMad(PMFormat(),payload,path,attributeModifier,
+        return self._doMAD(PMFormat(),payload,path,attributeModifier,
                            payload.MAD_PERFORMANCEGET);
 
     # TODO ['BMGet', 'BMSet', 'CommMgtGet', 'CommMgtSend', 'CommMgtSet',

@@ -151,7 +151,7 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
                 del self._keys[rmatch];
                 self._timeouts.remove(res);
                 try:
-                    payload = self._completeMad(ret,*res[2]);
+                    payload = self._completeMAD(ret,*res[2]);
                 except:
                     res[1]._exc = sys.exc_info();
                     payload = True;
@@ -164,7 +164,7 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
             # Pass the timeout back into MADTransactor and capture the
             # result
             try:
-                self._completeMad(None,*res[2]);
+                self._completeMAD(None,*res[2]);
             except:
                 res[1]._exc = sys.exc_info();
                 self._step(res[1],True);
@@ -182,8 +182,8 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
 
     # Implement the MADTransactor interface. This is the asynchronous use model,
     # where the RPC functions return the work to do, not the result.
-    def _doMad(self,fmt,payload,path,attributeModifier,method,completer=None):
-        self._prepareMad(fmt,payload,attributeModifier,method);
+    def _doMAD(self,fmt,payload,path,attributeModifier,method,completer=None):
+        self._prepareMAD(fmt,payload,attributeModifier,method);
         newer = payload if isinstance(payload,type) else payload.__class__;
         return (fmt,path,newer,completer);
 

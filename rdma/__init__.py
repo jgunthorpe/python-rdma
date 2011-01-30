@@ -48,7 +48,7 @@ def get_rdma_devices(refresh = False):
 def get_umad(port,**kwargs):
     '''Create a umad instance for the associated EndPort'''
     import rdma.umad;
-    return rdma.umad.UMad(port,**kwargs);
+    return rdma.umad.UMAD(port,**kwargs);
 
 def get_verbs(port,**kwargs):
     '''Create a UVerbs instance for the associated Device/EndPort'''

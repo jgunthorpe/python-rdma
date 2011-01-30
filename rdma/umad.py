@@ -39,7 +39,7 @@ class LazyIBPath(rdma.path.IBPath):
          self.SGID,
          flow_label,
          self.pkey_index) = \
-         UMad.ib_mad_addr_t.unpack(self._cache_umad_ah);
+         UMAD.ib_mad_addr_t.unpack(self._cache_umad_ah);
         self.sqpn = cpu_to_be32(sqpn);
         # FIXME: dqpn can be derived from agent_id
         self.qkey = cpu_to_be32(qkey);
@@ -50,7 +50,7 @@ class LazyIBPath(rdma.path.IBPath):
             self.DGID = self.end_port.gids[DGID_index];
             self.flow_label = cpu_to_be32(flow_label);
 
-class UMad(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
+class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
     '''Handle to a umad kernel interface. This supports the context manager protocol.'''
     IB_IOCTL_MAGIC = 0x1b
     IB_USER_MAD_REGISTER_AGENT = rdma.tools._IOC(3,IB_IOCTL_MAGIC,1,28);
