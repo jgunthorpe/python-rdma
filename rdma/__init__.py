@@ -3,7 +3,30 @@
 import os;
 
 class RDMAError(Exception):
-    '''General exception class for RDMA related errors'''
+    '''General exception class for RDMA related errors.'''
+
+class MADError(RDMAError):
+    """Thrown when a MAD transaction returns with an error."""
+    def __init__(self,req,rep,**kwargs):
+        self.req = req;
+        self.rep = rep;
+        for k,v in kwargs.iteritems():
+            self.__setattr__(k,v);
+
+    def __str__(self):
+        if "exc_info" in self.__dict__:
+            return repr(self.exc_info);
+        # FIXME: Decode what it was we asked for...
+        import rdma.IBA;
+        return "MAD error reply status 0x%x - %s"%(self.status,
+                                                   rdma.IBA.mad_status_to_str(self.status));
+
+class MADTimeoutError(MADError):
+    '''Exception thrown when a MAD RPC times out.'''
+    def __str__(self):
+        if "exc_info" in self.__dict__:
+            return repr(self.exc_info);
+        return "MAD timed out";
 
 _cached_devices = None;
 def get_rdma_devices(refresh = False):

@@ -28,9 +28,12 @@ class umad_self_test(unittest.TestCase):
         for I in range(1,ports):
             inf = self.umad.SubnGet(IBA.SMPPortInfo,self.local_path,I);
 
-        self.assertRaises(rdma.madtransactor.MADError,
+        self.assertRaises(rdma.MADError,
                           self.umad.SubnGet,IBA.SMPPortInfo,
                           self.local_path,ports+1);
+
+    def test_timeout(self):
+        self.assertEqual(self.umad.recvfrom(100),None);
 
 if __name__ == '__main__':
     unittest.main()

@@ -135,6 +135,10 @@ class EndPort(SysFSCache):
     @property
     def sm_sl(self): return self._cached_sysfs("sm_sl",int);
 
+    # FIXME This must come from verbs :(
+    @property
+    def subnet_timeout(self): return 18;
+
     def pkey_index(self,pkey):
         # FIXME: We don't really need to read all the pkey entries to do
         # this, searching the directory

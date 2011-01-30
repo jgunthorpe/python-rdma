@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import collections,inspect,sys
+import collections,inspect,sys,bisect
 import rdma,rdma.madtransactor;
 
 class Context(object):
@@ -29,27 +29,30 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
 
     max_outstanding = 4;
     """Maximum number of outstanding MADs at any time."""
-    max_queue = 16;
-    """Maximum size of our internal context queue."""
 
     def __init__(self,umad):
         rdma.madtransactor.MADTransactor.__init__(self);
         self._umad = umad;
         self._keys = {};
+        self._timeouts = []
         self._mqueue = collections.deque();
         self.max_outstanding = 4;
         self._replyqueue = collections.deque();
 
     def _sendMAD(self,ctx,mad):
         buf = mad[0]._buf;
-        rmatch = self._getReplyMatchKey(buf);
 
         rep = self._umad._execute(buf,mad[1],sendOnly=True);
         if rep:
             self._replyqueue.append(rep);
 
+        itm = [mad[1].mad_timeout + rdma.tools.clock_monotonic(),
+               ctx,mad,mad[1].retries];
+        bisect.insort(self._timeouts,itm);
+
+        rmatch = self._getReplyMatchKey(buf);
         assert(rmatch not in self._keys);
-        self._keys[rmatch] = (ctx,mad);
+        self._keys[rmatch] = itm;
 
     def _step(self,ctx,result):
         """Advance a context to its next yield statement. If result == None
@@ -76,8 +79,9 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
                 # Flow exceptions up the stack of generators
                 if ctx._opstack:
                     ctx._op = ctx._opstack.pop();
-                    ctx.exc = sys.exc_info();
+                    ctx._exc = sys.exc_info();
                     result = True;
+                    continue;
                 else:
                     raise;
 
@@ -125,21 +129,56 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
 
             # Wait for a MAD
             if self._replyqueue:
-                rbuf,rpath = self._replyqueue.pop();
+                ret = self._replyqueue.pop();
             else:
-                rbuf,rpath = self._umad.recvfrom();
+                ret = self._umad.recvfrom(self._timeouts[0][0]);
+                if ret == None:
+                    # Purge timed out values
+                    now = rdma.tools.clock_monotonic();
+
+                    # During timeout processing we might cause new MAD
+                    # sends so we have to iterate here carefully.
+                    while self._timeouts:
+                        k = self._timeouts[0];
+                        if k[0] <= now:
+                            del self._timeouts[0];
+                        self._do_timeout(k);
 
             # Dispatch the MAD
-            rmatch = self._getMatchKey(rbuf);
+            rmatch = self._getMatchKey(ret[0]);
             res = self._keys.get(rmatch);
             if res:
                 del self._keys[rmatch];
+                self._timeouts.remove(res);
                 try:
-                    payload = self._completeMad(rbuf,*res[1]);
+                    payload = self._completeMad(ret,*res[2]);
                 except:
-                    res[0]._exc = sys.exc_info();
+                    res[1]._exc = sys.exc_info();
                     payload = True;
-                self._step(res[0],payload);
+                self._step(res[1],payload);
+
+    def _do_timeout(self,res):
+        """The timeout list entry res has timed out - either error it
+        or issue a retry"""
+        if res[3] == 0:
+            # Pass the timeout back into MADTransactor and capture the
+            # result
+            try:
+                self._completeMad(None,*res[2]);
+            except:
+                res[1]._exc = sys.exc_info();
+                self._step(res[1],True);
+            else:
+                assert(False);
+        res[3] = res[3] - 1;
+
+        # Resend
+        mad = res[2];
+        rep = self._umad._execute(mad[0]._buf,mad[1],sendOnly=True);
+        if rep:
+            self._replyqueue.append(rep);
+        res[0] = mad[1].mad_timeout + rdma.tools.clock_monotonic();
+        bisect.insort(self._timeouts,res);
 
     # Implement the MADTransactor interface. This is the asynchronous use model,
     # where the RPC functions return the work to do, not the result.

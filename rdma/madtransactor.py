@@ -2,21 +2,6 @@
 import rdma,rdma.path,sys;
 import rdma.IBA as IBA;
 
-class MADError(rdma.RDMAError):
-    """Thrown when a MAD transaction returns with an error."""
-    def __init__(self,req,rep,**kwargs):
-        self.req = req;
-        self.rep = rep;
-        for k,v in kwargs.iteritems():
-            self.__setattr__(k,v);
-
-    def __str__(self):
-        if "exc_info" in self.__dict__:
-            return repr(self.exc_info);
-        # FIXME: Decode what it was we asked for...
-        return "MAD error reply status 0x%x - %s"%(self.status,
-                                                   IBA.mad_status_to_str(self.status));
-
 class MADTransactor(object):
     """This class is a mixin for everything that implements a MAD transaction
     interface. Derived classes must provide the execute_transaction
@@ -79,23 +64,27 @@ class MADTransactor(object):
         fmt._buf = bytearray(fmt.MAD_LENGTH);
         fmt.pack_into(fmt._buf);
 
-    def _completeMad(self,rbuf,fmt,path,newer,completer):
+    def _completeMad(self,ret,fmt,path,newer,completer):
+        if ret == None:
+            raise rdma.MADTimeoutError(fmt,path);
+        rbuf,self.reply_path = ret;
+
         # The try wrappers the unpack incase the MAD is busted somehow.
         try:
             if len(rbuf) != fmt.MAD_LENGTH:
-                raise MADError(fmt,rbuf,path=path,status=MAD_XSTATUS_INVALID_REPLY_SIZE);
+                raise rdma.MADError(fmt,rbuf,path=path,status=MAD_XSTATUS_INVALID_REPLY_SIZE);
             self.reply_fmt = fmt.__class__(bytes(rbuf));
 
             # FIXME: Handle BUSY
             # FIXME: Handle redirect
             if self.reply_fmt.MADHeader.status & 0x1F != 0:
-                raise MADError(fmt,rbuf,path=path,
-                               status=self.reply_fmt.MADHeader.status);
+                raise rdma.MADError(fmt,rbuf,path=path,
+                                    status=self.reply_fmt.MADHeader.status);
             rpayload = newer(self.reply_fmt.data);
-        except MADError:
+        except rdma.MADError:
             raise
         except:
-            raise MADError(fmt,rbuf,path=path,exc_info=sys.exc_info());
+            raise rmda.MADError(fmt,rbuf,path=path,exc_info=sys.exc_info());
 
         if completer:
             return completer(rpayload);
@@ -107,9 +96,9 @@ class MADTransactor(object):
         post-processing work to do then a completer function must be specified
         to do it."""
         self._prepareMad(fmt,payload,attributeModifier,method);
-        rbuf,self.reply_path = self._execute(fmt._buf,path);
+        ret = self._execute(fmt._buf,path);
         newer = payload if isinstance(payload,type) else payload.__class__;
-        return self._completeMad(rbuf,fmt,path,newer,completer);
+        return self._completeMad(ret,fmt,path,newer,completer);
 
     def _subnDo(self,payload,path,attributeModifier,method):
         if isinstance(path,rdma.path.IBDRPath):
@@ -117,7 +106,7 @@ class MADTransactor(object):
             fmt.drSLID = path.drSLID;
             fmt.drDLID = path.drDLID;
             fmt.initialPath[:len(path.drPath)] = path.drPath;
-            fmt.MADHeader.hopCount = len(path.drPath);
+            fmt.MADHeader.hopCount = len(path.drPath)-1;
         else:
             fmt = IBA.SMPFormat();
         return self._doMad(fmt,payload,path,attributeModifier,method);

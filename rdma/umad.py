@@ -3,7 +3,7 @@ from __future__ import with_statement;
 
 import rdma,rdma.tools,rdma.path,rdma.madtransactor;
 import rdma.IBA as IBA;
-import fcntl,struct,copy,errno;
+import fcntl,struct,copy,errno,os,select;
 from socket import htonl as cpu_to_be32;
 from socket import htons as cpu_to_be16;
 
@@ -103,6 +103,11 @@ class UMad(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
 
         self.sbuf = bytearray(320);
 
+        fcntl.fcntl(self.dev.fileno(),fcntl.F_SETFL,
+                    fcntl.fcntl(self.dev.fileno(), fcntl.F_GETFL) | os.O_NONBLOCK);
+        self._poll = select.poll();
+        self._poll.register(self.dev.fileno(),select.POLLIN);
+
     def _ioctl_enable_pkey(self):
         return fcntl.ioctl(self.dev.fileno(),self.IB_USER_MAD_ENABLE_PKEY) == 0;
     def _ioctl_unregister_agent(self,agent_id):
@@ -162,9 +167,19 @@ class UMad(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
         path._cache_umad_ah = res;
         return res;
 
-    # The kernel API is lame, don't use the timers. Send all MADs with 0
-    # timeout and rely on our own code to match things up. It isn't clear that
-    # agent_id is actually useful except to pick QP1 or QP0.
+    # The kernel API is lame, you'd think setting a 0 timeout would be fine to
+    # disable the state tracking, but it insists on tracking TIDs so that
+    # doesn't work. Bascially this sucks. Using the kernel timers doesn't fit
+    # well for us. There is no way to cancel MADs once submitted, basically it
+    # is a huge pain. Plus this API ensures that userspace can OOM the
+    # kernel. Weee. Bad Design. Let me send packets. Enforce some TID bits
+    # outgoing and route matching TID bits on reply and leave the rest to me.
+
+    # FIXME: This is really roughly connected to our timers - the idea
+    # is to keep the kernel listening up until before our timer expires then
+    # have the kerne let go so our retry isn't blocked. This leaves a small
+    # window where packets are ignored, I suppose I should fixup the callers
+    # to allow delegated timeout processing, but grrr......
     def sendto(self,buf,path):
         '''Send a MAD packet'''
         try:
@@ -173,31 +188,43 @@ class UMad(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
             addr = self._cache_make_ah(path);
 
         self.ib_user_mad_t.pack_into(self.sbuf,0,
-                                     path.umad_agent_id,0,0,0,len(buf),
+                                     path.umad_agent_id,0,
+                                     max(500,path.mad_timeout*1000-500),0,
+                                     len(buf),
                                      addr);
         del self.sbuf[64:];
         self.sbuf.extend(buf);
         self.dev.write(self.sbuf);
 
-    def recvfrom(self):
-        '''Recv a MAD packet into buf. Returns (buf,path).'''
+    def recvfrom(self,wakeat):
+        '''Recv a MAD packet. Returns (buf,path). wakeat is the
+        CLOCK_MONOTONIC time to return after.'''
         buf = bytearray(320);
-        rc = self.dev.readinto(buf);
+        while True:
+            timeout = wakeat - rdma.tools.clock_monotonic();
+            rc = self.dev.readinto(buf);
+            if rc == None:
+                if timeout <= 0 or not self._poll.poll(timeout*1000):
+                    return None;
+                rc = self.dev.readinto(buf);
+                if rc == None:
+                    raise IOError(errno.EAGAIN,"Invalid read after poll");
 
-        path = rdma.path.IBPath(self.parent);
-        (path.umad_agent_id,status,timeout_ms,retries,length,
-         path._cache_umad_ah) = self.ib_user_mad_t.unpack_from(bytes(buf),0);
-        path.__class__ = LazyIBPath;
+            path = rdma.path.IBPath(self.parent);
+            (path.umad_agent_id,status,timeout_ms,retries,length,
+             path._cache_umad_ah) = self.ib_user_mad_t.unpack_from(bytes(buf),0);
+            path.__class__ = LazyIBPath;
 
-        if status != 0:
-            # With a 0 timeout this should never happen.
-            raise RDMAError("umad send failure code=%d for %s"%(status,repr(buf)));
-        return (buf[64:],path);
+            if status != 0:
+                if status == errno.ETIMEDOUT:
+                    continue;
+                raise rdma.RDMAError("umad send failure code=%d for %s"%(status,repr(buf)));
+            return (buf[64:],path);
 
     def _gen_error(self,buf,path):
-        """Sadly the kernel can return EIO if it could not process the MAD,
+        """Sadly the kernel can return EINVAL if it could not process the MAD,
         eg if you ask for PortInfo of the local CA with an invalid attributeID
-        the Mellanox driver will return EIO rather than construct an error
+        the Mellanox driver will return EINVAL rather than construct an error
         MAD. I consider this to be a bug in the kernel, but we fix it here
         by constructing an error MAD."""
         buf[3] = buf[3] | IBA.MAD_METHOD_RESPONSE;
@@ -221,12 +248,21 @@ class UMad(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
         if sendOnly:
             return None;
 
-        # FIXME: Timeout/resend
         rmatch = self._getReplyMatchKey(buf);
+        expire = path.mad_timeout + rdma.tools.clock_monotonic();
+        retries = path.retries;
         while True:
-            rbuf,rpath = self.recvfrom();
-            if rmatch == self._getMatchKey(rbuf):
-                return (rbuf,rpath);
+            ret = self.recvfrom(expire);
+            if ret == None:
+                if retries == 0:
+                    return None;
+                retries = retries - 1;
+                self._execute(buf,path,True);
+
+                expire = path.mad_timeout + rdma.tools.clock_monotonic();
+                continue;
+            elif rmatch == self._getMatchKey(ret[0]):
+                return ret;
 
     def __repr__(self):
         return "<%s.%s object for %s at 0x%x>"%\

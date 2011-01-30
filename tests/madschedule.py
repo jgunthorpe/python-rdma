@@ -15,8 +15,9 @@ class madschedule_test(unittest.TestCase):
             self.end_port = rdma.get_rdma_devices().first().end_ports.first();
             self.umad = rdma.get_umad(self.end_port);
             self.qp0 = self.umad.register_client(IBA.MAD_SUBNET,1);
+            self.qp0dr = self.umad.register_client(IBA.MAD_SUBNET_DIRECTED,1);
             self.local_path = rdma.path.IBDRPath(self.end_port,
-                                                 umad_agent_id = self.qp0);
+                                                 umad_agent_id = self.qp0dr);
 
     @contextmanager
     def with_assertRaises(self,excClass):
@@ -53,21 +54,24 @@ class madschedule_test(unittest.TestCase):
         """Check that exceptions flow from the MAD decoder."""
         def first(self,sched):
             inf = yield sched.SubnGet(IBA.SMPNodeInfo,self.local_path);
-            with self.with_assertRaises(rdma.madtransactor.MADError):
+            with self.with_assertRaises(rdma.MADError):
                 yield sched.SubnGet(IBA.SMPPortInfo,
                                     self.local_path,inf.numPorts+1);
 
         sched = rdma.sched.MADSchedule(self.umad);
         sched.run(first(self,sched));
 
-    def get_port_info(self,sched,path,port):
+    def get_port_info(self,sched,path,port,follow):
+        print "Get port_info %u follow=%r"%(port,follow)
         pinf = yield sched.SubnGet(IBA.SMPPortInfo,path,port);
         print "Done port",port;
         #pinf.printer(sys.stdout);
 
-        if pinf.portState != IBA.PORT_STATE_DOWN:
+        if follow and pinf.portState != IBA.PORT_STATE_DOWN:
             npath = rdma.path.IBDRPath(self.end_port);
-            npath.drPath = path.drPath + bytes(port);
+            npath.umad_agent_id = path.umad_agent_id;
+            npath.drPath = path.drPath + chr(port);
+            print "Probe port",port,repr(npath.drPath)
             yield self.get_node_info(sched,npath);
 
     def get_node_info(self,sched,path):
@@ -76,15 +80,23 @@ class madschedule_test(unittest.TestCase):
             return;
         self.guids.add(ninf.nodeGUID);
 
-        print repr(ninf.nodeGUID);
-        sched.mqueue(self.get_port_info(sched,path,I) \
-                     for I in range(1,ninf.numPorts+1));
-
+        print "Got Node GUID 0x%x"%(ninf.nodeGUID);
         if ninf.nodeType == IBA.NODE_SWITCH:
+            sched.mqueue(self.get_port_info(sched,path,I,True) \
+                         for I in range(1,ninf.numPorts+1));
             pinf = yield sched.SubnGet(IBA.SMPPortInfo,path,0);
+        else:
+            yield self.get_port_info(sched,path,ninf.localPortNum,
+                                     len(path.drPath) == 1);
 
     def test_sched(self):
         """Do a simple directed route discovery of the subnet"""
         self.guids = set();
         sched = rdma.sched.MADSchedule(self.umad)
-        sched.run(self.get_node_info(sched,self.local_path));
+        try:
+            sched.run(self.get_node_info(sched,self.local_path));
+        except rdma.MADError as err:
+            print err
+            err.req._buf = bytes(err.req._buf);
+            err.req.printer(sys.stdout);
+            raise;
