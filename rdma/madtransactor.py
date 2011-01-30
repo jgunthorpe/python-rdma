@@ -65,7 +65,7 @@ class MADTransactor(object):
         fmt.pack_into(fmt._buf);
 
     def _completeMad(self,ret,fmt,path,newer,completer):
-        if ret == None:
+        if ret is None:
             raise rdma.MADTimeoutError(fmt,path);
         rbuf,self.reply_path = ret;
 

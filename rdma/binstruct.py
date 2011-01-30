@@ -27,7 +27,7 @@ class BinStruct(object):
             print >> F, "%s"%(self.__class__.__name__);
 
     def dump(self,F,startBits,endBits,label,offset=0):
-        if self._buf == None:
+        if self._buf is None:
             self._buf = bytearray(256);
             self.pack_into(self._buf);
             self._buf = bytes(self._buf);

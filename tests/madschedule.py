@@ -11,7 +11,7 @@ class madschedule_test(unittest.TestCase):
     tid = 0;
 
     def setUp(self):
-        if self.umad == None:
+        if self.umad is None:
             self.end_port = rdma.get_rdma_devices().first().end_ports.first();
             self.umad = rdma.get_umad(self.end_port);
             self.qp0 = self.umad.register_client(IBA.MAD_SUBNET,1);

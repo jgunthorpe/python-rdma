@@ -203,11 +203,11 @@ class UMad(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
         while True:
             timeout = wakeat - rdma.tools.clock_monotonic();
             rc = self.dev.readinto(buf);
-            if rc == None:
+            if rc is None:
                 if timeout <= 0 or not self._poll.poll(timeout*1000):
                     return None;
                 rc = self.dev.readinto(buf);
-                if rc == None:
+                if rc is None:
                     raise IOError(errno.EAGAIN,"Invalid read after poll");
 
             path = rdma.path.IBPath(self.parent);
@@ -253,7 +253,7 @@ class UMad(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
         retries = path.retries;
         while True:
             ret = self.recvfrom(expire);
-            if ret == None:
+            if ret is None:
                 if retries == 0:
                     return None;
                 retries = retries - 1;

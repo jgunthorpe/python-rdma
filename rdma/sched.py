@@ -55,16 +55,16 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
         self._keys[rmatch] = itm;
 
     def _step(self,ctx,result):
-        """Advance a context to its next yield statement. If result == None
+        """Advance a context to its next yield statement. If result is None
         then this ctx is brand new. If ctx is not exhausted then it is put
         onto _mqueue for later"""
-        while result == None or len(self._keys) <= self.max_outstanding:
+        while result is None or len(self._keys) <= self.max_outstanding:
             try:
                 exc = ctx._exc
                 if exc != None:
                     ctx._exc = None;
                     work = ctx._op.throw(*exc);
-                elif result == None:
+                elif result is None:
                     work = ctx._op.next();
                 else:
                     work = ctx._op.send(result);
@@ -132,7 +132,7 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
                 ret = self._replyqueue.pop();
             else:
                 ret = self._umad.recvfrom(self._timeouts[0][0]);
-                if ret == None:
+                if ret is None:
                     # Purge timed out values
                     now = rdma.tools.clock_monotonic();
 

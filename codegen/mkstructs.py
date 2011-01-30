@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# ./mkstructs.py -x iba_transport.xml -x iba_12.xml -x iba_13_4.xml -x iba_13_6.xml -x iba_14.xml -x iba_15.xml -x iba_16_1.xml -x iba_16_3.xml -x iba_16_4.xml  -o ../rdma/IBA_struct.py -t ../test/iba_struct.py
+# ./mkstructs.py -x iba_transport.xml -x iba_12.xml -x iba_13_4.xml -x iba_13_6.xml -x iba_14.xml -x iba_15.xml -x iba_16_1.xml -x iba_16_3.xml -x iba_16_4.xml  -o ../rdma/IBA_struct.py -t ../tests/iba_struct.py
 '''This script converts the XML descriptions of IB structures into python
    classes and associated codegen'''
 from __future__ import with_statement;
@@ -99,7 +99,7 @@ class Struct(object):
         self.packCount = 0;
         self.reserved = 0;
         def toReserved(s):
-            if s == None:
+            if s is None:
                 self.reserved = self.reserved + 1;
                 return "reserved%u"%(self.reserved);
             return s;
@@ -164,7 +164,7 @@ class Struct(object):
         if mbt.type == "HdrIPv6Addr":
             return ("[:16]",name,bits);
         if mbt.count == 1:
-            if mbt.type == None and bits > 64:
+            if mbt.type is None and bits > 64:
                 return ("[:%u]"%(bits/8),name,bits);
             return (self.bitsToFormat(bits),name,bits);
         if mbt.bits == 8:
@@ -223,7 +223,7 @@ class Struct(object):
         sfmtsOff = [];
         fmtsOff = 0;
         for I in fmts:
-            if I[0] == None:
+            if I[0] is None:
                 pack.append("    %s;"%(I[1][0]));
                 unpack.append("    %s;"%(I[1][1]));
                 off = off + I[2];

@@ -67,7 +67,7 @@ class DemandList(collections.Iterable):
 
     def __getitem__(self,idx):
         ret = self._data[idx];
-        if ret == None:
+        if ret is None:
             with open(self._path + "%s"%(idx)) as F:
                 ret = self._conv(F.read());
                 self._data[idx] = ret;
@@ -92,7 +92,7 @@ class DemandList2(DemandList):
     content."""
     def __getitem__(self,idx):
         ret = self._data[idx];
-        if ret == None:
+        if ret is None:
             ret = self._conv(idx);
             self._data[idx] = ret;
         return ret;
