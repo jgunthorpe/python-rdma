@@ -26,12 +26,12 @@ class MADTransactor(object):
         into buf. Return path of the reply"""
         raise AttributeError(); # ABC
 
-    def _getNewTID(self):
+    def _get_new_TID(self):
         self._tid = (self._tid + 1) % (1 << 32);
         return self._tid;
 
     @staticmethod
-    def _getMatchKey(buf):
+    def _get_match_key(buf):
         """Return a tuple that represents the 'key' for MAD buf.
         If two keys match then they are the same transaction."""
         # baseVersion,mgmtClass,classVersion method transactionID[31:0],attributeID
@@ -40,11 +40,11 @@ class MADTransactor(object):
         return (buf[0:2],ord(buf[3]),buf[12:18]);
 
     @staticmethod
-    def _getReplyMatchKey(buf):
+    def _get_reply_match_key(buf):
         """Return a tuple that represents the 'key' for response to MAD buf.
         If two keys match then they are the same transaction."""
         # baseVersion,mgmtClass,classVersion method transactionID[31:0],attributeID
-        x = MADTransactor._getMatchKey(buf)
+        x = MADTransactor._get_match_key(buf)
         return (x[0],x[1] | IBA.MAD_METHOD_RESPONSE,x[2]);
 
     def _prepareMAD(self,fmt,payload,attributeModifier,method):
@@ -52,7 +52,7 @@ class MADTransactor(object):
         fmt.MADHeader.mgmtClass = fmt.MAD_CLASS;
         fmt.MADHeader.classVersion = fmt.MAD_CLASS_VERSION;
         fmt.MADHeader.method = method;
-        fmt.MADHeader.transactionID = self._getNewTID();
+        fmt.MADHeader.transactionID = self._get_new_TID();
         fmt.MADHeader.attributeID = payload.MAD_ATTRIBUTE_ID;
         fmt.MADHeader.attributeModifier = attributeModifier;
 
@@ -100,7 +100,7 @@ class MADTransactor(object):
         newer = payload if isinstance(payload,type) else payload.__class__;
         return self._completeMAD(ret,fmt,path,newer,completer);
 
-    def _subnDo(self,payload,path,attributeModifier,method):
+    def _subn_do(self,payload,path,attributeModifier,method):
         if isinstance(path,rdma.path.IBDRPath):
             fmt = IBA.SMPFormatDirected();
             fmt.drSLID = path.drSLID;
@@ -112,10 +112,10 @@ class MADTransactor(object):
         return self._doMAD(fmt,payload,path,attributeModifier,method);
 
     def SubnGet(self,payload,path,attributeModifier=0):
-        return self._subnDo(payload,path,attributeModifier,
+        return self._subn_do(payload,path,attributeModifier,
                            payload.MAD_SUBNGET);
     def SubnSet(self,payload,path,attributeModifier=0):
-        return self._subnDo(payload,path,attributeModifier,
+        return self._subn_do(payload,path,attributeModifier,
                            payload.MAD_SUBNSET);
 
     def PerformanceGet(self,payload,path,attributeModifier=0):

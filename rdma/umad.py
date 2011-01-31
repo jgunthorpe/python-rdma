@@ -248,7 +248,7 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
         if sendOnly:
             return None;
 
-        rmatch = self._getReplyMatchKey(buf);
+        rmatch = self._get_reply_match_key(buf);
         expire = path.mad_timeout + rdma.tools.clock_monotonic();
         retries = path.retries;
         while True:
@@ -261,7 +261,7 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
 
                 expire = path.mad_timeout + rdma.tools.clock_monotonic();
                 continue;
-            elif rmatch == self._getMatchKey(ret[0]):
+            elif rmatch == self._get_match_key(ret[0]):
                 return ret;
 
     def __repr__(self):

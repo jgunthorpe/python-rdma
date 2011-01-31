@@ -2246,11 +2246,11 @@ class SMPSLToVLMappingTable(rdma.binstruct.BinStruct):
         self.SLtoVL = bytearray(16);
 
     def pack_into(self,buffer,offset=0):
-        rdma.binstruct.packArray8(buffer,0,4,16,self.SLtoVL);
+        rdma.binstruct.pack_array8(buffer,0,4,16,self.SLtoVL);
 
     def unpack_from(self,buffer,offset=0):
         self._buf = buffer[offset:];
-        rdma.binstruct.unpackArray8(buffer,0,4,16,self.SLtoVL);
+        rdma.binstruct.unpack_array8(buffer,0,4,16,self.SLtoVL);
 
     def printer(self,F,offset=0,*args):
         rdma.binstruct.BinStruct.printer(self,F,offset,*args);
@@ -3007,7 +3007,7 @@ class SAServiceRecord(rdma.binstruct.BinStruct):
         buffer[offset + 32:offset + 48] = self.serviceKey
         buffer[offset + 48:offset + 112] = self.serviceName
         buffer[offset + 112:offset + 128] = self.serviceData8
-        rdma.binstruct.packArray8(buffer,1280,64,2,self.serviceData64);
+        rdma.binstruct.pack_array8(buffer,1280,64,2,self.serviceData64);
         struct.pack_into('>Q',buffer,offset+0,self.serviceID);
         struct.pack_into('>HHL',buffer,offset+24,self.servicePKey,self.reserved1,self.serviceLease);
         struct.pack_into('>HHHHHHHHLLLL',buffer,offset+128,self.serviceData16[0],self.serviceData16[1],self.serviceData16[2],self.serviceData16[3],self.serviceData16[4],self.serviceData16[5],self.serviceData16[6],self.serviceData16[7],self.serviceData32[0],self.serviceData32[1],self.serviceData32[2],self.serviceData32[3]);
@@ -3018,7 +3018,7 @@ class SAServiceRecord(rdma.binstruct.BinStruct):
         self.serviceKey = buffer[offset + 32:offset + 48]
         self.serviceName = buffer[offset + 48:offset + 112]
         self.serviceData8 = buffer[offset + 112:offset + 128]
-        rdma.binstruct.unpackArray8(buffer,1280,64,2,self.serviceData64);
+        rdma.binstruct.unpack_array8(buffer,1280,64,2,self.serviceData64);
         (self.serviceID,) = struct.unpack_from('>Q',buffer,offset+0);
         (self.servicePKey,self.reserved1,self.serviceLease,) = struct.unpack_from('>HHL',buffer,offset+24);
         (self.serviceData16[0],self.serviceData16[1],self.serviceData16[2],self.serviceData16[3],self.serviceData16[4],self.serviceData16[5],self.serviceData16[6],self.serviceData16[7],self.serviceData32[0],self.serviceData32[1],self.serviceData32[2],self.serviceData32[3],) = struct.unpack_from('>HHHHHHHHLLLL',buffer,offset+128);
@@ -3990,12 +3990,12 @@ class PMPortVLXmitFlowCtlUpdateErrors(rdma.binstruct.BinStruct):
         self.portVLXmitFlowCtlUpdateErrors = bytearray(16);
 
     def pack_into(self,buffer,offset=0):
-        rdma.binstruct.packArray8(buffer,32,2,16,self.portVLXmitFlowCtlUpdateErrors);
+        rdma.binstruct.pack_array8(buffer,32,2,16,self.portVLXmitFlowCtlUpdateErrors);
         struct.pack_into('>BBH',buffer,offset+0,self.reserved1,self.portSelect,self.counterSelect);
 
     def unpack_from(self,buffer,offset=0):
         self._buf = buffer[offset:];
-        rdma.binstruct.unpackArray8(buffer,32,2,16,self.portVLXmitFlowCtlUpdateErrors);
+        rdma.binstruct.unpack_array8(buffer,32,2,16,self.portVLXmitFlowCtlUpdateErrors);
         (self.reserved1,self.portSelect,self.counterSelect,) = struct.unpack_from('>BBH',buffer,offset+0);
 
     def printer(self,F,offset=0,*args):
@@ -4094,12 +4094,12 @@ class PMPortSamplesResExt(rdma.binstruct.BinStruct):
         self.reserved2 = (value >> 0) & 0x3FFFFFFF;
 
     def pack_into(self,buffer,offset=0):
-        rdma.binstruct.packArray8(buffer,64,64,15,self.counter);
+        rdma.binstruct.pack_array8(buffer,64,64,15,self.counter);
         struct.pack_into('>LL',buffer,offset+0,self._pack_0_32,self._pack_1_32);
 
     def unpack_from(self,buffer,offset=0):
         self._buf = buffer[offset:];
-        rdma.binstruct.unpackArray8(buffer,64,64,15,self.counter);
+        rdma.binstruct.unpack_array8(buffer,64,64,15,self.counter);
         (self._pack_0_32,self._pack_1_32,) = struct.unpack_from('>LL',buffer,offset+0);
 
     def printer(self,F,offset=0,*args):

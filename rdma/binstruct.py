@@ -2,10 +2,10 @@
 import rdma;
 
 # FIXME
-def packArray8(buffer,offset,mlen,count,inp):
+def pack_array8(buffer,offset,mlen,count,inp):
     return
     raise rdma.RDMAError("Not implemented");
-def unpackArray8(buffer,offset,mlen,count,inp):
+def unpack_array8(buffer,offset,mlen,count,inp):
     return
     raise rdma.RDMAError("Not implemented");
 

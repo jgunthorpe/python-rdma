@@ -50,7 +50,7 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
                ctx,mad,mad[1].retries];
         bisect.insort(self._timeouts,itm);
 
-        rmatch = self._getReplyMatchKey(buf);
+        rmatch = self._get_reply_match_key(buf);
         assert(rmatch not in self._keys);
         self._keys[rmatch] = itm;
 
@@ -145,7 +145,7 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
                         self._do_timeout(k);
 
             # Dispatch the MAD
-            rmatch = self._getMatchKey(ret[0]);
+            rmatch = self._get_match_key(ret[0]);
             res = self._keys.get(rmatch);
             if res:
                 del self._keys[rmatch];
@@ -187,5 +187,5 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
         newer = payload if isinstance(payload,type) else payload.__class__;
         return (fmt,path,newer,completer);
 
-    def _getNewTID(self):
-        return self._umad._getNewTID();
+    def _get_new_TID(self):
+        return self._umad._get_new_TID();
