@@ -2,8 +2,7 @@
 '''This module provides a list of IB devices scrapped from sysfs'''
 from __future__ import with_statement;
 
-import rdma.IBA;
-import os,stat,socket,re,collections
+import os,socket,re,collections
 
 SYS_INFINIBAND = "/sys/class/infiniband/";
 
@@ -24,8 +23,8 @@ def conv_int_desc(s):
 class SysFSCache(object):
     '''Cache queries from sysfs attributes. This class is used to make
     the sysfs parsing demand load.'''
-    def __init__(self,dir):
-        self._dir = dir;
+    def __init__(self,dir_):
+        self._dir = dir_;
         self._cache = {};
 
     def _cached_sysfs(self,name,convert = None):
@@ -108,12 +107,12 @@ class EndPort(SysFSCache):
         self.pkeys = DemandList(self._dir + "pkeys/",conv_hex);
         self.gids = DemandList(self._dir + "gids/",conv_gid);
 
-    def _iterate_services_device(self,dir,matcher):
-        return self.parent._iterate_services_device(dir,matcher);
-    def _iterate_services_end_port(self,dir,matcher):
+    def _iterate_services_device(self,dir_,matcher):
+        return self.parent._iterate_services_device(dir_,matcher);
+    def _iterate_services_end_port(self,dir_,matcher):
         '''Iterate over all sysfs files that are associated with the
         device and with this end port.'''
-        for I in self.parent._iterate_services_device(dir,matcher):
+        for I in self.parent._iterate_services_device(dir_,matcher):
             try:
                 with open(I + "/port") as F:
                     if int(F.read()) != self.port_id:
@@ -163,21 +162,21 @@ class RDMADevice(SysFSCache):
                                      lambda x:EndPort(self,x));
         self.phys_port_cnt = len(self.end_ports);
 
-    def _iterate_services_device(self,dir,matcher):
+    def _iterate_services_device(self,dir_,matcher):
         '''Iterate over all sysfs files (ie umad, cm, etc) that are associated
         with this device. Use this to find the sysfs ID of slave kernel
         interface devices.'''
         m = re.compile(matcher);
-        for I in os.listdir(dir):
+        for I in os.listdir(dir_):
             if not m.match(I):
                 continue;
             try:
-                with open("%s%s/ibdev"%(dir,I)) as F:
+                with open("%s%s/ibdev"%(dir_,I)) as F:
                     if F.read().strip() != self.name:
                         continue;
             except IOError:
                 continue;
-            yield dir + I;
+            yield dir_ + I;
 
     @property
     def node_type(self): return self._cached_sysfs("node_type",conv_int_desc);

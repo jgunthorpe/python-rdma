@@ -8,6 +8,7 @@ class RDMAError(Exception):
 class MADError(RDMAError):
     """Thrown when a MAD transaction returns with an error."""
     def __init__(self,req,rep,**kwargs):
+        RDMAError.__init__(self);
         self.req = req;
         self.rep = rep;
         for k,v in kwargs.iteritems():

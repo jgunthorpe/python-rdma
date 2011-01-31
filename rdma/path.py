@@ -1,5 +1,4 @@
 #!/usr/bin/python
-import rdma;
 import rdma.IBA as IBA;
 
 class Path(object):
@@ -116,6 +115,7 @@ class IBPath(Path):
             return self.end_port.subnet_timeout;
     @packet_life_time.setter
     def packet_life_time(self,value):
+        self._packet_life_time = value;
         return self._packet_life_time;
 
     @property

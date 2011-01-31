@@ -24,7 +24,7 @@ class MADTransactor(object):
     def _execute(self,buf,path):
         """Send the fully formed MAD in buf to path and copy the reply
         into buf. Return path of the reply"""
-        raise AttributeError(); # ABC
+        pass
 
     def _get_new_TID(self):
         self._tid = (self._tid + 1) % (1 << 32);
@@ -72,7 +72,7 @@ class MADTransactor(object):
         # The try wrappers the unpack incase the MAD is busted somehow.
         try:
             if len(rbuf) != fmt.MAD_LENGTH:
-                raise rdma.MADError(fmt,rbuf,path=path,status=MAD_XSTATUS_INVALID_REPLY_SIZE);
+                raise rdma.MADError(fmt,rbuf,path=path,status=IBA.MAD_XSTATUS_INVALID_REP_SIZE);
             self.reply_fmt = fmt.__class__(bytes(rbuf));
 
             # FIXME: Handle BUSY
@@ -84,7 +84,7 @@ class MADTransactor(object):
         except rdma.MADError:
             raise
         except:
-            raise rmda.MADError(fmt,rbuf,path=path,exc_info=sys.exc_info());
+            raise rdma.MADError(fmt,rbuf,path=path,exc_info=sys.exc_info());
 
         if completer:
             return completer(rpayload);
@@ -119,10 +119,10 @@ class MADTransactor(object):
                            payload.MAD_SUBNSET);
 
     def PerformanceGet(self,payload,path,attributeModifier=0):
-        return self._doMAD(PMFormat(),payload,path,attributeModifier,
+        return self._doMAD(IBA.PMFormat(),payload,path,attributeModifier,
                            payload.MAD_PERFORMANCEGET);
     def PerformanceSet(self,payload,path,attributeModifier=0):
-        return self._doMAD(PMFormat(),payload,path,attributeModifier,
+        return self._doMAD(IBA.PMFormat(),payload,path,attributeModifier,
                            payload.MAD_PERFORMANCEGET);
 
     # TODO ['BMGet', 'BMSet', 'CommMgtGet', 'CommMgtSend', 'CommMgtSet',

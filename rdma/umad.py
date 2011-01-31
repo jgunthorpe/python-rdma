@@ -97,9 +97,9 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
         with open(SYS_INFINIBAND_MAD + "abi_version") as F:
             self.abi_version = int(F.read().strip());
         if self.abi_version < 5:
-            raise RDMAError("UMAD ABI version is %u but we need at least 5."%(self.abi_version));
+            raise rdma.RDMAError("UMAD ABI version is %u but we need at least 5."%(self.abi_version));
         if not self._ioctl_enable_pkey():
-            raise RDMAError("UMAD ABI is not compatible, we need PKey support.");
+            raise rdma.RDMAError("UMAD ABI is not compatible, we need PKey support.");
 
         self.sbuf = bytearray(320);
 
@@ -184,7 +184,7 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
         '''Send a MAD packet'''
         try:
             addr = path._cache_umad_ah;
-        except:
+        except AttributeError:
             addr = self._cache_make_ah(path);
 
         self.ib_user_mad_t.pack_into(self.sbuf,0,

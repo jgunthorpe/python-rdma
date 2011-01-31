@@ -60,7 +60,8 @@ class SysFSDevice(object):
                     return F;
         raise rdma.RDMAError("Unable to open device node for %s"%(repr(name)));
 
-    def __enter__(self): return self;
+    def __enter__(self):
+        return self;
     def __exit__(self,*exc_info):
         return self.dev.close();
 

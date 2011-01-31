@@ -2,7 +2,6 @@
 from __future__ import with_statement;
 
 import rdma,rdma.tools;
-import os,os.path;
 
 SYS_INFINIBAND_VERBS = "/sys/class/infiniband_verbs/";
 
