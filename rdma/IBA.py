@@ -1,56 +1,71 @@
 #!/usr/bin/python
-'''Constants from the InfiniBand Architecture'''
+
+# NOTE: The docstrings for this module are specially processed in the
+# documentation take some care when editing.
 
 from rdma.IBA_struct import *;
 import socket;
 
+#: Node Type Constants
 # see NodeInfo.nodeType
 NODE_CA = 1;
 NODE_SWITCH = 2;
 NODE_ROUTER = 3;
 
+#: General Constants
 MAX_PORTS = 254; # maximum number of physical ports on a device
 INVALID_PORT = 255;
 MAX_PKEYS = 65536;
 MAX_GUIDS = 256;
 MAX_PKT_WORDS = 4222/4;
 
-MAD_BASE_VERSION = 1;
-
+#: LID Constants
 LID_RESERVED = 0; # for uninitialised ports
 LID_MULTICAST = 0xC000; # first multicast LID
 LID_PERMISSIVE = 0xFFFF;
 LID_COUNT_UNICAST = 0xC000;
 LID_COUNT_MULTICAST = 0xFFFE - 0xC000;
 
+#: Partition Key Constants
 PKEY_DEFAULT = 0xFFFF;
 PKEY_INVALID = 0;
 
+#: Well known QKEY Constants
+IB_DEFAULT_QP0_QKEY = 0
+IB_DEFAULT_QP1_QKEY = 0x80010000
+
+#: LRH LNH Header bits
 LNH_GRH = 1<<0;
 LNH_IBA = 1<<1;
 
+#: GID Constants
 GID_DEFAULT_PREFIX = 0xFE80 << 48;
 
+#: PortInfo MTU Constants
 MTU_256 = 1;
 MTU_512 = 2;
 MTU_1024 = 3;
 MTU_2048 = 4;
 MTU_4096 = 5;
 
+#: PortInfo Link Width Constants
 LINK_WIDTH_1x = 0x1;
 LINK_WIDTH_4x = 0x2;
 LINK_WIDTH_8x = 0x4;
 LINK_WIDTH_12x = 0x8;
 
+#: PortInfo Link Speed Constants
 LINK_SPEED_2Gb5 = 0x1;
 LINK_SPEED_5Gb0 = 0x2;
 LINK_SPEED_10Gb0 = 0x4;
 
+#: PortInfo Port State Constants
 PORT_STATE_DOWN = 1;
 PORT_STATE_INIT = 2;
 PORT_STATE_ARMED = 3;
 PORT_STATE_ACTIVE = 4;
 
+#: PortInfo Physical Port State Constants
 PHYS_PORT_STATE_SLEEP = 1;
 PHYS_PORT_STATE_POLLING = 2;
 PHYS_PORT_STATE_DISABLED = 3;
@@ -59,6 +74,7 @@ PHYS_PORT_STATE_LINK_UP = 5;
 PHYS_PORT_STATE_LINK_ERR_RECOVERY = 6;
 PHYS_PORT_STATE_PHY_TEST = 7;
 
+#: MAD RPC Constants
 MAD_METHOD_GET = 0x01;
 MAD_METHOD_SET = 0x02;
 MAD_METHOD_SEND = 0x03;
@@ -71,12 +87,15 @@ MAD_METHOD_GET_MULTI = 0x14;
 MAD_METHOD_DELETE = 0x15;
 MAD_METHOD_RESPONSE = 0x80;
 
+MAD_BASE_VERSION = 1;
+
 MAD_NOTICE_FATAL = 0;
 MAD_NOTICE_URGENT = 1;
 MAD_NOTICE_SECURITY = 2;
 MAD_NOTICE_SM = 3;
 MAD_NOTICE_INFO = 4;
 
+#: MAD Response Status Constants
 MAD_STATUS_BUSY = 1<<0;
 MAD_STATUS_REDIRECT = 1<<1;
 MAD_STATUS_BAD_VERSION = 1<<2;
@@ -85,10 +104,11 @@ MAD_STATUS_UNSUP_METHOD_ATTR_COMBO = 3<<2;
 MAD_STATUS_INVALID_ATTR_OR_MODIFIER = 7<<2;
 MAD_STATUS_DIRECTED_RESPONSE = 1<<15;
 
-# Used internally
+#: Internal MAD Status Constants
 MAD_XSTATUS_INVALID_REP_SIZE = 1<<16;
+
 def mad_status_to_str(status):
-    """Decode a MAD status"""
+    """Decode a MAD status into a string."""
     if status == MAD_XSTATUS_INVALID_REP_SIZE:
         return "Invalid reply size";
     res = "";
@@ -109,7 +129,7 @@ def mad_status_to_str(status):
         return res + "Invalid attr or modifier";
     return res + "??";
 
-# MAD Classes. Try not to use, the structs have these embedded
+#: MAD Class Constants
 MAD_SUBNET = 0x01;
 MAD_SUBNET_DIRECTED = 0x81;
 MAD_SUBNET_ADMIN = 0x3;
@@ -118,15 +138,12 @@ MAD_PERFORMANCE = 0x4;
 MAD_DEVICE = 0x6;
 MAD_SNMP = 0x8;
 
-IB_DEFAULT_QP0_QKEY = 0
-IB_DEFAULT_QP1_QKEY = 0x80010000
-
-# ClassPortInfo.capabilityMask
+#: ClassPortInfo capabilityMask Constants
 generatesTraps = 1<<0;
 implementsNotice = 1<<1;
 allPortSelect = 1<<8; # Performance Management
 
-# PortInfo.capabilityMask
+#: PortInfo capabilityMask Constants
 isSM = 1<<1;
 isNoticeSupported = 1<<2;
 isTrapSupported = 1<<3;
@@ -153,10 +170,15 @@ isOtherLocalChangesNoticeSupported = 1<<26;
 isLinkSpeedWidthPairsTableSupported = 1<<27;
 
 class GUID(bytes):
+    """Stores a GUID in internal format. In string format a GUID is formatted
+    as ``0002:c903:0000:1491``. Externally the class looks like a string
+    that formats to the GUID. :meth:`pack_into` is used to store the GUID in
+    network format. Instances are immutable and can be hashed."""
     def __init__(self,s,raw=False):
-        """Convert the content of a sysfs GUID file to our
-        representation. Raises :exc:`ValueError` if the string is invalid. A
-        GUID looks like: 0002:c903:0000:1491. Three colons are mandatory."""
+        """Convert from a string to our GUID representation. *s* is the input
+        string and if *raw* is True then *s* must be a length 8 :class:`bytes`.
+
+        :raises ValueError: If the string can not be parsed."""
         pass
     def __new__(self,s,raw=False):
         if isinstance(s,GUID):
@@ -174,7 +196,7 @@ class GUID(bytes):
             raise ValueError("%r is not a valid GUID"%(s));
 
     def pack_into(self,buf,offset=0):
-        """Pack the value into a byte array""";
+        """Pack the value into a byte array.""";
         buffer[offset:offest+8] = bytes.__str__(self);
 
     def __str__(self):
@@ -185,10 +207,15 @@ class GUID(bytes):
         return "GUID('%s')"%(self.__str__());
 
 class GID(bytes):
+    """Stores a GID in internal format. In string format a GID is formatted
+    like an IPv6 addres eg ``fe80::2:c903:0:1491``. Externally the class looks
+    like a string that formats to the GID. :meth:`pack_into` is used to store
+    the GID in network format. Instances are immutable and can be hashed."""
     def __init__(self,s,raw=False):
-        """Convert from a string to our GID representation. Raises
-        :exc:`ValueError` if the string is invalid. A GID is in IPv6 format,
-        and looks like: fe80::2:c903:0:1491."""
+        """Convert from a string to our GID representation. *s* is the input
+        string and if *raw* is True then *s* must be a length 16 :class:`bytes`.
+
+        :raises ValueError: If the string can not be parsed."""
         pass
     def __new__(self,s,raw=False):
         if isinstance(s,GID):
@@ -200,6 +227,10 @@ class GID(bytes):
             return bytes.__new__(self,socket.inet_pton(socket.AF_INET6,s.strip()));
         except:
             raise ValueError("%r is not a valid GID"%(s));
+
+    def pack_into(self,buf,offset=0):
+        """Pack the value into a byte array.""";
+        buffer[offset:offest+16] = bytes.__str__(self);
 
     def __str__(self):
         """Return a printable string of the GID."""

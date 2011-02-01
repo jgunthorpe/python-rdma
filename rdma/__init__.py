@@ -31,8 +31,7 @@ class MADTimeoutError(MADError):
 
 def get_end_port(name=None):
     """Return a :class:`rdma.devices.EndPort` for the default end port if name
-    is ``None``, or for the end port described by name. Throws :exc:`RDMAError` if
-    no end port was found or name is malformed.
+    is ``None``, or for the end port described by name.
 
     The end port string format is one of:
       =========== ===================
@@ -43,7 +42,9 @@ def get_end_port(name=None):
       Port GID    fe80::2:c903:0:1491
       Port GUID   0002:c903:0000:1491
       =========== ===================
-      """
+
+    :rtype: :class:`rdma.devices.EndPort`
+    :raises rdma.RDMAError: If no matching device is found or name is invalid."""
     devices = get_rdma_devices();
     if len(devices) == 0:
         raise RDMAError("No RDMA devices found.");
@@ -81,8 +82,7 @@ def get_rdma_devices(refresh=False):
     0 then no devices were detected. Programs are encouraged to use
     :func:`rdma.get_end_port`.
 
-    Current, the type returned is a :class:`~.devices.DemandList` but this is
-    an implementation detail.'''
+    :rtype: :class:`~.devices.DemandList` but this is an implementation detail.'''
     global _cached_devices;
     if _cached_devices is not None and not refresh:
         return _cached_devices;

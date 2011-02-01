@@ -9,17 +9,20 @@ import os,re,collections
 SYS_INFINIBAND = "/sys/class/infiniband/";
 
 def _conv_gid2guid(s):
-    """Return the GUID portion of a GID string. Raises :exc:`ValueError` if
-    the string is invalid."""
+    """Return the GUID portion of a GID string.
+
+    :raises ValueError: If the string is invalid."""
     return IBA.GID(s).guid();
 def _conv_hex(s):
     """Convert the content of a sysfs hex integer file to our representation.
-    Raises :exc:`ValueError` if the string is invalid."""
+
+    :raises ValueError: If the string is invalid."""
     return int(s,16);
 def _conv_int_desc(s):
     """Convert the content of a sysfs file that has a format %u:%s, the %s is
-    the descriptive name for the integer. Raises :exc:`ValueError` if the
-    string is invalid."""
+    the descriptive name for the integer.
+
+    :raises ValueError: If the string is invalid."""
     t = s.split(':');
     if len(t) != 2:
         raise ValueError("%r is not a valid major:minor"%(s));
@@ -29,6 +32,7 @@ class SysFSCache(object):
     '''Cache queries from sysfs attributes. This class is used to make
     the sysfs parsing demand load.'''
     def __init__(self,dir_):
+        '''*dir_* is the directory the attributes reside in.'''
         self._dir = dir_;
         self._cache = {};
 
@@ -46,9 +50,17 @@ class SysFSCache(object):
             return s;
 
 class DemandList(collections.Iterable):
-    """Demand loading class for things like GID tables and PKey tables"""
+    """Present an ordered list interface with a non-integer index for
+    a set of values that are demand created. The list indexes must be known
+    in advance."""
     # FIXME: would like to use OrderedDict
     def __init__(self,path,conv,iconv = int):
+        """The indexes are computed as::
+
+             sorted(iconv(I) for I in os.listdir(path))
+
+        *conv* is called to convert the contents of each file in *path*
+        to the python representation."""
         self._path = path;
         self._conv = conv;
         self._data = {};
@@ -78,7 +90,7 @@ class DemandList(collections.Iterable):
         return ret;
 
     def index(self,value):
-        """Return the index idx such that obj[idx] == value"""
+        """Return the index idx such that ``obj[idx] == value``."""
         for k,v in self._data.iteritems():
             if v == value:
                 return k;
@@ -92,8 +104,9 @@ class DemandList(collections.Iterable):
         return "{%s}"%(", ".join("%r: %r"%(k,self[k]) for k in self._okeys));
 
 class DemandList2(DemandList):
-    """Like DemandList but conv is a function to call with the idx, not file
-    content."""
+    """Like :class:`DemandList` but *conv* is a function to call with the idx,
+    not file content. This is useful for cases where the *path* argument to
+    :meth:`__init__` points to a list of directories."""
     def __getitem__(self,idx):
         ret = self._data[idx];
         if ret is None:
@@ -103,9 +116,11 @@ class DemandList2(DemandList):
 
 class EndPort(SysFSCache):
     '''A RDMA end port. An end port can issue RDMA operations, has a port GID,
-    etc. For an IB switch this will be port 0, for a \*CA it will be port 1 or
-    higher.'''
+    LID, etc. For an IB switch this will be port 0, for a \*CA it will be port
+    1 or higher.'''
     def __init__(self,parent,port_id):
+        """*parent* is the owning :class:`RDMADevice` and port_id is the port
+        ID number, 0 for switches and > 1 for \*CAs"""
         SysFSCache.__init__(self,parent._dir + "ports/%u/"%(port_id));
         self.parent = parent;
         self.port_id = port_id;
@@ -146,8 +161,7 @@ class EndPort(SysFSCache):
     def subnet_timeout(self): return 18;
 
     def pkey_index(self,pkey):
-        # FIXME: We don't really need to read all the pkey entries to do
-        # this, searching the directory
+        """Return the ``pkey index`` for pkey value *pkey*."""
         return self.pkeys.index(pkey);
 
     def __str__(self):
@@ -161,8 +175,11 @@ class EndPort(SysFSCache):
                 id(self));
 
 class RDMADevice(SysFSCache):
-    """Represents a RDMA device in the system."""
+    """A RDMA device. A device has at least one end port. The main significance of
+    a RDMA device in the API is to indicate that multiple end ports can
+    share a single protection domain."""
     def __init__(self,name):
+        """*name* is the kernel's name for this device in sysfs."""
         SysFSCache.__init__(self,SYS_INFINIBAND + name + "/");
         self.name = name;
 
@@ -211,9 +228,10 @@ class RDMADevice(SysFSCache):
                 id(self));
 
 def find_port_gid(devices,gid):
-    """Search the list *devices* for the end port with *gid* and return a
-    ``tuple`` of (:class:`EndPort`,gid_index) or None if not found. *gid* may
-    be a string representation or the internal representation of a gid."""
+    """Search the list *devices* for the end port with *gid*.
+
+    :returns: (:class:`EndPort`,gid_index)
+    :raises rdma.RDMAError: If no matching device is found."""
     for I in devices:
         for J in I.end_ports:
             try:
@@ -223,9 +241,10 @@ def find_port_gid(devices,gid):
     raise rdma.RDMAError("RDMA End port %r not found."%(gid));
 
 def find_port_guid(devices,guid):
-    """Search the list *devices* for the end port with *guid* and return a
-    :class:`EndPort`, or None if not found. *guid* may be a string
-    representation or the internal representation of a gid."""
+    """Search the list *devices* for the end port with *guid*.
+
+    :rtype: :class:`EndPort`
+    :raises rdma.RDMAError: If no matching device is found."""
     for I in devices:
         for J in I.end_ports:
             if J.port_guid == guid:
@@ -233,11 +252,12 @@ def find_port_guid(devices,guid):
     raise rdma.RDMAError("RDMA End port %r not found."%(guid));
 
 def find_port_name(devices,name):
-    """Search the list *devices* for the end port with *name* and
-    return :class:`EndPort`, or None if not found. *name* may be
-    a device name in which case the first end port is returned,
-    otherwise it may be device/port. Raises :exc:`rdma.RDMAError` if
-    name is invalid and no device is found."""
+    """Search the list *devices* for the end port with *name* and *name* may
+    be a device name in which case the first end port is returned, otherwise
+    it may be device/port.
+
+    :rtype: :class:`EndPort`
+    :raises rdma.RDMAError: If no matching device is found."""
     parts = name.split('/');
     try:
         device = devices[parts[0]];

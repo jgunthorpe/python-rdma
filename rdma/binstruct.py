@@ -16,7 +16,11 @@ class BinStruct(object):
     __slots__ = ('_buf');
 
     def __init__(self,buf = None,offset = 0):
-        if buf != None:
+        """*buf* is either an instance of :class:`BinStruct` or a :class:`bytes`
+        representing the data to unpack into the instance. *offset* is the
+        starting offset in *buf* for unpacking. If no arguments are given then
+        all attributes are set to 0."""
+        if buf is not None:
             if isinstance(buf,BinStruct):
                 buf = buf._buf;
             self.unpack_from(buf,offset);
@@ -25,13 +29,15 @@ class BinStruct(object):
             self.zero();
 
     def printer(self,F,offset=0,header=True):
-        """Pretty print the structure."""
+        """Pretty print the structure. *F* is the output file, *offset* is
+        added to all printed offsets and *header* causes the display of the
+        class type on the first line."""
         if header:
             print >> F, "%s"%(self.__class__.__name__);
 
     def dump(self,F,start_bits,end_bits,label,offset=0):
-        """Display a single 'thing'. The display format is 'offest hexdword
-        fmt' where fmt is the string version of the thing."""
+        """Internal use. Display a single 'thing'. The display format is
+        ``offest hexdword fmt`` where fmt is the string version of the thing."""
         if self._buf is None:
             self._buf = bytearray(256);
             self.pack_into(self._buf);
@@ -50,13 +56,16 @@ class BinStruct(object):
 
     # 'pure virtual' functions
     def zero(self):
-        """Set this instance back to the initial all zeros value."""
+        """Overridden in derived classes. Set this instance back to the
+        initial all zeros value."""
         return
     @abc.abstractmethod
     def unpack_from(self,buf,offset=0):
-        """Expand the byte string buf starting at offset into this instance."""
+        """Overriden in derived classes. Expand the :class:`bytes` *buf*
+        starting at *offset* into this instance."""
         pass
     @abc.abstractmethod
     def pack_into(self,buf,offset=0):
-        """Compact this instance into the byte array buf starting at offset."""
+        """Overriden in derived classes. Compact this instance into the
+        :class:`bytearray` *buf* starting at *offset*."""
         pass
