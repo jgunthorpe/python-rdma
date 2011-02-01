@@ -189,7 +189,7 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
 
         self.ib_user_mad_t.pack_into(self.sbuf,0,
                                      path.umad_agent_id,0,
-                                     max(500,path.mad_timeout*1000-500),0,
+                                     max(500,int(path.mad_timeout*1000)-500),0,
                                      len(buf),
                                      addr);
         del self.sbuf[64:];
