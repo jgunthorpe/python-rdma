@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# ./mkstructs.py -x iba_transport.xml -x iba_12.xml -x iba_13_4.xml -x iba_13_6.xml -x iba_14.xml -x iba_15.xml -x iba_16_1.xml -x iba_16_3.xml -x iba_16_4.xml  -o ../rdma/IBA_struct.py -t ../tests/iba_struct.py
+# ./mkstructs.py -x iba_transport.xml -x iba_12.xml -x iba_13_4.xml -x iba_13_6.xml -x iba_14.xml -x iba_15.xml -x iba_16_1.xml -x iba_16_3.xml -x iba_16_4.xml  -o ../rdma/IBA_struct.py -t ../tests/iba_struct.py -r ../doc/iba_struct.inc
 '''This script converts the XML descriptions of IB structures into python
    classes and associated codegen'''
 from __future__ import with_statement;
@@ -44,6 +44,18 @@ def safeUpdateCtx(path):
     f.close();
     os.rename(tmp,path);
 
+def rst_tableize(lst,idx):
+    width = max(len(I[idx]) for I in lst);
+    line = "="*width;
+    yield line;
+    first = True;
+    for I in lst:
+        yield I[idx].ljust(width);
+        if first:
+            yield line;
+            first = False;
+    yield line;
+
 class Type(object):
     """Hold a single typed field in the structure"""
     def __init__(self,xml):
@@ -73,6 +85,18 @@ class Type(object):
                 return "bytearray(%u)"%(self.count);
             return "[%s]*%u"%(base,self.count);
         return base;
+    def type_desc(self):
+        base = ":class:`int`";
+        if self.isObject():
+            base = ":class:`~rdma.IBA.%s`"%(self.type[7:]);
+        elif self.bits > 64:
+            base = ":class:`bytearray` (%u)"%(self.bits/8);
+        if self.count != 1:
+            if self.bits <= 8:
+                base = ":class:`bytearray` (%u)"%(self.count);
+            return "[%s]*%u"%(base,self.count);
+        return base;
+
     def isAligned(self):
         if self.bits >= 32:
             return self.bits % 32 == 0 and self.off % 32 == 0;
@@ -89,6 +113,7 @@ class Struct(object):
         self.name = xml.get("name");
         self.size = int(xml.get("bytes"));
         self.desc = "%s (section %s)"%(xml.get("desc"),xml.get("sect"));
+        self.sect = tuple(int(I) for I in xml.get("sect").split("."));
 
         self.mgmtClass = xml.get("mgmtClass");
         self.mgmtClassVersion = xml.get("mgmtClassVersion");
@@ -281,6 +306,18 @@ class Struct(object):
             x.append('    return;');
         self.funcs.append(x);
 
+    def get_properties(self):
+        yield "MAD_LENGTH","%u"%(self.size);
+        if self.mgmtClass:
+            yield "MAD_CLASS","0x%x"%(int(self.mgmtClass,0));
+            yield "MAD_CLASS_VERSION","0x%x"%(int(self.mgmtClassVersion,0));
+        if self.attributeID:
+            yield "MAD_ATTRIBUTE_ID","0x%x"%(int(self.attributeID,0));
+        if self.methods:
+            for I in self.methods.split():
+                yield "MAD_%s"%(I.upper()),"0x%x # %s"%(globals()[methodMap[I]],
+                                                        methodMap[I]);
+
     def asPython(self,F):
         self.funcs = [];
 
@@ -317,25 +354,38 @@ class Struct(object):
     __slots__ = (%(slots)s);"""%\
         self.__dict__;
 
-        print >> F,"    MAD_LENGTH = %u;"%(self.size);
-        if self.mgmtClass:
-            print >> F,"    MAD_CLASS = 0x%x;"%(int(self.mgmtClass,0));
-            print >> F,"    MAD_CLASS_VERSION = 0x%x;"%(int(self.mgmtClassVersion,0));
-        if self.attributeID:
-            print >> F,"    MAD_ATTRIBUTE_ID = 0x%x;"%(int(self.attributeID,0));
-        if self.methods:
-            for I in self.methods.split():
-                print >> F,"    MAD_%s = 0x%x; # %s"%(I.upper(),globals()[methodMap[I]],
-                                                      methodMap[I]);
+        for name,value in self.get_properties():
+            print >> F, "    %s = %s"%(name,value);
 
         for I in self.funcs:
             print >> F, "   ", "\n    ".join(I);
             print >> F
 
+    def asRST(self,F):
+        print >> F,".. class:: rdma.IBA.%s"%(self.name)
+        print >> F,""
+        print >> F,"   ",self.desc
+        print >> F,""
+        for name,value in self.get_properties():
+            print >> F, "    .. attribute:: %s = %s"%(name,value);
+        print >> F,""
+
+        rows = [("Member","Position","Type")];
+        for name,ty in self.mb:
+            rows.append((":attr:`%s`"%(name),
+                         "%u:%u (%u)"%(ty.off,ty.off+ty.lenBits(),
+                                       ty.bits),
+                         ty.type_desc()));
+        if rows:
+            for I in zip(rst_tableize(rows,0),rst_tableize(rows,1),rst_tableize(rows,2)):
+                print >> F,"   "," ".join(I)
+            print >> F,""
+
 parser = optparse.OptionParser(usage="%prog")
 parser.add_option('-x', '--xml', dest='xml', action="append")
 parser.add_option('-o', '--struct-out', dest='struct_out')
 parser.add_option('-t', '--test-out', dest='test_out')
+parser.add_option('-r', '--rst-out', dest='rst_out')
 (options, args) = parser.parse_args()
 
 structs = [];
@@ -352,6 +402,36 @@ with safeUpdateCtx(options.struct_out) as F:
     for I in structs:
         I.asPython(F);
 
+with safeUpdateCtx(options.rst_out) as F:
+    def is_sect_prefix(x,y):
+        return x == y[:len(x)];
+    sects = [((12,),"Communication Management"),
+             ((13,4),"Generic MAD"),
+             ((13,6),"RMPP"),
+             ((14,),"Subnet Management"),
+             ((15,),"Subnet Administration"),
+             ((16,1),"Performance Management"),
+             ((16,3),"Device Management"),
+             ((16,4),"SNMP Tunneling")];
+    lst = sorted(structs,key=lambda x:x.name);
+    done = set();
+    for I,name in sects:
+        header = "%s (%s)"%(name,".".join("%s"%(x) for x in I));
+        print >> F, header;
+        print >> F, "^"*len(header);
+        print >> F
+        for J in lst:
+            if J not in done and is_sect_prefix(I,J.sect):
+                J.asRST(F);
+                done.add(J);
+
+    header = "Miscellaneous IBA Structures";
+    print >> F, header;
+    print >> F, "^"*len(header);
+    print >> F
+    for J in lst:
+        if J not in done:
+                J.asRST(F);
 with safeUpdateCtx(options.test_out) as F:
     print >> F,\
 """#!/usr/bin/python

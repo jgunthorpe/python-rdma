@@ -2,7 +2,7 @@ import struct,rdma.binstruct;
 class HdrLRH(rdma.binstruct.BinStruct):
     '''Local Route Header (section 7.7)'''
     __slots__ = ('VL','LVer','SL','reserved1','LNH','DLID','reserved2','pktLen','SLID');
-    MAD_LENGTH = 8;
+    MAD_LENGTH = 8
     def zero(self):
         self.VL = 0;
         self.LVer = 0;
@@ -54,7 +54,7 @@ class HdrLRH(rdma.binstruct.BinStruct):
 class HdrRWH(rdma.binstruct.BinStruct):
     '''Raw Header (section 5.3)'''
     __slots__ = ('reserved1','etherType');
-    MAD_LENGTH = 4;
+    MAD_LENGTH = 4
     def zero(self):
         self.reserved1 = 0;
         self.etherType = 0;
@@ -74,7 +74,7 @@ class HdrRWH(rdma.binstruct.BinStruct):
 class HdrGRH(rdma.binstruct.BinStruct):
     '''Global Route Header (section 8.3)'''
     __slots__ = ('IPVer','TClass','flowLabel','payLen','nxtHdr','hopLmt','SGID','DGID');
-    MAD_LENGTH = 40;
+    MAD_LENGTH = 40
     def zero(self):
         self.IPVer = 0;
         self.TClass = 0;
@@ -130,7 +130,7 @@ class HdrGRH(rdma.binstruct.BinStruct):
 class HdrBTH(rdma.binstruct.BinStruct):
     '''Base Transport Header (section 9.2)'''
     __slots__ = ('service','function','SE','migReq','padCnt','TVer','PKey','reserved1','destQP','ackReq','reserved2','PSN');
-    MAD_LENGTH = 12;
+    MAD_LENGTH = 12
     def zero(self):
         self.service = 0;
         self.function = 0;
@@ -197,7 +197,7 @@ class HdrBTH(rdma.binstruct.BinStruct):
 class HdrRDETH(rdma.binstruct.BinStruct):
     '''Reliable Datagram Extended Transport Header (section 9.3.1)'''
     __slots__ = ('reserved1','EEC');
-    MAD_LENGTH = 4;
+    MAD_LENGTH = 4
     def zero(self):
         self.reserved1 = 0;
         self.EEC = 0;
@@ -226,7 +226,7 @@ class HdrRDETH(rdma.binstruct.BinStruct):
 class HdrDETH(rdma.binstruct.BinStruct):
     '''Datagram Extended Transport Header (section 9.3.2)'''
     __slots__ = ('QKey','reserved1','srcQP');
-    MAD_LENGTH = 8;
+    MAD_LENGTH = 8
     def zero(self):
         self.QKey = 0;
         self.reserved1 = 0;
@@ -258,7 +258,7 @@ class HdrDETH(rdma.binstruct.BinStruct):
 class HdrRETH(rdma.binstruct.BinStruct):
     '''RDMA Extended Transport Header (section 9.3.3)'''
     __slots__ = ('VA','RKey','DMALen');
-    MAD_LENGTH = 16;
+    MAD_LENGTH = 16
     def zero(self):
         self.VA = 0;
         self.RKey = 0;
@@ -283,7 +283,7 @@ class HdrRETH(rdma.binstruct.BinStruct):
 class HdrAtomicETH(rdma.binstruct.BinStruct):
     '''Atomic Extended Transport Header (section 9.3.4)'''
     __slots__ = ('VA','RKey','swapData','cmpData');
-    MAD_LENGTH = 28;
+    MAD_LENGTH = 28
     def zero(self):
         self.VA = 0;
         self.RKey = 0;
@@ -311,7 +311,7 @@ class HdrAtomicETH(rdma.binstruct.BinStruct):
 class HdrAETH(rdma.binstruct.BinStruct):
     '''ACK Extended Transport Header (section 9.3.5)'''
     __slots__ = ('syndrome','MSN');
-    MAD_LENGTH = 4;
+    MAD_LENGTH = 4
     def zero(self):
         self.syndrome = 0;
         self.MSN = 0;
@@ -340,7 +340,7 @@ class HdrAETH(rdma.binstruct.BinStruct):
 class HdrAtomicAckETH(rdma.binstruct.BinStruct):
     '''Atomic Acknowledge Extended Transport Header (section 9.5.3)'''
     __slots__ = ('origRData');
-    MAD_LENGTH = 8;
+    MAD_LENGTH = 8
     def zero(self):
         self.origRData = 0;
 
@@ -359,7 +359,7 @@ class HdrAtomicAckETH(rdma.binstruct.BinStruct):
 class HdrImmDt(rdma.binstruct.BinStruct):
     '''Immediate Extended Transport Header (section 9.3.6)'''
     __slots__ = ('immediateData');
-    MAD_LENGTH = 4;
+    MAD_LENGTH = 4
     def zero(self):
         self.immediateData = 0;
 
@@ -378,7 +378,7 @@ class HdrImmDt(rdma.binstruct.BinStruct):
 class HdrIETH(rdma.binstruct.BinStruct):
     '''Invalidate Extended Transport Header (section 9.3.7)'''
     __slots__ = ('RKey');
-    MAD_LENGTH = 4;
+    MAD_LENGTH = 4
     def zero(self):
         self.RKey = 0;
 
@@ -397,7 +397,7 @@ class HdrIETH(rdma.binstruct.BinStruct):
 class HdrFlowControl(rdma.binstruct.BinStruct):
     '''Flow Control Packet (section 7.9.4)'''
     __slots__ = ('op','FCTBS','VL','FCCL');
-    MAD_LENGTH = 4;
+    MAD_LENGTH = 4
     def zero(self):
         self.op = 0;
         self.FCTBS = 0;
@@ -430,9 +430,9 @@ class HdrFlowControl(rdma.binstruct.BinStruct):
 class CMFormat(rdma.binstruct.BinStruct):
     '''Request for Communication (section 16.7.1)'''
     __slots__ = ('MADHeader','data');
-    MAD_LENGTH = 256;
-    MAD_CLASS = 0x7;
-    MAD_CLASS_VERSION = 0x2;
+    MAD_LENGTH = 256
+    MAD_CLASS = 0x7
+    MAD_CLASS_VERSION = 0x2
     def __init__(self,*args):
         self.MADHeader = MADHeader();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -460,7 +460,7 @@ class CMFormat(rdma.binstruct.BinStruct):
 class CMPath(rdma.binstruct.BinStruct):
     '''Path Information (section 12.6)'''
     __slots__ = ('SLID','DLID','SGID','DGID','flowLabel','reserved1','reserved2','PD','TClass','hopLimit','SL','subnetLocal','reserved3','localACKTimeout','reserved4');
-    MAD_LENGTH = 44;
+    MAD_LENGTH = 44
     def zero(self):
         self.SLID = 0;
         self.DLID = 0;
@@ -532,9 +532,9 @@ class CMPath(rdma.binstruct.BinStruct):
 class CMREQ(rdma.binstruct.BinStruct):
     '''Request for Communication (section 12.6.5)'''
     __slots__ = ('LCID','reserved1','serviceID','LGUID','localCMQKey','localQKey','localQPN','responderResources','localEECN','initiatorDepth','remoteEECN','remoteResponseTimeout','transportService','flowControl','startingPSN','localResponseTimeout','retryCount','PKey','pathPacketMTU','RDCExists','RNRRetryCount','maxCMRetries','reserved2','primaryPath','alternatePath','privateData');
-    MAD_LENGTH = 232;
-    MAD_ATTRIBUTE_ID = 0x10;
-    MAD_COMMMGTSEND = 0x3; # MAD_METHOD_SEND
+    MAD_LENGTH = 232
+    MAD_ATTRIBUTE_ID = 0x10
+    MAD_COMMMGTSEND = 0x3 # MAD_METHOD_SEND
     def __init__(self,*args):
         self.primaryPath = CMPath();
         self.alternatePath = CMPath();
@@ -667,9 +667,9 @@ class CMREQ(rdma.binstruct.BinStruct):
 class CMMRA(rdma.binstruct.BinStruct):
     '''Message Receipt Acknowledgement (section 12.6.6)'''
     __slots__ = ('LCID','RCID','messageMRAed','reserved1','serviceTimeout','reserved2','reserved3','privateData');
-    MAD_LENGTH = 232;
-    MAD_ATTRIBUTE_ID = 0x11;
-    MAD_COMMMGTSEND = 0x3; # MAD_METHOD_SEND
+    MAD_LENGTH = 232
+    MAD_ATTRIBUTE_ID = 0x11
+    MAD_COMMMGTSEND = 0x3 # MAD_METHOD_SEND
     def zero(self):
         self.LCID = 0;
         self.RCID = 0;
@@ -715,9 +715,9 @@ class CMMRA(rdma.binstruct.BinStruct):
 class CMREJ(rdma.binstruct.BinStruct):
     '''Reject (section 12.6.7)'''
     __slots__ = ('LCID','RCID','messageRejected','reserved1','rejectInfoLength','reserved2','reason','ARI','privateData');
-    MAD_LENGTH = 232;
-    MAD_ATTRIBUTE_ID = 0x12;
-    MAD_COMMMGTSEND = 0x3; # MAD_METHOD_SEND
+    MAD_LENGTH = 232
+    MAD_ATTRIBUTE_ID = 0x12
+    MAD_COMMMGTSEND = 0x3 # MAD_METHOD_SEND
     def zero(self):
         self.LCID = 0;
         self.RCID = 0;
@@ -768,9 +768,9 @@ class CMREJ(rdma.binstruct.BinStruct):
 class CMREP(rdma.binstruct.BinStruct):
     '''Reply To Request For Communication (section 12.6.8)'''
     __slots__ = ('LCID','RCID','localQKey','localQPN','reserved1','localEEContext','reserved2','startingPSN','reserved3','responderResources','initiatorDepth','targetACKDelay','failoverAccepted','flowControl','RNRRetryCount','reserved4','LGUID','privateData');
-    MAD_LENGTH = 232;
-    MAD_ATTRIBUTE_ID = 0x13;
-    MAD_COMMMGTSEND = 0x3; # MAD_METHOD_SEND
+    MAD_LENGTH = 232
+    MAD_ATTRIBUTE_ID = 0x13
+    MAD_COMMMGTSEND = 0x3 # MAD_METHOD_SEND
     def zero(self):
         self.LCID = 0;
         self.RCID = 0;
@@ -865,9 +865,9 @@ class CMREP(rdma.binstruct.BinStruct):
 class CMRTU(rdma.binstruct.BinStruct):
     '''Ready To Use (section 12.6.9)'''
     __slots__ = ('LCID','RCID','privateData');
-    MAD_LENGTH = 232;
-    MAD_ATTRIBUTE_ID = 0x14;
-    MAD_COMMMGTSEND = 0x3; # MAD_METHOD_SEND
+    MAD_LENGTH = 232
+    MAD_ATTRIBUTE_ID = 0x14
+    MAD_COMMMGTSEND = 0x3 # MAD_METHOD_SEND
     def zero(self):
         self.LCID = 0;
         self.RCID = 0;
@@ -894,9 +894,9 @@ class CMRTU(rdma.binstruct.BinStruct):
 class CMDREQ(rdma.binstruct.BinStruct):
     '''Request For Communication Release (Disconnection Request) (section 12.6.10)'''
     __slots__ = ('LCID','RCID','remoteQPN','reserved1','privateData');
-    MAD_LENGTH = 232;
-    MAD_ATTRIBUTE_ID = 0x15;
-    MAD_COMMMGTSEND = 0x3; # MAD_METHOD_SEND
+    MAD_LENGTH = 232
+    MAD_ATTRIBUTE_ID = 0x15
+    MAD_COMMMGTSEND = 0x3 # MAD_METHOD_SEND
     def zero(self):
         self.LCID = 0;
         self.RCID = 0;
@@ -936,9 +936,9 @@ class CMDREQ(rdma.binstruct.BinStruct):
 class CMDREP(rdma.binstruct.BinStruct):
     '''Reply To Request For Communication Release (section 12.6.11)'''
     __slots__ = ('LCID','RCID','privateData');
-    MAD_LENGTH = 232;
-    MAD_ATTRIBUTE_ID = 0x16;
-    MAD_COMMMGTSEND = 0x3; # MAD_METHOD_SEND
+    MAD_LENGTH = 232
+    MAD_ATTRIBUTE_ID = 0x16
+    MAD_COMMMGTSEND = 0x3 # MAD_METHOD_SEND
     def zero(self):
         self.LCID = 0;
         self.RCID = 0;
@@ -965,9 +965,9 @@ class CMDREP(rdma.binstruct.BinStruct):
 class CMLAP(rdma.binstruct.BinStruct):
     '''Load Alternate Path (section 12.8.1)'''
     __slots__ = ('LCID','RCID','QKey','RQPN','RCMTimeout','reserved1','reserved2','altSLID','altDLID','altSGID','altDGID','altFlowLabel','reserved3','altTClass','altHopLimit','reserved4','altIPD','altSL','altSubnetLocal','reserved5','altLocalACKTimeout','reserved6','privateData');
-    MAD_LENGTH = 232;
-    MAD_ATTRIBUTE_ID = 0x19;
-    MAD_COMMMGTSEND = 0x3; # MAD_METHOD_SEND
+    MAD_LENGTH = 232
+    MAD_ATTRIBUTE_ID = 0x19
+    MAD_COMMMGTSEND = 0x3 # MAD_METHOD_SEND
     def zero(self):
         self.LCID = 0;
         self.RCID = 0;
@@ -1071,9 +1071,9 @@ class CMLAP(rdma.binstruct.BinStruct):
 class CMAPR(rdma.binstruct.BinStruct):
     '''Alternate Path Response (section 12.8.2)'''
     __slots__ = ('LCID','RCID','additionalInfoLength','APstatus','reserved1','additionalInfo','privateData');
-    MAD_LENGTH = 232;
-    MAD_ATTRIBUTE_ID = 0x1a;
-    MAD_COMMMGTSEND = 0x3; # MAD_METHOD_SEND
+    MAD_LENGTH = 232
+    MAD_ATTRIBUTE_ID = 0x1a
+    MAD_COMMMGTSEND = 0x3 # MAD_METHOD_SEND
     def zero(self):
         self.LCID = 0;
         self.RCID = 0;
@@ -1110,9 +1110,9 @@ class CMAPR(rdma.binstruct.BinStruct):
 class CMSIDR_REQ(rdma.binstruct.BinStruct):
     '''Service ID Resolution Request (section 12.11.1)'''
     __slots__ = ('requestID','reserved1','serviceID','privateData');
-    MAD_LENGTH = 232;
-    MAD_ATTRIBUTE_ID = 0x17;
-    MAD_COMMMGTSEND = 0x3; # MAD_METHOD_SEND
+    MAD_LENGTH = 232
+    MAD_ATTRIBUTE_ID = 0x17
+    MAD_COMMMGTSEND = 0x3 # MAD_METHOD_SEND
     def zero(self):
         self.requestID = 0;
         self.reserved1 = 0;
@@ -1142,9 +1142,9 @@ class CMSIDR_REQ(rdma.binstruct.BinStruct):
 class CMSIDR_REP(rdma.binstruct.BinStruct):
     '''Service ID Resolution Response (section 12.11.2)'''
     __slots__ = ('requestID','QPN','status','serviceID','QKey','classPortinfo','privateData');
-    MAD_LENGTH = 232;
-    MAD_ATTRIBUTE_ID = 0x18;
-    MAD_COMMMGTSEND = 0x3; # MAD_METHOD_SEND
+    MAD_LENGTH = 232
+    MAD_ATTRIBUTE_ID = 0x18
+    MAD_COMMMGTSEND = 0x3 # MAD_METHOD_SEND
     def __init__(self,*args):
         self.classPortinfo = MADClassPortInfo();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -1196,7 +1196,7 @@ class CMSIDR_REP(rdma.binstruct.BinStruct):
 class MADHeader(rdma.binstruct.BinStruct):
     '''MAD Base Header (section 13.4.3)'''
     __slots__ = ('baseVersion','mgmtClass','classVersion','method','status','classSpecific','transactionID','attributeID','reserved1','attributeModifier');
-    MAD_LENGTH = 24;
+    MAD_LENGTH = 24
     def zero(self):
         self.baseVersion = 0;
         self.mgmtClass = 0;
@@ -1232,7 +1232,7 @@ class MADHeader(rdma.binstruct.BinStruct):
 class MADHeaderDirected(rdma.binstruct.BinStruct):
     '''MAD Base Header Directed (section 13.4.3)'''
     __slots__ = ('baseVersion','mgmtClass','classVersion','method','D','status','hopPointer','hopCount','transactionID','attributeID','reserved1','attributeModifier');
-    MAD_LENGTH = 24;
+    MAD_LENGTH = 24
     def zero(self):
         self.baseVersion = 0;
         self.mgmtClass = 0;
@@ -1281,17 +1281,17 @@ class MADHeaderDirected(rdma.binstruct.BinStruct):
 class MADClassPortInfo(rdma.binstruct.BinStruct):
     '''Class Port Info (section 13.4.8.1)'''
     __slots__ = ('baseVersion','classVersion','capabilityMask','reserved1','respTimeValue','redirectGID','redirectTC','redirectSL','redirectFL','redirectLID','redirectPKey','reserved2','redirectQP','redirectQKey','trapGID','trapTC','trapSL','trapFL','trapLID','trapPKey','trapHL','trapQP','trapQKey');
-    MAD_LENGTH = 72;
-    MAD_ATTRIBUTE_ID = 0x1;
-    MAD_COMMMGTGET = 0x1; # MAD_METHOD_GET
-    MAD_COMMMGTSET = 0x2; # MAD_METHOD_SET
-    MAD_PERFORMANCEGET = 0x1; # MAD_METHOD_GET
-    MAD_BMGET = 0x1; # MAD_METHOD_GET
-    MAD_BMSET = 0x2; # MAD_METHOD_SET
-    MAD_DEVMGTGET = 0x1; # MAD_METHOD_GET
-    MAD_DEVMGTSET = 0x2; # MAD_METHOD_SET
-    MAD_SNMPGET = 0x1; # MAD_METHOD_GET
-    MAD_SUBNADMGET = 0x1; # MAD_METHOD_GET
+    MAD_LENGTH = 72
+    MAD_ATTRIBUTE_ID = 0x1
+    MAD_COMMMGTGET = 0x1 # MAD_METHOD_GET
+    MAD_COMMMGTSET = 0x2 # MAD_METHOD_SET
+    MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
+    MAD_BMGET = 0x1 # MAD_METHOD_GET
+    MAD_BMSET = 0x2 # MAD_METHOD_SET
+    MAD_DEVMGTGET = 0x1 # MAD_METHOD_GET
+    MAD_DEVMGTSET = 0x2 # MAD_METHOD_SET
+    MAD_SNMPGET = 0x1 # MAD_METHOD_GET
+    MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     def zero(self):
         self.baseVersion = 0;
         self.classVersion = 0;
@@ -1409,9 +1409,9 @@ class MADClassPortInfo(rdma.binstruct.BinStruct):
 class MADInformInfo(rdma.binstruct.BinStruct):
     '''InformInfo (section 13.4.8.3)'''
     __slots__ = ('GID','LIDRangeBegin','LIDRangeEnd','reserved1','isGeneric','subscribe','type','trapNumber','QPN','reserved2','respTimeValue','reserved3','producerType');
-    MAD_LENGTH = 36;
-    MAD_ATTRIBUTE_ID = 0x3;
-    MAD_SUBNADMSET = 0x2; # MAD_METHOD_SET
+    MAD_LENGTH = 36
+    MAD_ATTRIBUTE_ID = 0x3
+    MAD_SUBNADMSET = 0x2 # MAD_METHOD_SET
     def zero(self):
         self.GID = bytearray(16);
         self.LIDRangeBegin = 0;
@@ -1473,7 +1473,7 @@ class MADInformInfo(rdma.binstruct.BinStruct):
 class RMPPHeader(rdma.binstruct.BinStruct):
     '''RMPP Header Fields (section 13.6.2.1)'''
     __slots__ = ('MADHeader','RMPPVersion','RMPPType','RRespTime','RMPPFlags','RMPPStatus','data1','data2');
-    MAD_LENGTH = 36;
+    MAD_LENGTH = 36
     def __init__(self,*args):
         self.MADHeader = MADHeader();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -1523,7 +1523,7 @@ class RMPPHeader(rdma.binstruct.BinStruct):
 class RMPPShortHeader(rdma.binstruct.BinStruct):
     '''RMPP Header Fields (section 13.6.2.1)'''
     __slots__ = ('MADHeader','RMPPVersion','RMPPType','RRespTime','RMPPFlags','RMPPStatus');
-    MAD_LENGTH = 28;
+    MAD_LENGTH = 28
     def __init__(self,*args):
         self.MADHeader = MADHeader();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -1567,7 +1567,7 @@ class RMPPShortHeader(rdma.binstruct.BinStruct):
 class RMPPData(rdma.binstruct.BinStruct):
     '''RMPP Data Packet (section 13.6.2.3)'''
     __slots__ = ('RMPPHeader','segmentNumber','payLoadLength','data');
-    MAD_LENGTH = 256;
+    MAD_LENGTH = 256
     def __init__(self,*args):
         self.RMPPHeader = RMPPShortHeader();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -1603,7 +1603,7 @@ class RMPPData(rdma.binstruct.BinStruct):
 class RMPPAck(rdma.binstruct.BinStruct):
     '''RMPP Data Packet (section 13.6.2.3)'''
     __slots__ = ('RMPPHeader','segmentNumber','newWindowLast','reserved1');
-    MAD_LENGTH = 256;
+    MAD_LENGTH = 256
     def __init__(self,*args):
         self.RMPPHeader = RMPPShortHeader();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -1639,7 +1639,7 @@ class RMPPAck(rdma.binstruct.BinStruct):
 class RMPPAbort(rdma.binstruct.BinStruct):
     '''RMPP Data Packet (section 13.6.2.3)'''
     __slots__ = ('RMPPHeader','reserved1','reserved2','errorData');
-    MAD_LENGTH = 256;
+    MAD_LENGTH = 256
     def __init__(self,*args):
         self.RMPPHeader = RMPPShortHeader();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -1675,7 +1675,7 @@ class RMPPAbort(rdma.binstruct.BinStruct):
 class RMPPStop(rdma.binstruct.BinStruct):
     '''RMPP Data Packet (section 13.6.2.3)'''
     __slots__ = ('RMPPHeader','reserved1','reserved2','errorData');
-    MAD_LENGTH = 256;
+    MAD_LENGTH = 256
     def __init__(self,*args):
         self.RMPPHeader = RMPPShortHeader();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -1711,7 +1711,7 @@ class RMPPStop(rdma.binstruct.BinStruct):
 class SMPGUIDBlock(rdma.binstruct.BinStruct):
     '''GUID Block Element (section 14.2.5.5)'''
     __slots__ = ('GUID');
-    MAD_LENGTH = 8;
+    MAD_LENGTH = 8
     def zero(self):
         self.GUID = 0;
 
@@ -1730,7 +1730,7 @@ class SMPGUIDBlock(rdma.binstruct.BinStruct):
 class SMPLIDPortBlock(rdma.binstruct.BinStruct):
     '''LID/Port Block Element (section 14.2.5.11)'''
     __slots__ = ('LID','valid','LMC','reserved1','port');
-    MAD_LENGTH = 4;
+    MAD_LENGTH = 4
     def zero(self):
         self.LID = 0;
         self.valid = 0;
@@ -1765,9 +1765,9 @@ class SMPLIDPortBlock(rdma.binstruct.BinStruct):
 class SMPFormat(rdma.binstruct.BinStruct):
     '''SMP Format - LID Routed (section 14.2.1.1)'''
     __slots__ = ('MADHeader','MKey','reserved1','data','reserved2');
-    MAD_LENGTH = 256;
-    MAD_CLASS = 0x1;
-    MAD_CLASS_VERSION = 0x1;
+    MAD_LENGTH = 256
+    MAD_CLASS = 0x1
+    MAD_CLASS_VERSION = 0x1
     def __init__(self,*args):
         self.MADHeader = MADHeader();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -1810,9 +1810,9 @@ class SMPFormat(rdma.binstruct.BinStruct):
 class SMPFormatDirected(rdma.binstruct.BinStruct):
     '''SMP Format - Direct Routed (section 14.2.1.2)'''
     __slots__ = ('MADHeader','MKey','drSLID','drDLID','reserved1','data','initialPath','returnPath');
-    MAD_LENGTH = 256;
-    MAD_CLASS = 0x81;
-    MAD_CLASS_VERSION = 0x1;
+    MAD_LENGTH = 256
+    MAD_CLASS = 0x81
+    MAD_CLASS_VERSION = 0x1
     def __init__(self,*args):
         self.MADHeader = MADHeaderDirected();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -1864,9 +1864,9 @@ class SMPFormatDirected(rdma.binstruct.BinStruct):
 class SMPNodeDescription(rdma.binstruct.BinStruct):
     '''Node Description String (section 14.2.5.2)'''
     __slots__ = ('nodeString');
-    MAD_LENGTH = 64;
-    MAD_ATTRIBUTE_ID = 0x10;
-    MAD_SUBNGET = 0x1; # MAD_METHOD_GET
+    MAD_LENGTH = 64
+    MAD_ATTRIBUTE_ID = 0x10
+    MAD_SUBNGET = 0x1 # MAD_METHOD_GET
     def zero(self):
         self.nodeString = bytearray(64);
 
@@ -1885,9 +1885,9 @@ class SMPNodeDescription(rdma.binstruct.BinStruct):
 class SMPNodeInfo(rdma.binstruct.BinStruct):
     '''Generic Node Data (section 14.2.5.3)'''
     __slots__ = ('baseVersion','classVersion','nodeType','numPorts','systemImageGUID','nodeGUID','portGUID','partitionCap','deviceID','revision','localPortNum','vendorID');
-    MAD_LENGTH = 40;
-    MAD_ATTRIBUTE_ID = 0x11;
-    MAD_SUBNGET = 0x1; # MAD_METHOD_GET
+    MAD_LENGTH = 40
+    MAD_ATTRIBUTE_ID = 0x11
+    MAD_SUBNGET = 0x1 # MAD_METHOD_GET
     def zero(self):
         self.baseVersion = 0;
         self.classVersion = 0;
@@ -1938,10 +1938,10 @@ class SMPNodeInfo(rdma.binstruct.BinStruct):
 class SMPSwitchInfo(rdma.binstruct.BinStruct):
     '''Switch Information (section 14.2.5.4)'''
     __slots__ = ('linearFDBCap','randomFDBCap','multicastFDBCap','linearFDBTop','defaultPort','defaultMulticastPrimaryPort','defaultMulticastNotPrimaryPort','lifeTimeValue','portStateChange','reserved1','optimizedSLtoVLMappingProgramming','LIDsPerPort','partitionEnforcementCap','inboundEnforcementCap','outboundEnforcementCap','filterRawInboundCap','filterRawOutboundCap','enhancedPort0','reserved2','reserved3');
-    MAD_LENGTH = 20;
-    MAD_ATTRIBUTE_ID = 0x12;
-    MAD_SUBNGET = 0x1; # MAD_METHOD_GET
-    MAD_SUBNSET = 0x2; # MAD_METHOD_SET
+    MAD_LENGTH = 20
+    MAD_ATTRIBUTE_ID = 0x12
+    MAD_SUBNGET = 0x1 # MAD_METHOD_GET
+    MAD_SUBNSET = 0x2 # MAD_METHOD_SET
     def zero(self):
         self.linearFDBCap = 0;
         self.randomFDBCap = 0;
@@ -2015,10 +2015,10 @@ class SMPSwitchInfo(rdma.binstruct.BinStruct):
 class SMPGUIDInfo(rdma.binstruct.BinStruct):
     '''Assigned GUIDs (section 14.2.5.5)'''
     __slots__ = ('GUIDBlock');
-    MAD_LENGTH = 64;
-    MAD_ATTRIBUTE_ID = 0x14;
-    MAD_SUBNGET = 0x1; # MAD_METHOD_GET
-    MAD_SUBNSET = 0x2; # MAD_METHOD_SET
+    MAD_LENGTH = 64
+    MAD_ATTRIBUTE_ID = 0x14
+    MAD_SUBNGET = 0x1 # MAD_METHOD_GET
+    MAD_SUBNSET = 0x2 # MAD_METHOD_SET
     def __init__(self,*args):
         self.GUIDBlock = [SMPGUIDBlock()]*8;
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -2055,10 +2055,10 @@ class SMPGUIDInfo(rdma.binstruct.BinStruct):
 class SMPPortInfo(rdma.binstruct.BinStruct):
     '''Port Information (section 14.2.5.6)'''
     __slots__ = ('MKey','GIDPrefix','LID','masterSMLID','capabilityMask','diagCode','MKeyLeasePeriod','localPortNum','linkWidthEnabled','linkWidthSupported','linkWidthActive','linkSpeedSupported','portState','portPhysicalState','linkDownDefaultState','MKeyProtectBits','reserved1','LMC','linkSpeedActive','linkSpeedEnabled','neighborMTU','masterSMSL','VLCap','initType','VLHighLimit','VLArbitrationHighCap','VLArbitrationLowCap','initTypeReply','MTUCap','VLStallCount','HOQLife','operationalVLs','partitionEnforcementInbound','partitionEnforcementOutbound','filterRawInbound','filterRawOutbound','MKeyViolations','PKeyViolations','QKeyViolations','GUIDCap','clientReregister','reserved2','subnetTimeOut','reserved3','respTimeValue','localPhyErrors','overrunErrors','reserved4');
-    MAD_LENGTH = 56;
-    MAD_ATTRIBUTE_ID = 0x15;
-    MAD_SUBNGET = 0x1; # MAD_METHOD_GET
-    MAD_SUBNSET = 0x2; # MAD_METHOD_SET
+    MAD_LENGTH = 56
+    MAD_ATTRIBUTE_ID = 0x15
+    MAD_SUBNGET = 0x1 # MAD_METHOD_GET
+    MAD_SUBNSET = 0x2 # MAD_METHOD_SET
     def zero(self):
         self.MKey = 0;
         self.GIDPrefix = 0;
@@ -2216,10 +2216,10 @@ class SMPPortInfo(rdma.binstruct.BinStruct):
 class SMPPKeyTable(rdma.binstruct.BinStruct):
     '''Partition Table (section 14.2.5.7)'''
     __slots__ = ('PKeyBlock');
-    MAD_LENGTH = 64;
-    MAD_ATTRIBUTE_ID = 0x16;
-    MAD_SUBNGET = 0x1; # MAD_METHOD_GET
-    MAD_SUBNSET = 0x2; # MAD_METHOD_SET
+    MAD_LENGTH = 64
+    MAD_ATTRIBUTE_ID = 0x16
+    MAD_SUBNGET = 0x1 # MAD_METHOD_GET
+    MAD_SUBNSET = 0x2 # MAD_METHOD_SET
     def zero(self):
         self.PKeyBlock = [0]*32;
 
@@ -2238,10 +2238,10 @@ class SMPPKeyTable(rdma.binstruct.BinStruct):
 class SMPSLToVLMappingTable(rdma.binstruct.BinStruct):
     '''Service Level to Virtual Lane mapping Information (section 14.2.5.8)'''
     __slots__ = ('SLtoVL');
-    MAD_LENGTH = 8;
-    MAD_ATTRIBUTE_ID = 0x17;
-    MAD_SUBNGET = 0x1; # MAD_METHOD_GET
-    MAD_SUBNSET = 0x2; # MAD_METHOD_SET
+    MAD_LENGTH = 8
+    MAD_ATTRIBUTE_ID = 0x17
+    MAD_SUBNGET = 0x1 # MAD_METHOD_GET
+    MAD_SUBNSET = 0x2 # MAD_METHOD_SET
     def zero(self):
         self.SLtoVL = bytearray(16);
 
@@ -2260,10 +2260,10 @@ class SMPSLToVLMappingTable(rdma.binstruct.BinStruct):
 class SMPVLArbitrationTable(rdma.binstruct.BinStruct):
     '''List of Weights (section 14.2.5.9)'''
     __slots__ = ('VLWeightBlock');
-    MAD_LENGTH = 64;
-    MAD_ATTRIBUTE_ID = 0x18;
-    MAD_SUBNGET = 0x1; # MAD_METHOD_GET
-    MAD_SUBNSET = 0x2; # MAD_METHOD_SET
+    MAD_LENGTH = 64
+    MAD_ATTRIBUTE_ID = 0x18
+    MAD_SUBNGET = 0x1 # MAD_METHOD_GET
+    MAD_SUBNSET = 0x2 # MAD_METHOD_SET
     def zero(self):
         self.VLWeightBlock = [0]*32;
 
@@ -2282,10 +2282,10 @@ class SMPVLArbitrationTable(rdma.binstruct.BinStruct):
 class SMPLinearForwardingTable(rdma.binstruct.BinStruct):
     '''Linear Forwarding Table Information (section 14.2.5.10)'''
     __slots__ = ('portBlock');
-    MAD_LENGTH = 64;
-    MAD_ATTRIBUTE_ID = 0x19;
-    MAD_SUBNGET = 0x1; # MAD_METHOD_GET
-    MAD_SUBNSET = 0x2; # MAD_METHOD_SET
+    MAD_LENGTH = 64
+    MAD_ATTRIBUTE_ID = 0x19
+    MAD_SUBNGET = 0x1 # MAD_METHOD_GET
+    MAD_SUBNSET = 0x2 # MAD_METHOD_SET
     def zero(self):
         self.portBlock = bytearray(64);
 
@@ -2304,10 +2304,10 @@ class SMPLinearForwardingTable(rdma.binstruct.BinStruct):
 class SMPRandomForwardingTable(rdma.binstruct.BinStruct):
     '''Random Forwarding Table Information (section 14.2.5.11)'''
     __slots__ = ('LIDPortBlock');
-    MAD_LENGTH = 64;
-    MAD_ATTRIBUTE_ID = 0x1a;
-    MAD_SUBNGET = 0x1; # MAD_METHOD_GET
-    MAD_SUBNSET = 0x2; # MAD_METHOD_SET
+    MAD_LENGTH = 64
+    MAD_ATTRIBUTE_ID = 0x1a
+    MAD_SUBNGET = 0x1 # MAD_METHOD_GET
+    MAD_SUBNSET = 0x2 # MAD_METHOD_SET
     def __init__(self,*args):
         self.LIDPortBlock = [SMPLIDPortBlock()]*16;
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -2360,10 +2360,10 @@ class SMPRandomForwardingTable(rdma.binstruct.BinStruct):
 class SMPMulticastForwardingTable(rdma.binstruct.BinStruct):
     '''Multicast Forwarding Table Information (section 14.2.5.12)'''
     __slots__ = ('portMaskBlock');
-    MAD_LENGTH = 64;
-    MAD_ATTRIBUTE_ID = 0x1b;
-    MAD_SUBNGET = 0x1; # MAD_METHOD_GET
-    MAD_SUBNSET = 0x2; # MAD_METHOD_SET
+    MAD_LENGTH = 64
+    MAD_ATTRIBUTE_ID = 0x1b
+    MAD_SUBNGET = 0x1 # MAD_METHOD_GET
+    MAD_SUBNSET = 0x2 # MAD_METHOD_SET
     def zero(self):
         self.portMaskBlock = [0]*32;
 
@@ -2382,10 +2382,10 @@ class SMPMulticastForwardingTable(rdma.binstruct.BinStruct):
 class SMPSMInfo(rdma.binstruct.BinStruct):
     '''Subnet Management Information (section 14.2.5.13)'''
     __slots__ = ('GUID','SMKey','actCount','priority','SMState','reserved1');
-    MAD_LENGTH = 24;
-    MAD_ATTRIBUTE_ID = 0x20;
-    MAD_SUBNGET = 0x1; # MAD_METHOD_GET
-    MAD_SUBNSET = 0x2; # MAD_METHOD_SET
+    MAD_LENGTH = 24
+    MAD_ATTRIBUTE_ID = 0x20
+    MAD_SUBNGET = 0x1 # MAD_METHOD_GET
+    MAD_SUBNSET = 0x2 # MAD_METHOD_SET
     def zero(self):
         self.GUID = 0;
         self.SMKey = 0;
@@ -2425,9 +2425,9 @@ class SMPSMInfo(rdma.binstruct.BinStruct):
 class SMPVendorDiag(rdma.binstruct.BinStruct):
     '''Vendor Specific Diagnostic (section 14.2.5.14)'''
     __slots__ = ('nextIndex','reserved1','diagData');
-    MAD_LENGTH = 64;
-    MAD_ATTRIBUTE_ID = 0x30;
-    MAD_SUBNGET = 0x1; # MAD_METHOD_GET
+    MAD_LENGTH = 64
+    MAD_ATTRIBUTE_ID = 0x30
+    MAD_SUBNGET = 0x1 # MAD_METHOD_GET
     def zero(self):
         self.nextIndex = 0;
         self.reserved1 = 0;
@@ -2452,10 +2452,10 @@ class SMPVendorDiag(rdma.binstruct.BinStruct):
 class SMPLedInfo(rdma.binstruct.BinStruct):
     '''Turn on/off LED (section 14.2.5.15)'''
     __slots__ = ('ledMask','reserved1');
-    MAD_LENGTH = 4;
-    MAD_ATTRIBUTE_ID = 0x31;
-    MAD_SUBNGET = 0x1; # MAD_METHOD_GET
-    MAD_SUBNSET = 0x2; # MAD_METHOD_SET
+    MAD_LENGTH = 4
+    MAD_ATTRIBUTE_ID = 0x31
+    MAD_SUBNGET = 0x1 # MAD_METHOD_GET
+    MAD_SUBNSET = 0x2 # MAD_METHOD_SET
     def zero(self):
         self.ledMask = 0;
         self.reserved1 = 0;
@@ -2484,9 +2484,9 @@ class SMPLedInfo(rdma.binstruct.BinStruct):
 class SAHeader(rdma.binstruct.BinStruct):
     '''SA Header (section 15.2.1.1)'''
     __slots__ = ('RMPPHeader','SMKey','attributeOffset','reserved1','componentMask');
-    MAD_LENGTH = 56;
-    MAD_CLASS = 0x3;
-    MAD_CLASS_VERSION = 0x2;
+    MAD_LENGTH = 56
+    MAD_CLASS = 0x3
+    MAD_CLASS_VERSION = 0x2
     def __init__(self,*args):
         self.RMPPHeader = RMPPHeader();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -2521,7 +2521,7 @@ class SAHeader(rdma.binstruct.BinStruct):
 class SAFormat(rdma.binstruct.BinStruct):
     '''SA Format (section 15.2.1.1)'''
     __slots__ = ('SAHeader','data');
-    MAD_LENGTH = 256;
+    MAD_LENGTH = 256
     def __init__(self,*args):
         self.SAHeader = SAHeader();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -2549,10 +2549,10 @@ class SAFormat(rdma.binstruct.BinStruct):
 class SANodeRecord(rdma.binstruct.BinStruct):
     '''Container for NodeInfo (section 15.2.5.2)'''
     __slots__ = ('LID','reserved1','nodeInfo','nodeDescription');
-    MAD_LENGTH = 108;
-    MAD_ATTRIBUTE_ID = 0x11;
-    MAD_SUBNADMGET = 0x1; # MAD_METHOD_GET
-    MAD_SUBNADMGETTABLE = 0x12; # MAD_METHOD_GET_TABLE
+    MAD_LENGTH = 108
+    MAD_ATTRIBUTE_ID = 0x11
+    MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
+    MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
     def __init__(self,*args):
         self.nodeInfo = SMPNodeInfo();
         self.nodeDescription = SMPNodeDescription();
@@ -2587,10 +2587,10 @@ class SANodeRecord(rdma.binstruct.BinStruct):
 class SAPortInfoRecord(rdma.binstruct.BinStruct):
     '''Container for PortInfo (section 15.2.5.3)'''
     __slots__ = ('endportLID','portNum','reserved1','portInfo');
-    MAD_LENGTH = 60;
-    MAD_ATTRIBUTE_ID = 0x12;
-    MAD_SUBNADMGET = 0x1; # MAD_METHOD_GET
-    MAD_SUBNADMGETTABLE = 0x12; # MAD_METHOD_GET_TABLE
+    MAD_LENGTH = 60
+    MAD_ATTRIBUTE_ID = 0x12
+    MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
+    MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
     def __init__(self,*args):
         self.portInfo = SMPPortInfo();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -2620,10 +2620,10 @@ class SAPortInfoRecord(rdma.binstruct.BinStruct):
 class SASLToVLMappingTableRecord(rdma.binstruct.BinStruct):
     '''Container for SLtoVLMappingTable entry (section 15.2.5.4)'''
     __slots__ = ('LID','inputPortNum','outputPortNum','reserved1','SLToVLMappingTable');
-    MAD_LENGTH = 16;
-    MAD_ATTRIBUTE_ID = 0x13;
-    MAD_SUBNADMGET = 0x1; # MAD_METHOD_GET
-    MAD_SUBNADMGETTABLE = 0x12; # MAD_METHOD_GET_TABLE
+    MAD_LENGTH = 16
+    MAD_ATTRIBUTE_ID = 0x13
+    MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
+    MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
     def __init__(self,*args):
         self.SLToVLMappingTable = SMPSLToVLMappingTable();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -2656,10 +2656,10 @@ class SASLToVLMappingTableRecord(rdma.binstruct.BinStruct):
 class SASwitchInfoRecord(rdma.binstruct.BinStruct):
     '''Container for SwitchInfo (section 15.2.5.5)'''
     __slots__ = ('LID','reserved1','switchInfo');
-    MAD_LENGTH = 24;
-    MAD_ATTRIBUTE_ID = 0x14;
-    MAD_SUBNADMGET = 0x1; # MAD_METHOD_GET
-    MAD_SUBNADMGETTABLE = 0x12; # MAD_METHOD_GET_TABLE
+    MAD_LENGTH = 24
+    MAD_ATTRIBUTE_ID = 0x14
+    MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
+    MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
     def __init__(self,*args):
         self.switchInfo = SMPSwitchInfo();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -2688,10 +2688,10 @@ class SASwitchInfoRecord(rdma.binstruct.BinStruct):
 class SALinearForwardingTableRecord(rdma.binstruct.BinStruct):
     '''Container for LinearForwardingTable entry (section 15.2.5.6)'''
     __slots__ = ('LID','blockNum','reserved1','linearForwardingTable');
-    MAD_LENGTH = 72;
-    MAD_ATTRIBUTE_ID = 0x15;
-    MAD_SUBNADMGET = 0x1; # MAD_METHOD_GET
-    MAD_SUBNADMGETTABLE = 0x12; # MAD_METHOD_GET_TABLE
+    MAD_LENGTH = 72
+    MAD_ATTRIBUTE_ID = 0x15
+    MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
+    MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
     def __init__(self,*args):
         self.linearForwardingTable = SMPLinearForwardingTable();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -2723,10 +2723,10 @@ class SALinearForwardingTableRecord(rdma.binstruct.BinStruct):
 class SARandomForwardingTableRecord(rdma.binstruct.BinStruct):
     '''Container for RandomForwardingTable entry (section 15.2.5.7)'''
     __slots__ = ('LID','blockNum','reserved1','randomForwardingTable');
-    MAD_LENGTH = 72;
-    MAD_ATTRIBUTE_ID = 0x16;
-    MAD_SUBNADMGET = 0x1; # MAD_METHOD_GET
-    MAD_SUBNADMGETTABLE = 0x12; # MAD_METHOD_GET_TABLE
+    MAD_LENGTH = 72
+    MAD_ATTRIBUTE_ID = 0x16
+    MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
+    MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
     def __init__(self,*args):
         self.randomForwardingTable = SMPRandomForwardingTable();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -2758,10 +2758,10 @@ class SARandomForwardingTableRecord(rdma.binstruct.BinStruct):
 class SAMulticastForwardingTableRecord(rdma.binstruct.BinStruct):
     '''Container for MulticastForwardingTable entry (section 15.2.5.8)'''
     __slots__ = ('LID','reserved1','position','blockNum','reserved2','multicastForwardingTable');
-    MAD_LENGTH = 72;
-    MAD_ATTRIBUTE_ID = 0x17;
-    MAD_SUBNADMGET = 0x1; # MAD_METHOD_GET
-    MAD_SUBNADMGETTABLE = 0x12; # MAD_METHOD_GET_TABLE
+    MAD_LENGTH = 72
+    MAD_ATTRIBUTE_ID = 0x17
+    MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
+    MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
     def __init__(self,*args):
         self.multicastForwardingTable = SMPMulticastForwardingTable();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -2806,10 +2806,10 @@ class SAMulticastForwardingTableRecord(rdma.binstruct.BinStruct):
 class SAVLArbitrationTableRecord(rdma.binstruct.BinStruct):
     '''Container for VLArbitrationTable entry (section 15.2.5.9)'''
     __slots__ = ('LID','outputPortNum','blockNum','reserved1','VLArbitrationTable');
-    MAD_LENGTH = 72;
-    MAD_ATTRIBUTE_ID = 0x36;
-    MAD_SUBNADMGET = 0x1; # MAD_METHOD_GET
-    MAD_SUBNADMGETTABLE = 0x12; # MAD_METHOD_GET_TABLE
+    MAD_LENGTH = 72
+    MAD_ATTRIBUTE_ID = 0x36
+    MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
+    MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
     def __init__(self,*args):
         self.VLArbitrationTable = SMPVLArbitrationTable();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -2842,10 +2842,10 @@ class SAVLArbitrationTableRecord(rdma.binstruct.BinStruct):
 class SASMInfoRecord(rdma.binstruct.BinStruct):
     '''Container for SMInfo (section 15.2.5.10)'''
     __slots__ = ('LID','reserved1','SMInfo');
-    MAD_LENGTH = 28;
-    MAD_ATTRIBUTE_ID = 0x18;
-    MAD_SUBNADMGET = 0x1; # MAD_METHOD_GET
-    MAD_SUBNADMGETTABLE = 0x12; # MAD_METHOD_GET_TABLE
+    MAD_LENGTH = 28
+    MAD_ATTRIBUTE_ID = 0x18
+    MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
+    MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
     def __init__(self,*args):
         self.SMInfo = SMPSMInfo();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -2874,10 +2874,10 @@ class SASMInfoRecord(rdma.binstruct.BinStruct):
 class SAInformInfoRecord(rdma.binstruct.BinStruct):
     '''Container for InformInfo (section 15.2.5.12)'''
     __slots__ = ('subscriberGID','enumeration','reserved1','reserved2','informInfo','reserved3');
-    MAD_LENGTH = 80;
-    MAD_ATTRIBUTE_ID = 0xf3;
-    MAD_SUBNADMGET = 0x1; # MAD_METHOD_GET
-    MAD_SUBNADMGETTABLE = 0x12; # MAD_METHOD_GET_TABLE
+    MAD_LENGTH = 80
+    MAD_ATTRIBUTE_ID = 0xf3
+    MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
+    MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
     def __init__(self,*args):
         self.informInfo = MADInformInfo();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -2919,10 +2919,10 @@ class SAInformInfoRecord(rdma.binstruct.BinStruct):
 class SALinkRecord(rdma.binstruct.BinStruct):
     '''Inter-node linkage information (section 15.2.5.13)'''
     __slots__ = ('fromLID','fromPort','toPort','toLID','reserved1');
-    MAD_LENGTH = 8;
-    MAD_ATTRIBUTE_ID = 0x20;
-    MAD_SUBNADMGET = 0x1; # MAD_METHOD_GET
-    MAD_SUBNADMGETTABLE = 0x12; # MAD_METHOD_GET_TABLE
+    MAD_LENGTH = 8
+    MAD_ATTRIBUTE_ID = 0x20
+    MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
+    MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
     def zero(self):
         self.fromLID = 0;
         self.fromPort = 0;
@@ -2947,10 +2947,10 @@ class SALinkRecord(rdma.binstruct.BinStruct):
 class SAGUIDInfoRecord(rdma.binstruct.BinStruct):
     '''Container for port GUIDInfo (section 15.2.5.18)'''
     __slots__ = ('LID','blockNum','reserved1','reserved2','GUIDInfo');
-    MAD_LENGTH = 72;
-    MAD_ATTRIBUTE_ID = 0x30;
-    MAD_SUBNADMGET = 0x1; # MAD_METHOD_GET
-    MAD_SUBNADMGETTABLE = 0x12; # MAD_METHOD_GET_TABLE
+    MAD_LENGTH = 72
+    MAD_ATTRIBUTE_ID = 0x30
+    MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
+    MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
     def __init__(self,*args):
         self.GUIDInfo = SMPGUIDInfo();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -2983,12 +2983,12 @@ class SAGUIDInfoRecord(rdma.binstruct.BinStruct):
 class SAServiceRecord(rdma.binstruct.BinStruct):
     '''Information on advertised services (section 15.2.5.14)'''
     __slots__ = ('serviceID','serviceGID','servicePKey','reserved1','serviceLease','serviceKey','serviceName','serviceData8','serviceData16','serviceData32','serviceData64');
-    MAD_LENGTH = 176;
-    MAD_ATTRIBUTE_ID = 0x31;
-    MAD_SUBNADMGET = 0x1; # MAD_METHOD_GET
-    MAD_SUBNADMSET = 0x2; # MAD_METHOD_SET
-    MAD_SUBNADMGETTABLE = 0x12; # MAD_METHOD_GET_TABLE
-    MAD_SUBNADMDELETE = 0x15; # MAD_METHOD_DELETE
+    MAD_LENGTH = 176
+    MAD_ATTRIBUTE_ID = 0x31
+    MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
+    MAD_SUBNADMSET = 0x2 # MAD_METHOD_SET
+    MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
+    MAD_SUBNADMDELETE = 0x15 # MAD_METHOD_DELETE
     def zero(self):
         self.serviceID = 0;
         self.serviceGID = bytearray(16);
@@ -3049,10 +3049,10 @@ class SAServiceRecord(rdma.binstruct.BinStruct):
 class SAPKeyTableRecord(rdma.binstruct.BinStruct):
     '''Container for P_Key Table (section 15.2.5.11)'''
     __slots__ = ('LID','blockNum','portNum','reserved1','PKeyTable');
-    MAD_LENGTH = 72;
-    MAD_ATTRIBUTE_ID = 0x33;
-    MAD_SUBNADMGET = 0x1; # MAD_METHOD_GET
-    MAD_SUBNADMGETTABLE = 0x12; # MAD_METHOD_GET_TABLE
+    MAD_LENGTH = 72
+    MAD_ATTRIBUTE_ID = 0x33
+    MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
+    MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
     def __init__(self,*args):
         self.PKeyTable = SMPPKeyTable();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -3094,10 +3094,10 @@ class SAPKeyTableRecord(rdma.binstruct.BinStruct):
 class SAPathRecord(rdma.binstruct.BinStruct):
     '''Information on paths through the subnet (section 15.2.5.16)'''
     __slots__ = ('reserved1','reserved2','DGID','SGID','DLID','SLID','rawTraffic','reserved3','flowLabel','hopLimit','TClass','reversible','numbPath','PKey','reserved4','SL','MTUSelector','MTU','rateSelector','rate','packetLifeTimeSelector','packetLifeTime','preference','reserved5','reserved6');
-    MAD_LENGTH = 64;
-    MAD_ATTRIBUTE_ID = 0x35;
-    MAD_SUBNADMGET = 0x1; # MAD_METHOD_GET
-    MAD_SUBNADMGETTABLE = 0x12; # MAD_METHOD_GET_TABLE
+    MAD_LENGTH = 64
+    MAD_ATTRIBUTE_ID = 0x35
+    MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
+    MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
     def zero(self):
         self.reserved1 = 0;
         self.reserved2 = 0;
@@ -3210,12 +3210,12 @@ class SAPathRecord(rdma.binstruct.BinStruct):
 class SAMCMemberRecord(rdma.binstruct.BinStruct):
     '''Multicast member attribute (section 15.2.5.17)'''
     __slots__ = ('MGID','portGID','requesterGID','QKey','MLID','MTUSelector','MTU','TClass','PKey','rateSelector','rate','packetLifeTimeSelector','packetLifeTime','SL','flowLabel','hopLimit','scope','joinState','reserved1');
-    MAD_LENGTH = 68;
-    MAD_ATTRIBUTE_ID = 0x38;
-    MAD_SUBNADMGET = 0x1; # MAD_METHOD_GET
-    MAD_SUBNADMSET = 0x2; # MAD_METHOD_SET
-    MAD_SUBNADMGETTABLE = 0x12; # MAD_METHOD_GET_TABLE
-    MAD_SUBNADMDELETE = 0x15; # MAD_METHOD_DELETE
+    MAD_LENGTH = 68
+    MAD_ATTRIBUTE_ID = 0x38
+    MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
+    MAD_SUBNADMSET = 0x2 # MAD_METHOD_SET
+    MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
+    MAD_SUBNADMDELETE = 0x15 # MAD_METHOD_DELETE
     def zero(self):
         self.MGID = bytearray(16);
         self.portGID = bytearray(16);
@@ -3315,9 +3315,9 @@ class SAMCMemberRecord(rdma.binstruct.BinStruct):
 class SATraceRecord(rdma.binstruct.BinStruct):
     '''Path trace information (section 15.2.5.19)'''
     __slots__ = ('GIDPrefix','IDGeneration','reserved1','nodeType','nodeID','chassisID','entryPortID','exitPortID','entryPort','exitPort','reserved2');
-    MAD_LENGTH = 48;
-    MAD_ATTRIBUTE_ID = 0x39;
-    MAD_SUBNADMGETTRACETABLE = 0x13; # MAD_METHOD_GET_TRACE_TABLE
+    MAD_LENGTH = 48
+    MAD_ATTRIBUTE_ID = 0x39
+    MAD_SUBNADMGETTRACETABLE = 0x13 # MAD_METHOD_GET_TRACE_TABLE
     def zero(self):
         self.GIDPrefix = 0;
         self.IDGeneration = 0;
@@ -3358,9 +3358,9 @@ class SATraceRecord(rdma.binstruct.BinStruct):
 class SAMultiPathRecord(rdma.binstruct.BinStruct):
     '''Request for multiple paths (section 15.2.5.20)'''
     __slots__ = ('rawTraffic','reserved1','flowLabel','hopLimit','TClass','reversible','numbPath','PKey','reserved2','SL','MTUSelector','MTU','rateSelector','rate','packetLifeTimeSelector','packetLifeTime','reserved3','independenceSelector','reserved4','SGIDCount','DGIDCount','reserved5','reserved6','SDGID');
-    MAD_LENGTH = 40;
-    MAD_ATTRIBUTE_ID = 0x3a;
-    MAD_SUBNADMGETMULTI = 0x14; # MAD_METHOD_GET_MULTI
+    MAD_LENGTH = 40
+    MAD_ATTRIBUTE_ID = 0x3a
+    MAD_SUBNADMGETMULTI = 0x14 # MAD_METHOD_GET_MULTI
     def zero(self):
         self.rawTraffic = 0;
         self.reserved1 = 0;
@@ -3473,10 +3473,10 @@ class SAMultiPathRecord(rdma.binstruct.BinStruct):
 class SAServiceAssociationRecord(rdma.binstruct.BinStruct):
     '''ServiceRecord ServiceName/ServiceKey association (section 15.2.5.15)'''
     __slots__ = ('serviceKey','serviceName');
-    MAD_LENGTH = 80;
-    MAD_ATTRIBUTE_ID = 0x3b;
-    MAD_SUBNADMGET = 0x1; # MAD_METHOD_GET
-    MAD_SUBNADMGETTABLE = 0x12; # MAD_METHOD_GET_TABLE
+    MAD_LENGTH = 80
+    MAD_ATTRIBUTE_ID = 0x3b
+    MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
+    MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
     def zero(self):
         self.serviceKey = bytearray(16);
         self.serviceName = bytearray(64);
@@ -3500,9 +3500,9 @@ class SAServiceAssociationRecord(rdma.binstruct.BinStruct):
 class PMFormat(rdma.binstruct.BinStruct):
     '''Performance Management MAD Format (section 16.1.1)'''
     __slots__ = ('MADHeader','reserved1','data');
-    MAD_LENGTH = 256;
-    MAD_CLASS = 0x4;
-    MAD_CLASS_VERSION = 0x1;
+    MAD_LENGTH = 256
+    MAD_CLASS = 0x4
+    MAD_CLASS_VERSION = 0x1
     def __init__(self,*args):
         self.MADHeader = MADHeader();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -3535,10 +3535,10 @@ class PMFormat(rdma.binstruct.BinStruct):
 class PMPortSamplesCtl(rdma.binstruct.BinStruct):
     '''Port Performance Data Sampling Control (section 16.1.3.2)'''
     __slots__ = ('opCode','portSelect','tick','reserved1','counterWidth','reserved2','counterMask0','counterMask1','counterMask2','counterMask3','counterMask4','counterMask5','counterMask6','counterMask7','counterMask8','counterMask9','reserved3','counterMask10','counterMask11','counterMask12','counterMask13','counterMask14','sampleMechanisms','reserved4','sampleStatus','optionMask','vendorMask','sampleStart','sampleInterval','tag','counterSelect0','counterSelect1','counterSelect2','counterSelect3','counterSelect4','counterSelect5','counterSelect6','counterSelect7','counterSelect8','counterSelect9','counterSelect10','counterSelect11','counterSelect12','counterSelect13','counterSelect14','reserved5','samplesOnlyOptionMask','reserved6');
-    MAD_LENGTH = 192;
-    MAD_ATTRIBUTE_ID = 0x10;
-    MAD_PERFORMANCEGET = 0x1; # MAD_METHOD_GET
-    MAD_PERFORMANCESET = 0x2; # MAD_METHOD_SET
+    MAD_LENGTH = 192
+    MAD_ATTRIBUTE_ID = 0x10
+    MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
+    MAD_PERFORMANCESET = 0x2 # MAD_METHOD_SET
     def zero(self):
         self.opCode = 0;
         self.portSelect = 0;
@@ -3686,9 +3686,9 @@ class PMPortSamplesCtl(rdma.binstruct.BinStruct):
 class PMPortSamplesRes(rdma.binstruct.BinStruct):
     '''Port Performance Data Sampling Results (section 16.1.3.4)'''
     __slots__ = ('tag','reserved1','sampleStatus','counter');
-    MAD_LENGTH = 64;
-    MAD_ATTRIBUTE_ID = 0x11;
-    MAD_PERFORMANCEGET = 0x1; # MAD_METHOD_GET
+    MAD_LENGTH = 64
+    MAD_ATTRIBUTE_ID = 0x11
+    MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
     def zero(self):
         self.tag = 0;
         self.reserved1 = 0;
@@ -3722,10 +3722,10 @@ class PMPortSamplesRes(rdma.binstruct.BinStruct):
 class PMPortCounters(rdma.binstruct.BinStruct):
     '''Port Basic Performance and Error Counters (section 16.1.3.5)'''
     __slots__ = ('reserved1','portSelect','counterSelect','symbolErrorCounter','linkErrorRecoveryCounter','linkDownedCounter','portRcvErrors','portRcvRemotePhysicalErrors','portRcvSwitchRelayErrors','portXmitDiscards','portXmitConstraintErrors','portRcvConstraintErrors','counterSelect2','localLinkIntegrityErrors','excessiveBufferOverrunErrors','reserved2','VL15Dropped','portXmitData','portRcvData','portXmitPkts','portRcvPkts','portXmitWait');
-    MAD_LENGTH = 44;
-    MAD_ATTRIBUTE_ID = 0x12;
-    MAD_PERFORMANCEGET = 0x1; # MAD_METHOD_GET
-    MAD_PERFORMANCESET = 0x2; # MAD_METHOD_SET
+    MAD_LENGTH = 44
+    MAD_ATTRIBUTE_ID = 0x12
+    MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
+    MAD_PERFORMANCESET = 0x2 # MAD_METHOD_SET
     def zero(self):
         self.reserved1 = 0;
         self.portSelect = 0;
@@ -3797,10 +3797,10 @@ class PMPortCounters(rdma.binstruct.BinStruct):
 class PMPortRcvErrorDetails(rdma.binstruct.BinStruct):
     '''Port Detailed Error Counters (section 16.1.4.1)'''
     __slots__ = ('reserved1','portSelect','counterSelect','portLocalPhysicalErrors','portMalformedPacketErrors','portBufferOverrunErrors','portDLIDMappingErrors','portVLMappingErrors','portLoopingErrors');
-    MAD_LENGTH = 16;
-    MAD_ATTRIBUTE_ID = 0x15;
-    MAD_PERFORMANCEGET = 0x1; # MAD_METHOD_GET
-    MAD_PERFORMANCESET = 0x2; # MAD_METHOD_SET
+    MAD_LENGTH = 16
+    MAD_ATTRIBUTE_ID = 0x15
+    MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
+    MAD_PERFORMANCESET = 0x2 # MAD_METHOD_SET
     def zero(self):
         self.reserved1 = 0;
         self.portSelect = 0;
@@ -3833,10 +3833,10 @@ class PMPortRcvErrorDetails(rdma.binstruct.BinStruct):
 class PMPortXmitDiscardDetails(rdma.binstruct.BinStruct):
     '''Port Transmit Discard Counters (section 16.1.4.2)'''
     __slots__ = ('reserved1','portSelect','counterSelect','portInactiveDiscards','portNeighborMTUDiscards','portSwLifetimeLimitDiscards','portSwHOQLimitDiscards');
-    MAD_LENGTH = 12;
-    MAD_ATTRIBUTE_ID = 0x16;
-    MAD_PERFORMANCEGET = 0x1; # MAD_METHOD_GET
-    MAD_PERFORMANCESET = 0x2; # MAD_METHOD_SET
+    MAD_LENGTH = 12
+    MAD_ATTRIBUTE_ID = 0x16
+    MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
+    MAD_PERFORMANCESET = 0x2 # MAD_METHOD_SET
     def zero(self):
         self.reserved1 = 0;
         self.portSelect = 0;
@@ -3865,10 +3865,10 @@ class PMPortXmitDiscardDetails(rdma.binstruct.BinStruct):
 class PMPortOpRcvCounters(rdma.binstruct.BinStruct):
     '''Port Receive Counters per Op Code (section 16.1.4.3)'''
     __slots__ = ('opCode','portSelect','counterSelect','portOpRcvPkts','portOpRcvData');
-    MAD_LENGTH = 12;
-    MAD_ATTRIBUTE_ID = 0x17;
-    MAD_PERFORMANCEGET = 0x1; # MAD_METHOD_GET
-    MAD_PERFORMANCESET = 0x2; # MAD_METHOD_SET
+    MAD_LENGTH = 12
+    MAD_ATTRIBUTE_ID = 0x17
+    MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
+    MAD_PERFORMANCESET = 0x2 # MAD_METHOD_SET
     def zero(self):
         self.opCode = 0;
         self.portSelect = 0;
@@ -3895,10 +3895,10 @@ class PMPortOpRcvCounters(rdma.binstruct.BinStruct):
 class PMPortFlowCtlCounters(rdma.binstruct.BinStruct):
     '''Port Flow Control Counters (section 16.1.4.4)'''
     __slots__ = ('reserved1','portSelect','counterSelect','portXmitFlowPkts','portRcvFlowPkts');
-    MAD_LENGTH = 12;
-    MAD_ATTRIBUTE_ID = 0x18;
-    MAD_PERFORMANCEGET = 0x1; # MAD_METHOD_GET
-    MAD_PERFORMANCESET = 0x2; # MAD_METHOD_SET
+    MAD_LENGTH = 12
+    MAD_ATTRIBUTE_ID = 0x18
+    MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
+    MAD_PERFORMANCESET = 0x2 # MAD_METHOD_SET
     def zero(self):
         self.reserved1 = 0;
         self.portSelect = 0;
@@ -3925,10 +3925,10 @@ class PMPortFlowCtlCounters(rdma.binstruct.BinStruct):
 class PMPortVLOpPackets(rdma.binstruct.BinStruct):
     '''Port Packets Received per Op Code per VL (section 16.1.4.5)'''
     __slots__ = ('opCode','portSelect','counterSelect','portVLOpPackets');
-    MAD_LENGTH = 36;
-    MAD_ATTRIBUTE_ID = 0x19;
-    MAD_PERFORMANCEGET = 0x1; # MAD_METHOD_GET
-    MAD_PERFORMANCESET = 0x2; # MAD_METHOD_SET
+    MAD_LENGTH = 36
+    MAD_ATTRIBUTE_ID = 0x19
+    MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
+    MAD_PERFORMANCESET = 0x2 # MAD_METHOD_SET
     def zero(self):
         self.opCode = 0;
         self.portSelect = 0;
@@ -3952,10 +3952,10 @@ class PMPortVLOpPackets(rdma.binstruct.BinStruct):
 class PMPortVLOpData(rdma.binstruct.BinStruct):
     '''Port Kilobytes Received per Op Code per VL (section 16.1.4.6)'''
     __slots__ = ('opCode','portSelect','counterSelect','portVLOpData');
-    MAD_LENGTH = 68;
-    MAD_ATTRIBUTE_ID = 0x1a;
-    MAD_PERFORMANCEGET = 0x1; # MAD_METHOD_GET
-    MAD_PERFORMANCESET = 0x2; # MAD_METHOD_SET
+    MAD_LENGTH = 68
+    MAD_ATTRIBUTE_ID = 0x1a
+    MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
+    MAD_PERFORMANCESET = 0x2 # MAD_METHOD_SET
     def zero(self):
         self.opCode = 0;
         self.portSelect = 0;
@@ -3979,10 +3979,10 @@ class PMPortVLOpData(rdma.binstruct.BinStruct):
 class PMPortVLXmitFlowCtlUpdateErrors(rdma.binstruct.BinStruct):
     '''Port Flow Control update errors per VL (section 16.1.4.7)'''
     __slots__ = ('reserved1','portSelect','counterSelect','portVLXmitFlowCtlUpdateErrors');
-    MAD_LENGTH = 8;
-    MAD_ATTRIBUTE_ID = 0x1b;
-    MAD_PERFORMANCEGET = 0x1; # MAD_METHOD_GET
-    MAD_PERFORMANCESET = 0x2; # MAD_METHOD_SET
+    MAD_LENGTH = 8
+    MAD_ATTRIBUTE_ID = 0x1b
+    MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
+    MAD_PERFORMANCESET = 0x2 # MAD_METHOD_SET
     def zero(self):
         self.reserved1 = 0;
         self.portSelect = 0;
@@ -4008,10 +4008,10 @@ class PMPortVLXmitFlowCtlUpdateErrors(rdma.binstruct.BinStruct):
 class PMPortVLXmitWaitCounters(rdma.binstruct.BinStruct):
     '''Port Ticks Waiting to Transmit Counters per VL (section 16.1.4.8)'''
     __slots__ = ('reserved1','portSelect','counterSelect','portVLXmitWait');
-    MAD_LENGTH = 36;
-    MAD_ATTRIBUTE_ID = 0x1c;
-    MAD_PERFORMANCEGET = 0x1; # MAD_METHOD_GET
-    MAD_PERFORMANCESET = 0x2; # MAD_METHOD_SET
+    MAD_LENGTH = 36
+    MAD_ATTRIBUTE_ID = 0x1c
+    MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
+    MAD_PERFORMANCESET = 0x2 # MAD_METHOD_SET
     def zero(self):
         self.reserved1 = 0;
         self.portSelect = 0;
@@ -4035,10 +4035,10 @@ class PMPortVLXmitWaitCounters(rdma.binstruct.BinStruct):
 class PMSwPortVLCongestion(rdma.binstruct.BinStruct):
     '''Switch Port Congestion per VL (section 16.1.4.9)'''
     __slots__ = ('reserved1','portSelect','counterSelect','swPortVLCongestion');
-    MAD_LENGTH = 36;
-    MAD_ATTRIBUTE_ID = 0x30;
-    MAD_PERFORMANCEGET = 0x1; # MAD_METHOD_GET
-    MAD_PERFORMANCESET = 0x2; # MAD_METHOD_SET
+    MAD_LENGTH = 36
+    MAD_ATTRIBUTE_ID = 0x30
+    MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
+    MAD_PERFORMANCESET = 0x2 # MAD_METHOD_SET
     def zero(self):
         self.reserved1 = 0;
         self.portSelect = 0;
@@ -4062,10 +4062,10 @@ class PMSwPortVLCongestion(rdma.binstruct.BinStruct):
 class PMPortSamplesResExt(rdma.binstruct.BinStruct):
     '''Extended Port Samples Result (section 16.1.4.10)'''
     __slots__ = ('tag','reserved1','sampleStatus','extendedWidth','reserved2','counter');
-    MAD_LENGTH = 128;
-    MAD_ATTRIBUTE_ID = 0x1e;
-    MAD_PERFORMANCEGET = 0x1; # MAD_METHOD_GET
-    MAD_PERFORMANCESET = 0x2; # MAD_METHOD_SET
+    MAD_LENGTH = 128
+    MAD_ATTRIBUTE_ID = 0x1e
+    MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
+    MAD_PERFORMANCESET = 0x2 # MAD_METHOD_SET
     def zero(self):
         self.tag = 0;
         self.reserved1 = 0;
@@ -4114,10 +4114,10 @@ class PMPortSamplesResExt(rdma.binstruct.BinStruct):
 class PMPortCountersExt(rdma.binstruct.BinStruct):
     '''Extended Port Counters (section 16.1.4.11)'''
     __slots__ = ('reserved1','portSelect','counterSelect','reserved2','portXmitData','portRcvData','portXmitPkts','portRcvPkts','portUnicastXmitPkts','portUnicastRcvPkts','portMulticastXmitPkts','portMulticastRcvPkts');
-    MAD_LENGTH = 72;
-    MAD_ATTRIBUTE_ID = 0x1d;
-    MAD_PERFORMANCEGET = 0x1; # MAD_METHOD_GET
-    MAD_PERFORMANCESET = 0x2; # MAD_METHOD_SET
+    MAD_LENGTH = 72
+    MAD_ATTRIBUTE_ID = 0x1d
+    MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
+    MAD_PERFORMANCESET = 0x2 # MAD_METHOD_SET
     def zero(self):
         self.reserved1 = 0;
         self.portSelect = 0;
@@ -4165,9 +4165,9 @@ class PMPortCountersExt(rdma.binstruct.BinStruct):
 class DMFormat(rdma.binstruct.BinStruct):
     '''Device Management MAD Format (section 16.3.1)'''
     __slots__ = ('MADHeader','reserved1','data');
-    MAD_LENGTH = 256;
-    MAD_CLASS = 0x6;
-    MAD_CLASS_VERSION = 0x1;
+    MAD_LENGTH = 256
+    MAD_CLASS = 0x6
+    MAD_CLASS_VERSION = 0x1
     def __init__(self,*args):
         self.MADHeader = MADHeader();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -4200,7 +4200,7 @@ class DMFormat(rdma.binstruct.BinStruct):
 class DMServiceEntry(rdma.binstruct.BinStruct):
     '''Service Entry (section 16.3.3)'''
     __slots__ = ('serviceName','serviceID');
-    MAD_LENGTH = 48;
+    MAD_LENGTH = 48
     def zero(self):
         self.serviceName = bytearray(40);
         self.serviceID = 0;
@@ -4224,9 +4224,9 @@ class DMServiceEntry(rdma.binstruct.BinStruct):
 class DMIOUnitInfo(rdma.binstruct.BinStruct):
     '''List of all I/O Controllers in a I/O Unit (section 16.3.3.3)'''
     __slots__ = ('changeID','maxControllers','reserved1','diagDeviceID','optionROM','controllerList');
-    MAD_LENGTH = 132;
-    MAD_ATTRIBUTE_ID = 0x10;
-    MAD_DEVMGTGET = 0x1; # MAD_METHOD_GET
+    MAD_LENGTH = 132
+    MAD_ATTRIBUTE_ID = 0x10
+    MAD_DEVMGTGET = 0x1 # MAD_METHOD_GET
     def zero(self):
         self.changeID = 0;
         self.maxControllers = 0;
@@ -4266,9 +4266,9 @@ class DMIOUnitInfo(rdma.binstruct.BinStruct):
 class DMIOControllerProfile(rdma.binstruct.BinStruct):
     '''I/O Controller Profile Information (section 16.3.3.4)'''
     __slots__ = ('GUID','vendorID','reserved1','deviceID','deviceVersion','reserved2','subsystemVendorID','reserved3','subsystemID','IOClass','IOSubclass','protocol','protocolVersion','reserved4','reserved5','sendMessageDepth','reserved6','RDMAReadDepth','sendMessageSize','RDMATransferSize','controllerOperationsMask','reserved7','serviceEntries','reserved8','reserved9','IDString');
-    MAD_LENGTH = 128;
-    MAD_ATTRIBUTE_ID = 0x11;
-    MAD_DEVMGTGET = 0x1; # MAD_METHOD_GET
+    MAD_LENGTH = 128
+    MAD_ATTRIBUTE_ID = 0x11
+    MAD_DEVMGTGET = 0x1 # MAD_METHOD_GET
     def zero(self):
         self.GUID = 0;
         self.vendorID = 0;
@@ -4360,9 +4360,9 @@ class DMIOControllerProfile(rdma.binstruct.BinStruct):
 class DMServiceEntries(rdma.binstruct.BinStruct):
     '''List of Supported Services and Their Associated Service IDs (section 16.3.3.5)'''
     __slots__ = ('serviceEntry');
-    MAD_LENGTH = 192;
-    MAD_ATTRIBUTE_ID = 0x12;
-    MAD_DEVMGTGET = 0x1; # MAD_METHOD_GET
+    MAD_LENGTH = 192
+    MAD_ATTRIBUTE_ID = 0x12
+    MAD_DEVMGTGET = 0x1 # MAD_METHOD_GET
     def __init__(self,*args):
         self.serviceEntry = [DMServiceEntry()]*4;
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -4391,9 +4391,9 @@ class DMServiceEntries(rdma.binstruct.BinStruct):
 class DMDiagnosticTimeout(rdma.binstruct.BinStruct):
     '''Get the Maximum Time for Completion of a Diagnostic Test (section 16.3.3.6)'''
     __slots__ = ('maxDiagTime');
-    MAD_LENGTH = 4;
-    MAD_ATTRIBUTE_ID = 0x20;
-    MAD_DEVMGTGET = 0x1; # MAD_METHOD_GET
+    MAD_LENGTH = 4
+    MAD_ATTRIBUTE_ID = 0x20
+    MAD_DEVMGTGET = 0x1 # MAD_METHOD_GET
     def zero(self):
         self.maxDiagTime = 0;
 
@@ -4412,10 +4412,10 @@ class DMDiagnosticTimeout(rdma.binstruct.BinStruct):
 class DMPrepareToTest(rdma.binstruct.BinStruct):
     '''Prepare Device for Test (section 16.3.3.7)'''
     __slots__ = ();
-    MAD_LENGTH = 0;
-    MAD_ATTRIBUTE_ID = 0x21;
-    MAD_DEVMGTGET = 0x1; # MAD_METHOD_GET
-    MAD_DEVMGTSET = 0x2; # MAD_METHOD_SET
+    MAD_LENGTH = 0
+    MAD_ATTRIBUTE_ID = 0x21
+    MAD_DEVMGTGET = 0x1 # MAD_METHOD_GET
+    MAD_DEVMGTSET = 0x2 # MAD_METHOD_SET
     def pack_into(self,buffer,offset=0):
         return None;
 
@@ -4429,9 +4429,9 @@ class DMPrepareToTest(rdma.binstruct.BinStruct):
 class DMTestDeviceOnce(rdma.binstruct.BinStruct):
     '''Test Device Once (section 16.3.3.8)'''
     __slots__ = ();
-    MAD_LENGTH = 0;
-    MAD_ATTRIBUTE_ID = 0x22;
-    MAD_DEVMGTSET = 0x2; # MAD_METHOD_SET
+    MAD_LENGTH = 0
+    MAD_ATTRIBUTE_ID = 0x22
+    MAD_DEVMGTSET = 0x2 # MAD_METHOD_SET
     def pack_into(self,buffer,offset=0):
         return None;
 
@@ -4445,9 +4445,9 @@ class DMTestDeviceOnce(rdma.binstruct.BinStruct):
 class DMTestDeviceLoop(rdma.binstruct.BinStruct):
     '''Test Device Continuously (section 16.3.3.9)'''
     __slots__ = ();
-    MAD_LENGTH = 0;
-    MAD_ATTRIBUTE_ID = 0x23;
-    MAD_DEVMGTSET = 0x2; # MAD_METHOD_SET
+    MAD_LENGTH = 0
+    MAD_ATTRIBUTE_ID = 0x23
+    MAD_DEVMGTSET = 0x2 # MAD_METHOD_SET
     def pack_into(self,buffer,offset=0):
         return None;
 
@@ -4461,9 +4461,9 @@ class DMTestDeviceLoop(rdma.binstruct.BinStruct):
 class DMDiagCode(rdma.binstruct.BinStruct):
     '''Vendor-Specific Device Diagnostic Information (section 16.3.3.10)'''
     __slots__ = ('diagCode','reserved1');
-    MAD_LENGTH = 4;
-    MAD_ATTRIBUTE_ID = 0x24;
-    MAD_DEVMGTGET = 0x1; # MAD_METHOD_GET
+    MAD_LENGTH = 4
+    MAD_ATTRIBUTE_ID = 0x24
+    MAD_DEVMGTGET = 0x1 # MAD_METHOD_GET
     def zero(self):
         self.diagCode = 0;
         self.reserved1 = 0;
@@ -4483,9 +4483,9 @@ class DMDiagCode(rdma.binstruct.BinStruct):
 class SNMPFormat(rdma.binstruct.BinStruct):
     '''SNMP Tunneling MAD Format (section 16.4.1)'''
     __slots__ = ('MADHeader','reserved1','RAddress','payloadLength','segmentNumber','sourceLID','data');
-    MAD_LENGTH = 256;
-    MAD_CLASS = 0x8;
-    MAD_CLASS_VERSION = 0x1;
+    MAD_LENGTH = 256
+    MAD_CLASS = 0x8
+    MAD_CLASS_VERSION = 0x1
     def __init__(self,*args):
         self.MADHeader = MADHeader();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -4528,9 +4528,9 @@ class SNMPFormat(rdma.binstruct.BinStruct):
 class SNMPCommunityInfo(rdma.binstruct.BinStruct):
     '''Community Name Data Store (section 16.4.3.2)'''
     __slots__ = ('communityName');
-    MAD_LENGTH = 64;
-    MAD_ATTRIBUTE_ID = 0x10;
-    MAD_SNMPSEND = 0x3; # MAD_METHOD_SEND
+    MAD_LENGTH = 64
+    MAD_ATTRIBUTE_ID = 0x10
+    MAD_SNMPSEND = 0x3 # MAD_METHOD_SEND
     def zero(self):
         self.communityName = bytearray(64);
 
@@ -4549,9 +4549,9 @@ class SNMPCommunityInfo(rdma.binstruct.BinStruct):
 class SNMPPDUInfo(rdma.binstruct.BinStruct):
     '''Data Segment (section 16.4.3.3)'''
     __slots__ = ('PDUData');
-    MAD_LENGTH = 192;
-    MAD_ATTRIBUTE_ID = 0x11;
-    MAD_SNMPSEND = 0x3; # MAD_METHOD_SEND
+    MAD_LENGTH = 192
+    MAD_ATTRIBUTE_ID = 0x11
+    MAD_SNMPSEND = 0x3 # MAD_METHOD_SEND
     def zero(self):
         self.PDUData = bytearray(192);
 
