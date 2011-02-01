@@ -29,9 +29,60 @@ class MADTimeoutError(MADError):
             return repr(self.exc_info);
         return "MAD timed out";
 
+def get_end_port(name=None):
+    """Return a :class:`rdma.devices.EndPort` for the default end port if name
+    is ``None``, or for the end port described by name. Throws :exc:`RDMAError` if
+    no end port was found or name is malformed.
+
+    The end port string format is one of:
+      =========== ===================
+      Format      Example
+      =========== ===================
+      device      mlx4_0  (defaults to the first port)
+      device/port mlx4_0/1
+      Port GID    fe80::2:c903:0:1491
+      Port GUID   0002:c903:0000:1491
+      =========== ===================
+      """
+    devices = get_rdma_devices();
+    if len(devices) == 0:
+        raise RDMAError("No RDMA devices found.");
+    if name is None:
+        return devices.first().end_ports.first();
+
+    # Try for a port GID
+    import rdma.devices;
+    import rdma.IBA;
+    try:
+        gid = IBA.GID(name);
+    except ValueError:
+        pass;
+    else:
+        return rdma.devices.find_port_gid(devices,gid)[0];
+
+    # Port GUID
+    try:
+        guid = IBA.GUID(name);
+    except ValueError:
+        pass;
+    else:
+        return rdma.devices.find_port_guid(devices,guid);
+
+    # Device name string
+    return rdma.devices.find_port_name(devices,name);
+
 _cached_devices = None;
-def get_rdma_devices(refresh = False):
-    '''Return a container of RDMADevice objects for all devices in the system'''
+def get_rdma_devices(refresh=False):
+    '''Return a container of :class:`rdma.devices.RDMADevice` objects for all devices in the system.
+
+    The return result is an object that looks like an ordered list of
+    :class:`rdma.devices.RDMADevice` objects. However, indexing the list is
+    done by device name not by index. If the length of the returned object is
+    0 then no devices were detected. Programs are encouraged to use
+    :func:`rdma.get_end_port`.
+
+    Current, the type returned is a :class:`~.devices.DemandList` but this is
+    an implementation detail.'''
     global _cached_devices;
     if _cached_devices is not None and not refresh:
         return _cached_devices;
@@ -47,11 +98,13 @@ def get_rdma_devices(refresh = False):
     return _cached_devices;
 
 def get_umad(port,**kwargs):
-    '''Create a umad instance for the associated EndPort'''
+    '''Create a :class:`rdma.umad.UMAD` instance for the associated
+    :class:`rdma.devices.EndPort`.'''
     import rdma.umad;
     return rdma.umad.UMAD(port,**kwargs);
 
 def get_verbs(port,**kwargs):
-    '''Create a UVerbs instance for the associated Device/EndPort'''
+    '''Create a :class:`rdma.uverbs.UVerbs` instance for the associated
+    :class:`rdma.devices.RDMADevice`/:class:`rdma.devices.EndPort`.'''
     import rdma.uverbs;
     return rdma.uverbs.UVerbs(port,**kwargs);

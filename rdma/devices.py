@@ -2,22 +2,27 @@
 '''This module provides a list of IB devices scrapped from sysfs'''
 from __future__ import with_statement;
 
-import os,socket,re,collections
+import rdma;
+import rdma.IBA as IBA;
+import os,re,collections
 
 SYS_INFINIBAND = "/sys/class/infiniband/";
 
-def conv_gid(s):
-    """Convert the content of a sysfs GID file to our representation."""
-    return socket.inet_pton(socket.AF_INET6,s.strip());
-def conv_guid(s):
-    """Convert the content of a sysfs GUID file to our representation."""
-    return s.strip();
-def conv_hex(s):
-    """Convert the content of a sysfs hex integer file to our representation."""
+def _conv_gid2guid(s):
+    """Return the GUID portion of a GID string. Raises :exc:`ValueError` if
+    the string is invalid."""
+    return IBA.GID(s).guid();
+def _conv_hex(s):
+    """Convert the content of a sysfs hex integer file to our representation.
+    Raises :exc:`ValueError` if the string is invalid."""
     return int(s,16);
-def conv_int_desc(s):
-    """Convert the content of a sysfs device major:minor file to our representation."""
+def _conv_int_desc(s):
+    """Convert the content of a sysfs file that has a format %u:%s, the %s is
+    the descriptive name for the integer. Raises :exc:`ValueError` if the
+    string is invalid."""
     t = s.split(':');
+    if len(t) != 2:
+        raise ValueError("%r is not a valid major:minor"%(s));
     return (int(t[0]),t[1].strip());
 
 class SysFSCache(object):
@@ -98,14 +103,14 @@ class DemandList2(DemandList):
 
 class EndPort(SysFSCache):
     '''A RDMA end port. An end port can issue RDMA operations, has a port GID,
-    etc. For an IB switch this will be port 0, for *CA it will be port 1 or
+    etc. For an IB switch this will be port 0, for a \*CA it will be port 1 or
     higher.'''
     def __init__(self,parent,port_id):
         SysFSCache.__init__(self,parent._dir + "ports/%u/"%(port_id));
         self.parent = parent;
         self.port_id = port_id;
-        self.pkeys = DemandList(self._dir + "pkeys/",conv_hex);
-        self.gids = DemandList(self._dir + "gids/",conv_gid);
+        self.pkeys = DemandList(self._dir + "pkeys/",_conv_hex);
+        self.gids = DemandList(self._dir + "gids/",IBA.GID);
 
     def _iterate_services_device(self,dir_,matcher):
         return self.parent._iterate_services_device(dir_,matcher);
@@ -122,17 +127,19 @@ class EndPort(SysFSCache):
             yield I;
 
     @property
-    def lid(self): return self._cached_sysfs("lid",conv_hex);
+    def lid(self): return self._cached_sysfs("lid",_conv_hex);
     @property
     def lmc(self): return self._cached_sysfs("lid_mask_count",int);
     @property
-    def phys_state(self): return self._cached_sysfs("phys_state",conv_int_desc);
+    def phys_state(self): return self._cached_sysfs("phys_state",_conv_int_desc);
     @property
-    def state(self): return self._cached_sysfs("state",conv_int_desc);
+    def state(self): return self._cached_sysfs("state",_conv_int_desc);
     @property
-    def sm_lid(self): return self._cached_sysfs("sm_lid",conv_hex);
+    def sm_lid(self): return self._cached_sysfs("sm_lid",_conv_hex);
     @property
     def sm_sl(self): return self._cached_sysfs("sm_sl",int);
+    @property
+    def port_guid(self): return self._cached_sysfs("gids/0",_conv_gid2guid);
 
     # FIXME This must come from verbs :(
     @property
@@ -154,6 +161,7 @@ class EndPort(SysFSCache):
                 id(self));
 
 class RDMADevice(SysFSCache):
+    """Represents a RDMA device in the system."""
     def __init__(self,name):
         SysFSCache.__init__(self,SYS_INFINIBAND + name + "/");
         self.name = name;
@@ -179,15 +187,15 @@ class RDMADevice(SysFSCache):
             yield dir_ + I;
 
     @property
-    def node_type(self): return self._cached_sysfs("node_type",conv_int_desc);
+    def node_type(self): return self._cached_sysfs("node_type",_conv_int_desc);
     @property
-    def node_guid(self): return self._cached_sysfs("node_guid",conv_guid);
+    def node_guid(self): return self._cached_sysfs("node_guid",IBA.GUID);
     @property
     def node_desc(self): return self._cached_sysfs("node_desc");
     @property
     def fw_ver(self): return self._cached_sysfs("fw_ver");
     @property
-    def sys_image_guid(self): return self._cached_sysfs("sys_image_guid",conv_guid);
+    def sys_image_guid(self): return self._cached_sysfs("sys_image_guid",IBA.GUID);
     @property
     def board_id(self): return self._cached_sysfs("board_id");
     @property
@@ -201,3 +209,52 @@ class RDMADevice(SysFSCache):
                 self.__class__.__name__,
                 self,
                 id(self));
+
+def find_port_gid(devices,gid):
+    """Search the list *devices* for the end port with *gid* and return a
+    ``tuple`` of (:class:`EndPort`,gid_index) or None if not found. *gid* may
+    be a string representation or the internal representation of a gid."""
+    for I in devices:
+        for J in I.end_ports:
+            try:
+                return (J,J.gids.index(gid));
+            except ValueError:
+                continue;
+    raise rdma.RDMAError("RDMA End port %r not found."%(gid));
+
+def find_port_guid(devices,guid):
+    """Search the list *devices* for the end port with *guid* and return a
+    :class:`EndPort`, or None if not found. *guid* may be a string
+    representation or the internal representation of a gid."""
+    for I in devices:
+        for J in I.end_ports:
+            if J.port_guid == guid:
+                return J;
+    raise rdma.RDMAError("RDMA End port %r not found."%(guid));
+
+def find_port_name(devices,name):
+    """Search the list *devices* for the end port with *name* and
+    return :class:`EndPort`, or None if not found. *name* may be
+    a device name in which case the first end port is returned,
+    otherwise it may be device/port. Raises :exc:`rdma.RDMAError` if
+    name is invalid and no device is found."""
+    parts = name.split('/');
+    try:
+        device = devices[parts[0]];
+    except KeyError:
+        raise rdma.RDMAError("RDMA device %r not found."%(name));
+
+    if len(parts) == 1:
+        return device.end_ports.first();
+    if len(parts) != 2:
+        raise rdma.RDMAError("Invalid end port specification %r"%(name));
+
+    try:
+        idx = int(parts[1]);
+    except ValueError:
+        raise rdma.RDMAError("Invalid end port specification %r"%(name));
+
+    try:
+        return device.end_ports[idx];
+    except KeyError:
+        raise rdma.RDMAError("RDMA device %r port %u not found."%(parts[0],idx));
