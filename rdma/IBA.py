@@ -2,6 +2,7 @@
 '''Constants from the InfiniBand Architecture'''
 
 from rdma.IBA_struct import *;
+import socket;
 
 # see NodeInfo.nodeType
 NODE_CA = 1;
@@ -150,3 +151,61 @@ isLinkRoundTripLatencySupported = 1<<24;
 isClientReregistrationSupported = 1<<25;
 isOtherLocalChangesNoticeSupported = 1<<26;
 isLinkSpeedWidthPairsTableSupported = 1<<27;
+
+class GUID(bytes):
+    def __init__(self,s,raw=False):
+        """Convert the content of a sysfs GUID file to our
+        representation. Raises :exc:`ValueError` if the string is invalid. A
+        GUID looks like: 0002:c903:0000:1491. Three colons are mandatory."""
+        pass
+    def __new__(self,s,raw=False):
+        if isinstance(s,GUID):
+            return bytes.__new__(self,bytes.__str__(s));
+        if raw or isinstance(s,GUID):
+            assert(len(s) == 8);
+            return bytes.__new__(self,s);
+
+        v = ''.join(I.zfill(4) for I in s.strip().split(':'));
+        if len(v) != 16:
+            raise ValueError("%r is not a valid GUID"%(s));
+        try:
+            return bytes.__new__(self,v.decode("hex"));
+        except TypeError:
+            raise ValueError("%r is not a valid GUID"%(s));
+
+    def pack_into(self,buf,offset=0):
+        """Pack the value into a byte array""";
+        buffer[offset:offest+8] = bytes.__str__(self);
+
+    def __str__(self):
+        """Return a printable string of the GUID."""
+        tmp = self.encode("hex");
+        return "%s:%s:%s:%s"%(tmp[0:4],tmp[4:8],tmp[8:12],tmp[12:16]);
+    def __repr__(self):
+        return "GUID('%s')"%(self.__str__());
+
+class GID(bytes):
+    def __init__(self,s,raw=False):
+        """Convert from a string to our GID representation. Raises
+        :exc:`ValueError` if the string is invalid. A GID is in IPv6 format,
+        and looks like: fe80::2:c903:0:1491."""
+        pass
+    def __new__(self,s,raw=False):
+        if isinstance(s,GID):
+            return bytes.__new__(self,bytes.__str__(s));
+        if raw:
+            assert(len(s) == 16);
+            return bytes.__new__(self,s);
+        try:
+            return bytes.__new__(self,socket.inet_pton(socket.AF_INET6,s.strip()));
+        except:
+            raise ValueError("%r is not a valid GID"%(s));
+
+    def __str__(self):
+        """Return a printable string of the GID."""
+        return socket.inet_ntop(socket.AF_INET6,bytes.__str__(self));
+    def __repr__(self):
+        return "GID('%s')"%(self.__str__());
+    def guid(self):
+        """Return the GUID portion of the GID."""
+        return GUID(bytes.__getslice__(self,8,16),raw=True);
