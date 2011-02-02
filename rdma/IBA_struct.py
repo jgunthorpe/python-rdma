@@ -82,8 +82,8 @@ class HdrGRH(rdma.binstruct.BinStruct):
         self.payLen = 0;
         self.nxtHdr = 0;
         self.hopLmt = 0;
-        self.SGID = bytearray(16);
-        self.DGID = bytearray(16);
+        self.SGID = IBA.GID();
+        self.DGID = IBA.GID();
 
     @property
     def _pack_0_32(self):
@@ -106,14 +106,14 @@ class HdrGRH(rdma.binstruct.BinStruct):
         self.hopLmt = (value >> 0) & 0xFF;
 
     def pack_into(self,buffer,offset=0):
-        buffer[offset + 8:offset + 24] = self.SGID
-        buffer[offset + 24:offset + 40] = self.DGID
+        self.SGID.pack_into(buffer,offset + 8);
+        self.DGID.pack_into(buffer,offset + 24);
         struct.pack_into('>LL',buffer,offset+0,self._pack_0_32,self._pack_1_32);
 
     def unpack_from(self,buffer,offset=0):
         self._buf = buffer[offset:];
-        self.SGID = buffer[offset + 8:offset + 24]
-        self.DGID = buffer[offset + 24:offset + 40]
+        self.SGID = IBA.GID(buffer[offset + 8:offset + 24],raw=True);
+        self.DGID = IBA.GID(buffer[offset + 24:offset + 40],raw=True);
         (self._pack_0_32,self._pack_1_32,) = struct.unpack_from('>LL',buffer,offset+0);
 
     def printer(self,F,offset=0,*args):
@@ -464,8 +464,8 @@ class CMPath(rdma.binstruct.BinStruct):
     def zero(self):
         self.SLID = 0;
         self.DLID = 0;
-        self.SGID = bytearray(16);
-        self.DGID = bytearray(16);
+        self.SGID = IBA.GID();
+        self.DGID = IBA.GID();
         self.flowLabel = 0;
         self.reserved1 = 0;
         self.reserved2 = 0;
@@ -504,15 +504,15 @@ class CMPath(rdma.binstruct.BinStruct):
         self.reserved4 = (value >> 0) & 0x7;
 
     def pack_into(self,buffer,offset=0):
-        buffer[offset + 4:offset + 20] = self.SGID
-        buffer[offset + 20:offset + 36] = self.DGID
+        self.SGID.pack_into(buffer,offset + 4);
+        self.DGID.pack_into(buffer,offset + 20);
         struct.pack_into('>HH',buffer,offset+0,self.SLID,self.DLID);
         struct.pack_into('>LL',buffer,offset+36,self._pack_0_32,self._pack_1_32);
 
     def unpack_from(self,buffer,offset=0):
         self._buf = buffer[offset:];
-        self.SGID = buffer[offset + 4:offset + 20]
-        self.DGID = buffer[offset + 20:offset + 36]
+        self.SGID = IBA.GID(buffer[offset + 4:offset + 20],raw=True);
+        self.DGID = IBA.GID(buffer[offset + 20:offset + 36],raw=True);
         (self.SLID,self.DLID,) = struct.unpack_from('>HH',buffer,offset+0);
         (self._pack_0_32,self._pack_1_32,) = struct.unpack_from('>LL',buffer,offset+36);
 
@@ -984,8 +984,8 @@ class CMLAP(rdma.binstruct.BinStruct):
         self.reserved2 = 0;
         self.altSLID = 0;
         self.altDLID = 0;
-        self.altSGID = bytearray(16);
-        self.altDGID = bytearray(16);
+        self.altSGID = IBA.GID();
+        self.altDGID = IBA.GID();
         self.altFlowLabel = 0;
         self.reserved3 = 0;
         self.altTClass = 0;
@@ -1035,16 +1035,16 @@ class CMLAP(rdma.binstruct.BinStruct):
         self.reserved6 = (value >> 0) & 0x7;
 
     def pack_into(self,buffer,offset=0):
-        buffer[offset + 24:offset + 40] = self.altSGID
-        buffer[offset + 40:offset + 56] = self.altDGID
+        self.altSGID.pack_into(buffer,offset + 24);
+        self.altDGID.pack_into(buffer,offset + 40);
         buffer[offset + 64:offset + 232] = self.privateData
         struct.pack_into('>LLLLLHH',buffer,offset+0,self.LCID,self.RCID,self.QKey,self._pack_0_32,self.reserved2,self.altSLID,self.altDLID);
         struct.pack_into('>LL',buffer,offset+56,self._pack_1_32,self._pack_2_32);
 
     def unpack_from(self,buffer,offset=0):
         self._buf = buffer[offset:];
-        self.altSGID = buffer[offset + 24:offset + 40]
-        self.altDGID = buffer[offset + 40:offset + 56]
+        self.altSGID = IBA.GID(buffer[offset + 24:offset + 40],raw=True);
+        self.altDGID = IBA.GID(buffer[offset + 40:offset + 56],raw=True);
         self.privateData = buffer[offset + 64:offset + 232]
         (self.LCID,self.RCID,self.QKey,self._pack_0_32,self.reserved2,self.altSLID,self.altDLID,) = struct.unpack_from('>LLLLLHH',buffer,offset+0);
         (self._pack_1_32,self._pack_2_32,) = struct.unpack_from('>LL',buffer,offset+56);
@@ -1304,7 +1304,7 @@ class MADClassPortInfo(rdma.binstruct.BinStruct):
         self.capabilityMask = 0;
         self.reserved1 = 0;
         self.respTimeValue = 0;
-        self.redirectGID = bytearray(16);
+        self.redirectGID = IBA.GID();
         self.redirectTC = 0;
         self.redirectSL = 0;
         self.redirectFL = 0;
@@ -1313,7 +1313,7 @@ class MADClassPortInfo(rdma.binstruct.BinStruct):
         self.reserved2 = 0;
         self.redirectQP = 0;
         self.redirectQKey = 0;
-        self.trapGID = bytearray(16);
+        self.trapGID = IBA.GID();
         self.trapTC = 0;
         self.trapSL = 0;
         self.trapFL = 0;
@@ -1371,16 +1371,16 @@ class MADClassPortInfo(rdma.binstruct.BinStruct):
         self.trapQP = (value >> 0) & 0xFFFFFF;
 
     def pack_into(self,buffer,offset=0):
-        buffer[offset + 8:offset + 24] = self.redirectGID
-        buffer[offset + 40:offset + 56] = self.trapGID
+        self.redirectGID.pack_into(buffer,offset + 64);
+        self.trapGID.pack_into(buffer,offset + 320);
         struct.pack_into('>BBHL',buffer,offset+0,self.baseVersion,self.classVersion,self.capabilityMask,self._pack_0_32);
         struct.pack_into('>LHHLL',buffer,offset+24,self._pack_1_32,self.redirectLID,self.redirectPKey,self._pack_2_32,self.redirectQKey);
         struct.pack_into('>LHHLL',buffer,offset+56,self._pack_3_32,self.trapLID,self.trapPKey,self._pack_4_32,self.trapQKey);
 
     def unpack_from(self,buffer,offset=0):
         self._buf = buffer[offset:];
-        self.redirectGID = buffer[offset + 8:offset + 24]
-        self.trapGID = buffer[offset + 40:offset + 56]
+        self.redirectGID = IBA.GID(buffer[offset + 64:offset + 80],raw=True);
+        self.trapGID = IBA.GID(buffer[offset + 320:offset + 336],raw=True);
         (self.baseVersion,self.classVersion,self.capabilityMask,self._pack_0_32,) = struct.unpack_from('>BBHL',buffer,offset+0);
         (self._pack_1_32,self.redirectLID,self.redirectPKey,self._pack_2_32,self.redirectQKey,) = struct.unpack_from('>LHHLL',buffer,offset+24);
         (self._pack_3_32,self.trapLID,self.trapPKey,self._pack_4_32,self.trapQKey,) = struct.unpack_from('>LHHLL',buffer,offset+56);
@@ -1419,7 +1419,7 @@ class MADInformInfo(rdma.binstruct.BinStruct):
     MAD_ATTRIBUTE_ID = 0x3
     MAD_SUBNADMSET = 0x2 # MAD_METHOD_SET
     def zero(self):
-        self.GID = bytearray(16);
+        self.GID = IBA.GID();
         self.LIDRangeBegin = 0;
         self.LIDRangeEnd = 0;
         self.reserved1 = 0;
@@ -1453,12 +1453,12 @@ class MADInformInfo(rdma.binstruct.BinStruct):
         self.producerType = (value >> 0) & 0xFFFFFF;
 
     def pack_into(self,buffer,offset=0):
-        buffer[offset + 0:offset + 16] = self.GID
+        self.GID.pack_into(buffer,offset + 0);
         struct.pack_into('>HHHBBHHLL',buffer,offset+16,self.LIDRangeBegin,self.LIDRangeEnd,self.reserved1,self.isGeneric,self.subscribe,self.type,self.trapNumber,self._pack_0_32,self._pack_1_32);
 
     def unpack_from(self,buffer,offset=0):
         self._buf = buffer[offset:];
-        self.GID = buffer[offset + 0:offset + 16]
+        self.GID = IBA.GID(buffer[offset + 0:offset + 16],raw=True);
         (self.LIDRangeBegin,self.LIDRangeEnd,self.reserved1,self.isGeneric,self.subscribe,self.type,self.trapNumber,self._pack_0_32,self._pack_1_32,) = struct.unpack_from('>HHHBBHHLL',buffer,offset+16);
 
     def printer(self,F,offset=0,*args):
@@ -2906,7 +2906,7 @@ class SAInformInfoRecord(rdma.binstruct.BinStruct):
         rdma.binstruct.BinStruct.__init__(self,*args);
 
     def zero(self):
-        self.subscriberGID = bytearray(16);
+        self.subscriberGID = IBA.GID();
         self.enumeration = 0;
         self.reserved1 = 0;
         self.reserved2 = 0;
@@ -2914,14 +2914,14 @@ class SAInformInfoRecord(rdma.binstruct.BinStruct):
         self.reserved3 = bytearray(20);
 
     def pack_into(self,buffer,offset=0):
-        buffer[offset + 0:offset + 16] = self.subscriberGID
+        self.subscriberGID.pack_into(buffer,offset + 0);
         self.informInfo.pack_into(buffer,offset + 192);
         buffer[offset + 60:offset + 80] = self.reserved3
         struct.pack_into('>HHL',buffer,offset+16,self.enumeration,self.reserved1,self.reserved2);
 
     def unpack_from(self,buffer,offset=0):
         self._buf = buffer[offset:];
-        self.subscriberGID = buffer[offset + 0:offset + 16]
+        self.subscriberGID = IBA.GID(buffer[offset + 0:offset + 16],raw=True);
         self.informInfo.unpack_from(buffer,offset + 192);
         self.reserved3 = buffer[offset + 60:offset + 80]
         (self.enumeration,self.reserved1,self.reserved2,) = struct.unpack_from('>HHL',buffer,offset+16);
@@ -3022,11 +3022,11 @@ class SAServiceRecord(rdma.binstruct.BinStruct):
 
     def zero(self):
         self.serviceID = 0;
-        self.serviceGID = bytearray(16);
+        self.serviceGID = IBA.GID();
         self.servicePKey = 0;
         self.reserved1 = 0;
         self.serviceLease = 0;
-        self.serviceKey = bytearray(16);
+        self.serviceKey = IBA.GID();
         self.serviceName = bytearray(64);
         self.serviceData8 = bytearray(16);
         self.serviceData16 = [0]*8;
@@ -3034,8 +3034,8 @@ class SAServiceRecord(rdma.binstruct.BinStruct):
         self.serviceData64 = [0]*2;
 
     def pack_into(self,buffer,offset=0):
-        buffer[offset + 8:offset + 24] = self.serviceGID
-        buffer[offset + 32:offset + 48] = self.serviceKey
+        self.serviceGID.pack_into(buffer,offset + 64);
+        self.serviceKey.pack_into(buffer,offset + 256);
         buffer[offset + 48:offset + 112] = self.serviceName
         buffer[offset + 112:offset + 128] = self.serviceData8
         rdma.binstruct.pack_array8(buffer,1280,64,2,self.serviceData64);
@@ -3045,8 +3045,8 @@ class SAServiceRecord(rdma.binstruct.BinStruct):
 
     def unpack_from(self,buffer,offset=0):
         self._buf = buffer[offset:];
-        self.serviceGID = buffer[offset + 8:offset + 24]
-        self.serviceKey = buffer[offset + 32:offset + 48]
+        self.serviceGID = IBA.GID(buffer[offset + 64:offset + 80],raw=True);
+        self.serviceKey = IBA.GID(buffer[offset + 256:offset + 272],raw=True);
         self.serviceName = buffer[offset + 48:offset + 112]
         self.serviceData8 = buffer[offset + 112:offset + 128]
         rdma.binstruct.unpack_array8(buffer,1280,64,2,self.serviceData64);
@@ -3132,8 +3132,8 @@ class SAPathRecord(rdma.binstruct.BinStruct):
     def zero(self):
         self.reserved1 = 0;
         self.reserved2 = 0;
-        self.DGID = bytearray(16);
-        self.SGID = bytearray(16);
+        self.DGID = IBA.GID();
+        self.SGID = IBA.GID();
         self.DLID = 0;
         self.SLID = 0;
         self.rawTraffic = 0;
@@ -3203,15 +3203,15 @@ class SAPathRecord(rdma.binstruct.BinStruct):
         self.reserved5 = (value >> 0) & 0xFFFF;
 
     def pack_into(self,buffer,offset=0):
-        buffer[offset + 8:offset + 24] = self.DGID
-        buffer[offset + 24:offset + 40] = self.SGID
+        self.DGID.pack_into(buffer,offset + 64);
+        self.SGID.pack_into(buffer,offset + 192);
         struct.pack_into('>LL',buffer,offset+0,self.reserved1,self.reserved2);
         struct.pack_into('>HHLLLLL',buffer,offset+40,self.DLID,self.SLID,self._pack_0_32,self._pack_1_32,self._pack_2_32,self._pack_3_32,self.reserved6);
 
     def unpack_from(self,buffer,offset=0):
         self._buf = buffer[offset:];
-        self.DGID = buffer[offset + 8:offset + 24]
-        self.SGID = buffer[offset + 24:offset + 40]
+        self.DGID = IBA.GID(buffer[offset + 64:offset + 80],raw=True);
+        self.SGID = IBA.GID(buffer[offset + 192:offset + 208],raw=True);
         (self.reserved1,self.reserved2,) = struct.unpack_from('>LL',buffer,offset+0);
         (self.DLID,self.SLID,self._pack_0_32,self._pack_1_32,self._pack_2_32,self._pack_3_32,self.reserved6,) = struct.unpack_from('>HHLLLLL',buffer,offset+40);
 
@@ -3248,9 +3248,9 @@ class SAMCMemberRecord(rdma.binstruct.BinStruct):
     MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
     MAD_SUBNADMDELETE = 0x15 # MAD_METHOD_DELETE
     def zero(self):
-        self.MGID = bytearray(16);
-        self.portGID = bytearray(16);
-        self.requesterGID = bytearray(16);
+        self.MGID = IBA.GID();
+        self.portGID = IBA.GID();
+        self.requesterGID = IBA.GID();
         self.QKey = 0;
         self.MLID = 0;
         self.MTUSelector = 0;
@@ -3312,16 +3312,16 @@ class SAMCMemberRecord(rdma.binstruct.BinStruct):
         self.reserved1 = (value >> 0) & 0xFFFFFF;
 
     def pack_into(self,buffer,offset=0):
-        buffer[offset + 0:offset + 16] = self.MGID
-        buffer[offset + 16:offset + 32] = self.portGID
-        buffer[offset + 32:offset + 48] = self.requesterGID
+        self.MGID.pack_into(buffer,offset + 0);
+        self.portGID.pack_into(buffer,offset + 128);
+        self.requesterGID.pack_into(buffer,offset + 256);
         struct.pack_into('>LLLLL',buffer,offset+48,self.QKey,self._pack_0_32,self._pack_1_32,self._pack_2_32,self._pack_3_32);
 
     def unpack_from(self,buffer,offset=0):
         self._buf = buffer[offset:];
-        self.MGID = buffer[offset + 0:offset + 16]
-        self.portGID = buffer[offset + 16:offset + 32]
-        self.requesterGID = buffer[offset + 32:offset + 48]
+        self.MGID = IBA.GID(buffer[offset + 0:offset + 16],raw=True);
+        self.portGID = IBA.GID(buffer[offset + 128:offset + 144],raw=True);
+        self.requesterGID = IBA.GID(buffer[offset + 256:offset + 272],raw=True);
         (self.QKey,self._pack_0_32,self._pack_1_32,self._pack_2_32,self._pack_3_32,) = struct.unpack_from('>LLLLL',buffer,offset+48);
 
     def printer(self,F,offset=0,*args):
@@ -3416,7 +3416,7 @@ class SAMultiPathRecord(rdma.binstruct.BinStruct):
         self.DGIDCount = 0;
         self.reserved5 = 0;
         self.reserved6 = 0;
-        self.SDGID = bytearray(16);
+        self.SDGID = IBA.GID();
 
     @property
     def _pack_0_32(self):
@@ -3476,12 +3476,12 @@ class SAMultiPathRecord(rdma.binstruct.BinStruct):
         self.reserved5 = (value >> 0) & 0xFFFFFF;
 
     def pack_into(self,buffer,offset=0):
-        buffer[offset + 24:offset + 40] = self.SDGID
+        self.SDGID.pack_into(buffer,offset + 192);
         struct.pack_into('>LLLLLL',buffer,offset+0,self._pack_0_32,self._pack_1_32,self._pack_2_32,self._pack_3_32,self._pack_4_32,self.reserved6);
 
     def unpack_from(self,buffer,offset=0):
         self._buf = buffer[offset:];
-        self.SDGID = buffer[offset + 24:offset + 40]
+        self.SDGID = IBA.GID(buffer[offset + 192:offset + 208],raw=True);
         (self._pack_0_32,self._pack_1_32,self._pack_2_32,self._pack_3_32,self._pack_4_32,self.reserved6,) = struct.unpack_from('>LLLLLL',buffer,offset+0);
 
     def printer(self,F,offset=0,*args):
@@ -3513,16 +3513,16 @@ class SAServiceAssociationRecord(rdma.binstruct.BinStruct):
         rdma.binstruct.BinStruct.__init__(self,*args);
 
     def zero(self):
-        self.serviceKey = bytearray(16);
+        self.serviceKey = IBA.GID();
         self.serviceName = bytearray(64);
 
     def pack_into(self,buffer,offset=0):
-        buffer[offset + 0:offset + 16] = self.serviceKey
+        self.serviceKey.pack_into(buffer,offset + 0);
         buffer[offset + 16:offset + 80] = self.serviceName
 
     def unpack_from(self,buffer,offset=0):
         self._buf = buffer[offset:];
-        self.serviceKey = buffer[offset + 0:offset + 16]
+        self.serviceKey = IBA.GID(buffer[offset + 0:offset + 16],raw=True);
         self.serviceName = buffer[offset + 16:offset + 80]
 
     def printer(self,F,offset=0,*args):

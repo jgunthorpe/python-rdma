@@ -75,8 +75,8 @@ Communication Management (12)
     :attr:`reserved2`          128:160 (32)    :class:`int`            
     :attr:`altSLID`            160:176 (16)    :class:`int`            
     :attr:`altDLID`            176:192 (16)    :class:`int`            
-    :attr:`altSGID`            192:320 (128)   :class:`bytearray` (16) 
-    :attr:`altDGID`            320:448 (128)   :class:`bytearray` (16) 
+    :attr:`altSGID`            192:320 (128)   :class:`~rdma.IBA.GID`  
+    :attr:`altDGID`            320:448 (128)   :class:`~rdma.IBA.GID`  
     :attr:`altFlowLabel`       448:468 (20)    :class:`int`            
     :attr:`reserved3`          90:94 (4)       :class:`int`            
     :attr:`altTClass`          472:480 (8)     :class:`int`            
@@ -118,25 +118,25 @@ Communication Management (12)
 
     .. attribute:: MAD_LENGTH = 44
 
-    ======================= ============= =======================
-    Member                  Position      Type                   
-    ======================= ============= =======================
-    :attr:`SLID`            0:16 (16)     :class:`int`           
-    :attr:`DLID`            16:32 (16)    :class:`int`           
-    :attr:`SGID`            32:160 (128)  :class:`bytearray` (16)
-    :attr:`DGID`            160:288 (128) :class:`bytearray` (16)
-    :attr:`flowLabel`       288:308 (20)  :class:`int`           
-    :attr:`reserved1`       70:74 (4)     :class:`int`           
-    :attr:`reserved2`       312:314 (2)   :class:`int`           
-    :attr:`PD`              55:61 (6)     :class:`int`           
-    :attr:`TClass`          320:328 (8)   :class:`int`           
-    :attr:`hopLimit`        328:336 (8)   :class:`int`           
-    :attr:`SL`              336:340 (4)   :class:`int`           
-    :attr:`subnetLocal`     74:75 (1)     :class:`int`           
-    :attr:`reserved3`       82:85 (3)     :class:`int`           
-    :attr:`localACKTimeout` 344:349 (5)   :class:`int`           
-    :attr:`reserved4`       83:86 (3)     :class:`int`           
-    ======================= ============= =======================
+    ======================= ============= ======================
+    Member                  Position      Type                  
+    ======================= ============= ======================
+    :attr:`SLID`            0:16 (16)     :class:`int`          
+    :attr:`DLID`            16:32 (16)    :class:`int`          
+    :attr:`SGID`            32:160 (128)  :class:`~rdma.IBA.GID`
+    :attr:`DGID`            160:288 (128) :class:`~rdma.IBA.GID`
+    :attr:`flowLabel`       288:308 (20)  :class:`int`          
+    :attr:`reserved1`       70:74 (4)     :class:`int`          
+    :attr:`reserved2`       312:314 (2)   :class:`int`          
+    :attr:`PD`              55:61 (6)     :class:`int`          
+    :attr:`TClass`          320:328 (8)   :class:`int`          
+    :attr:`hopLimit`        328:336 (8)   :class:`int`          
+    :attr:`SL`              336:340 (4)   :class:`int`          
+    :attr:`subnetLocal`     74:75 (1)     :class:`int`          
+    :attr:`reserved3`       82:85 (3)     :class:`int`          
+    :attr:`localACKTimeout` 344:349 (5)   :class:`int`          
+    :attr:`reserved4`       83:86 (3)     :class:`int`          
+    ======================= ============= ======================
 
 .. class:: rdma.IBA.CMREJ
 
@@ -302,33 +302,33 @@ Generic MAD (13.4)
     .. attribute:: MAD_SNMPGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
 
-    ====================== =============== =======================
-    Member                 Position        Type                   
-    ====================== =============== =======================
-    :attr:`baseVersion`    0:8 (8)         :class:`int`           
-    :attr:`classVersion`   64:72 (8)       :class:`int`           
-    :attr:`capabilityMask` 128:144 (16)    :class:`int`           
-    :attr:`reserved1`      256:283 (27)    :class:`int`           
-    :attr:`respTimeValue`  472:477 (5)     :class:`int`           
-    :attr:`redirectGID`    512:640 (128)   :class:`bytearray` (16)
-    :attr:`redirectTC`     1536:1544 (8)   :class:`int`           
-    :attr:`redirectSL`     1600:1604 (4)   :class:`int`           
-    :attr:`redirectFL`     1632:1652 (20)  :class:`int`           
-    :attr:`redirectLID`    1792:1808 (16)  :class:`int`           
-    :attr:`redirectPKey`   1920:1936 (16)  :class:`int`           
-    :attr:`reserved2`      2048:2056 (8)   :class:`int`           
-    :attr:`redirectQP`     2112:2136 (24)  :class:`int`           
-    :attr:`redirectQKey`   2304:2336 (32)  :class:`int`           
-    :attr:`trapGID`        2560:2688 (128) :class:`bytearray` (16)
-    :attr:`trapTC`         3584:3592 (8)   :class:`int`           
-    :attr:`trapSL`         3648:3652 (4)   :class:`int`           
-    :attr:`trapFL`         3680:3700 (20)  :class:`int`           
-    :attr:`trapLID`        3840:3856 (16)  :class:`int`           
-    :attr:`trapPKey`       3968:3984 (16)  :class:`int`           
-    :attr:`trapHL`         4096:4104 (8)   :class:`int`           
-    :attr:`trapQP`         4160:4184 (24)  :class:`int`           
-    :attr:`trapQKey`       4352:4384 (32)  :class:`int`           
-    ====================== =============== =======================
+    ====================== =============== ======================
+    Member                 Position        Type                  
+    ====================== =============== ======================
+    :attr:`baseVersion`    0:8 (8)         :class:`int`          
+    :attr:`classVersion`   64:72 (8)       :class:`int`          
+    :attr:`capabilityMask` 128:144 (16)    :class:`int`          
+    :attr:`reserved1`      256:283 (27)    :class:`int`          
+    :attr:`respTimeValue`  472:477 (5)     :class:`int`          
+    :attr:`redirectGID`    512:640 (128)   :class:`~rdma.IBA.GID`
+    :attr:`redirectTC`     1536:1544 (8)   :class:`int`          
+    :attr:`redirectSL`     1600:1604 (4)   :class:`int`          
+    :attr:`redirectFL`     1632:1652 (20)  :class:`int`          
+    :attr:`redirectLID`    1792:1808 (16)  :class:`int`          
+    :attr:`redirectPKey`   1920:1936 (16)  :class:`int`          
+    :attr:`reserved2`      2048:2056 (8)   :class:`int`          
+    :attr:`redirectQP`     2112:2136 (24)  :class:`int`          
+    :attr:`redirectQKey`   2304:2336 (32)  :class:`int`          
+    :attr:`trapGID`        2560:2688 (128) :class:`~rdma.IBA.GID`
+    :attr:`trapTC`         3584:3592 (8)   :class:`int`          
+    :attr:`trapSL`         3648:3652 (4)   :class:`int`          
+    :attr:`trapFL`         3680:3700 (20)  :class:`int`          
+    :attr:`trapLID`        3840:3856 (16)  :class:`int`          
+    :attr:`trapPKey`       3968:3984 (16)  :class:`int`          
+    :attr:`trapHL`         4096:4104 (8)   :class:`int`          
+    :attr:`trapQP`         4160:4184 (24)  :class:`int`          
+    :attr:`trapQKey`       4352:4384 (32)  :class:`int`          
+    ====================== =============== ======================
 
 .. class:: rdma.IBA.MADHeader
 
@@ -382,23 +382,23 @@ Generic MAD (13.4)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x3
     .. attribute:: MAD_SUBNADMSET = 0x2 # MAD_METHOD_SET
 
-    ===================== ============== =======================
-    Member                Position       Type                   
-    ===================== ============== =======================
-    :attr:`GID`           0:128 (128)    :class:`bytearray` (16)
-    :attr:`LIDRangeBegin` 1024:1040 (16) :class:`int`           
-    :attr:`LIDRangeEnd`   1152:1168 (16) :class:`int`           
-    :attr:`reserved1`     1280:1296 (16) :class:`int`           
-    :attr:`isGeneric`     1408:1416 (8)  :class:`int`           
-    :attr:`subscribe`     1472:1480 (8)  :class:`int`           
-    :attr:`type`          1536:1552 (16) :class:`int`           
-    :attr:`trapNumber`    1664:1680 (16) :class:`int`           
-    :attr:`QPN`           1792:1816 (24) :class:`int`           
-    :attr:`reserved2`     1984:1987 (3)  :class:`int`           
-    :attr:`respTimeValue` 2008:2013 (5)  :class:`int`           
-    :attr:`reserved3`     2048:2056 (8)  :class:`int`           
-    :attr:`producerType`  2112:2136 (24) :class:`int`           
-    ===================== ============== =======================
+    ===================== ============== ======================
+    Member                Position       Type                  
+    ===================== ============== ======================
+    :attr:`GID`           0:128 (128)    :class:`~rdma.IBA.GID`
+    :attr:`LIDRangeBegin` 1024:1040 (16) :class:`int`          
+    :attr:`LIDRangeEnd`   1152:1168 (16) :class:`int`          
+    :attr:`reserved1`     1280:1296 (16) :class:`int`          
+    :attr:`isGeneric`     1408:1416 (8)  :class:`int`          
+    :attr:`subscribe`     1472:1480 (8)  :class:`int`          
+    :attr:`type`          1536:1552 (16) :class:`int`          
+    :attr:`trapNumber`    1664:1680 (16) :class:`int`          
+    :attr:`QPN`           1792:1816 (24) :class:`int`          
+    :attr:`reserved2`     1984:1987 (3)  :class:`int`          
+    :attr:`respTimeValue` 2008:2013 (5)  :class:`int`          
+    :attr:`reserved3`     2048:2056 (8)  :class:`int`          
+    :attr:`producerType`  2112:2136 (24) :class:`int`          
+    ===================== ============== ======================
 
 RMPP (13.6)
 ^^^^^^^^^^^
@@ -914,7 +914,7 @@ Subnet Administration (15)
     ===================== =============== ================================
     Member                Position        Type                            
     ===================== =============== ================================
-    :attr:`subscriberGID` 0:128 (128)     :class:`bytearray` (16)         
+    :attr:`subscriberGID` 0:128 (128)     :class:`~rdma.IBA.GID`          
     :attr:`enumeration`   1024:1040 (16)  :class:`int`                    
     :attr:`reserved1`     1152:1168 (16)  :class:`int`                    
     :attr:`reserved2`     1280:1312 (32)  :class:`int`                    
@@ -970,29 +970,29 @@ Subnet Administration (15)
     .. attribute:: MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
     .. attribute:: MAD_SUBNADMDELETE = 0x15 # MAD_METHOD_DELETE
 
-    ============================== =============== =======================
-    Member                         Position        Type                   
-    ============================== =============== =======================
-    :attr:`MGID`                   0:128 (128)     :class:`bytearray` (16)
-    :attr:`portGID`                1024:1152 (128) :class:`bytearray` (16)
-    :attr:`requesterGID`           2048:2176 (128) :class:`bytearray` (16)
-    :attr:`QKey`                   3072:3104 (32)  :class:`int`           
-    :attr:`MLID`                   3328:3344 (16)  :class:`int`           
-    :attr:`MTUSelector`            3456:3458 (2)   :class:`int`           
-    :attr:`MTU`                    3472:3478 (6)   :class:`int`           
-    :attr:`TClass`                 3520:3528 (8)   :class:`int`           
-    :attr:`PKey`                   3584:3600 (16)  :class:`int`           
-    :attr:`rateSelector`           3712:3714 (2)   :class:`int`           
-    :attr:`rate`                   3728:3734 (6)   :class:`int`           
-    :attr:`packetLifeTimeSelector` 3776:3778 (2)   :class:`int`           
-    :attr:`packetLifeTime`         3792:3798 (6)   :class:`int`           
-    :attr:`SL`                     3840:3844 (4)   :class:`int`           
-    :attr:`flowLabel`              3872:3892 (20)  :class:`int`           
-    :attr:`hopLimit`               4032:4040 (8)   :class:`int`           
-    :attr:`scope`                  4096:4100 (4)   :class:`int`           
-    :attr:`joinState`              4128:4132 (4)   :class:`int`           
-    :attr:`reserved1`              4160:4184 (24)  :class:`int`           
-    ============================== =============== =======================
+    ============================== =============== ======================
+    Member                         Position        Type                  
+    ============================== =============== ======================
+    :attr:`MGID`                   0:128 (128)     :class:`~rdma.IBA.GID`
+    :attr:`portGID`                1024:1152 (128) :class:`~rdma.IBA.GID`
+    :attr:`requesterGID`           2048:2176 (128) :class:`~rdma.IBA.GID`
+    :attr:`QKey`                   3072:3104 (32)  :class:`int`          
+    :attr:`MLID`                   3328:3344 (16)  :class:`int`          
+    :attr:`MTUSelector`            3456:3458 (2)   :class:`int`          
+    :attr:`MTU`                    3472:3478 (6)   :class:`int`          
+    :attr:`TClass`                 3520:3528 (8)   :class:`int`          
+    :attr:`PKey`                   3584:3600 (16)  :class:`int`          
+    :attr:`rateSelector`           3712:3714 (2)   :class:`int`          
+    :attr:`rate`                   3728:3734 (6)   :class:`int`          
+    :attr:`packetLifeTimeSelector` 3776:3778 (2)   :class:`int`          
+    :attr:`packetLifeTime`         3792:3798 (6)   :class:`int`          
+    :attr:`SL`                     3840:3844 (4)   :class:`int`          
+    :attr:`flowLabel`              3872:3892 (20)  :class:`int`          
+    :attr:`hopLimit`               4032:4040 (8)   :class:`int`          
+    :attr:`scope`                  4096:4100 (4)   :class:`int`          
+    :attr:`joinState`              4128:4132 (4)   :class:`int`          
+    :attr:`reserved1`              4160:4184 (24)  :class:`int`          
+    ============================== =============== ======================
 
 .. class:: rdma.IBA.SAMultiPathRecord
 
@@ -1002,34 +1002,34 @@ Subnet Administration (15)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x3a
     .. attribute:: MAD_SUBNADMGETMULTI = 0x14 # MAD_METHOD_GET_MULTI
 
-    ============================== =============== =======================
-    Member                         Position        Type                   
-    ============================== =============== =======================
-    :attr:`rawTraffic`             0:1 (1)         :class:`int`           
-    :attr:`reserved1`              8:11 (3)        :class:`int`           
-    :attr:`flowLabel`              32:52 (20)      :class:`int`           
-    :attr:`hopLimit`               192:200 (8)     :class:`int`           
-    :attr:`TClass`                 256:264 (8)     :class:`int`           
-    :attr:`reversible`             320:321 (1)     :class:`int`           
-    :attr:`numbPath`               328:335 (7)     :class:`int`           
-    :attr:`PKey`                   384:400 (16)    :class:`int`           
-    :attr:`reserved2`              512:524 (12)    :class:`int`           
-    :attr:`SL`                     608:612 (4)     :class:`int`           
-    :attr:`MTUSelector`            640:642 (2)     :class:`int`           
-    :attr:`MTU`                    656:662 (6)     :class:`int`           
-    :attr:`rateSelector`           704:706 (2)     :class:`int`           
-    :attr:`rate`                   720:726 (6)     :class:`int`           
-    :attr:`packetLifeTimeSelector` 768:770 (2)     :class:`int`           
-    :attr:`packetLifeTime`         784:790 (6)     :class:`int`           
-    :attr:`reserved3`              832:840 (8)     :class:`int`           
-    :attr:`independenceSelector`   896:898 (2)     :class:`int`           
-    :attr:`reserved4`              912:918 (6)     :class:`int`           
-    :attr:`SGIDCount`              960:968 (8)     :class:`int`           
-    :attr:`DGIDCount`              1024:1032 (8)   :class:`int`           
-    :attr:`reserved5`              1088:1112 (24)  :class:`int`           
-    :attr:`reserved6`              1280:1312 (32)  :class:`int`           
-    :attr:`SDGID`                  1536:1664 (128) :class:`bytearray` (16)
-    ============================== =============== =======================
+    ============================== =============== ======================
+    Member                         Position        Type                  
+    ============================== =============== ======================
+    :attr:`rawTraffic`             0:1 (1)         :class:`int`          
+    :attr:`reserved1`              8:11 (3)        :class:`int`          
+    :attr:`flowLabel`              32:52 (20)      :class:`int`          
+    :attr:`hopLimit`               192:200 (8)     :class:`int`          
+    :attr:`TClass`                 256:264 (8)     :class:`int`          
+    :attr:`reversible`             320:321 (1)     :class:`int`          
+    :attr:`numbPath`               328:335 (7)     :class:`int`          
+    :attr:`PKey`                   384:400 (16)    :class:`int`          
+    :attr:`reserved2`              512:524 (12)    :class:`int`          
+    :attr:`SL`                     608:612 (4)     :class:`int`          
+    :attr:`MTUSelector`            640:642 (2)     :class:`int`          
+    :attr:`MTU`                    656:662 (6)     :class:`int`          
+    :attr:`rateSelector`           704:706 (2)     :class:`int`          
+    :attr:`rate`                   720:726 (6)     :class:`int`          
+    :attr:`packetLifeTimeSelector` 768:770 (2)     :class:`int`          
+    :attr:`packetLifeTime`         784:790 (6)     :class:`int`          
+    :attr:`reserved3`              832:840 (8)     :class:`int`          
+    :attr:`independenceSelector`   896:898 (2)     :class:`int`          
+    :attr:`reserved4`              912:918 (6)     :class:`int`          
+    :attr:`SGIDCount`              960:968 (8)     :class:`int`          
+    :attr:`DGIDCount`              1024:1032 (8)   :class:`int`          
+    :attr:`reserved5`              1088:1112 (24)  :class:`int`          
+    :attr:`reserved6`              1280:1312 (32)  :class:`int`          
+    :attr:`SDGID`                  1536:1664 (128) :class:`~rdma.IBA.GID`
+    ============================== =============== ======================
 
 .. class:: rdma.IBA.SAMulticastForwardingTableRecord
 
@@ -1097,35 +1097,35 @@ Subnet Administration (15)
     .. attribute:: MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
 
-    ============================== =============== =======================
-    Member                         Position        Type                   
-    ============================== =============== =======================
-    :attr:`reserved1`              0:32 (32)       :class:`int`           
-    :attr:`reserved2`              256:288 (32)    :class:`int`           
-    :attr:`DGID`                   512:640 (128)   :class:`bytearray` (16)
-    :attr:`SGID`                   1536:1664 (128) :class:`bytearray` (16)
-    :attr:`DLID`                   2560:2576 (16)  :class:`int`           
-    :attr:`SLID`                   2688:2704 (16)  :class:`int`           
-    :attr:`rawTraffic`             2816:2817 (1)   :class:`int`           
-    :attr:`reserved3`              2824:2827 (3)   :class:`int`           
-    :attr:`flowLabel`              2848:2868 (20)  :class:`int`           
-    :attr:`hopLimit`               3008:3016 (8)   :class:`int`           
-    :attr:`TClass`                 3072:3080 (8)   :class:`int`           
-    :attr:`reversible`             3136:3137 (1)   :class:`int`           
-    :attr:`numbPath`               3144:3151 (7)   :class:`int`           
-    :attr:`PKey`                   3200:3216 (16)  :class:`int`           
-    :attr:`reserved4`              3328:3340 (12)  :class:`int`           
-    :attr:`SL`                     3424:3428 (4)   :class:`int`           
-    :attr:`MTUSelector`            3456:3458 (2)   :class:`int`           
-    :attr:`MTU`                    3472:3478 (6)   :class:`int`           
-    :attr:`rateSelector`           3520:3522 (2)   :class:`int`           
-    :attr:`rate`                   3536:3542 (6)   :class:`int`           
-    :attr:`packetLifeTimeSelector` 3584:3586 (2)   :class:`int`           
-    :attr:`packetLifeTime`         3600:3606 (6)   :class:`int`           
-    :attr:`preference`             3648:3656 (8)   :class:`int`           
-    :attr:`reserved5`              3712:3728 (16)  :class:`int`           
-    :attr:`reserved6`              3840:3872 (32)  :class:`int`           
-    ============================== =============== =======================
+    ============================== =============== ======================
+    Member                         Position        Type                  
+    ============================== =============== ======================
+    :attr:`reserved1`              0:32 (32)       :class:`int`          
+    :attr:`reserved2`              256:288 (32)    :class:`int`          
+    :attr:`DGID`                   512:640 (128)   :class:`~rdma.IBA.GID`
+    :attr:`SGID`                   1536:1664 (128) :class:`~rdma.IBA.GID`
+    :attr:`DLID`                   2560:2576 (16)  :class:`int`          
+    :attr:`SLID`                   2688:2704 (16)  :class:`int`          
+    :attr:`rawTraffic`             2816:2817 (1)   :class:`int`          
+    :attr:`reserved3`              2824:2827 (3)   :class:`int`          
+    :attr:`flowLabel`              2848:2868 (20)  :class:`int`          
+    :attr:`hopLimit`               3008:3016 (8)   :class:`int`          
+    :attr:`TClass`                 3072:3080 (8)   :class:`int`          
+    :attr:`reversible`             3136:3137 (1)   :class:`int`          
+    :attr:`numbPath`               3144:3151 (7)   :class:`int`          
+    :attr:`PKey`                   3200:3216 (16)  :class:`int`          
+    :attr:`reserved4`              3328:3340 (12)  :class:`int`          
+    :attr:`SL`                     3424:3428 (4)   :class:`int`          
+    :attr:`MTUSelector`            3456:3458 (2)   :class:`int`          
+    :attr:`MTU`                    3472:3478 (6)   :class:`int`          
+    :attr:`rateSelector`           3520:3522 (2)   :class:`int`          
+    :attr:`rate`                   3536:3542 (6)   :class:`int`          
+    :attr:`packetLifeTimeSelector` 3584:3586 (2)   :class:`int`          
+    :attr:`packetLifeTime`         3600:3606 (6)   :class:`int`          
+    :attr:`preference`             3648:3656 (8)   :class:`int`          
+    :attr:`reserved5`              3712:3728 (16)  :class:`int`          
+    :attr:`reserved6`              3840:3872 (32)  :class:`int`          
+    ============================== =============== ======================
 
 .. class:: rdma.IBA.SAPortInfoRecord
 
@@ -1211,7 +1211,7 @@ Subnet Administration (15)
     =================== ============= ============================
     Member              Position      Type                        
     =================== ============= ============================
-    :attr:`serviceKey`  0:128 (128)   :class:`bytearray` (16)     
+    :attr:`serviceKey`  0:128 (128)   :class:`~rdma.IBA.GID`      
     :attr:`serviceName` 1024:1536 (8) [:class:`bytearray` (64)]*64
     =================== ============= ============================
 
@@ -1230,11 +1230,11 @@ Subnet Administration (15)
     Member                Position         Type                        
     ===================== ================ ============================
     :attr:`serviceID`     0:64 (64)        :class:`int`                
-    :attr:`serviceGID`    512:640 (128)    :class:`bytearray` (16)     
+    :attr:`serviceGID`    512:640 (128)    :class:`~rdma.IBA.GID`      
     :attr:`servicePKey`   1536:1552 (16)   :class:`int`                
     :attr:`reserved1`     1664:1680 (16)   :class:`int`                
     :attr:`serviceLease`  1792:1824 (32)   :class:`int`                
-    :attr:`serviceKey`    2048:2176 (128)  :class:`bytearray` (16)     
+    :attr:`serviceKey`    2048:2176 (128)  :class:`~rdma.IBA.GID`      
     :attr:`serviceName`   3072:3584 (8)    [:class:`bytearray` (64)]*64
     :attr:`serviceData8`  7168:7296 (8)    [:class:`bytearray` (16)]*16
     :attr:`serviceData16` 8192:8320 (16)   [:class:`int`]*8            
@@ -1994,18 +1994,18 @@ Miscellaneous IBA Structures
 
     .. attribute:: MAD_LENGTH = 40
 
-    ================= ============= =======================
-    Member            Position      Type                   
-    ================= ============= =======================
-    :attr:`IPVer`     0:4 (4)       :class:`int`           
-    :attr:`TClass`    32:40 (8)     :class:`int`           
-    :attr:`flowLabel` 96:116 (20)   :class:`int`           
-    :attr:`payLen`    32:48 (16)    :class:`int`           
-    :attr:`nxtHdr`    132:140 (8)   :class:`int`           
-    :attr:`hopLmt`    196:204 (8)   :class:`int`           
-    :attr:`SGID`      64:192 (128)  :class:`bytearray` (16)
-    :attr:`DGID`      192:320 (128) :class:`bytearray` (16)
-    ================= ============= =======================
+    ================= ============= ======================
+    Member            Position      Type                  
+    ================= ============= ======================
+    :attr:`IPVer`     0:4 (4)       :class:`int`          
+    :attr:`TClass`    32:40 (8)     :class:`int`          
+    :attr:`flowLabel` 96:116 (20)   :class:`int`          
+    :attr:`payLen`    32:48 (16)    :class:`int`          
+    :attr:`nxtHdr`    132:140 (8)   :class:`int`          
+    :attr:`hopLmt`    196:204 (8)   :class:`int`          
+    :attr:`SGID`      64:192 (128)  :class:`~rdma.IBA.GID`
+    :attr:`DGID`      192:320 (128) :class:`~rdma.IBA.GID`
+    ================= ============= ======================
 
 .. class:: rdma.IBA.HdrIETH
 

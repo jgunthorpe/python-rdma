@@ -71,6 +71,9 @@ class Type(object):
         else:
             self.off = int(self.off)*8;
         self.type = xml.get("type");
+        if self.type == "HdrIPv6Addr" and self.bits == 128:
+            self.type = "struct IBA.GID";
+            self.mutable = False;
         if self.type is None and xml.text is not None and \
            self.bits == 64 and "GUID" in xml.text:
             self.type = "struct IBA.GUID";
