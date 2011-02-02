@@ -58,6 +58,8 @@ def rst_tableize(lst,idx):
 
 class Type(object):
     """Hold a single typed field in the structure"""
+    mutable = True;
+
     def __init__(self,xml):
         self.count = int(xml.get("count","1"));
         self.bits = int(xml.get("bits"));
@@ -69,11 +71,15 @@ class Type(object):
         else:
             self.off = int(self.off)*8;
         self.type = xml.get("type");
+        if self.type is None and xml.text is not None and \
+           self.bits == 64 and "GUID" in xml.text:
+            self.type = "struct IBA.GUID";
+            self.mutable = False;
 
     def lenBits(self):
         return self.bits*self.count;
     def isObject(self):
-        return self.type and self.type[:7] == 'struct ';
+        return self.type and self.type.startswith('struct ');
     def initStr(self):
         base = "0";
         if self.isObject():
@@ -88,7 +94,11 @@ class Type(object):
     def type_desc(self):
         base = ":class:`int`";
         if self.isObject():
-            base = ":class:`~rdma.IBA.%s`"%(self.type[7:]);
+            ty = self.type[7:]
+            if ty.startswith("IBA."):
+                base = ":class:`~rdma.%s`"%(self.type[7:]);
+            else:
+                base = ":class:`~rdma.IBA.%s`"%(self.type[7:]);
         elif self.bits > 64:
             base = ":class:`bytearray` (%u)"%(self.bits/8);
         if self.count != 1:
@@ -96,6 +106,15 @@ class Type(object):
                 base = ":class:`bytearray` (%u)"%(self.count);
             return "[%s]*%u"%(base,self.count);
         return base;
+
+    def make_pack(self,name,idx=0):
+        return "%s.pack_into(buffer,offset + %u)"%(name,self.off/8 + idx*self.bits/8);
+    def make_unpack(self,name,idx=0):
+        if self.mutable:
+            return "%s.unpack_from(buffer,offset + %u)"%(name,self.off/8 + idx*self.bits/8)
+        return "%s = %s(buffer[offset + %u:offset + %u],raw=True)"%\
+               (name,self.type[7:],self.off/8 + idx*self.bits/8,
+                self.off/8 + (idx+1)*self.bits/8);
 
     def isAligned(self):
         if self.bits >= 32:
@@ -177,14 +196,15 @@ class Struct(object):
         other = mbt.getStruct();
         if other:
             if mbt.count == 1:
-                return (None,("%s.pack_into(buffer,offset + %u)"%(name,mbt.off/8),
-                              "%s.unpack_from(buffer,offset + %u)"%(name,mbt.off/8)),mbt.lenBits());
-
+                return (None,(mbt.make_pack(name),
+                              mbt.make_unpack(name)),
+                        mbt.lenBits());
             lst = [];
             for I in range(0,mbt.count):
-                lst.append((None,("%s[%u].pack_into(buffer,offset + %u)"%(name,I,I*mbt.bits/8 + mbt.off/8),
-                                  "%s[%u].unpack_from(buffer,offset + %u)"%(name,I,I*mbt.bits/8 + mbt.off/8)),
-                            mbt.lenBits()));
+                n = "%s[%u]"%(name,I);
+                lst.append((None,(mbt.make_pack(n,I),
+                                  mbt.make_unpack(n,I)),
+                            mbt.lenBits()))
             return lst;
         if mbt.type == "HdrIPv6Addr":
             return ("[:16]",name,bits);
@@ -324,7 +344,7 @@ class Struct(object):
         if self.mb:
             x = ["def __init__(self,*args):"];
             for name,ty in self.mb:
-                if ty.isObject():
+                if (ty.isObject() and ty.mutable) or ty.count != 1:
                     x.append("    self.%s = %s;"%(name,ty.initStr()));
             if len(x) != 1:
                 x.append("    rdma.binstruct.BinStruct.__init__(self,*args);");
@@ -446,6 +466,7 @@ class structs_test(unittest.TestCase):
         print >> F,'        assert(len(test) == 512);';
         print >> F,'        IBA.%s().pack_into(test);'%(I.name);
         print >> F,'        IBA.%s().unpack_from(testr);'%(I.name);
+        print >> F,'        IBA.%s(testr);'%(I.name);
     print >> F, "    def test_struct_printer(self):";
     for I in structs:
         print >> F,'        IBA.%s().printer(sys.stdout);'%(I.name);

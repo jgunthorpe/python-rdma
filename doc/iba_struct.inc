@@ -187,7 +187,7 @@ Communication Management (12)
     :attr:`flowControl`        82:83 (1)       :class:`int`            
     :attr:`RNRRetryCount`      216:219 (3)     :class:`int`            
     :attr:`reserved4`          51:56 (5)       :class:`int`            
-    :attr:`LGUID`              224:288 (64)    :class:`int`            
+    :attr:`LGUID`              224:288 (64)    :class:`~rdma.IBA.GUID` 
     :attr:`privateData`        288:1856 (1568) :class:`bytearray` (196)
     ========================== =============== ========================
 
@@ -205,7 +205,7 @@ Communication Management (12)
     :attr:`LCID`                  0:32 (32)       :class:`int`             
     :attr:`reserved1`             32:64 (32)      :class:`int`             
     :attr:`serviceID`             64:128 (64)     :class:`int`             
-    :attr:`LGUID`                 128:192 (64)    :class:`int`             
+    :attr:`LGUID`                 128:192 (64)    :class:`~rdma.IBA.GUID`  
     :attr:`localCMQKey`           192:224 (32)    :class:`int`             
     :attr:`localQKey`             224:256 (32)    :class:`int`             
     :attr:`localQPN`              256:280 (24)    :class:`int`             
@@ -541,18 +541,6 @@ Subnet Management (14)
     :attr:`returnPath`  1536:2048 (8)  [:class:`bytearray` (64)]*64        
     =================== ============== ====================================
 
-.. class:: rdma.IBA.SMPGUIDBlock
-
-    GUID Block Element (section 14.2.5.5)
-
-    .. attribute:: MAD_LENGTH = 8
-
-    ============ ========= ============
-    Member       Position  Type        
-    ============ ========= ============
-    :attr:`GUID` 0:64 (64) :class:`int`
-    ============ ========= ============
-
 .. class:: rdma.IBA.SMPGUIDInfo
 
     Assigned GUIDs (section 14.2.5.5)
@@ -562,11 +550,11 @@ Subnet Management (14)
     .. attribute:: MAD_SUBNGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNSET = 0x2 # MAD_METHOD_SET
 
-    ================= ========== ===================================
-    Member            Position   Type                               
-    ================= ========== ===================================
-    :attr:`GUIDBlock` 0:512 (64) [:class:`~rdma.IBA.SMPGUIDBlock`]*8
-    ================= ========== ===================================
+    ================= ========== ===========================
+    Member            Position   Type                       
+    ================= ========== ===========================
+    :attr:`GUIDBlock` 0:512 (64) [:class:`~rdma.IBA.GUID`]*8
+    ================= ========== ===========================
 
 .. class:: rdma.IBA.SMPLIDPortBlock
 
@@ -652,22 +640,22 @@ Subnet Management (14)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x11
     .. attribute:: MAD_SUBNGET = 0x1 # MAD_METHOD_GET
 
-    ======================= ============== ============
-    Member                  Position       Type        
-    ======================= ============== ============
-    :attr:`baseVersion`     0:8 (8)        :class:`int`
-    :attr:`classVersion`    64:72 (8)      :class:`int`
-    :attr:`nodeType`        128:136 (8)    :class:`int`
-    :attr:`numPorts`        192:200 (8)    :class:`int`
-    :attr:`systemImageGUID` 256:320 (64)   :class:`int`
-    :attr:`nodeGUID`        768:832 (64)   :class:`int`
-    :attr:`portGUID`        1280:1344 (64) :class:`int`
-    :attr:`partitionCap`    1792:1808 (16) :class:`int`
-    :attr:`deviceID`        1920:1936 (16) :class:`int`
-    :attr:`revision`        2048:2080 (32) :class:`int`
-    :attr:`localPortNum`    2304:2312 (8)  :class:`int`
-    :attr:`vendorID`        2368:2392 (24) :class:`int`
-    ======================= ============== ============
+    ======================= ============== =======================
+    Member                  Position       Type                   
+    ======================= ============== =======================
+    :attr:`baseVersion`     0:8 (8)        :class:`int`           
+    :attr:`classVersion`    64:72 (8)      :class:`int`           
+    :attr:`nodeType`        128:136 (8)    :class:`int`           
+    :attr:`numPorts`        192:200 (8)    :class:`int`           
+    :attr:`systemImageGUID` 256:320 (64)   :class:`~rdma.IBA.GUID`
+    :attr:`nodeGUID`        768:832 (64)   :class:`~rdma.IBA.GUID`
+    :attr:`portGUID`        1280:1344 (64) :class:`~rdma.IBA.GUID`
+    :attr:`partitionCap`    1792:1808 (16) :class:`int`           
+    :attr:`deviceID`        1920:1936 (16) :class:`int`           
+    :attr:`revision`        2048:2080 (32) :class:`int`           
+    :attr:`localPortNum`    2304:2312 (8)  :class:`int`           
+    :attr:`vendorID`        2368:2392 (24) :class:`int`           
+    ======================= ============== =======================
 
 .. class:: rdma.IBA.SMPPKeyTable
 
@@ -785,16 +773,16 @@ Subnet Management (14)
     .. attribute:: MAD_SUBNGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNSET = 0x2 # MAD_METHOD_SET
 
-    ================= ============== ============
-    Member            Position       Type        
-    ================= ============== ============
-    :attr:`GUID`      0:64 (64)      :class:`int`
-    :attr:`SMKey`     512:576 (64)   :class:`int`
-    :attr:`actCount`  1024:1056 (32) :class:`int`
-    :attr:`priority`  1280:1284 (4)  :class:`int`
-    :attr:`SMState`   1312:1316 (4)  :class:`int`
-    :attr:`reserved1` 1344:1368 (24) :class:`int`
-    ================= ============== ============
+    ================= ============== =======================
+    Member            Position       Type                   
+    ================= ============== =======================
+    :attr:`GUID`      0:64 (64)      :class:`~rdma.IBA.GUID`
+    :attr:`SMKey`     512:576 (64)   :class:`int`           
+    :attr:`actCount`  1024:1056 (32) :class:`int`           
+    :attr:`priority`  1280:1284 (4)  :class:`int`           
+    :attr:`SMState`   1312:1316 (4)  :class:`int`           
+    :attr:`reserved1` 1344:1368 (24) :class:`int`           
+    ================= ============== =======================
 
 .. class:: rdma.IBA.SMPSwitchInfo
 
@@ -1725,7 +1713,7 @@ Device Management (16.3)
     ================================ ============== ============================
     Member                           Position       Type                        
     ================================ ============== ============================
-    :attr:`GUID`                     0:64 (64)      :class:`int`                
+    :attr:`GUID`                     0:64 (64)      :class:`~rdma.IBA.GUID`     
     :attr:`vendorID`                 512:536 (24)   :class:`int`                
     :attr:`reserved1`                704:712 (8)    :class:`int`                
     :attr:`deviceID`                 768:800 (32)   :class:`int`                

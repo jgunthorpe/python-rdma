@@ -1,12 +1,5 @@
 <?xml version='1.0' encoding='UTF-8' ?>
 <makestructs type="IBA Subnet Management">
-  <struct name="SMPGUIDBlock"
-          bytes="8"
-          desc="GUID Block Element"
-          sect="14.2.5.5">
-    <mb bits="64" off="0[0]">GUID<!--GUID--></mb>
-  </struct>
-
   <struct name="SMPLIDPortBlock"
           bytes="4"
           desc="LID/Port Block Element"
@@ -281,7 +274,7 @@
           attributeID="0x14"
           attributeName="SMP_GUID_INFO"
           methods="SubnGet SubnSet">
-    <mb bits="64" off="0[0]" count="8" type="struct SMPGUIDBlock">GUIDBlock<!--GUID Block--></mb>
+    <mb bits="64" off="0[0]" count="8">GUIDBlock<!--GUID Block--></mb>
   </struct>
 
   <struct name="SMPPortInfo"

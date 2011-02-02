@@ -3,8 +3,7 @@
 # NOTE: The docstrings for this module are specially processed in the
 # documentation take some care when editing.
 
-from rdma.IBA_struct import *;
-import socket;
+import socket,sys;
 
 #: Node Type Constants
 # see NodeInfo.nodeType
@@ -286,3 +285,15 @@ class GID(bytes):
         """Return the GUID portion of the GID."""
         return GUID(bytes.__getslice__(self,8,16),raw=True);
 ZERO_GID = bytes('\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00');
+
+from rdma.IBA_struct import *;
+def _make_IBA_link():
+    """We have a bit of a circular dependency here, make a IBA
+    name inside the IBA_struct module so that it can see the
+    stuff in this module when its code runs. Fugly, but I
+    don't think you can do #include in python, which is what
+    I really want.."""
+    me = sys.modules[__name__];
+    struct = sys.modules["rdma.IBA_struct"];
+    setattr(struct,"IBA",me)
+_make_IBA_link();
