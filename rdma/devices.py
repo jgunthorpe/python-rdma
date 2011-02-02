@@ -155,6 +155,10 @@ class EndPort(SysFSCache):
     def sm_sl(self): return self._cached_sysfs("sm_sl",int);
     @property
     def port_guid(self): return self._cached_sysfs("gids/0",_conv_gid2guid);
+    @property
+    def rate(self): return self._cached_sysfs("rate");
+    @property
+    def cap_mask(self): return self._cached_sysfs("cap_mask",_conv_hex);
 
     # FIXME This must come from verbs :(
     @property
@@ -217,6 +221,8 @@ class RDMADevice(SysFSCache):
     def board_id(self): return self._cached_sysfs("board_id");
     @property
     def hw_ver(self): return self._cached_sysfs("hw_rev");
+    @property
+    def hca_type(self): return self._cached_sysfs("hca_type");
 
     def __str__(self):
         return self.name;
