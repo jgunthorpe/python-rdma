@@ -3,20 +3,20 @@ import rdma,rdma.path,sys;
 import rdma.IBA as IBA;
 
 class MADTransactor(object):
-    """This class is a mixin for everything that implements a MAD transaction
-    interface. Derived classes must provide the execute_transaction
+    """This class is a mixin for everything that implements a MAD RPC
+    transaction interface. Derived classes must provide the :meth:`_execute`
     method which sends the MAD and gets the reply.
 
-    By design instances of this interface cannot be multi-threaded. For multi-threaded
-    applications each thread must have a separate MADTransactor instance.
-    Simple MAD request/reply transactors return payload, other
-    attributes for the last processed reply are available via
-    instance attributes."""
+    By design instances of this interface cannot be multi-threaded. For
+    multi-threaded applications each thread must have a separate
+    :class:`MADTransactor` instance.  Simple MAD request/reply transactors
+    return payload, other attributes for the last processed reply are
+    available via instance attributes."""
 
+    #: The path for the last reply packet processed
     reply_path = None;
-    """The path for the last reply packet processed"""
+    #: The MADFormat for the last reply packet processed
     reply_fmt = None;
-    """The MADFormat for the last reply packet processed"""
 
     def __init__(self):
         self._tid = 0;

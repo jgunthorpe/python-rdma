@@ -12,25 +12,14 @@ class Context(object):
 class MADSchedule(rdma.madtransactor.MADTransactor):
     """This class provides a MADTransactor interface suitable for use by
     python coroutines. The implementation gets MAD parallelism by running
-    multiple coroutines at once. coroutines are implemented as generators.
-    A simple use of the class to fetch node infos for a list of paths:
+    multiple coroutines at once. coroutines are implemented as generators."""
 
-    def get_nodeinfo(sched,node):
-        node.ninf = yield sched.SubGet(IBA.SMPNodeInfo,I.path);
-
-    nodes = [..];
-    sched = rdma.sched.MADSchedual();
-    sched.run(mqueue=(get_nodeinfo(sched,I) for I in nodes));
-
-    The scheduler will pull generators from the start argument to run and
-    invoke them to return MADs, bounding the total outstanding MAD count and
-    returning replies as the result of yield. Calling queue() during coroutine
-    execution will create a new coroutine."""
-
+    #: Maximum number of outstanding MADs at any time.
     max_outstanding = 4;
-    """Maximum number of outstanding MADs at any time."""
 
     def __init__(self,umad):
+        """*umad* is a :class:`rdma.umad.UMAD` instance which will be used to
+        issue the MADs."""
         rdma.madtransactor.MADTransactor.__init__(self);
         self._umad = umad;
         self._keys = {};
@@ -61,7 +50,7 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
         while result is None or len(self._keys) <= self.max_outstanding:
             try:
                 exc = ctx._exc
-                if exc != None:
+                if exc is not None:
                     ctx._exc = None;
                     work = ctx._op.throw(*exc);
                 elif result is None:
@@ -101,20 +90,20 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
         self._mqueue.append(ctx);
 
     def mqueue(self,works):
-        """works is a generator returning coroutines. All coroutines
+        """*works* is a generator returning coroutines. All coroutines
         can run in parallel."""
         assert(inspect.isgenerator(works));
         self._step(Context(works,True),None);
 
     def queue(self,work):
-        """work is a single coroutine."""
+        """*work* is a single coroutine."""
         assert(inspect.isgenerator(work));
         self._step(Context(work,False),None);
 
     def run(self,queue=None,mqueue=None):
         """Schedule MADs. Exits once all the work has been completed.
-        queue and mqueue arguments as passed straight to the
-        queue and mqueue functions."""
+        *queue* and *mqueue* arguments as passed straight to the
+        :meth:`queue` and :meth:`mqueue` methods."""
         self._keys.clear();
         self._replyqueue.clear();
         self._mqueue.clear();

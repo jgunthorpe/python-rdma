@@ -10,8 +10,8 @@ from socket import htons as cpu_to_be16;
 SYS_INFINIBAND_MAD = "/sys/class/infiniband_mad/";
 
 class LazyIBPath(rdma.path.IBPath):
-    """Similar to IBPath but the unpack of the umad AH is deferred until
-    necessary since most of the time we do not care."""
+    """Similar to :class:`rdma.path.IBPath` but the unpack of the UMAD AH is
+    deferred until necessary since most of the time we do not care."""
     def __getattribute__(self,name):
         if name[0] != '_':
             # I wonder if this is evil? We switch out class to the
@@ -51,7 +51,8 @@ class LazyIBPath(rdma.path.IBPath):
             self.flow_label = cpu_to_be32(flow_label);
 
 class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
-    '''Handle to a umad kernel interface. This supports the context manager protocol.'''
+    '''Handle to a UMAD kernel interface. This class supports the context
+    manager protocol.'''
     IB_IOCTL_MAGIC = 0x1b
     IB_USER_MAD_REGISTER_AGENT = rdma.tools._IOC(3,IB_IOCTL_MAGIC,1,28);
     IB_USER_MAD_UNREGISTER_AGENT = rdma.tools._IOC(1,IB_IOCTL_MAGIC,2,4);
@@ -86,6 +87,7 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
     ib_mad_addr_local_t = struct.Struct("=LLHBBxxxx16x4xH6x");
 
     def __init__(self,parent):
+        """*parent* is the owning :class:`rdma.devices.EndPort`."""
         rdma.madtransactor.MADTransactor.__init__(self);
 
         for I in parent._iterate_services_end_port(SYS_INFINIBAND_MAD,"umad\d+"):
@@ -141,7 +143,7 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
                                           [0]*4);
 
     def _cache_make_ah(self,path):
-        """Construct the address handle for umad and cache it in the path
+        """Construct the address handle for UMAD and cache it in the path
         class"""
         assert(path.end_port == self.parent);
         if path.has_grh:
@@ -181,7 +183,8 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
     # window where packets are ignored, I suppose I should fixup the callers
     # to allow delegated timeout processing, but grrr......
     def sendto(self,buf,path):
-        '''Send a MAD packet'''
+        '''Send a MAD packet. *buf* is the raw MAD to send, starting with the first
+        byte of :class:`rdma.IBA.MADHeader`. *path* is the destination.'''
         try:
             addr = path._cache_umad_ah;
         except AttributeError:
@@ -197,8 +200,11 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
         self.dev.write(self.sbuf);
 
     def recvfrom(self,wakeat):
-        '''Recv a MAD packet. Returns (buf,path). wakeat is the
-        CLOCK_MONOTONIC time to return after.'''
+        '''Receive a MAD packet. If the value of
+        :func:`rdma.tools.clock_monotonic()` exceeds *wakeat* then :class:`None`
+        is returned.
+
+        :returns: tuple(buf,path)'''
         buf = bytearray(320);
         while True:
             timeout = wakeat - rdma.tools.clock_monotonic();
