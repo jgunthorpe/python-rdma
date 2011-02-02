@@ -45,7 +45,7 @@ def get_end_port(name=None):
 
     :rtype: :class:`rdma.devices.EndPort`
     :raises rdma.RDMAError: If no matching device is found or name is invalid."""
-    devices = get_rdma_devices();
+    devices = get_devices();
     if len(devices) == 0:
         raise RDMAError("No RDMA devices found.");
     if name is None:
@@ -73,7 +73,7 @@ def get_end_port(name=None):
     return rdma.devices.find_port_name(devices,name);
 
 _cached_devices = None;
-def get_rdma_devices(refresh=False):
+def get_devices(refresh=False):
     '''Return a container of :class:`rdma.devices.RDMADevice` objects for all devices in the system.
 
     The return result is an object that looks like an ordered list of

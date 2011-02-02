@@ -4,7 +4,7 @@ import rdma
 
 class get_umad_test(unittest.TestCase):
     def test_get(self):
-        for I in rdma.get_rdma_devices():
+        for I in rdma.get_devices():
             for Q in I.end_ports:
                 with rdma.get_umad(Q) as X:
                     print X;

@@ -2,9 +2,9 @@
 import unittest
 import rdma
 
-class get_rdma_devices_test(unittest.TestCase):
+class get_devices_test(unittest.TestCase):
     def test_list(self):
-        devs = rdma.get_rdma_devices()
+        devs = rdma.get_devices()
         print devs;
         for I in devs:
             print "RDMA Device '%s'"%(I.name);

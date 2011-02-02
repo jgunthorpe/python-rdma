@@ -20,7 +20,7 @@ class get_end_port_test(unittest.TestCase):
 
     def test_good(self):
         """Test get_end_port calls that succeed.""";
-        devices = rdma.get_rdma_devices();
+        devices = rdma.get_devices();
         dev = devices.first();
         ep = dev.end_ports.first();
         self.assertEquals(rdma.get_end_port(),ep);
@@ -33,7 +33,7 @@ class get_end_port_test(unittest.TestCase):
 
     def test_fail(self):
         """Test valid get_end_port calls that fail.""";
-        devices = rdma.get_rdma_devices();
+        devices = rdma.get_devices();
         dev = devices.first();
         self.assertRaises(rdma.RDMAError,
                           rdma.get_end_port,IBA.GID("::"));
