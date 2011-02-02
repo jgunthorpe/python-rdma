@@ -169,21 +169,47 @@ isClientReregistrationSupported = 1<<25;
 isOtherLocalChangesNoticeSupported = 1<<26;
 isLinkSpeedWidthPairsTableSupported = 1<<27;
 
+def conv_lid(s,multicast=False):
+    """Converts the string *s* into an integer assuming it is a LID.
+    If *multicast* is `False` then the LID must be a valid unicast LID.
+    If *multicast* is `True` then the LID must be a valid multicast LID.
+    If *multicast* is `None` then any 16 bit value is accepted.
+
+    :raises ValueError: If the string can not be parsed."""
+    lid = int(s,0);
+    if multicast is None:
+        return lid;
+    if multicast == True:
+        if lid < LID_MULTICAST or lid == LID_PERMISSIVE:
+            raise ValueError("%r is not a multicast LID"%(s));
+    else:
+        if lid >= LID_MULTICAST or lid == LID_RESERVED:
+            raise ValueError("%r is not a unicast LID"%(s));
+    return lid;
+
 class GUID(bytes):
     """Stores a GUID in internal format. In string format a GUID is formatted
     as ``0002:c903:0000:1491``. Externally the class looks like a string
     that formats to the GUID. :meth:`pack_into` is used to store the GUID in
     network format. Instances are immutable and can be hashed."""
-    def __init__(self,s,raw=False):
+    def __init__(self,s=None,raw=False):
         """Convert from a string to our GUID representation. *s* is the input
         string and if *raw* is True then *s* must be a length 8 :class:`bytes`.
 
+        If *s* is `None` then the :attr:`~rdma.IBA.ZERO_GUID` is
+        instantiated. *s* can also be an integer.
+
         :raises ValueError: If the string can not be parsed."""
         pass
-    def __new__(self,s,raw=False):
+    def __new__(self,s=None,raw=False):
+        if s is None:
+            return ZERO_GUID;
         if isinstance(s,GUID):
             return bytes.__new__(self,bytes.__str__(s));
-        if raw or isinstance(s,GUID):
+        if isinstance(s,int) or isinstance(s,long):
+            s = ("%016x"%(s)).decode("hex");
+            raw = True;
+        if raw:
             assert(len(s) == 8);
             return bytes.__new__(self,s);
 
@@ -197,7 +223,7 @@ class GUID(bytes):
 
     def pack_into(self,buf,offset=0):
         """Pack the value into a byte array.""";
-        buffer[offset:offest+8] = bytes.__str__(self);
+        buf[offset:offset+8] = bytes.__str__(self);
 
     def __str__(self):
         """Return a printable string of the GUID."""
@@ -206,18 +232,37 @@ class GUID(bytes):
     def __repr__(self):
         return "GUID('%s')"%(self.__str__());
 
+ZERO_GUID = GUID('\x00\x00\x00\x00\x00\x00\x00\x00',raw=True);
+
 class GID(bytes):
     """Stores a GID in internal format. In string format a GID is formatted
     like an IPv6 addres eg ``fe80::2:c903:0:1491``. Externally the class looks
     like a string that formats to the GID. :meth:`pack_into` is used to store
     the GID in network format. Instances are immutable and can be hashed."""
-    def __init__(self,s,raw=False):
+    def __init__(self,s=None,raw=False,prefix=None,guid=None):
         """Convert from a string to our GID representation. *s* is the input
-        string and if *raw* is True then *s* must be a length 16 :class:`bytes`.
+        string and if *raw* is `True` then *s* must be a length 16 :class:`bytes`.
+
+        If *s* is `None` then the :attr:`~rdma.IBA.ZERO_GID` is
+        instantiated. Invoking as ``GID(prefix=PREFIX,guid=GUID)`` will
+        construct a GID by concatenating the *PREFIX* to *GUID*. *GUID* should
+        be a :class:`rdma.IBA.GUID` while *PREFIX* can be 8 bytes, an integer
+        or a :class:`rdma.IBA.GID`.
 
         :raises ValueError: If the string can not be parsed."""
         pass
-    def __new__(self,s,raw=False):
+    def __new__(self,s=None,raw=False,prefix=None,guid=None):
+        if s is None:
+            if prefix is None:
+                return ZERO_GID;
+            if isinstance(prefix,GID):
+                prefix = bytes.__str__(prefix)[:8];
+            elif isinstance(prefix,GUID):
+                prefix = bytes.__str__(prefix);
+            elif isinstance(prefix,int) or isinstance(prefix,long):
+                prefix = ("%016x"%(prefix)).decode("hex");
+            return bytes.__new__(self,prefix + bytes.__str__(guid))
+
         if isinstance(s,GID):
             return bytes.__new__(self,bytes.__str__(s));
         if raw:
@@ -230,7 +275,7 @@ class GID(bytes):
 
     def pack_into(self,buf,offset=0):
         """Pack the value into a byte array.""";
-        buffer[offset:offest+16] = bytes.__str__(self);
+        buf[offset:offset+16] = bytes.__str__(self);
 
     def __str__(self):
         """Return a printable string of the GID."""
@@ -240,3 +285,4 @@ class GID(bytes):
     def guid(self):
         """Return the GUID portion of the GID."""
         return GUID(bytes.__getslice__(self,8,16),raw=True);
+ZERO_GID = bytes('\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00');
