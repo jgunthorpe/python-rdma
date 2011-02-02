@@ -238,7 +238,7 @@ def find_port_gid(devices,gid):
                 return (J,J.gids.index(gid));
             except ValueError:
                 continue;
-    raise rdma.RDMAError("RDMA End port %r not found."%(gid));
+    raise rdma.RDMAError("RDMA end port %r not found."%(gid));
 
 def find_port_guid(devices,guid):
     """Search the list *devices* for the end port with *guid*.
@@ -249,7 +249,17 @@ def find_port_guid(devices,guid):
         for J in I.end_ports:
             if J.port_guid == guid:
                 return J;
-    raise rdma.RDMAError("RDMA End port %r not found."%(guid));
+    raise rdma.RDMAError("RDMA end port %r not found."%(guid));
+
+def find_node_guid(devices,guid):
+    """Search the list *devices* for the device with *guid*.
+
+    :rtype: :class:`Device`
+    :raises rdma.RDMAError: If no matching device is found."""
+    for I in devices:
+        if I.node_guid == guid:
+            return I;
+    raise rdma.RDMAError("RDMA device %r not found."%(guid));
 
 def find_port_name(devices,name):
     """Search the list *devices* for the end port with *name* and *name* may
