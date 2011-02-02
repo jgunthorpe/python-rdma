@@ -110,6 +110,8 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
         self._poll = select.poll();
         self._poll.register(self.dev.fileno(),select.POLLIN);
 
+        self._agent_cache = {};
+
     def _ioctl_enable_pkey(self):
         return fcntl.ioctl(self.dev.fileno(),self.IB_USER_MAD_ENABLE_PKEY) == 0;
     def _ioctl_unregister_agent(self,agent_id):
@@ -131,16 +133,21 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
                           buf);
         return struct.unpack("=L",buf[:4])[0];
 
-    def register_client(self,mgmt_class,mgmt_version):
-        """This is the general entry point to start operating as a client.
-        The class and version of outgoing MADs should be provided. agent_id is
-        returned."""
-        rmpp_version = 1 if mgmt_class == IBA.MAD_SUBNET_ADMIN else 0;
-        qpn = 0 if (mgmt_class == IBA.MAD_SUBNET or
-                    mgmt_class == IBA.MAD_SUBNET_DIRECTED) else 1;
-        return self._ioctl_register_agent(qpn,mgmt_class,mgmt_version,
-                                          (0x00,0x14,0x05),rmpp_version,
-                                          [0]*4);
+    def register_client(self,mgmt_class,class_version):
+        """Manually register a MAD agent. This is done automatically for
+        sending MADs, this API is mainly intended to enable listening
+        for unsolicited messages."""
+        try:
+            return self._agent_cache[mgmt_class,class_version];
+        except KeyError:
+            rmpp_version = 1 if mgmt_class == IBA.MAD_SUBNET_ADMIN else 0;
+            qpn = 0 if (mgmt_class == IBA.MAD_SUBNET or
+                        mgmt_class == IBA.MAD_SUBNET_DIRECTED) else 1;
+            ret = self._ioctl_register_agent(qpn,mgmt_class,class_version,
+                                             (0x00,0x14,0x05),rmpp_version,
+                                             [0]*4);
+            self._agent_cache[mgmt_class,class_version] = ret;
+            return ret;
 
     def _cache_make_ah(self,path):
         """Construct the address handle for UMAD and cache it in the path
@@ -182,7 +189,7 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
     # have the kerne let go so our retry isn't blocked. This leaves a small
     # window where packets are ignored, I suppose I should fixup the callers
     # to allow delegated timeout processing, but grrr......
-    def sendto(self,buf,path):
+    def sendto(self,buf,path,agent_id=None):
         '''Send a MAD packet. *buf* is the raw MAD to send, starting with the first
         byte of :class:`rdma.IBA.MADHeader`. *path* is the destination.'''
         try:
@@ -190,8 +197,10 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
         except AttributeError:
             addr = self._cache_make_ah(path);
 
+        if agent_id is None:
+            agent_id = path.umad_agent_id;
         self.ib_user_mad_t.pack_into(self.sbuf,0,
-                                     path.umad_agent_id,0,
+                                     agent_id,0,
                                      max(500,int(path.mad_timeout*1000)-500),0,
                                      len(buf),
                                      addr);
@@ -244,8 +253,15 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
         """Send the fully formed MAD in buf to path and copy the reply
         into buf. Return path of the reply. This is a synchronous method, all
         MADs received during this call are discarded until the reply is seen."""
+        if path.umad_agent_id is None:
+            if isinstance(buf,bytearray):
+                agent_id = self.register_client(buf[2],buf[3]);
+            else:
+                agent_id = self.register_client(buf[2],buf[3]);
+        else:
+            agent_id = None;
         try:
-            self.sendto(buf,path);
+            self.sendto(buf,path,agent_id);
         except IOError as err:
             if err.errno == errno.EINVAL:
                 return self._gen_error(buf,path);

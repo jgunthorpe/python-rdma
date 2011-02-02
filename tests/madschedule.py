@@ -14,10 +14,7 @@ class madschedule_test(unittest.TestCase):
         if self.umad is None:
             self.end_port = rdma.get_end_port();
             self.umad = rdma.get_umad(self.end_port);
-            self.qp0 = self.umad.register_client(IBA.MAD_SUBNET,1);
-            self.qp0dr = self.umad.register_client(IBA.MAD_SUBNET_DIRECTED,1);
-            self.local_path = rdma.path.IBDRPath(self.end_port,
-                                                 umad_agent_id = self.qp0dr);
+            self.local_path = rdma.path.IBDRPath(self.end_port);
 
     @contextmanager
     def with_assertRaises(self,excClass):
@@ -69,7 +66,6 @@ class madschedule_test(unittest.TestCase):
 
         if follow and pinf.portState != IBA.PORT_STATE_DOWN:
             npath = rdma.path.IBDRPath(self.end_port);
-            npath.umad_agent_id = path.umad_agent_id;
             npath.drPath = path.drPath + chr(port);
             print "Probe port",port,repr(npath.drPath)
             yield self.get_node_info(sched,npath);

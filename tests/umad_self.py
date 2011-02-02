@@ -12,9 +12,7 @@ class umad_self_test(unittest.TestCase):
         if self.umad is None:
             self.end_port = rdma.get_end_port();
             self.umad = rdma.get_umad(self.end_port);
-            self.qp0 = self.umad.register_client(IBA.MAD_SUBNET,1);
-            self.local_path = rdma.path.IBDRPath(self.end_port,
-                                                 umad_agent_id = self.qp0);
+            self.local_path = rdma.path.IBDRPath(self.end_port);
 
     def test_node_info(self):
         inf = self.umad.SubnGet(IBA.SMPNodeInfo(),self.local_path);
