@@ -26,7 +26,7 @@ def _conv_int_desc(s):
     t = s.split(':');
     if len(t) != 2:
         raise ValueError("%r is not a valid major:minor"%(s));
-    return (int(t[0]),t[1].strip());
+    return int(t[0]);
 
 class SysFSCache(object):
     '''Cache queries from sysfs attributes. This class is used to make
