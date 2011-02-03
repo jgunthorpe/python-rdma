@@ -67,7 +67,7 @@ class Type(object):
         g = re.match("^(\d+)\[(\d+)\]$",self.off);
         if g:
             g = g.groups();
-            self.off = int(g[0]) + int(g[1])*8;
+            self.off = int(g[0])*8 + int(g[1]);
         else:
             self.off = int(self.off)*8;
         self.type = xml.get("type");
