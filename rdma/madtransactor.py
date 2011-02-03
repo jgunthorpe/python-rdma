@@ -48,13 +48,13 @@ class MADTransactor(object):
         return (x[0],x[1] | IBA.MAD_METHOD_RESPONSE,x[2]);
 
     def _prepareMAD(self,fmt,payload,attributeModifier,method):
-        fmt.MADHeader.baseVersion = IBA.MAD_BASE_VERSION;
-        fmt.MADHeader.mgmtClass = fmt.MAD_CLASS;
-        fmt.MADHeader.classVersion = fmt.MAD_CLASS_VERSION;
-        fmt.MADHeader.method = method;
-        fmt.MADHeader.transactionID = self._get_new_TID();
-        fmt.MADHeader.attributeID = payload.MAD_ATTRIBUTE_ID;
-        fmt.MADHeader.attributeModifier = attributeModifier;
+        fmt.baseVersion = IBA.MAD_BASE_VERSION;
+        fmt.mgmtClass = fmt.MAD_CLASS;
+        fmt.classVersion = fmt.MAD_CLASS_VERSION;
+        fmt.method = method;
+        fmt.transactionID = self._get_new_TID();
+        fmt.attributeID = payload.MAD_ATTRIBUTE_ID;
+        fmt.attributeModifier = attributeModifier;
 
         # You can pass in the class object for payload and this means
         # send all zeros for it. Used for GET operations with no additional
@@ -77,9 +77,9 @@ class MADTransactor(object):
 
             # FIXME: Handle BUSY
             # FIXME: Handle redirect
-            if self.reply_fmt.MADHeader.status & 0x1F != 0:
+            if self.reply_fmt.status & 0x1F != 0:
                 raise rdma.MADError(fmt,rbuf,path=path,
-                                    status=self.reply_fmt.MADHeader.status);
+                                    status=self.reply_fmt.status);
             rpayload = newer(self.reply_fmt.data);
         except rdma.MADError:
             raise
@@ -106,7 +106,7 @@ class MADTransactor(object):
             fmt.drSLID = path.drSLID;
             fmt.drDLID = path.drDLID;
             fmt.initialPath[:len(path.drPath)] = path.drPath;
-            fmt.MADHeader.hopCount = len(path.drPath)-1;
+            fmt.hopCount = len(path.drPath)-1;
         else:
             fmt = IBA.SMPFormat();
         return self._doMAD(fmt,payload,path,attributeModifier,method);
@@ -123,7 +123,22 @@ class MADTransactor(object):
                            payload.MAD_PERFORMANCEGET);
     def PerformanceSet(self,payload,path,attributeModifier=0):
         return self._doMAD(IBA.PMFormat(),payload,path,attributeModifier,
-                           payload.MAD_PERFORMANCEGET);
+                           payload.MAD_PERFORMANCESET);
+
+    def _subn_adm_do(self,payload,path,attributeModifier,method):
+        fmt = IBA.SAFormat();
+        if isinstance(payload,IBA.ComponentMask):
+            fmt.componentMask = payload.component_mask;
+            payload = payload.payload;
+        # fmt.SMKey = path.SMKey;
+        return self._doMAD(fmt,payload,path,attributeModifier,method);
+
+    def SubnAdmGet(self,payload,path,attributeModifier=0):
+        return self._subn_adm_do(payload,path,attributeModifier,
+                           payload.MAD_SUBNADMGET);
+    def SubnAdmSet(self,payload,path,attributeModifier=0):
+        return self._subn_adm_do(payload,path,attributeModifier,
+                           payload.MAD_SUBNADMSET);
 
     # TODO ['BMGet', 'BMSet', 'CommMgtGet', 'CommMgtSend', 'CommMgtSet',
     # 'DevMgtGet', 'DevMgtSet', 'SNMPGet',
