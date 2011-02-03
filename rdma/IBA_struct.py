@@ -2588,6 +2588,8 @@ class SAFormat(rdma.binstruct.BinStruct):
     '''SA Format (section 15.2.1.1)'''
     __slots__ = ('baseVersion','mgmtClass','classVersion','method','status','classSpecific','transactionID','attributeID','reserved1','attributeModifier','RMPPVersion','RMPPType','RRespTime','RMPPFlags','RMPPStatus','data1','data2','SMKey','attributeOffset','reserved2','componentMask','data');
     MAD_LENGTH = 256
+    MAD_CLASS = 0x3
+    MAD_CLASS_VERSION = 0x2
     def zero(self):
         self.baseVersion = 0;
         self.mgmtClass = 0;

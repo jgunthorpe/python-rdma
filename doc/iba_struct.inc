@@ -885,6 +885,8 @@ Subnet Administration (15)
     SA Format (section 15.2.1.1)
 
     .. attribute:: MAD_LENGTH = 256
+    .. attribute:: MAD_CLASS = 0x3
+    .. attribute:: MAD_CLASS_VERSION = 0x2
 
     ========================= =============== ========================
     Member                    Position        Type                    

@@ -17,7 +17,10 @@
   <struct name="SAFormat"
           bytes="256"
           desc="SA Format"
-          sect="15.2.1.1">
+          sect="15.2.1.1"
+          mgmtClass="0x03"
+          mgmtClassVersion="2"
+          mgmtClassName="MAD_SUBNET_ADMIN">
     <mb bits="448" off="0" type="struct SAHeader">SAHeader<!--RMPP Data--></mb>
     <mb bits="1600" off="56" display="data">data<!--SubnetAdminData--></mb>
   </struct>
