@@ -75,7 +75,7 @@ automatically correctly set the `ComponentMask` value of the MAD.
 :mod:`rdma.IBA` InfiniBand Architecture (IBA) definitions
 ---------------------------------------------------------
 .. automodule:: rdma.IBA
-   :members: mad_status_to_str,conv_lid,GUID,ZERO_GUID,GID,ZERO_GID,conv_destination,ComponentMask
+   :members: ComponentMask,GID,GUID,ZERO_GID,ZERO_GUID,conv_ep_addr,conv_lid,mad_status_to_str
    :undoc-members:
    :show-inheritance:
 

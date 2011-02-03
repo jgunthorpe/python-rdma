@@ -4,6 +4,7 @@
 # documentation take some care when editing.
 
 import socket,sys;
+import rdma.binstruct;
 
 #: Node Type Constants
 # see NodeInfo.nodeType
@@ -19,7 +20,7 @@ MAX_GUIDS = 256;
 MAX_PKT_WORDS = 4222/4;
 
 #: LID Constants
-LID_RESERVED = 0; # for uninitialised ports
+LID_RESERVED = 0; # for uninitialized ports
 LID_MULTICAST = 0xC000; # first multicast LID
 LID_PERMISSIVE = 0xFFFF;
 LID_COUNT_UNICAST = 0xC000;
@@ -27,6 +28,7 @@ LID_COUNT_MULTICAST = 0xFFFE - 0xC000;
 
 #: Partition Key Constants
 PKEY_DEFAULT = 0xFFFF;
+PKEY_PARTIAL_DEFAULT = 0x7FFF;
 PKEY_INVALID = 0;
 
 #: Well known QKEY Constants
@@ -57,6 +59,17 @@ LINK_WIDTH_12x = 0x8;
 LINK_SPEED_2Gb5 = 0x1;
 LINK_SPEED_5Gb0 = 0x2;
 LINK_SPEED_10Gb0 = 0x4;
+
+#: PathRecord rate constants
+PR_RATE_2Gb5 = 2;
+PR_RATE_10Gb0 = 3;
+PR_RATE_30Gb0 = 4;
+PR_RATE_5Gb0 = 5;
+PR_RATE_20Gb0 = 6;
+PR_RATE_40Gb0 = 7;
+PR_RATE_60Gb0 = 8;
+PR_RATE_80Gb0 = 9;
+PR_RATE_120Gb0 = 10;
 
 #: PortInfo Port State Constants
 PORT_STATE_DOWN = 1;
@@ -204,7 +217,7 @@ class GUID(bytes):
         if s is None:
             return ZERO_GUID;
         if isinstance(s,GUID):
-            return bytes.__new__(self,bytes.__str__(s));
+            return s;
         if isinstance(s,int) or isinstance(s,long):
             s = ("%016x"%(s)).decode("hex");
             raw = True;
@@ -231,6 +244,7 @@ class GUID(bytes):
     def __repr__(self):
         return "GUID('%s')"%(self.__str__());
 
+#: All zeros GUID value.
 ZERO_GUID = GUID('\x00\x00\x00\x00\x00\x00\x00\x00',raw=True);
 
 class GID(bytes):
@@ -263,7 +277,7 @@ class GID(bytes):
             return bytes.__new__(self,prefix + bytes.__str__(guid))
 
         if isinstance(s,GID):
-            return bytes.__new__(self,bytes.__str__(s));
+            return s;
         if raw:
             assert(len(s) == 16);
             return bytes.__new__(self,s);
@@ -284,7 +298,34 @@ class GID(bytes):
     def guid(self):
         """Return the GUID portion of the GID."""
         return GUID(bytes.__getslice__(self,8,16),raw=True);
-ZERO_GID = bytes('\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00');
+
+#: All zeros GID value.
+ZERO_GID = GID('\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',raw=True);
+
+def conv_ep_addr(s):
+    """Convert the string *s* into a end port address. *s* can be a
+    GID, port GUID or LID. The result of this function is a
+    :class:`GID` or :class:`int`.
+
+    :raises ValueError: If the string can not be parsed."""
+    # Called on our own output.
+    if isinstance(s,GID) or isinstance(s,int) or isinstance(s,long):
+        return s;
+
+    try:
+        return GID(s);
+    except ValueError:
+        pass;
+    try:
+        guid = GUID(s);
+        return GID(prefix=GID_DEFAULT_PREFIX,guid=guid);
+    except ValueError:
+        pass;
+    try:
+        return conv_lid(s);
+    except ValueError:
+        pass;
+    raise ValueError("%r is not a valid end port address (GID, port GUID or LID)"%(s))
 
 class ComponentMask(object):
     """This is a wrapper class for managing IBA structures with a component
@@ -299,6 +340,11 @@ class ComponentMask(object):
         """*obj* is wrappered"""
         object.__setattr__(self,"component_mask",0);
         object.__setattr__(self,"_obj",obj);
+
+    @property
+    def payload(self):
+        """The original object that is wrappered."""
+        return self._obj;
 
     def touch(self,name):
         """Include the component mask value *name* in the calculation.

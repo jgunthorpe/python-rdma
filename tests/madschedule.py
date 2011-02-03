@@ -76,7 +76,7 @@ class madschedule_test(unittest.TestCase):
             return;
         self.guids.add(ninf.nodeGUID);
 
-        print "Got Node GUID 0x%x"%(ninf.nodeGUID);
+        print "Got Node %r"%(ninf.nodeGUID);
         if ninf.nodeType == IBA.NODE_SWITCH:
             sched.mqueue(self.get_port_info(sched,path,I,True) \
                          for I in range(1,ninf.numPorts+1));
