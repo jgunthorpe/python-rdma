@@ -47,6 +47,25 @@ to read the data::
    fmt = IBA.SMPFormat(data);
    pinf = IBA.SMPPortInfo(fmt.data);
 
+Component Mask Helper
+---------------------
+
+Subnet Administration Get RPCs have an annoying `ComponentMask` field which is
+a bitfield indicating which subfields are relevant. Computing the correct
+value for this can be quite difficult. The RPC generator computes the proper
+values for all RPCs and stores them in the class variable
+``COMPONENT_MASK``. The helper class :class:`rdma.IBA.ComponentMask` uses this
+information to automate computing the `ComponentMask` value. For example::
+
+        obj = IBA.SAPathRecord()
+        cm = IBA.ComponentMask(obj);
+	cm.DGID = IBA.GID("::1");
+        cm.DLID = 2;
+        assert(cm.component_mask == 20)
+
+Passing a :class:`~rdma.IBA.ComponentMask` into the `SubnAdm*` RPC methods will
+automatically correctly set the `ComponentMask` value of the MAD.
+
 :mod:`rdma.binstruct` IBA Structure Helpers
 -------------------------------------------
 .. automodule:: rdma.binstruct
@@ -56,7 +75,7 @@ to read the data::
 :mod:`rdma.IBA` InfiniBand Architecture (IBA) definitions
 ---------------------------------------------------------
 .. automodule:: rdma.IBA
-   :members: GID,GUID,mad_status_to_str
+   :members: mad_status_to_str,conv_lid,GUID,ZERO_GUID,GID,ZERO_GID,conv_destination,ComponentMask
    :undoc-members:
    :show-inheritance:
 

@@ -157,6 +157,19 @@ class Struct(object):
 
         self.mbGroup = self.groupMB();
 
+    def gen_component_mask(self,follow=True):
+        """We have an automatic system for managing the component mask value
+        used in SA queries. This generates the component mask bit offsets."""
+        res = [];
+        for name,mbt in sorted(self.mb,key=lambda x:x[1].off):
+            struct = mbt.getStruct();
+            if follow and struct is not None and struct in structMap:
+                tmp = structMap[struct].gen_component_mask(False);
+                res.extend("%s.%s"%(name,J) for J in tmp);
+            else:
+                res.append(name)
+        return res;
+
     def groupMB(self):
         """Take the member list and group it into struct format characters. We
         try to have 1 format character for each member, but if that doesn't
@@ -337,9 +350,16 @@ class Struct(object):
         if self.attributeID:
             yield "MAD_ATTRIBUTE_ID","0x%x"%(int(self.attributeID,0));
         if self.methods:
+            is_sa = False;
             for I in self.methods.split():
+                if I.startswith("SubnAdm"):
+                    is_sa = True;
                 yield "MAD_%s"%(I.upper()),"0x%x # %s"%(globals()[methodMap[I]],
                                                         methodMap[I]);
+            if is_sa:
+                cm = self.gen_component_mask();
+                if cm:
+                    yield "COMPONENT_MASK","{%s}"%(", ".join("%r:%u"%(name,I) for I,name in enumerate(cm)));
 
     def asPython(self,F):
         self.funcs = [];
@@ -462,6 +482,11 @@ import unittest,sys
 import rdma.IBA as IBA;
 
 class structs_test(unittest.TestCase):
+    def test_component_mask(self):
+        # See C15-0.1.27
+        self.assertEqual(IBA.SAPortInfoRecord.COMPONENT_MASK["portInfo.capabilityMask"],7)
+        self.assertEqual(IBA.SALinearForwardingTableRecord.COMPONENT_MASK["linearForwardingTable.portBlock"],3)
+
     def test_struct_packer(self):
         test = bytearray(512);
         testr = bytes(test);"""
@@ -476,4 +501,3 @@ class structs_test(unittest.TestCase):
     print >> F,\
 """if __name__ == '__main__':
     unittest.main()""";
-

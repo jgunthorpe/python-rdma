@@ -71,6 +71,9 @@ class ModuleDataDirective(sphinx.util.compat.Directive):
         res = [];
         title = None;
         for namespace,membername in attr_visitor.data:
+            if namespace != '':
+                continue;
+
             member = getattr(self.object,membername);
             if not (isinstance(member,int) or isinstance(member,long)):
                 continue;

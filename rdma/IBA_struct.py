@@ -1298,6 +1298,7 @@ class MADClassPortInfo(rdma.binstruct.BinStruct):
     MAD_DEVMGTSET = 0x2 # MAD_METHOD_SET
     MAD_SNMPGET = 0x1 # MAD_METHOD_GET
     MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
+    COMPONENT_MASK = {'baseVersion': 0,'classVersion': 1,'capabilityMask': 2,'reserved1': 3,'respTimeValue': 4,'redirectGID': 5,'redirectTC': 6,'redirectSL': 7,'redirectFL': 8,'redirectLID': 9,'redirectPKey': 10,'reserved2': 11,'redirectQP': 12,'redirectQKey': 13,'trapGID': 14,'trapTC': 15,'trapSL': 16,'trapFL': 17,'trapLID': 18,'trapPKey': 19,'trapHL': 20,'trapQP': 21,'trapQKey': 22}
     def zero(self):
         self.baseVersion = 0;
         self.classVersion = 0;
@@ -1418,6 +1419,7 @@ class MADInformInfo(rdma.binstruct.BinStruct):
     MAD_LENGTH = 36
     MAD_ATTRIBUTE_ID = 0x3
     MAD_SUBNADMSET = 0x2 # MAD_METHOD_SET
+    COMPONENT_MASK = {'GID': 0,'LIDRangeBegin': 1,'LIDRangeEnd': 2,'reserved1': 3,'isGeneric': 4,'subscribe': 5,'type': 6,'trapNumber': 7,'QPN': 8,'reserved2': 9,'respTimeValue': 10,'reserved3': 11,'producerType': 12}
     def zero(self):
         self.GID = IBA.GID();
         self.LIDRangeBegin = 0;
@@ -2576,6 +2578,7 @@ class SANodeRecord(rdma.binstruct.BinStruct):
     MAD_ATTRIBUTE_ID = 0x11
     MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
+    COMPONENT_MASK = {'LID': 0,'reserved1': 1,'nodeInfo.baseVersion': 2,'nodeInfo.classVersion': 3,'nodeInfo.nodeType': 4,'nodeInfo.numPorts': 5,'nodeInfo.systemImageGUID': 6,'nodeInfo.nodeGUID': 7,'nodeInfo.portGUID': 8,'nodeInfo.partitionCap': 9,'nodeInfo.deviceID': 10,'nodeInfo.revision': 11,'nodeInfo.localPortNum': 12,'nodeInfo.vendorID': 13,'nodeDescription.nodeString': 14}
     def __init__(self,*args):
         self.nodeInfo = SMPNodeInfo();
         self.nodeDescription = SMPNodeDescription();
@@ -2614,6 +2617,7 @@ class SAPortInfoRecord(rdma.binstruct.BinStruct):
     MAD_ATTRIBUTE_ID = 0x12
     MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
+    COMPONENT_MASK = {'endportLID': 0,'portNum': 1,'reserved1': 2,'portInfo.MKey': 3,'portInfo.GIDPrefix': 4,'portInfo.LID': 5,'portInfo.masterSMLID': 6,'portInfo.capabilityMask': 7,'portInfo.diagCode': 8,'portInfo.MKeyLeasePeriod': 9,'portInfo.localPortNum': 10,'portInfo.linkWidthEnabled': 11,'portInfo.linkWidthSupported': 12,'portInfo.linkWidthActive': 13,'portInfo.linkSpeedSupported': 14,'portInfo.portState': 15,'portInfo.portPhysicalState': 16,'portInfo.linkDownDefaultState': 17,'portInfo.MKeyProtectBits': 18,'portInfo.reserved1': 19,'portInfo.LMC': 20,'portInfo.linkSpeedActive': 21,'portInfo.linkSpeedEnabled': 22,'portInfo.neighborMTU': 23,'portInfo.masterSMSL': 24,'portInfo.VLCap': 25,'portInfo.initType': 26,'portInfo.VLHighLimit': 27,'portInfo.VLArbitrationHighCap': 28,'portInfo.VLArbitrationLowCap': 29,'portInfo.initTypeReply': 30,'portInfo.MTUCap': 31,'portInfo.VLStallCount': 32,'portInfo.HOQLife': 33,'portInfo.operationalVLs': 34,'portInfo.partitionEnforcementInbound': 35,'portInfo.partitionEnforcementOutbound': 36,'portInfo.filterRawInbound': 37,'portInfo.filterRawOutbound': 38,'portInfo.MKeyViolations': 39,'portInfo.PKeyViolations': 40,'portInfo.QKeyViolations': 41,'portInfo.GUIDCap': 42,'portInfo.clientReregister': 43,'portInfo.reserved2': 44,'portInfo.subnetTimeOut': 45,'portInfo.reserved3': 46,'portInfo.respTimeValue': 47,'portInfo.localPhyErrors': 48,'portInfo.overrunErrors': 49,'portInfo.reserved4': 50}
     def __init__(self,*args):
         self.portInfo = SMPPortInfo();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -2647,6 +2651,7 @@ class SASLToVLMappingTableRecord(rdma.binstruct.BinStruct):
     MAD_ATTRIBUTE_ID = 0x13
     MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
+    COMPONENT_MASK = {'LID': 0,'inputPortNum': 1,'outputPortNum': 2,'reserved1': 3,'SLToVLMappingTable.SLtoVL': 4}
     def __init__(self,*args):
         self.SLToVLMappingTable = SMPSLToVLMappingTable();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -2683,6 +2688,7 @@ class SASwitchInfoRecord(rdma.binstruct.BinStruct):
     MAD_ATTRIBUTE_ID = 0x14
     MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
+    COMPONENT_MASK = {'LID': 0,'reserved1': 1,'switchInfo.linearFDBCap': 2,'switchInfo.randomFDBCap': 3,'switchInfo.multicastFDBCap': 4,'switchInfo.linearFDBTop': 5,'switchInfo.defaultPort': 6,'switchInfo.defaultMulticastPrimaryPort': 7,'switchInfo.defaultMulticastNotPrimaryPort': 8,'switchInfo.lifeTimeValue': 9,'switchInfo.portStateChange': 10,'switchInfo.reserved1': 11,'switchInfo.optimizedSLtoVLMappingProgramming': 12,'switchInfo.LIDsPerPort': 13,'switchInfo.partitionEnforcementCap': 14,'switchInfo.inboundEnforcementCap': 15,'switchInfo.outboundEnforcementCap': 16,'switchInfo.filterRawInboundCap': 17,'switchInfo.filterRawOutboundCap': 18,'switchInfo.enhancedPort0': 19,'switchInfo.reserved2': 20,'switchInfo.reserved3': 21}
     def __init__(self,*args):
         self.switchInfo = SMPSwitchInfo();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -2715,6 +2721,7 @@ class SALinearForwardingTableRecord(rdma.binstruct.BinStruct):
     MAD_ATTRIBUTE_ID = 0x15
     MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
+    COMPONENT_MASK = {'LID': 0,'blockNum': 1,'reserved1': 2,'linearForwardingTable.portBlock': 3}
     def __init__(self,*args):
         self.linearForwardingTable = SMPLinearForwardingTable();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -2750,6 +2757,7 @@ class SARandomForwardingTableRecord(rdma.binstruct.BinStruct):
     MAD_ATTRIBUTE_ID = 0x16
     MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
+    COMPONENT_MASK = {'LID': 0,'blockNum': 1,'reserved1': 2,'randomForwardingTable.LIDPortBlock': 3}
     def __init__(self,*args):
         self.randomForwardingTable = SMPRandomForwardingTable();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -2785,6 +2793,7 @@ class SAMulticastForwardingTableRecord(rdma.binstruct.BinStruct):
     MAD_ATTRIBUTE_ID = 0x17
     MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
+    COMPONENT_MASK = {'LID': 0,'reserved1': 1,'position': 2,'blockNum': 3,'reserved2': 4,'multicastForwardingTable.portMaskBlock': 5}
     def __init__(self,*args):
         self.multicastForwardingTable = SMPMulticastForwardingTable();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -2833,6 +2842,7 @@ class SAVLArbitrationTableRecord(rdma.binstruct.BinStruct):
     MAD_ATTRIBUTE_ID = 0x36
     MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
+    COMPONENT_MASK = {'LID': 0,'outputPortNum': 1,'blockNum': 2,'reserved1': 3,'VLArbitrationTable.VLWeightBlock': 4}
     def __init__(self,*args):
         self.VLArbitrationTable = SMPVLArbitrationTable();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -2869,6 +2879,7 @@ class SASMInfoRecord(rdma.binstruct.BinStruct):
     MAD_ATTRIBUTE_ID = 0x18
     MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
+    COMPONENT_MASK = {'LID': 0,'reserved1': 1,'SMInfo.GUID': 2,'SMInfo.SMKey': 3,'SMInfo.actCount': 4,'SMInfo.priority': 5,'SMInfo.SMState': 6,'SMInfo.reserved1': 7}
     def __init__(self,*args):
         self.SMInfo = SMPSMInfo();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -2901,6 +2912,7 @@ class SAInformInfoRecord(rdma.binstruct.BinStruct):
     MAD_ATTRIBUTE_ID = 0xf3
     MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
+    COMPONENT_MASK = {'subscriberGID': 0,'enumeration': 1,'reserved1': 2,'reserved2': 3,'informInfo.GID': 4,'informInfo.LIDRangeBegin': 5,'informInfo.LIDRangeEnd': 6,'informInfo.reserved1': 7,'informInfo.isGeneric': 8,'informInfo.subscribe': 9,'informInfo.type': 10,'informInfo.trapNumber': 11,'informInfo.QPN': 12,'informInfo.reserved2': 13,'informInfo.respTimeValue': 14,'informInfo.reserved3': 15,'informInfo.producerType': 16,'reserved3': 17}
     def __init__(self,*args):
         self.informInfo = MADInformInfo();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -2946,6 +2958,7 @@ class SALinkRecord(rdma.binstruct.BinStruct):
     MAD_ATTRIBUTE_ID = 0x20
     MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
+    COMPONENT_MASK = {'fromLID': 0,'fromPort': 1,'toPort': 2,'toLID': 3,'reserved1': 4}
     def zero(self):
         self.fromLID = 0;
         self.fromPort = 0;
@@ -2974,6 +2987,7 @@ class SAGUIDInfoRecord(rdma.binstruct.BinStruct):
     MAD_ATTRIBUTE_ID = 0x30
     MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
+    COMPONENT_MASK = {'LID': 0,'blockNum': 1,'reserved1': 2,'reserved2': 3,'GUIDInfo.GUIDBlock': 4}
     def __init__(self,*args):
         self.GUIDInfo = SMPGUIDInfo();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -3012,6 +3026,7 @@ class SAServiceRecord(rdma.binstruct.BinStruct):
     MAD_SUBNADMSET = 0x2 # MAD_METHOD_SET
     MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
     MAD_SUBNADMDELETE = 0x15 # MAD_METHOD_DELETE
+    COMPONENT_MASK = {'serviceID': 0,'serviceGID': 1,'servicePKey': 2,'reserved1': 3,'serviceLease': 4,'serviceKey': 5,'serviceName': 6,'serviceData8': 7,'serviceData16': 8,'serviceData32': 9,'serviceData64': 10}
     def __init__(self,*args):
         self.serviceName = bytearray(64);
         self.serviceData8 = bytearray(16);
@@ -3084,6 +3099,7 @@ class SAPKeyTableRecord(rdma.binstruct.BinStruct):
     MAD_ATTRIBUTE_ID = 0x33
     MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
+    COMPONENT_MASK = {'LID': 0,'blockNum': 1,'portNum': 2,'reserved1': 3,'PKeyTable.PKeyBlock': 4}
     def __init__(self,*args):
         self.PKeyTable = SMPPKeyTable();
         rdma.binstruct.BinStruct.__init__(self,*args);
@@ -3129,6 +3145,7 @@ class SAPathRecord(rdma.binstruct.BinStruct):
     MAD_ATTRIBUTE_ID = 0x35
     MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
+    COMPONENT_MASK = {'reserved1': 0,'reserved2': 1,'DGID': 2,'SGID': 3,'DLID': 4,'SLID': 5,'rawTraffic': 6,'reserved3': 7,'flowLabel': 8,'hopLimit': 9,'TClass': 10,'reversible': 11,'numbPath': 12,'PKey': 13,'reserved4': 14,'SL': 15,'MTUSelector': 16,'MTU': 17,'rateSelector': 18,'rate': 19,'packetLifeTimeSelector': 20,'packetLifeTime': 21,'preference': 22,'reserved5': 23,'reserved6': 24}
     def zero(self):
         self.reserved1 = 0;
         self.reserved2 = 0;
@@ -3247,6 +3264,7 @@ class SAMCMemberRecord(rdma.binstruct.BinStruct):
     MAD_SUBNADMSET = 0x2 # MAD_METHOD_SET
     MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
     MAD_SUBNADMDELETE = 0x15 # MAD_METHOD_DELETE
+    COMPONENT_MASK = {'MGID': 0,'portGID': 1,'requesterGID': 2,'QKey': 3,'MLID': 4,'MTUSelector': 5,'MTU': 6,'TClass': 7,'PKey': 8,'rateSelector': 9,'rate': 10,'packetLifeTimeSelector': 11,'packetLifeTime': 12,'SL': 13,'flowLabel': 14,'hopLimit': 15,'scope': 16,'joinState': 17,'reserved1': 18}
     def zero(self):
         self.MGID = IBA.GID();
         self.portGID = IBA.GID();
@@ -3349,6 +3367,7 @@ class SATraceRecord(rdma.binstruct.BinStruct):
     MAD_LENGTH = 48
     MAD_ATTRIBUTE_ID = 0x39
     MAD_SUBNADMGETTRACETABLE = 0x13 # MAD_METHOD_GET_TRACE_TABLE
+    COMPONENT_MASK = {'GIDPrefix': 0,'IDGeneration': 1,'reserved1': 2,'nodeType': 3,'nodeID': 4,'chassisID': 5,'entryPortID': 6,'exitPortID': 7,'entryPort': 8,'exitPort': 9,'reserved2': 10}
     def zero(self):
         self.GIDPrefix = 0;
         self.IDGeneration = 0;
@@ -3392,6 +3411,7 @@ class SAMultiPathRecord(rdma.binstruct.BinStruct):
     MAD_LENGTH = 40
     MAD_ATTRIBUTE_ID = 0x3a
     MAD_SUBNADMGETMULTI = 0x14 # MAD_METHOD_GET_MULTI
+    COMPONENT_MASK = {'rawTraffic': 0,'reserved1': 1,'flowLabel': 2,'hopLimit': 3,'TClass': 4,'reversible': 5,'numbPath': 6,'PKey': 7,'reserved2': 8,'SL': 9,'MTUSelector': 10,'MTU': 11,'rateSelector': 12,'rate': 13,'packetLifeTimeSelector': 14,'packetLifeTime': 15,'reserved3': 16,'independenceSelector': 17,'reserved4': 18,'SGIDCount': 19,'DGIDCount': 20,'reserved5': 21,'reserved6': 22,'SDGID': 23}
     def zero(self):
         self.rawTraffic = 0;
         self.reserved1 = 0;
@@ -3508,6 +3528,7 @@ class SAServiceAssociationRecord(rdma.binstruct.BinStruct):
     MAD_ATTRIBUTE_ID = 0x3b
     MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
+    COMPONENT_MASK = {'serviceKey': 0,'serviceName': 1}
     def __init__(self,*args):
         self.serviceName = bytearray(64);
         rdma.binstruct.BinStruct.__init__(self,*args);

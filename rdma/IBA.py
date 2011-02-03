@@ -286,6 +286,69 @@ class GID(bytes):
         return GUID(bytes.__getslice__(self,8,16),raw=True);
 ZERO_GID = bytes('\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00');
 
+class ComponentMask(object):
+    """This is a wrapper class for managing IBA structures with a component
+    mask. Attribute access is overridden and tracked by mapping the attribute
+    name to the component mask bit index to build up a component mask value as
+    the class is used."""
+
+    #: The computed component_mask
+    component_mask = 0
+
+    def __init__(self,obj):
+        """*obj* is wrappered"""
+        object.__setattr__(self,"component_mask",0);
+        object.__setattr__(self,"_obj",obj);
+
+    def touch(self,name):
+        """Include the component mask value *name* in the calculation.
+        Normally this happens automatically as attributes are accessed.
+
+        :raises ValueError: If *name* is not a valid component name"""
+        bit = self._obj.COMPONENT_MASK[name];
+        object.__setattr__(self,"component_mask",
+                           self.component_mask | (1<<bit));
+
+    def _touch(self,name):
+        bit = self._obj.COMPONENT_MASK.get(name);
+        if bit is not None:
+            object.__setattr__(self,"component_mask",
+                               self.component_mask | (1<<bit));
+
+    def __getattr__(self,name):
+        res = getattr(self._obj,name);
+        if isinstance(res,rdma.binstruct.BinStruct):
+            return ComponentMask._Proxy(self,name,res);
+        if isinstance(res,bytearray) or isinstance(res,list):
+            # It is an array of some sort, just reading from those
+            # flips the bit because I am lazy.
+            self._touch(name);
+        return res;
+
+    def __setattr__(self,name,value):
+        self._touch(name);
+        return setattr(self._obj,name,value);
+
+    class _Proxy(object):
+        def __init__(self,parent,name,obj):
+            object.__setattr__(self,"_parent",parent);
+            object.__setattr__(self,"_name",name);
+            object.__setattr__(self,"_obj",obj);
+
+        def __getattr__(self,name):
+            res = getattr(self._obj,name);
+            if isinstance(res,rdma.binstruct.BinStruct):
+                return _Proxy(self._parent,"%s.%s"%(self._name,name),res);
+            if isinstance(res,bytearray) or isinstance(res,list):
+                # It is an array of some sort, just reading from those
+                # flips the bit because I am lazy.
+                self._parent._touch("%s.%s"%(self._name,name));
+            return res;
+
+        def __setattr__(self,name,value):
+            self._parent._touch("%s.%s"%(self._name,name));
+            return setattr(self._obj,name,value);
+
 from rdma.IBA_struct import *;
 def _make_IBA_link():
     """We have a bit of a circular dependency here, make a IBA

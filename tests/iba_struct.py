@@ -3,6 +3,11 @@ import unittest,sys
 import rdma.IBA as IBA;
 
 class structs_test(unittest.TestCase):
+    def test_component_mask(self):
+        # See C15-0.1.27
+        self.assertEqual(IBA.SAPortInfoRecord.COMPONENT_MASK["portInfo.capabilityMask"],7)
+        self.assertEqual(IBA.SALinearForwardingTableRecord.COMPONENT_MASK["linearForwardingTable.portBlock"],3)
+
     def test_struct_packer(self):
         test = bytearray(512);
         testr = bytes(test);
