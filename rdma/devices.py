@@ -168,6 +168,31 @@ class EndPort(SysFSCache):
         """Return the ``pkey index`` for pkey value *pkey*."""
         return self.pkeys.index(pkey);
 
+    @property
+    def sa_path(self):
+        """The path to the SA. This path should only be used for GMPs of class
+        :data:`~rdma.IBA.MAD_SUBNET_ADMIN` and it should never be changed.
+        See IBA 15.4.2."""
+        try:
+            return self._cached_sa_path
+        except AttributeError:
+            pass;
+
+        try:
+            pkey_idx = self.pkey_index(IBA.PKEY_DEFAULT);
+        except ValueError:
+            try:
+                pkey_idx = self.pkey_index(IBA.PKEY_PARTIAL_DEFAULT);
+            except ValueError:
+                raise rdma.RDMAError("Could not find the SA default PKey");
+
+        self._cached_sa_path = rdma.path.IBPath(self,DLID=self.sm_lid,
+                                                SL=self.sm_sl,dqpn=1,sqpn=1,
+                                                qkey=IBA.IB_DEFAULT_QP1_QKEY,
+                                                pkey_index=pkey_idx,
+                                                packet_life_time=self.subnet_timeout);
+        return self._cached_sa_path;
+
     def __str__(self):
         return "%s/%u"%(self.parent,self.port_id);
 

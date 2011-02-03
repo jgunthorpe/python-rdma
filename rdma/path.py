@@ -24,6 +24,12 @@ class Path(object):
             if I.startswith("_cached"):
                 self.__delattr__(I);
 
+    def __repr__(self):
+        cls = self.__class__;
+        keys = ("%s=%r"%(k,v) for k,v in self.__dict__.iteritems()
+                if getattr(cls,k,None) != v);
+        return "%s(%s)"%(cls.__name__,", ".join(keys));
+
 class IBPath(Path):
     """Describe a path in an IB network with a LRH and GRH and BTH
 
@@ -61,6 +67,11 @@ class IBPath(Path):
     #: Holds :attr:`rdma.IBA.HdrDETH.QKey`
     qkey = None;
 
+    #: Maximum MTU to use on this path
+    MTU = IBA.MTU_256;
+    #: Maximum injection rate for this path
+    rate = IBA.PR_RATE_2Gb5;
+
     #: Method specific - override the *agent_id* for :class:`rdma.umad.UMAD`
     umad_agent_id = None;
 
@@ -70,7 +81,7 @@ class IBPath(Path):
     #: Holds :attr:`rdma.IBA.HdrGRH.DGID`
     DGID = None;
     #: Holds :attr:`rdma.IBA.HdrGRH.hopLmt`
-    hop_limit = 255;
+    hop_limit = 0;
     #: Holds :attr:`rdma.IBA.HdrGRH.TClass`
     traffic_class = 0;
     #: Holds :attr:`rdma.IBA.HdrGRH.flowLabel`
@@ -131,16 +142,16 @@ class IBPath(Path):
     def packet_life_time(self):
         """The packet lifetime value for this path. The lifetime value for the
         path is the expected uni-directional transit time.  If a value has not
-        been provided the the port's
+        been provided then the port's
         :attr:`rdma.devices.EndPort.subnet_timeout` is used."""
         try:
-            return self._packet_life_time;
+            return Path.__getattr__(self,"packet_life_time");
         except AttributeError:
             return self.end_port.subnet_timeout;
     @packet_life_time.setter
     def packet_life_time(self,value):
-        self._packet_life_time = value;
-        return self._packet_life_time;
+        self.__dict__["packet_life_time"] = value;
+        return value;
 
     @property
     def mad_timeout(self):
@@ -153,10 +164,20 @@ class IBPath(Path):
                                                  2**self.resp_time);
             return self._cached_mad_timeout;
 
+    def __str__(self):
+        if self.has_grh:
+            res = "%s %r -> %s %u TC=%r FL=%r HL=%r"%(
+                self.SGID,self.SLID,self.DGID,self.DLID,self.traffic_class,
+                self.flow_label,self.hop_limit);
+        else:
+            res = "%r -> %r"%(self.SLID,self.DLID);
+        return "Path %s SL=%r PKey=%r DQPN=%r"%(
+            res,self.SL,self.pkey,self.dqpn);
+
 class IBDRPath(IBPath):
     """Describe a directed route path in an IB network using a VL15 QP0 packet,
     a LRH and :class:`rdma.IBA.SMPFormatDirected` MADs."""
-    #: Holds :attr:`rdma.IBA.SMPFormatDirected.drSLID`
+    #: Holds :attr:`rdma.IBA.SMPFormatDirected.drSLID`. Should be the same as SLID.
     drSLID = 0xFFFF;
     #: Holds :attr:`rdma.IBA.SMPFormatDirected.drDLID`
     drDLID = 0xFFFF;
@@ -166,9 +187,11 @@ class IBDRPath(IBPath):
     def __init__(self,end_port,**kwargs):
         """*end_port* is the :class:`rdma.devices.EndPort` this path is
         associated with. *kwargs* is applied to set attributes of the
-        instance during initialization."""
-        self.DLID = 0xFFFF;
-        self.SLID = 0; # FIXME
+        instance during initialization.
+
+        By default this class construct a DR path to the local port."""
+        self.DLID = IBA.LID_PERMISSIVE;
+        self.SLID = IBA.LID_PERMISSIVE;
         self.drPath = bytes(chr(0));
         self.dqpn = 0;
         self.sqpn = 0;
@@ -184,3 +207,54 @@ class IBDRPath(IBPath):
     def has_grh(self):
         """Returns False, GID addressing is not possible for DR paths."""
         return False;
+
+    def __str__(self):
+        # No LID components
+        drPath = tuple(ord(I) for I in self.drPath);
+        if self.drDLID == IBA.LID_PERMISSIVE and self.drSLID == IBA.LID_PERMISSIVE:
+            return "DR Path %r"%(drPath,);
+        # LID route at the start
+        if self.drDLID == IBA.LID_PERMISSIVE and self.drSLID != IBA.LID_PERMISSIVE:
+            return "DR Path %u -> %r"%(self.DLID,drPath);
+        # LID route at the end
+        if self.drDLID != IBA.LID_PERMISSIVE and self.drSLID == IBA.LID_PERMISSIVE:
+            return "DR Path %r -> %u"%(drPath,self.drDLID);
+        # Double ended
+        return "DR Path %u -> %r -> %u"%(self.DLID,drPath,self.drDLID);
+
+def get_mad_path(mad,ep_addr):
+    """Query the SA and return a path for *ep_addr* (:func:rdma.IBA.conv_ep_addr is
+    called automatically).
+
+    This is a simplified query function to return MAD paths from the end port
+    associated with *mad* to the destination *ep_addr*.
+
+    This returns a single reversible path.
+
+    :raises ValueError: If dest is not appropriate.
+    :raises rdma.RDMAError: If no matching end_port is found."""
+    ep_addr = IBA.conv_ep_addr(ep_addr);
+
+    q = IBA.ComponentMask(IBA.SAPathRecord());
+    q.reversible = True;
+    q.SGID = mad.parent.gids[0];
+    if isinstance(ep_addr,IBA.GID):
+        q.DGID = ep_addr;
+    else:
+        q.DLID = ep_addr;
+
+    rep = mad.SubnAdmGet(q,mad.parent.sa_path);
+    return IBPath(mad.parent,
+                  DGID=rep.DGID,
+                  SGID=rep.SGID,
+                  DLID=rep.DLID,
+                  SLID=rep.SLID,
+                  flow_label=rep.flowLabel,
+                  hop_limit=rep.hopLimit,
+                  traffic_class=rep.TClass,
+                  pkey=rep.PKey,
+                  SL=rep.SL,
+                  MTU=rep.MTU,
+                  rate=rep.rate,
+                  has_grh=rep.hopLimit != 0,
+                  packet_life_time=rep.packetLifeTime);
