@@ -153,12 +153,18 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
         """Construct the address handle for UMAD and cache it in the path
         class"""
         assert(path.end_port == self.parent);
+        # The kernel seems to have no way to explicitly set a permissive
+        # SLID.. I wonder what it does?
+        if path.SLID == IBA.LID_PERMISSIVE:
+            slid_bits = 0;
+        else:
+            slid_bits = path.SLID_bits;
         if path.has_grh:
             res = self.ib_mad_addr_t.pack(cpu_to_be32(path.dqpn),
                                           cpu_to_be32(path.qkey),
                                           cpu_to_be16(path.DLID),
                                           path.SL,
-                                          path.path_bits,
+                                          slid_bits,
                                           1,
                                           path.SGID_index,
                                           path.hop_limit,
@@ -171,7 +177,7 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
                                                 cpu_to_be32(path.qkey),
                                                 cpu_to_be16(path.DLID),
                                                 path.SL,
-                                                path.SLID_bits,
+                                                slid_bits,
                                                 path.pkey_index);
         path._cache_umad_ah = res;
         return res;
