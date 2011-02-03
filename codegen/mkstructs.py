@@ -142,20 +142,49 @@ class Struct(object):
         self.methods = xml.get("methods");
         self.attributeID = xml.get("attributeID");
 
+        self.inherits = {};
         self.mb = [];
         self.packCount = 0;
         self.reserved = 0;
-        def toReserved(s):
-            if s is None:
+
+        for I in xml.getiterator("mb"):
+            self.mb.append((I.text or "",Type(I)));
+        assert(sum((I[1].lenBits() for I in self.mb),0) <= self.size*8);
+
+    def set_reserved(self):
+        def to_reserved(s):
+            if not s:
                 self.reserved = self.reserved + 1;
                 return "reserved%u"%(self.reserved);
             return s;
 
-        for I in xml.getiterator("mb"):
-            self.mb.append((toReserved(I.text),Type(I)));
-        assert(sum((I[1].lenBits() for I in self.mb),0) <= self.size*8);
-
+        self.reserved = 0;
+        self.mb = [(to_reserved(name),ty) for name,ty in self.mb];
         self.mbGroup = self.groupMB();
+
+    def make_inherit(self):
+        """*Format structures inherit from the first element, but
+        we optimize the codegen a little bit..."""
+        if not (self.name.endswith("Format") or
+                self.name.endswith("FormatDirected")):
+            return;
+
+        first = self.mb[0];
+        if not (first[0].endswith("Header") and first[1].isObject()):
+            return;
+        parent = structMap[first[1].getStruct()];
+
+        # replace the contents of the top struct into our mb list
+        self.mb = parent.mb + self.mb[1:];
+        self.inherits[first[0]] = parent;
+
+        # FIXME: I would like it if this was actually done with some
+        # inheritance so that isinstance would work properly, but since we use
+        # slots that seems like it would just cause confusion.  Certainly the
+        # codegen of a single pack/unpack is very desirable.
+
+        assert(sum((I[1].lenBits() for I in self.mb),0) <= self.size*8);
+        self.make_inherit();
 
     def gen_component_mask(self,follow=True):
         """We have an automatic system for managing the component mask value
@@ -407,6 +436,9 @@ class Struct(object):
     def asRST(self,F):
         print >> F,".. class:: rdma.IBA.%s"%(self.name)
         print >> F,""
+        if self.inherits:
+            print >> F,"    An *aggregation* of: %s"%(", ".join(I.name for I in self.inherits.itervalues()))
+            print >> F,""
         print >> F,"   ",self.desc
         print >> F,""
         for name,value in self.get_properties():
@@ -439,6 +471,10 @@ for I in options.xml:
             if not xml.get("containerName"):
                 structs.append(Struct(xml));
 structMap = dict((I.name,I) for I in structs);
+for I in structs:
+    I.make_inherit();
+for I in structs:
+    I.set_reserved();
 
 with safeUpdateCtx(options.struct_out) as F:
     print >> F, "import struct,rdma.binstruct;";
