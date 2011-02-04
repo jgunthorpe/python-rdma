@@ -22,6 +22,7 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
         issue the MADs."""
         rdma.madtransactor.MADTransactor.__init__(self);
         self._umad = umad;
+        self.trace_func = umad.trace_func
         self._keys = {};
         self._timeouts = []
         self._mqueue = collections.deque();
@@ -96,7 +97,11 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
         self._step(Context(works,True),None);
 
     def queue(self,work):
-        """*work* is a single coroutine."""
+        """*work* is a single coroutine, or *work* is a tuple of coroutines."""
+        if isinstance(work,tuple):
+            for I in work:
+                self.queue(I);
+            return;
         assert(inspect.isgenerator(work));
         self._step(Context(work,False),None);
 
@@ -120,6 +125,8 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
             if self._replyqueue:
                 ret = self._replyqueue.pop();
             else:
+                if not (self._keys or self._mqueue):
+                    break;
                 ret = self._umad.recvfrom(self._timeouts[0][0]);
                 if ret is None:
                     # Purge timed out values
@@ -132,6 +139,7 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
                         if k[0] <= now:
                             del self._timeouts[0];
                         self._do_timeout(k);
+                    continue;
 
             # Dispatch the MAD
             rmatch = self._get_match_key(ret[0]);
@@ -156,6 +164,8 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
         if res[3] == 0:
             # Pass the timeout back into MADTransactor and capture the
             # result
+            rmatch = self._get_reply_match_key(res[2][0]._buf);
+            del self._keys[rmatch];
             try:
                 self._completeMAD(None,*res[2]);
             except:
@@ -163,6 +173,7 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
                 self._step(res[1],True);
             else:
                 assert(False);
+            return
         res[3] = res[3] - 1;
 
         # Resend

@@ -263,10 +263,12 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
         the Mellanox driver will return EINVAL rather than construct an error
         MAD. I consider this to be a bug in the kernel, but we fix it here
         by constructing an error MAD."""
-        buf[3] = buf[3] | IBA.MAD_METHOD_RESPONSE;
+        buf = copy.copy(buf);
+        rmatch = self._get_reply_match_key(buf);
+        buf[3] = rmatch[1];
         buf[4] = 0;
         buf[5] = IBA.MAD_STATUS_INVALID_ATTR_OR_MODIFIER; # Guessing.
-        path = copy.copy(path);
+        path = path.copy();
         path.reverse();
         return (buf,path);
 
