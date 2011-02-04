@@ -121,6 +121,12 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
 
         self._agent_cache = {};
 
+        self._tid = int(os.urandom(4).encode("hex"),16);
+
+    def _get_new_TID(self):
+        self._tid = (self._tid + 1) % (1 << 32);
+        return self._tid;
+
     def _ioctl_enable_pkey(self):
         return fcntl.ioctl(self.dev.fileno(),self.IB_USER_MAD_ENABLE_PKEY) == 0;
     def _ioctl_unregister_agent(self,agent_id):

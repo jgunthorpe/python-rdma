@@ -54,17 +54,14 @@ class MADTransactor(object):
     #: A function to call for tracing.
     trace_func = None;
 
-    def __init__(self):
-        self._tid = 0;
-
     def _execute(self,buf,path):
         """Send the fully formed MAD in buf to path and copy the reply
         into buf. Return path of the reply"""
         pass
 
     def _get_new_TID(self):
-        self._tid = (self._tid + 1) % (1 << 32);
-        return self._tid;
+        """Override in derived classes."""
+        pass;
 
     @staticmethod
     def _get_match_key(buf):
