@@ -300,7 +300,10 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
                 continue;
             elif rmatch == self._get_match_key(ret[0]):
                 return ret;
-
+            else:
+                if self.trace_func is not None:
+                    self.trace_func(self,rdma.madtransactor.TRACE_UNEXPECTED,
+                                    path=path,ret=ret);
     def __repr__(self):
         return "<%s.%s object for %s at 0x%x>"%\
                (self.__class__.__module__,
