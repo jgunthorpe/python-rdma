@@ -131,7 +131,8 @@ class Type(object):
 
 class Struct(object):
     '''Holds the a single structure'''
-    def __init__(self,xml):
+    def __init__(self,xml,fn):
+        self.filename = fn;
         self.name = xml.get("name");
         self.size = int(xml.get("bytes"));
         self.desc = "%s (section %s)"%(xml.get("desc"),xml.get("sect"));
@@ -141,6 +142,9 @@ class Struct(object):
         self.mgmtClassVersion = xml.get("mgmtClassVersion");
         self.methods = xml.get("methods");
         self.attributeID = xml.get("attributeID");
+
+        self.is_format = (self.name.endswith("Format") or
+                          self.name.endswith("FormatDirected"));
 
         self.inherits = {};
         self.mb = [];
@@ -165,8 +169,7 @@ class Struct(object):
     def make_inherit(self):
         """*Format structures inherit from the first element, but
         we optimize the codegen a little bit..."""
-        if not (self.name.endswith("Format") or
-                self.name.endswith("FormatDirected")):
+        if not self.is_format:
             return;
 
         first = self.mb[0];
@@ -346,8 +349,8 @@ class Struct(object):
                           off/8));
 
     def genPrinter(self):
-        x = ["def printer(self,F,offset=0,*args):",
-             "    rdma.binstruct.BinStruct.printer(self,F,offset,*args);"];
+        x = ["def printer(self,F,offset=0,header=True):",
+             "    rdma.binstruct.BinStruct.printer(self,F,offset,header);"];
         groups = list(self.mbGroup);
         I = 0;
         while I < len(groups):
@@ -362,10 +365,13 @@ class Struct(object):
         for I in groups:
             bits = sum(J[1].lenBits() for J in I);
             assert bits % 32 == 0;
-            label = ','.join("%s=%%r"%(J[0]) for J in I);
-            label2 = ','.join("self.%s"%(J[0]) for J in I);
-            x.append('    label = "%s"%%(%s);'%(label,label2));
-            x.append('    self.dump(F,%u,%u,label,offset);'%(off,off+bits));
+            if self.is_format and I[0][0] == "data":
+                x.append('    self._format_data(F,%u,%u,offset);'%(off,off+bits));
+            else:
+                label = ','.join("%s=%%r"%(J[0]) for J in I);
+                label2 = ','.join("self.%s"%(J[0]) for J in I);
+                x.append('    label = "%s"%%(%s);'%(label,label2));
+                x.append('    self.dump(F,%u,%u,label,offset);'%(off,off+bits));
             off = off + bits;
         if len(x) == 1:
             x.append('    return;');
@@ -421,10 +427,12 @@ class Struct(object):
         self.genPrinter();
 
         self.slots = ','.join(repr(I[0]) for I in self.mb);
-        print >> F, """class %(name)s(rdma.binstruct.BinStruct):
-    '''%(desc)s'''
-    __slots__ = (%(slots)s);"""%\
-        self.__dict__;
+        if self.is_format:
+            print >> F,"class %s(BinFormat):"%(self.name);
+        else:
+            print >> F,"class %s(rdma.binstruct.BinStruct):"%(self.name);
+        print >> F,"    '''%s'''"%(self.desc);
+        print >> F,"    __slots__ = (%s);"""%(self.slots);
 
         for name,value in self.get_properties():
             print >> F, "    %s = %s"%(name,value);
@@ -469,7 +477,7 @@ for I in options.xml:
         doc = ElementTree.parse(F);
         for xml in doc.findall("struct"):
             if not xml.get("containerName"):
-                structs.append(Struct(xml));
+                structs.append(Struct(xml,I));
 structMap = dict((I.name,I) for I in structs);
 for I in structs:
     I.make_inherit();
@@ -477,9 +485,40 @@ for I in structs:
     I.set_reserved();
 
 with safeUpdateCtx(options.struct_out) as F:
-    print >> F, "import struct,rdma.binstruct;";
+    print >> F, """import struct,rdma.binstruct;
+class BinFormat(rdma.binstruct.BinStruct):
+    '''Base class for all `*Format` type packet layouts.'''
+    def _format_data(self,F,start_bits,end_bits,offset):
+        attr = ATTR_TO_STRUCT.get((self.__class__,self.attributeID));
+        if attr is None:
+            return self.dump(F,start_bits,end_bits,'data',offset);
+        attr(self,offset+start_bits/8).printer(F,offset+start_bits/8);
+    def describe(self):
+        '''Return a short description of the RPC described by this format.'''
+        attr = ATTR_TO_STRUCT.get((self.__class__,self.attributeID));
+        if attr is None:
+            s = '??(%u)'%(self.attributeID);
+        else:
+            s = '%s(%u)'%(attr.__name__,self.attributeID);
+        return '%s %s(%u.%u) %s'%(IBA.const_str('MAD_METHOD_',self.method,True),
+                                  self.__class__.__name__,self.mgmtClass,
+                                  self.classVersion,s);
+        """;
     for I in structs:
         I.asPython(F);
+
+    res = (I for I in structs if I.is_format);
+    print >> F, "CLASS_TO_STRUCT = {%s};"%(",\n\t".join("(%u,%u):%s"%(
+        int(I.mgmtClass,0),int(I.mgmtClassVersion,0),I.name) for I in res));
+
+    res = []
+    for I in structs:
+        if I.is_format:
+            for J in structs:
+                if J.filename == I.filename and J.attributeID is not None:
+                    res.append((I,J));
+    print >> F, "ATTR_TO_STRUCT = {%s};"%(",\n\t".join("(%s,%u):%s"%(
+        I[0].name,int(I[1].attributeID,0),I[1].name) for I in res));
 
 with safeUpdateCtx(options.rst_out) as F:
     def is_sect_prefix(x,y):

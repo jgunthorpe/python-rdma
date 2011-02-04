@@ -1,4 +1,22 @@
 import struct,rdma.binstruct;
+class BinFormat(rdma.binstruct.BinStruct):
+    '''Base class for all `*Format` type packet layouts.'''
+    def _format_data(self,F,start_bits,end_bits,offset):
+        attr = ATTR_TO_STRUCT.get((self.__class__,self.attributeID));
+        if attr is None:
+            return self.dump(F,start_bits,end_bits,'data',offset);
+        attr(self,offset+start_bits/8).printer(F,offset+start_bits/8);
+    def describe(self):
+        '''Return a short description of the RPC described by this format.'''
+        attr = ATTR_TO_STRUCT.get((self.__class__,self.attributeID));
+        if attr is None:
+            s = '??(%u)'%(self.attributeID);
+        else:
+            s = '%s(%u)'%(attr.__name__,self.attributeID);
+        return '%s %s(%u.%u) %s'%(IBA.const_str('MAD_METHOD_',self.method,True),
+                                  self.__class__.__name__,self.mgmtClass,
+                                  self.classVersion,s);
+        
 class HdrLRH(rdma.binstruct.BinStruct):
     '''Local Route Header (section 7.7)'''
     __slots__ = ('VL','LVer','SL','reserved1','LNH','DLID','reserved2','pktLen','SLID');
@@ -44,8 +62,8 @@ class HdrLRH(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         (self._pack_0_32,self._pack_1_32,) = struct.unpack_from('>LL',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "VL=%r,LVer=%r,SL=%r,reserved1=%r,LNH=%r,DLID=%r"%(self.VL,self.LVer,self.SL,self.reserved1,self.LNH,self.DLID);
         self.dump(F,0,32,label,offset);
         label = "reserved2=%r,pktLen=%r,SLID=%r"%(self.reserved2,self.pktLen,self.SLID);
@@ -66,8 +84,8 @@ class HdrRWH(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         (self.reserved1,self.etherType,) = struct.unpack_from('>HH',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "reserved1=%r,etherType=%r"%(self.reserved1,self.etherType);
         self.dump(F,0,32,label,offset);
 
@@ -106,8 +124,8 @@ class HdrGRH(rdma.binstruct.BinStruct):
         self.DGID = IBA.GID(buffer[offset + 24:offset + 40],raw=True);
         (self._pack_0_32,self.payLen,self.nxtHdr,self.hopLmt,) = struct.unpack_from('>LHBB',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "IPVer=%r,TClass=%r,flowLabel=%r"%(self.IPVer,self.TClass,self.flowLabel);
         self.dump(F,0,32,label,offset);
         label = "payLen=%r,nxtHdr=%r,hopLmt=%r"%(self.payLen,self.nxtHdr,self.hopLmt);
@@ -175,8 +193,8 @@ class HdrBTH(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         (self._pack_0_32,self._pack_1_32,self._pack_2_32,) = struct.unpack_from('>LLL',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "service=%r,function=%r,SE=%r,migReq=%r,padCnt=%r,TVer=%r,PKey=%r"%(self.service,self.function,self.SE,self.migReq,self.padCnt,self.TVer,self.PKey);
         self.dump(F,0,32,label,offset);
         label = "reserved1=%r,destQP=%r"%(self.reserved1,self.destQP);
@@ -208,8 +226,8 @@ class HdrRDETH(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         (self._pack_0_32,) = struct.unpack_from('>L',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "reserved1=%r,EEC=%r"%(self.reserved1,self.EEC);
         self.dump(F,0,32,label,offset);
 
@@ -238,8 +256,8 @@ class HdrDETH(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         (self.QKey,self._pack_0_32,) = struct.unpack_from('>LL',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "QKey=%r"%(self.QKey);
         self.dump(F,0,32,label,offset);
         label = "reserved1=%r,srcQP=%r"%(self.reserved1,self.srcQP);
@@ -261,8 +279,8 @@ class HdrRETH(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         (self.VA,self.RKey,self.DMALen,) = struct.unpack_from('>QLL',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "VA=%r"%(self.VA);
         self.dump(F,0,64,label,offset);
         label = "RKey=%r"%(self.RKey);
@@ -287,8 +305,8 @@ class HdrAtomicETH(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         (self.VA,self.RKey,self.swapData,self.cmpData,) = struct.unpack_from('>QLQQ',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "VA=%r"%(self.VA);
         self.dump(F,0,64,label,offset);
         label = "RKey=%r"%(self.RKey);
@@ -322,8 +340,8 @@ class HdrAETH(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         (self._pack_0_32,) = struct.unpack_from('>L',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "syndrome=%r,MSN=%r"%(self.syndrome,self.MSN);
         self.dump(F,0,32,label,offset);
 
@@ -341,8 +359,8 @@ class HdrAtomicAckETH(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         (self.origRData,) = struct.unpack_from('>Q',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "origRData=%r"%(self.origRData);
         self.dump(F,0,64,label,offset);
 
@@ -360,8 +378,8 @@ class HdrImmDt(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         (self.immediateData,) = struct.unpack_from('>L',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "immediateData=%r"%(self.immediateData);
         self.dump(F,0,32,label,offset);
 
@@ -379,8 +397,8 @@ class HdrIETH(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         (self.RKey,) = struct.unpack_from('>L',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "RKey=%r"%(self.RKey);
         self.dump(F,0,32,label,offset);
 
@@ -412,12 +430,12 @@ class HdrFlowControl(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         (self._pack_0_32,) = struct.unpack_from('>L',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "op=%r,FCTBS=%r,VL=%r,FCCL=%r"%(self.op,self.FCTBS,self.VL,self.FCCL);
         self.dump(F,0,32,label,offset);
 
-class CMFormat(rdma.binstruct.BinStruct):
+class CMFormat(BinFormat):
     '''Request for Communication (section 16.7.1)'''
     __slots__ = ('baseVersion','mgmtClass','classVersion','method','status','classSpecific','transactionID','attributeID','reserved1','attributeModifier','data');
     MAD_LENGTH = 256
@@ -445,8 +463,8 @@ class CMFormat(rdma.binstruct.BinStruct):
         self.data = buffer[offset + 24:offset + 256]
         (self.baseVersion,self.mgmtClass,self.classVersion,self.method,self.status,self.classSpecific,self.transactionID,self.attributeID,self.reserved1,self.attributeModifier,) = struct.unpack_from('>BBBBHHQHHL',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "baseVersion=%r,mgmtClass=%r,classVersion=%r,method=%r"%(self.baseVersion,self.mgmtClass,self.classVersion,self.method);
         self.dump(F,0,32,label,offset);
         label = "status=%r,classSpecific=%r"%(self.status,self.classSpecific);
@@ -457,8 +475,7 @@ class CMFormat(rdma.binstruct.BinStruct):
         self.dump(F,128,160,label,offset);
         label = "attributeModifier=%r"%(self.attributeModifier);
         self.dump(F,160,192,label,offset);
-        label = "data=%r"%(self.data);
-        self.dump(F,192,2048,label,offset);
+        self._format_data(F,192,2048,offset);
 
 class CMPath(rdma.binstruct.BinStruct):
     '''Path Information (section 12.6)'''
@@ -519,8 +536,8 @@ class CMPath(rdma.binstruct.BinStruct):
         (self.SLID,self.DLID,) = struct.unpack_from('>HH',buffer,offset+0);
         (self._pack_0_32,self._pack_1_32,) = struct.unpack_from('>LL',buffer,offset+36);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "SLID=%r,DLID=%r"%(self.SLID,self.DLID);
         self.dump(F,0,32,label,offset);
         label = "SGID=%r"%(self.SGID);
@@ -640,8 +657,8 @@ class CMREQ(rdma.binstruct.BinStruct):
         (self.LCID,self.reserved1,self.serviceID,) = struct.unpack_from('>LLQ',buffer,offset+0);
         (self.localCMQKey,self.localQKey,self._pack_0_32,self._pack_1_32,self._pack_2_32,self._pack_3_32,self._pack_4_32,) = struct.unpack_from('>LLLLLLL',buffer,offset+24);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "LCID=%r"%(self.LCID);
         self.dump(F,0,32,label,offset);
         label = "reserved1=%r"%(self.reserved1);
@@ -708,8 +725,8 @@ class CMMRA(rdma.binstruct.BinStruct):
         self.privateData = buffer[offset + 12:offset + 232]
         (self.LCID,self.RCID,self._pack_0_32,) = struct.unpack_from('>LLL',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "LCID=%r"%(self.LCID);
         self.dump(F,0,32,label,offset);
         label = "RCID=%r"%(self.RCID);
@@ -759,8 +776,8 @@ class CMREJ(rdma.binstruct.BinStruct):
         self.privateData = buffer[offset + 84:offset + 232]
         (self.LCID,self.RCID,self._pack_0_32,) = struct.unpack_from('>LLL',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "LCID=%r"%(self.LCID);
         self.dump(F,0,32,label,offset);
         label = "RCID=%r"%(self.RCID);
@@ -850,8 +867,8 @@ class CMREP(rdma.binstruct.BinStruct):
         self.privateData = buffer[offset + 36:offset + 232]
         (self.LCID,self.RCID,self.localQKey,self._pack_0_32,self._pack_1_32,self._pack_2_32,self._pack_3_32,) = struct.unpack_from('>LLLLLLL',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "LCID=%r"%(self.LCID);
         self.dump(F,0,32,label,offset);
         label = "RCID=%r"%(self.RCID);
@@ -891,8 +908,8 @@ class CMRTU(rdma.binstruct.BinStruct):
         self.privateData = buffer[offset + 8:offset + 232]
         (self.LCID,self.RCID,) = struct.unpack_from('>LL',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "LCID=%r"%(self.LCID);
         self.dump(F,0,32,label,offset);
         label = "RCID=%r"%(self.RCID);
@@ -931,8 +948,8 @@ class CMDREQ(rdma.binstruct.BinStruct):
         self.privateData = buffer[offset + 12:offset + 232]
         (self.LCID,self.RCID,self._pack_0_32,) = struct.unpack_from('>LLL',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "LCID=%r"%(self.LCID);
         self.dump(F,0,32,label,offset);
         label = "RCID=%r"%(self.RCID);
@@ -962,8 +979,8 @@ class CMDREP(rdma.binstruct.BinStruct):
         self.privateData = buffer[offset + 8:offset + 232]
         (self.LCID,self.RCID,) = struct.unpack_from('>LL',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "LCID=%r"%(self.LCID);
         self.dump(F,0,32,label,offset);
         label = "RCID=%r"%(self.RCID);
@@ -1052,8 +1069,8 @@ class CMLAP(rdma.binstruct.BinStruct):
         (self.LCID,self.RCID,self.QKey,self._pack_0_32,self.reserved2,self.altSLID,self.altDLID,) = struct.unpack_from('>LLLLLHH',buffer,offset+0);
         (self._pack_1_32,self._pack_2_32,) = struct.unpack_from('>LL',buffer,offset+56);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "LCID=%r"%(self.LCID);
         self.dump(F,0,32,label,offset);
         label = "RCID=%r"%(self.RCID);
@@ -1103,8 +1120,8 @@ class CMAPR(rdma.binstruct.BinStruct):
         self.privateData = buffer[offset + 84:offset + 232]
         (self.LCID,self.RCID,self.additionalInfoLength,self.APstatus,self.reserved1,) = struct.unpack_from('>LLBBH',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "LCID=%r"%(self.LCID);
         self.dump(F,0,32,label,offset);
         label = "RCID=%r"%(self.RCID);
@@ -1137,8 +1154,8 @@ class CMSIDR_REQ(rdma.binstruct.BinStruct):
         self.privateData = buffer[offset + 16:offset + 232]
         (self.requestID,self.reserved1,self.serviceID,) = struct.unpack_from('>LLQ',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "requestID=%r"%(self.requestID);
         self.dump(F,0,32,label,offset);
         label = "reserved1=%r"%(self.reserved1);
@@ -1187,8 +1204,8 @@ class CMSIDR_REP(rdma.binstruct.BinStruct):
         self.privateData = buffer[offset + 92:offset + 232]
         (self.requestID,self._pack_0_32,self.serviceID,self.QKey,) = struct.unpack_from('>LLQL',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "requestID=%r"%(self.requestID);
         self.dump(F,0,32,label,offset);
         label = "QPN=%r,status=%r"%(self.QPN,self.status);
@@ -1225,8 +1242,8 @@ class MADHeader(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         (self.baseVersion,self.mgmtClass,self.classVersion,self.method,self.status,self.classSpecific,self.transactionID,self.attributeID,self.reserved1,self.attributeModifier,) = struct.unpack_from('>BBBBHHQHHL',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "baseVersion=%r,mgmtClass=%r,classVersion=%r,method=%r"%(self.baseVersion,self.mgmtClass,self.classVersion,self.method);
         self.dump(F,0,32,label,offset);
         label = "status=%r,classSpecific=%r"%(self.status,self.classSpecific);
@@ -1274,8 +1291,8 @@ class MADHeaderDirected(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         (self.baseVersion,self.mgmtClass,self.classVersion,self.method,self._pack_0_32,self.transactionID,self.attributeID,self.reserved1,self.attributeModifier,) = struct.unpack_from('>BBBBLQHHL',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "baseVersion=%r,mgmtClass=%r,classVersion=%r,method=%r"%(self.baseVersion,self.mgmtClass,self.classVersion,self.method);
         self.dump(F,0,32,label,offset);
         label = "D=%r,status=%r,hopPointer=%r,hopCount=%r"%(self.D,self.status,self.hopPointer,self.hopCount);
@@ -1389,8 +1406,8 @@ class MADClassPortInfo(rdma.binstruct.BinStruct):
         (self._pack_1_32,self.redirectLID,self.redirectPKey,self._pack_2_32,self.redirectQKey,) = struct.unpack_from('>LHHLL',buffer,offset+24);
         (self._pack_3_32,self.trapLID,self.trapPKey,self._pack_4_32,self.trapQKey,) = struct.unpack_from('>LHHLL',buffer,offset+56);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "baseVersion=%r,classVersion=%r,capabilityMask=%r"%(self.baseVersion,self.classVersion,self.capabilityMask);
         self.dump(F,0,32,label,offset);
         label = "reserved1=%r,respTimeValue=%r"%(self.reserved1,self.respTimeValue);
@@ -1466,8 +1483,8 @@ class MADInformInfo(rdma.binstruct.BinStruct):
         self.GID = IBA.GID(buffer[offset + 0:offset + 16],raw=True);
         (self.LIDRangeBegin,self.LIDRangeEnd,self.reserved1,self.isGeneric,self.subscribe,self.type,self.trapNumber,self._pack_0_32,self._pack_1_32,) = struct.unpack_from('>HHHBBHHLL',buffer,offset+16);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "GID=%r"%(self.GID);
         self.dump(F,0,128,label,offset);
         label = "LIDRangeBegin=%r,LIDRangeEnd=%r"%(self.LIDRangeBegin,self.LIDRangeEnd);
@@ -1520,8 +1537,8 @@ class RMPPHeader(rdma.binstruct.BinStruct):
         self.MADHeader.unpack_from(buffer,offset + 0);
         (self._pack_0_32,self.data1,self.data2,) = struct.unpack_from('>LLL',buffer,offset+24);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "MADHeader=%r"%(self.MADHeader);
         self.dump(F,0,192,label,offset);
         label = "RMPPVersion=%r,RMPPType=%r,RRespTime=%r,RMPPFlags=%r,RMPPStatus=%r"%(self.RMPPVersion,self.RMPPType,self.RRespTime,self.RMPPFlags,self.RMPPStatus);
@@ -1568,8 +1585,8 @@ class RMPPShortHeader(rdma.binstruct.BinStruct):
         self.MADHeader.unpack_from(buffer,offset + 0);
         (self._pack_0_32,) = struct.unpack_from('>L',buffer,offset+24);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "MADHeader=%r"%(self.MADHeader);
         self.dump(F,0,192,label,offset);
         label = "RMPPVersion=%r,RMPPType=%r,RRespTime=%r,RMPPFlags=%r,RMPPStatus=%r"%(self.RMPPVersion,self.RMPPType,self.RRespTime,self.RMPPFlags,self.RMPPStatus);
@@ -1600,8 +1617,8 @@ class RMPPData(rdma.binstruct.BinStruct):
         self.data = buffer[offset + 36:offset + 256]
         (self.segmentNumber,self.payLoadLength,) = struct.unpack_from('>LL',buffer,offset+28);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "RMPPHeader=%r"%(self.RMPPHeader);
         self.dump(F,0,224,label,offset);
         label = "segmentNumber=%r"%(self.segmentNumber);
@@ -1636,8 +1653,8 @@ class RMPPAck(rdma.binstruct.BinStruct):
         self.reserved1 = buffer[offset + 36:offset + 256]
         (self.segmentNumber,self.newWindowLast,) = struct.unpack_from('>LL',buffer,offset+28);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "RMPPHeader=%r"%(self.RMPPHeader);
         self.dump(F,0,224,label,offset);
         label = "segmentNumber=%r"%(self.segmentNumber);
@@ -1672,8 +1689,8 @@ class RMPPAbort(rdma.binstruct.BinStruct):
         self.errorData = buffer[offset + 36:offset + 256]
         (self.reserved1,self.reserved2,) = struct.unpack_from('>LL',buffer,offset+28);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "RMPPHeader=%r"%(self.RMPPHeader);
         self.dump(F,0,224,label,offset);
         label = "reserved1=%r"%(self.reserved1);
@@ -1708,8 +1725,8 @@ class RMPPStop(rdma.binstruct.BinStruct):
         self.errorData = buffer[offset + 36:offset + 256]
         (self.reserved1,self.reserved2,) = struct.unpack_from('>LL',buffer,offset+28);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "RMPPHeader=%r"%(self.RMPPHeader);
         self.dump(F,0,224,label,offset);
         label = "reserved1=%r"%(self.reserved1);
@@ -1749,12 +1766,12 @@ class SMPLIDPortBlock(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         (self._pack_0_32,) = struct.unpack_from('>L',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "LID=%r,valid=%r,LMC=%r,reserved1=%r,port=%r"%(self.LID,self.valid,self.LMC,self.reserved1,self.port);
         self.dump(F,0,32,label,offset);
 
-class SMPFormat(rdma.binstruct.BinStruct):
+class SMPFormat(BinFormat):
     '''SMP Format - LID Routed (section 14.2.1.1)'''
     __slots__ = ('baseVersion','mgmtClass','classVersion','method','status','classSpecific','transactionID','attributeID','reserved1','attributeModifier','MKey','reserved2','data','reserved3');
     MAD_LENGTH = 256
@@ -1789,8 +1806,8 @@ class SMPFormat(rdma.binstruct.BinStruct):
         self.reserved3 = buffer[offset + 128:offset + 256]
         (self.baseVersion,self.mgmtClass,self.classVersion,self.method,self.status,self.classSpecific,self.transactionID,self.attributeID,self.reserved1,self.attributeModifier,self.MKey,) = struct.unpack_from('>BBBBHHQHHLQ',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "baseVersion=%r,mgmtClass=%r,classVersion=%r,method=%r"%(self.baseVersion,self.mgmtClass,self.classVersion,self.method);
         self.dump(F,0,32,label,offset);
         label = "status=%r,classSpecific=%r"%(self.status,self.classSpecific);
@@ -1805,12 +1822,11 @@ class SMPFormat(rdma.binstruct.BinStruct):
         self.dump(F,192,256,label,offset);
         label = "reserved2=%r"%(self.reserved2);
         self.dump(F,256,512,label,offset);
-        label = "data=%r"%(self.data);
-        self.dump(F,512,1024,label,offset);
+        self._format_data(F,512,1024,offset);
         label = "reserved3=%r"%(self.reserved3);
         self.dump(F,1024,2048,label,offset);
 
-class SMPFormatDirected(rdma.binstruct.BinStruct):
+class SMPFormatDirected(BinFormat):
     '''SMP Format - Direct Routed (section 14.2.1.2)'''
     __slots__ = ('baseVersion','mgmtClass','classVersion','method','D','status','hopPointer','hopCount','transactionID','attributeID','reserved1','attributeModifier','MKey','drSLID','drDLID','reserved2','data','initialPath','returnPath');
     MAD_LENGTH = 256
@@ -1868,8 +1884,8 @@ class SMPFormatDirected(rdma.binstruct.BinStruct):
         self.returnPath = buffer[offset + 192:offset + 256]
         (self.baseVersion,self.mgmtClass,self.classVersion,self.method,self._pack_0_32,self.transactionID,self.attributeID,self.reserved1,self.attributeModifier,self.MKey,self.drSLID,self.drDLID,) = struct.unpack_from('>BBBBLQHHLQHH',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "baseVersion=%r,mgmtClass=%r,classVersion=%r,method=%r"%(self.baseVersion,self.mgmtClass,self.classVersion,self.method);
         self.dump(F,0,32,label,offset);
         label = "D=%r,status=%r,hopPointer=%r,hopCount=%r"%(self.D,self.status,self.hopPointer,self.hopCount);
@@ -1886,8 +1902,7 @@ class SMPFormatDirected(rdma.binstruct.BinStruct):
         self.dump(F,256,288,label,offset);
         label = "reserved2=%r"%(self.reserved2);
         self.dump(F,288,512,label,offset);
-        label = "data=%r"%(self.data);
-        self.dump(F,512,1024,label,offset);
+        self._format_data(F,512,1024,offset);
         label = "initialPath=%r"%(self.initialPath);
         self.dump(F,1024,1536,label,offset);
         label = "returnPath=%r"%(self.returnPath);
@@ -1913,8 +1928,8 @@ class SMPNodeDescription(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         self.nodeString = buffer[offset + 0:offset + 64]
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "nodeString=%r"%(self.nodeString);
         self.dump(F,0,512,label,offset);
 
@@ -1962,8 +1977,8 @@ class SMPNodeInfo(rdma.binstruct.BinStruct):
         (self.baseVersion,self.classVersion,self.nodeType,self.numPorts,) = struct.unpack_from('>BBBB',buffer,offset+0);
         (self.partitionCap,self.deviceID,self.revision,self._pack_0_32,) = struct.unpack_from('>HHLL',buffer,offset+28);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "baseVersion=%r,classVersion=%r,nodeType=%r,numPorts=%r"%(self.baseVersion,self.classVersion,self.nodeType,self.numPorts);
         self.dump(F,0,32,label,offset);
         label = "systemImageGUID=%r"%(self.systemImageGUID);
@@ -2043,8 +2058,8 @@ class SMPSwitchInfo(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         (self.linearFDBCap,self.randomFDBCap,self.multicastFDBCap,self.linearFDBTop,self._pack_0_32,self.LIDsPerPort,self.partitionEnforcementCap,self._pack_1_32,) = struct.unpack_from('>HHHHLHHL',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "linearFDBCap=%r,randomFDBCap=%r"%(self.linearFDBCap,self.randomFDBCap);
         self.dump(F,0,32,label,offset);
         label = "multicastFDBCap=%r,linearFDBTop=%r"%(self.multicastFDBCap,self.linearFDBTop);
@@ -2091,8 +2106,8 @@ class SMPGUIDInfo(rdma.binstruct.BinStruct):
         self.GUIDBlock[6] = IBA.GUID(buffer[offset + 48:offset + 56],raw=True);
         self.GUIDBlock[7] = IBA.GUID(buffer[offset + 56:offset + 64],raw=True);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "GUIDBlock=%r"%(self.GUIDBlock);
         self.dump(F,0,512,label,offset);
 
@@ -2230,8 +2245,8 @@ class SMPPortInfo(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         (self.MKey,self.GIDPrefix,self.LID,self.masterSMLID,self.capabilityMask,self.diagCode,self.MKeyLeasePeriod,self.localPortNum,self.linkWidthEnabled,self.linkWidthSupported,self.linkWidthActive,self._pack_0_32,self._pack_1_32,self._pack_2_32,self.MKeyViolations,self.PKeyViolations,self._pack_3_32,self._pack_4_32,) = struct.unpack_from('>QQHHLHHBBBBLLLHHLL',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "MKey=%r"%(self.MKey);
         self.dump(F,0,64,label,offset);
         label = "GIDPrefix=%r"%(self.GIDPrefix);
@@ -2278,8 +2293,8 @@ class SMPPKeyTable(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         (self.PKeyBlock[0],self.PKeyBlock[1],self.PKeyBlock[2],self.PKeyBlock[3],self.PKeyBlock[4],self.PKeyBlock[5],self.PKeyBlock[6],self.PKeyBlock[7],self.PKeyBlock[8],self.PKeyBlock[9],self.PKeyBlock[10],self.PKeyBlock[11],self.PKeyBlock[12],self.PKeyBlock[13],self.PKeyBlock[14],self.PKeyBlock[15],self.PKeyBlock[16],self.PKeyBlock[17],self.PKeyBlock[18],self.PKeyBlock[19],self.PKeyBlock[20],self.PKeyBlock[21],self.PKeyBlock[22],self.PKeyBlock[23],self.PKeyBlock[24],self.PKeyBlock[25],self.PKeyBlock[26],self.PKeyBlock[27],self.PKeyBlock[28],self.PKeyBlock[29],self.PKeyBlock[30],self.PKeyBlock[31],) = struct.unpack_from('>HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "PKeyBlock=%r"%(self.PKeyBlock);
         self.dump(F,0,512,label,offset);
 
@@ -2304,8 +2319,8 @@ class SMPSLToVLMappingTable(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         rdma.binstruct.unpack_array8(buffer,0,4,16,self.SLtoVL);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "SLtoVL=%r"%(self.SLtoVL);
         self.dump(F,0,64,label,offset);
 
@@ -2330,8 +2345,8 @@ class SMPVLArbitrationTable(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         (self.VLWeightBlock[0],self.VLWeightBlock[1],self.VLWeightBlock[2],self.VLWeightBlock[3],self.VLWeightBlock[4],self.VLWeightBlock[5],self.VLWeightBlock[6],self.VLWeightBlock[7],self.VLWeightBlock[8],self.VLWeightBlock[9],self.VLWeightBlock[10],self.VLWeightBlock[11],self.VLWeightBlock[12],self.VLWeightBlock[13],self.VLWeightBlock[14],self.VLWeightBlock[15],self.VLWeightBlock[16],self.VLWeightBlock[17],self.VLWeightBlock[18],self.VLWeightBlock[19],self.VLWeightBlock[20],self.VLWeightBlock[21],self.VLWeightBlock[22],self.VLWeightBlock[23],self.VLWeightBlock[24],self.VLWeightBlock[25],self.VLWeightBlock[26],self.VLWeightBlock[27],self.VLWeightBlock[28],self.VLWeightBlock[29],self.VLWeightBlock[30],self.VLWeightBlock[31],) = struct.unpack_from('>HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "VLWeightBlock=%r"%(self.VLWeightBlock);
         self.dump(F,0,512,label,offset);
 
@@ -2356,8 +2371,8 @@ class SMPLinearForwardingTable(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         self.portBlock = buffer[offset + 0:offset + 64]
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "portBlock=%r"%(self.portBlock);
         self.dump(F,0,512,label,offset);
 
@@ -2412,8 +2427,8 @@ class SMPRandomForwardingTable(rdma.binstruct.BinStruct):
         self.LIDPortBlock[14].unpack_from(buffer,offset + 56);
         self.LIDPortBlock[15].unpack_from(buffer,offset + 60);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "LIDPortBlock=%r"%(self.LIDPortBlock);
         self.dump(F,0,512,label,offset);
 
@@ -2438,8 +2453,8 @@ class SMPMulticastForwardingTable(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         (self.portMaskBlock[0],self.portMaskBlock[1],self.portMaskBlock[2],self.portMaskBlock[3],self.portMaskBlock[4],self.portMaskBlock[5],self.portMaskBlock[6],self.portMaskBlock[7],self.portMaskBlock[8],self.portMaskBlock[9],self.portMaskBlock[10],self.portMaskBlock[11],self.portMaskBlock[12],self.portMaskBlock[13],self.portMaskBlock[14],self.portMaskBlock[15],self.portMaskBlock[16],self.portMaskBlock[17],self.portMaskBlock[18],self.portMaskBlock[19],self.portMaskBlock[20],self.portMaskBlock[21],self.portMaskBlock[22],self.portMaskBlock[23],self.portMaskBlock[24],self.portMaskBlock[25],self.portMaskBlock[26],self.portMaskBlock[27],self.portMaskBlock[28],self.portMaskBlock[29],self.portMaskBlock[30],self.portMaskBlock[31],) = struct.unpack_from('>HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "portMaskBlock=%r"%(self.portMaskBlock);
         self.dump(F,0,512,label,offset);
 
@@ -2477,8 +2492,8 @@ class SMPSMInfo(rdma.binstruct.BinStruct):
         self.GUID = IBA.GUID(buffer[offset + 0:offset + 8],raw=True);
         (self.SMKey,self.actCount,self._pack_0_32,) = struct.unpack_from('>QLL',buffer,offset+8);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "GUID=%r"%(self.GUID);
         self.dump(F,0,64,label,offset);
         label = "SMKey=%r"%(self.SMKey);
@@ -2508,8 +2523,8 @@ class SMPVendorDiag(rdma.binstruct.BinStruct):
         self.diagData = buffer[offset + 4:offset + 64]
         (self.nextIndex,self.reserved1,) = struct.unpack_from('>HH',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "nextIndex=%r,reserved1=%r"%(self.nextIndex,self.reserved1);
         self.dump(F,0,32,label,offset);
         label = "diagData=%r"%(self.diagData);
@@ -2542,8 +2557,8 @@ class SMPLedInfo(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         (self._pack_0_32,) = struct.unpack_from('>L',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "ledMask=%r,reserved1=%r"%(self.ledMask,self.reserved1);
         self.dump(F,0,32,label,offset);
 
@@ -2573,8 +2588,8 @@ class SAHeader(rdma.binstruct.BinStruct):
         self.RMPPHeader.unpack_from(buffer,offset + 0);
         (self.SMKey,self.attributeOffset,self.reserved1,self.componentMask,) = struct.unpack_from('>QHHQ',buffer,offset+36);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "RMPPHeader=%r"%(self.RMPPHeader);
         self.dump(F,0,288,label,offset);
         label = "SMKey=%r"%(self.SMKey);
@@ -2584,7 +2599,7 @@ class SAHeader(rdma.binstruct.BinStruct):
         label = "componentMask=%r"%(self.componentMask);
         self.dump(F,384,448,label,offset);
 
-class SAFormat(rdma.binstruct.BinStruct):
+class SAFormat(BinFormat):
     '''SA Format (section 15.2.1.1)'''
     __slots__ = ('baseVersion','mgmtClass','classVersion','method','status','classSpecific','transactionID','attributeID','reserved1','attributeModifier','RMPPVersion','RMPPType','RRespTime','RMPPFlags','RMPPStatus','data1','data2','SMKey','attributeOffset','reserved2','componentMask','data');
     MAD_LENGTH = 256
@@ -2635,8 +2650,8 @@ class SAFormat(rdma.binstruct.BinStruct):
         self.data = buffer[offset + 56:offset + 256]
         (self.baseVersion,self.mgmtClass,self.classVersion,self.method,self.status,self.classSpecific,self.transactionID,self.attributeID,self.reserved1,self.attributeModifier,self._pack_0_32,self.data1,self.data2,self.SMKey,self.attributeOffset,self.reserved2,self.componentMask,) = struct.unpack_from('>BBBBHHQHHLLLLQHHQ',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "baseVersion=%r,mgmtClass=%r,classVersion=%r,method=%r"%(self.baseVersion,self.mgmtClass,self.classVersion,self.method);
         self.dump(F,0,32,label,offset);
         label = "status=%r,classSpecific=%r"%(self.status,self.classSpecific);
@@ -2659,8 +2674,7 @@ class SAFormat(rdma.binstruct.BinStruct):
         self.dump(F,352,384,label,offset);
         label = "componentMask=%r"%(self.componentMask);
         self.dump(F,384,448,label,offset);
-        label = "data=%r"%(self.data);
-        self.dump(F,448,2048,label,offset);
+        self._format_data(F,448,2048,offset);
 
 class SANodeRecord(rdma.binstruct.BinStruct):
     '''Container for NodeInfo (section 15.2.5.2)'''
@@ -2692,8 +2706,8 @@ class SANodeRecord(rdma.binstruct.BinStruct):
         self.nodeDescription.unpack_from(buffer,offset + 44);
         (self.LID,self.reserved1,) = struct.unpack_from('>HH',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "LID=%r,reserved1=%r"%(self.LID,self.reserved1);
         self.dump(F,0,32,label,offset);
         label = "nodeInfo=%r"%(self.nodeInfo);
@@ -2728,8 +2742,8 @@ class SAPortInfoRecord(rdma.binstruct.BinStruct):
         self.portInfo.unpack_from(buffer,offset + 4);
         (self.endportLID,self.portNum,self.reserved1,) = struct.unpack_from('>HBB',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "endportLID=%r,portNum=%r,reserved1=%r"%(self.endportLID,self.portNum,self.reserved1);
         self.dump(F,0,32,label,offset);
         label = "portInfo=%r"%(self.portInfo);
@@ -2763,8 +2777,8 @@ class SASLToVLMappingTableRecord(rdma.binstruct.BinStruct):
         self.SLToVLMappingTable.unpack_from(buffer,offset + 8);
         (self.LID,self.inputPortNum,self.outputPortNum,self.reserved1,) = struct.unpack_from('>HBBL',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "LID=%r,inputPortNum=%r,outputPortNum=%r"%(self.LID,self.inputPortNum,self.outputPortNum);
         self.dump(F,0,32,label,offset);
         label = "reserved1=%r"%(self.reserved1);
@@ -2798,8 +2812,8 @@ class SASwitchInfoRecord(rdma.binstruct.BinStruct):
         self.switchInfo.unpack_from(buffer,offset + 4);
         (self.LID,self.reserved1,) = struct.unpack_from('>HH',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "LID=%r,reserved1=%r"%(self.LID,self.reserved1);
         self.dump(F,0,32,label,offset);
         label = "switchInfo=%r"%(self.switchInfo);
@@ -2832,8 +2846,8 @@ class SALinearForwardingTableRecord(rdma.binstruct.BinStruct):
         self.linearForwardingTable.unpack_from(buffer,offset + 8);
         (self.LID,self.blockNum,self.reserved1,) = struct.unpack_from('>HHL',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "LID=%r,blockNum=%r"%(self.LID,self.blockNum);
         self.dump(F,0,32,label,offset);
         label = "reserved1=%r"%(self.reserved1);
@@ -2868,8 +2882,8 @@ class SARandomForwardingTableRecord(rdma.binstruct.BinStruct):
         self.randomForwardingTable.unpack_from(buffer,offset + 8);
         (self.LID,self.blockNum,self.reserved1,) = struct.unpack_from('>HHL',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "LID=%r,blockNum=%r"%(self.LID,self.blockNum);
         self.dump(F,0,32,label,offset);
         label = "reserved1=%r"%(self.reserved1);
@@ -2917,8 +2931,8 @@ class SAMulticastForwardingTableRecord(rdma.binstruct.BinStruct):
         self.multicastForwardingTable.unpack_from(buffer,offset + 8);
         (self._pack_0_32,self.reserved2,) = struct.unpack_from('>LL',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "LID=%r,reserved1=%r,position=%r,blockNum=%r"%(self.LID,self.reserved1,self.position,self.blockNum);
         self.dump(F,0,32,label,offset);
         label = "reserved2=%r"%(self.reserved2);
@@ -2954,8 +2968,8 @@ class SAVLArbitrationTableRecord(rdma.binstruct.BinStruct):
         self.VLArbitrationTable.unpack_from(buffer,offset + 8);
         (self.LID,self.outputPortNum,self.blockNum,self.reserved1,) = struct.unpack_from('>HBBL',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "LID=%r,outputPortNum=%r,blockNum=%r"%(self.LID,self.outputPortNum,self.blockNum);
         self.dump(F,0,32,label,offset);
         label = "reserved1=%r"%(self.reserved1);
@@ -2989,8 +3003,8 @@ class SASMInfoRecord(rdma.binstruct.BinStruct):
         self.SMInfo.unpack_from(buffer,offset + 4);
         (self.LID,self.reserved1,) = struct.unpack_from('>HH',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "LID=%r,reserved1=%r"%(self.LID,self.reserved1);
         self.dump(F,0,32,label,offset);
         label = "SMInfo=%r"%(self.SMInfo);
@@ -3029,8 +3043,8 @@ class SAInformInfoRecord(rdma.binstruct.BinStruct):
         self.reserved3 = buffer[offset + 60:offset + 80]
         (self.enumeration,self.reserved1,self.reserved2,) = struct.unpack_from('>HHL',buffer,offset+16);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "subscriberGID=%r"%(self.subscriberGID);
         self.dump(F,0,128,label,offset);
         label = "enumeration=%r,reserved1=%r"%(self.enumeration,self.reserved1);
@@ -3064,8 +3078,8 @@ class SALinkRecord(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         (self.fromLID,self.fromPort,self.toPort,self.toLID,self.reserved1,) = struct.unpack_from('>HBBHH',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "fromLID=%r,fromPort=%r,toPort=%r"%(self.fromLID,self.fromPort,self.toPort);
         self.dump(F,0,32,label,offset);
         label = "toLID=%r,reserved1=%r"%(self.toLID,self.reserved1);
@@ -3099,8 +3113,8 @@ class SAGUIDInfoRecord(rdma.binstruct.BinStruct):
         self.GUIDInfo.unpack_from(buffer,offset + 8);
         (self.LID,self.blockNum,self.reserved1,self.reserved2,) = struct.unpack_from('>HBBL',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "LID=%r,blockNum=%r,reserved1=%r"%(self.LID,self.blockNum,self.reserved1);
         self.dump(F,0,32,label,offset);
         label = "reserved2=%r"%(self.reserved2);
@@ -3160,8 +3174,8 @@ class SAServiceRecord(rdma.binstruct.BinStruct):
         (self.servicePKey,self.reserved1,self.serviceLease,) = struct.unpack_from('>HHL',buffer,offset+24);
         (self.serviceData16[0],self.serviceData16[1],self.serviceData16[2],self.serviceData16[3],self.serviceData16[4],self.serviceData16[5],self.serviceData16[6],self.serviceData16[7],self.serviceData32[0],self.serviceData32[1],self.serviceData32[2],self.serviceData32[3],) = struct.unpack_from('>HHHHHHHHLLLL',buffer,offset+128);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "serviceID=%r"%(self.serviceID);
         self.dump(F,0,64,label,offset);
         label = "serviceGID=%r"%(self.serviceGID);
@@ -3220,8 +3234,8 @@ class SAPKeyTableRecord(rdma.binstruct.BinStruct):
         self.PKeyTable.unpack_from(buffer,offset + 8);
         (self.LID,self.blockNum,self._pack_0_32,) = struct.unpack_from('>HHL',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "LID=%r,blockNum=%r"%(self.LID,self.blockNum);
         self.dump(F,0,32,label,offset);
         label = "portNum=%r,reserved1=%r"%(self.portNum,self.reserved1);
@@ -3323,8 +3337,8 @@ class SAPathRecord(rdma.binstruct.BinStruct):
         (self.reserved1,self.reserved2,) = struct.unpack_from('>LL',buffer,offset+0);
         (self.DLID,self.SLID,self._pack_0_32,self._pack_1_32,self._pack_2_32,self._pack_3_32,self.reserved6,) = struct.unpack_from('>HHLLLLL',buffer,offset+40);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "reserved1=%r"%(self.reserved1);
         self.dump(F,0,32,label,offset);
         label = "reserved2=%r"%(self.reserved2);
@@ -3433,8 +3447,8 @@ class SAMCMemberRecord(rdma.binstruct.BinStruct):
         self.requesterGID = IBA.GID(buffer[offset + 32:offset + 48],raw=True);
         (self.QKey,self._pack_0_32,self._pack_1_32,self._pack_2_32,self._pack_3_32,) = struct.unpack_from('>LLLLL',buffer,offset+48);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "MGID=%r"%(self.MGID);
         self.dump(F,0,128,label,offset);
         label = "portGID=%r"%(self.portGID);
@@ -3479,8 +3493,8 @@ class SATraceRecord(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         (self.GIDPrefix,self.IDGeneration,self.reserved1,self.nodeType,self.nodeID,self.chassisID,self.entryPortID,self.exitPortID,self.entryPort,self.exitPort,self.reserved2,) = struct.unpack_from('>QHBBQQQQBBH',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "GIDPrefix=%r"%(self.GIDPrefix);
         self.dump(F,0,64,label,offset);
         label = "IDGeneration=%r,reserved1=%r,nodeType=%r"%(self.IDGeneration,self.reserved1,self.nodeType);
@@ -3595,8 +3609,8 @@ class SAMultiPathRecord(rdma.binstruct.BinStruct):
         self.SDGID = IBA.GID(buffer[offset + 24:offset + 40],raw=True);
         (self._pack_0_32,self._pack_1_32,self._pack_2_32,self._pack_3_32,self._pack_4_32,self.reserved6,) = struct.unpack_from('>LLLLLL',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "rawTraffic=%r,reserved1=%r,flowLabel=%r,hopLimit=%r"%(self.rawTraffic,self.reserved1,self.flowLabel,self.hopLimit);
         self.dump(F,0,32,label,offset);
         label = "TClass=%r,reversible=%r,numbPath=%r,PKey=%r"%(self.TClass,self.reversible,self.numbPath,self.PKey);
@@ -3637,14 +3651,14 @@ class SAServiceAssociationRecord(rdma.binstruct.BinStruct):
         self.serviceKey = IBA.GID(buffer[offset + 0:offset + 16],raw=True);
         self.serviceName = buffer[offset + 16:offset + 80]
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "serviceKey=%r"%(self.serviceKey);
         self.dump(F,0,128,label,offset);
         label = "serviceName=%r"%(self.serviceName);
         self.dump(F,128,640,label,offset);
 
-class PMFormat(rdma.binstruct.BinStruct):
+class PMFormat(BinFormat):
     '''Performance Management MAD Format (section 16.1.1)'''
     __slots__ = ('baseVersion','mgmtClass','classVersion','method','status','classSpecific','transactionID','attributeID','reserved1','attributeModifier','reserved2','data');
     MAD_LENGTH = 256
@@ -3675,8 +3689,8 @@ class PMFormat(rdma.binstruct.BinStruct):
         self.data = buffer[offset + 64:offset + 256]
         (self.baseVersion,self.mgmtClass,self.classVersion,self.method,self.status,self.classSpecific,self.transactionID,self.attributeID,self.reserved1,self.attributeModifier,) = struct.unpack_from('>BBBBHHQHHL',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "baseVersion=%r,mgmtClass=%r,classVersion=%r,method=%r"%(self.baseVersion,self.mgmtClass,self.classVersion,self.method);
         self.dump(F,0,32,label,offset);
         label = "status=%r,classSpecific=%r"%(self.status,self.classSpecific);
@@ -3689,8 +3703,7 @@ class PMFormat(rdma.binstruct.BinStruct):
         self.dump(F,160,192,label,offset);
         label = "reserved2=%r"%(self.reserved2);
         self.dump(F,192,512,label,offset);
-        label = "data=%r"%(self.data);
-        self.dump(F,512,2048,label,offset);
+        self._format_data(F,512,2048,offset);
 
 class PMPortSamplesCtl(rdma.binstruct.BinStruct):
     '''Port Performance Data Sampling Control (section 16.1.3.2)'''
@@ -3804,8 +3817,8 @@ class PMPortSamplesCtl(rdma.binstruct.BinStruct):
         self.reserved6 = buffer[offset + 80:offset + 192]
         (self._pack_0_32,self._pack_1_32,self._pack_2_32,self.optionMask,self.vendorMask,self.sampleStart,self.sampleInterval,self.tag,self.counterSelect0,self.counterSelect1,self.counterSelect2,self.counterSelect3,self.counterSelect4,self.counterSelect5,self.counterSelect6,self.counterSelect7,self.counterSelect8,self.counterSelect9,self.counterSelect10,self.counterSelect11,self.counterSelect12,self.counterSelect13,self.counterSelect14,self.reserved5,self.samplesOnlyOptionMask,) = struct.unpack_from('>LLLQQLLHHHHHHHHHHHHHHHHLQ',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "opCode=%r,portSelect=%r,tick=%r,reserved1=%r,counterWidth=%r"%(self.opCode,self.portSelect,self.tick,self.reserved1,self.counterWidth);
         self.dump(F,0,32,label,offset);
         label = "reserved2=%r,counterMask0=%r,counterMask1=%r,counterMask2=%r,counterMask3=%r,counterMask4=%r,counterMask5=%r,counterMask6=%r,counterMask7=%r,counterMask8=%r,counterMask9=%r"%(self.reserved2,self.counterMask0,self.counterMask1,self.counterMask2,self.counterMask3,self.counterMask4,self.counterMask5,self.counterMask6,self.counterMask7,self.counterMask8,self.counterMask9);
@@ -3876,8 +3889,8 @@ class PMPortSamplesRes(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         (self._pack_0_32,self.counter[0],self.counter[1],self.counter[2],self.counter[3],self.counter[4],self.counter[5],self.counter[6],self.counter[7],self.counter[8],self.counter[9],self.counter[10],self.counter[11],self.counter[12],self.counter[13],self.counter[14],) = struct.unpack_from('>LLLLLLLLLLLLLLLL',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "tag=%r,reserved1=%r,sampleStatus=%r"%(self.tag,self.reserved1,self.sampleStatus);
         self.dump(F,0,32,label,offset);
         label = "counter=%r"%(self.counter);
@@ -3933,8 +3946,8 @@ class PMPortCounters(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         (self.reserved1,self.portSelect,self.counterSelect,self.symbolErrorCounter,self.linkErrorRecoveryCounter,self.linkDownedCounter,self.portRcvErrors,self.portRcvRemotePhysicalErrors,self.portRcvSwitchRelayErrors,self.portXmitDiscards,self._pack_0_32,self.reserved2,self.VL15Dropped,self.portXmitData,self.portRcvData,self.portXmitPkts,self.portRcvPkts,self.portXmitWait,) = struct.unpack_from('>BBHHBBHHHHLHHLLLLL',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "reserved1=%r,portSelect=%r,counterSelect=%r"%(self.reserved1,self.portSelect,self.counterSelect);
         self.dump(F,0,32,label,offset);
         label = "symbolErrorCounter=%r,linkErrorRecoveryCounter=%r,linkDownedCounter=%r"%(self.symbolErrorCounter,self.linkErrorRecoveryCounter,self.linkDownedCounter);
@@ -3983,8 +3996,8 @@ class PMPortRcvErrorDetails(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         (self.reserved1,self.portSelect,self.counterSelect,self.portLocalPhysicalErrors,self.portMalformedPacketErrors,self.portBufferOverrunErrors,self.portDLIDMappingErrors,self.portVLMappingErrors,self.portLoopingErrors,) = struct.unpack_from('>BBHHHHHHH',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "reserved1=%r,portSelect=%r,counterSelect=%r"%(self.reserved1,self.portSelect,self.counterSelect);
         self.dump(F,0,32,label,offset);
         label = "portLocalPhysicalErrors=%r,portMalformedPacketErrors=%r"%(self.portLocalPhysicalErrors,self.portMalformedPacketErrors);
@@ -4017,8 +4030,8 @@ class PMPortXmitDiscardDetails(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         (self.reserved1,self.portSelect,self.counterSelect,self.portInactiveDiscards,self.portNeighborMTUDiscards,self.portSwLifetimeLimitDiscards,self.portSwHOQLimitDiscards,) = struct.unpack_from('>BBHHHHH',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "reserved1=%r,portSelect=%r,counterSelect=%r"%(self.reserved1,self.portSelect,self.counterSelect);
         self.dump(F,0,32,label,offset);
         label = "portInactiveDiscards=%r,portNeighborMTUDiscards=%r"%(self.portInactiveDiscards,self.portNeighborMTUDiscards);
@@ -4047,8 +4060,8 @@ class PMPortOpRcvCounters(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         (self.opCode,self.portSelect,self.counterSelect,self.portOpRcvPkts,self.portOpRcvData,) = struct.unpack_from('>BBHLL',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "opCode=%r,portSelect=%r,counterSelect=%r"%(self.opCode,self.portSelect,self.counterSelect);
         self.dump(F,0,32,label,offset);
         label = "portOpRcvPkts=%r"%(self.portOpRcvPkts);
@@ -4077,8 +4090,8 @@ class PMPortFlowCtlCounters(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         (self.reserved1,self.portSelect,self.counterSelect,self.portXmitFlowPkts,self.portRcvFlowPkts,) = struct.unpack_from('>BBHLL',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "reserved1=%r,portSelect=%r,counterSelect=%r"%(self.reserved1,self.portSelect,self.counterSelect);
         self.dump(F,0,32,label,offset);
         label = "portXmitFlowPkts=%r"%(self.portXmitFlowPkts);
@@ -4110,8 +4123,8 @@ class PMPortVLOpPackets(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         (self.opCode,self.portSelect,self.counterSelect,self.portVLOpPackets[0],self.portVLOpPackets[1],self.portVLOpPackets[2],self.portVLOpPackets[3],self.portVLOpPackets[4],self.portVLOpPackets[5],self.portVLOpPackets[6],self.portVLOpPackets[7],self.portVLOpPackets[8],self.portVLOpPackets[9],self.portVLOpPackets[10],self.portVLOpPackets[11],self.portVLOpPackets[12],self.portVLOpPackets[13],self.portVLOpPackets[14],self.portVLOpPackets[15],) = struct.unpack_from('>BBHHHHHHHHHHHHHHHHH',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "opCode=%r,portSelect=%r,counterSelect=%r"%(self.opCode,self.portSelect,self.counterSelect);
         self.dump(F,0,32,label,offset);
         label = "portVLOpPackets=%r"%(self.portVLOpPackets);
@@ -4141,8 +4154,8 @@ class PMPortVLOpData(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         (self.opCode,self.portSelect,self.counterSelect,self.portVLOpData[0],self.portVLOpData[1],self.portVLOpData[2],self.portVLOpData[3],self.portVLOpData[4],self.portVLOpData[5],self.portVLOpData[6],self.portVLOpData[7],self.portVLOpData[8],self.portVLOpData[9],self.portVLOpData[10],self.portVLOpData[11],self.portVLOpData[12],self.portVLOpData[13],self.portVLOpData[14],self.portVLOpData[15],) = struct.unpack_from('>BBHLLLLLLLLLLLLLLLL',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "opCode=%r,portSelect=%r,counterSelect=%r"%(self.opCode,self.portSelect,self.counterSelect);
         self.dump(F,0,32,label,offset);
         label = "portVLOpData=%r"%(self.portVLOpData);
@@ -4174,8 +4187,8 @@ class PMPortVLXmitFlowCtlUpdateErrors(rdma.binstruct.BinStruct):
         rdma.binstruct.unpack_array8(buffer,4,2,16,self.portVLXmitFlowCtlUpdateErrors);
         (self.reserved1,self.portSelect,self.counterSelect,) = struct.unpack_from('>BBH',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "reserved1=%r,portSelect=%r,counterSelect=%r"%(self.reserved1,self.portSelect,self.counterSelect);
         self.dump(F,0,32,label,offset);
         label = "portVLXmitFlowCtlUpdateErrors=%r"%(self.portVLXmitFlowCtlUpdateErrors);
@@ -4205,8 +4218,8 @@ class PMPortVLXmitWaitCounters(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         (self.reserved1,self.portSelect,self.counterSelect,self.portVLXmitWait[0],self.portVLXmitWait[1],self.portVLXmitWait[2],self.portVLXmitWait[3],self.portVLXmitWait[4],self.portVLXmitWait[5],self.portVLXmitWait[6],self.portVLXmitWait[7],self.portVLXmitWait[8],self.portVLXmitWait[9],self.portVLXmitWait[10],self.portVLXmitWait[11],self.portVLXmitWait[12],self.portVLXmitWait[13],self.portVLXmitWait[14],self.portVLXmitWait[15],) = struct.unpack_from('>BBHHHHHHHHHHHHHHHHH',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "reserved1=%r,portSelect=%r,counterSelect=%r"%(self.reserved1,self.portSelect,self.counterSelect);
         self.dump(F,0,32,label,offset);
         label = "portVLXmitWait=%r"%(self.portVLXmitWait);
@@ -4236,8 +4249,8 @@ class PMSwPortVLCongestion(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         (self.reserved1,self.portSelect,self.counterSelect,self.swPortVLCongestion[0],self.swPortVLCongestion[1],self.swPortVLCongestion[2],self.swPortVLCongestion[3],self.swPortVLCongestion[4],self.swPortVLCongestion[5],self.swPortVLCongestion[6],self.swPortVLCongestion[7],self.swPortVLCongestion[8],self.swPortVLCongestion[9],self.swPortVLCongestion[10],self.swPortVLCongestion[11],self.swPortVLCongestion[12],self.swPortVLCongestion[13],self.swPortVLCongestion[14],self.swPortVLCongestion[15],) = struct.unpack_from('>BBHHHHHHHHHHHHHHHHH',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "reserved1=%r,portSelect=%r,counterSelect=%r"%(self.reserved1,self.portSelect,self.counterSelect);
         self.dump(F,0,32,label,offset);
         label = "swPortVLCongestion=%r"%(self.swPortVLCongestion);
@@ -4290,8 +4303,8 @@ class PMPortSamplesResExt(rdma.binstruct.BinStruct):
         rdma.binstruct.unpack_array8(buffer,8,64,15,self.counter);
         (self._pack_0_32,self._pack_1_32,) = struct.unpack_from('>LL',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "tag=%r,reserved1=%r,sampleStatus=%r"%(self.tag,self.reserved1,self.sampleStatus);
         self.dump(F,0,32,label,offset);
         label = "extendedWidth=%r,reserved2=%r"%(self.extendedWidth,self.reserved2);
@@ -4327,8 +4340,8 @@ class PMPortCountersExt(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         (self.reserved1,self.portSelect,self.counterSelect,self.reserved2,self.portXmitData,self.portRcvData,self.portXmitPkts,self.portRcvPkts,self.portUnicastXmitPkts,self.portUnicastRcvPkts,self.portMulticastXmitPkts,self.portMulticastRcvPkts,) = struct.unpack_from('>BBHLQQQQQQQQ',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "reserved1=%r,portSelect=%r,counterSelect=%r"%(self.reserved1,self.portSelect,self.counterSelect);
         self.dump(F,0,32,label,offset);
         label = "reserved2=%r"%(self.reserved2);
@@ -4350,7 +4363,7 @@ class PMPortCountersExt(rdma.binstruct.BinStruct):
         label = "portMulticastRcvPkts=%r"%(self.portMulticastRcvPkts);
         self.dump(F,512,576,label,offset);
 
-class DMFormat(rdma.binstruct.BinStruct):
+class DMFormat(BinFormat):
     '''Device Management MAD Format (section 16.3.1)'''
     __slots__ = ('baseVersion','mgmtClass','classVersion','method','status','classSpecific','transactionID','attributeID','reserved1','attributeModifier','reserved2','data');
     MAD_LENGTH = 256
@@ -4381,8 +4394,8 @@ class DMFormat(rdma.binstruct.BinStruct):
         self.data = buffer[offset + 64:offset + 256]
         (self.baseVersion,self.mgmtClass,self.classVersion,self.method,self.status,self.classSpecific,self.transactionID,self.attributeID,self.reserved1,self.attributeModifier,) = struct.unpack_from('>BBBBHHQHHL',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "baseVersion=%r,mgmtClass=%r,classVersion=%r,method=%r"%(self.baseVersion,self.mgmtClass,self.classVersion,self.method);
         self.dump(F,0,32,label,offset);
         label = "status=%r,classSpecific=%r"%(self.status,self.classSpecific);
@@ -4395,8 +4408,7 @@ class DMFormat(rdma.binstruct.BinStruct):
         self.dump(F,160,192,label,offset);
         label = "reserved2=%r"%(self.reserved2);
         self.dump(F,192,512,label,offset);
-        label = "data=%r"%(self.data);
-        self.dump(F,512,2048,label,offset);
+        self._format_data(F,512,2048,offset);
 
 class DMServiceEntry(rdma.binstruct.BinStruct):
     '''Service Entry (section 16.3.3)'''
@@ -4419,8 +4431,8 @@ class DMServiceEntry(rdma.binstruct.BinStruct):
         self.serviceName = buffer[offset + 0:offset + 40]
         (self.serviceID,) = struct.unpack_from('>Q',buffer,offset+40);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "serviceName=%r"%(self.serviceName);
         self.dump(F,0,320,label,offset);
         label = "serviceID=%r"%(self.serviceID);
@@ -4461,8 +4473,8 @@ class DMIOUnitInfo(rdma.binstruct.BinStruct):
         self.controllerList = buffer[offset + 4:offset + 132]
         (self._pack_0_32,) = struct.unpack_from('>L',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "changeID=%r,maxControllers=%r,reserved1=%r,diagDeviceID=%r,optionROM=%r"%(self.changeID,self.maxControllers,self.reserved1,self.diagDeviceID,self.optionROM);
         self.dump(F,0,32,label,offset);
         label = "controllerList=%r"%(self.controllerList);
@@ -4535,8 +4547,8 @@ class DMIOControllerProfile(rdma.binstruct.BinStruct):
         self.IDString = buffer[offset + 64:offset + 128]
         (self._pack_0_32,self.deviceID,self.deviceVersion,self.reserved2,self._pack_1_32,self.subsystemID,self.IOClass,self.IOSubclass,self.protocol,self.protocolVersion,self.reserved4,self.reserved5,self.sendMessageDepth,self.reserved6,self.RDMAReadDepth,self.sendMessageSize,self.RDMATransferSize,self.controllerOperationsMask,self.reserved7,self.serviceEntries,self.reserved8,self.reserved9,) = struct.unpack_from('>LLHHLLHHHHHHHBBLLBBBBQ',buffer,offset+8);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "GUID=%r"%(self.GUID);
         self.dump(F,0,64,label,offset);
         label = "vendorID=%r,reserved1=%r"%(self.vendorID,self.reserved1);
@@ -4594,8 +4606,8 @@ class DMServiceEntries(rdma.binstruct.BinStruct):
         self.serviceEntry[2].unpack_from(buffer,offset + 96);
         self.serviceEntry[3].unpack_from(buffer,offset + 144);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "serviceEntry=%r"%(self.serviceEntry);
         self.dump(F,0,1536,label,offset);
 
@@ -4615,8 +4627,8 @@ class DMDiagnosticTimeout(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         (self.maxDiagTime,) = struct.unpack_from('>L',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "maxDiagTime=%r"%(self.maxDiagTime);
         self.dump(F,0,32,label,offset);
 
@@ -4634,8 +4646,8 @@ class DMPrepareToTest(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         return;
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
 
 class DMTestDeviceOnce(rdma.binstruct.BinStruct):
     '''Test Device Once (section 16.3.3.8)'''
@@ -4650,8 +4662,8 @@ class DMTestDeviceOnce(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         return;
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
 
 class DMTestDeviceLoop(rdma.binstruct.BinStruct):
     '''Test Device Continuously (section 16.3.3.9)'''
@@ -4666,8 +4678,8 @@ class DMTestDeviceLoop(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         return;
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
 
 class DMDiagCode(rdma.binstruct.BinStruct):
     '''Vendor-Specific Device Diagnostic Information (section 16.3.3.10)'''
@@ -4686,12 +4698,12 @@ class DMDiagCode(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         (self.diagCode,self.reserved1,) = struct.unpack_from('>HH',buffer,offset+0);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "diagCode=%r,reserved1=%r"%(self.diagCode,self.reserved1);
         self.dump(F,0,32,label,offset);
 
-class SNMPFormat(rdma.binstruct.BinStruct):
+class SNMPFormat(BinFormat):
     '''SNMP Tunneling MAD Format (section 16.4.1)'''
     __slots__ = ('baseVersion','mgmtClass','classVersion','method','status','classSpecific','transactionID','attributeID','reserved1','attributeModifier','reserved2','RAddress','payloadLength','segmentNumber','sourceLID','data');
     MAD_LENGTH = 256
@@ -4728,8 +4740,8 @@ class SNMPFormat(rdma.binstruct.BinStruct):
         (self.baseVersion,self.mgmtClass,self.classVersion,self.method,self.status,self.classSpecific,self.transactionID,self.attributeID,self.reserved1,self.attributeModifier,) = struct.unpack_from('>BBBBHHQHHL',buffer,offset+0);
         (self.RAddress,self.payloadLength,self.segmentNumber,self.sourceLID,) = struct.unpack_from('>LBBH',buffer,offset+56);
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "baseVersion=%r,mgmtClass=%r,classVersion=%r,method=%r"%(self.baseVersion,self.mgmtClass,self.classVersion,self.method);
         self.dump(F,0,32,label,offset);
         label = "status=%r,classSpecific=%r"%(self.status,self.classSpecific);
@@ -4746,8 +4758,7 @@ class SNMPFormat(rdma.binstruct.BinStruct):
         self.dump(F,448,480,label,offset);
         label = "payloadLength=%r,segmentNumber=%r,sourceLID=%r"%(self.payloadLength,self.segmentNumber,self.sourceLID);
         self.dump(F,480,512,label,offset);
-        label = "data=%r"%(self.data);
-        self.dump(F,512,2048,label,offset);
+        self._format_data(F,512,2048,offset);
 
 class SNMPCommunityInfo(rdma.binstruct.BinStruct):
     '''Community Name Data Store (section 16.4.3.2)'''
@@ -4769,8 +4780,8 @@ class SNMPCommunityInfo(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         self.communityName = buffer[offset + 0:offset + 64]
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "communityName=%r"%(self.communityName);
         self.dump(F,0,512,label,offset);
 
@@ -4790,8 +4801,97 @@ class SNMPPDUInfo(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:];
         self.PDUData = buffer[offset + 0:offset + 192]
 
-    def printer(self,F,offset=0,*args):
-        rdma.binstruct.BinStruct.printer(self,F,offset,*args);
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "PDUData=%r"%(self.PDUData);
         self.dump(F,0,1536,label,offset);
 
+CLASS_TO_STRUCT = {(7,2):CMFormat,
+	(1,1):SMPFormat,
+	(129,1):SMPFormatDirected,
+	(3,2):SAFormat,
+	(4,1):PMFormat,
+	(6,1):DMFormat,
+	(8,1):SNMPFormat};
+ATTR_TO_STRUCT = {(CMFormat,16):CMREQ,
+	(CMFormat,17):CMMRA,
+	(CMFormat,18):CMREJ,
+	(CMFormat,19):CMREP,
+	(CMFormat,20):CMRTU,
+	(CMFormat,21):CMDREQ,
+	(CMFormat,22):CMDREP,
+	(CMFormat,25):CMLAP,
+	(CMFormat,26):CMAPR,
+	(CMFormat,23):CMSIDR_REQ,
+	(CMFormat,24):CMSIDR_REP,
+	(SMPFormat,16):SMPNodeDescription,
+	(SMPFormat,17):SMPNodeInfo,
+	(SMPFormat,18):SMPSwitchInfo,
+	(SMPFormat,20):SMPGUIDInfo,
+	(SMPFormat,21):SMPPortInfo,
+	(SMPFormat,22):SMPPKeyTable,
+	(SMPFormat,23):SMPSLToVLMappingTable,
+	(SMPFormat,24):SMPVLArbitrationTable,
+	(SMPFormat,25):SMPLinearForwardingTable,
+	(SMPFormat,26):SMPRandomForwardingTable,
+	(SMPFormat,27):SMPMulticastForwardingTable,
+	(SMPFormat,32):SMPSMInfo,
+	(SMPFormat,48):SMPVendorDiag,
+	(SMPFormat,49):SMPLedInfo,
+	(SMPFormatDirected,16):SMPNodeDescription,
+	(SMPFormatDirected,17):SMPNodeInfo,
+	(SMPFormatDirected,18):SMPSwitchInfo,
+	(SMPFormatDirected,20):SMPGUIDInfo,
+	(SMPFormatDirected,21):SMPPortInfo,
+	(SMPFormatDirected,22):SMPPKeyTable,
+	(SMPFormatDirected,23):SMPSLToVLMappingTable,
+	(SMPFormatDirected,24):SMPVLArbitrationTable,
+	(SMPFormatDirected,25):SMPLinearForwardingTable,
+	(SMPFormatDirected,26):SMPRandomForwardingTable,
+	(SMPFormatDirected,27):SMPMulticastForwardingTable,
+	(SMPFormatDirected,32):SMPSMInfo,
+	(SMPFormatDirected,48):SMPVendorDiag,
+	(SMPFormatDirected,49):SMPLedInfo,
+	(SAFormat,17):SANodeRecord,
+	(SAFormat,18):SAPortInfoRecord,
+	(SAFormat,19):SASLToVLMappingTableRecord,
+	(SAFormat,20):SASwitchInfoRecord,
+	(SAFormat,21):SALinearForwardingTableRecord,
+	(SAFormat,22):SARandomForwardingTableRecord,
+	(SAFormat,23):SAMulticastForwardingTableRecord,
+	(SAFormat,54):SAVLArbitrationTableRecord,
+	(SAFormat,24):SASMInfoRecord,
+	(SAFormat,243):SAInformInfoRecord,
+	(SAFormat,32):SALinkRecord,
+	(SAFormat,48):SAGUIDInfoRecord,
+	(SAFormat,49):SAServiceRecord,
+	(SAFormat,51):SAPKeyTableRecord,
+	(SAFormat,53):SAPathRecord,
+	(SAFormat,56):SAMCMemberRecord,
+	(SAFormat,57):SATraceRecord,
+	(SAFormat,58):SAMultiPathRecord,
+	(SAFormat,59):SAServiceAssociationRecord,
+	(PMFormat,16):PMPortSamplesCtl,
+	(PMFormat,17):PMPortSamplesRes,
+	(PMFormat,18):PMPortCounters,
+	(PMFormat,21):PMPortRcvErrorDetails,
+	(PMFormat,22):PMPortXmitDiscardDetails,
+	(PMFormat,23):PMPortOpRcvCounters,
+	(PMFormat,24):PMPortFlowCtlCounters,
+	(PMFormat,25):PMPortVLOpPackets,
+	(PMFormat,26):PMPortVLOpData,
+	(PMFormat,27):PMPortVLXmitFlowCtlUpdateErrors,
+	(PMFormat,28):PMPortVLXmitWaitCounters,
+	(PMFormat,48):PMSwPortVLCongestion,
+	(PMFormat,30):PMPortSamplesResExt,
+	(PMFormat,29):PMPortCountersExt,
+	(DMFormat,16):DMIOUnitInfo,
+	(DMFormat,17):DMIOControllerProfile,
+	(DMFormat,18):DMServiceEntries,
+	(DMFormat,32):DMDiagnosticTimeout,
+	(DMFormat,33):DMPrepareToTest,
+	(DMFormat,34):DMTestDeviceOnce,
+	(DMFormat,35):DMTestDeviceLoop,
+	(DMFormat,36):DMDiagCode,
+	(SNMPFormat,16):SNMPCommunityInfo,
+	(SNMPFormat,17):SNMPPDUInfo};
