@@ -1,33 +1,129 @@
 #!/usr/bin/python
 
+import sys
 import os,os.path;
 
 class RDMAError(Exception):
     '''General exception class for RDMA related errors.'''
 
 class MADError(RDMAError):
-    """Thrown when a MAD transaction returns with an error."""
-    def __init__(self,req,rep,**kwargs):
+    """Thrown when a MAD RPC fails in some way. The throw site includes as
+    much information about the error context as possible. Depending on the
+    throw context not all members may be available."""
+    req = None;
+    rep = None;
+    rep_buf = None;
+    path = None;
+    status = 0;
+    exc_info = None;
+    messages = None;
+
+    def __init__(self,**kwargs):
+        """
+        :type req: derived from :class:`~rdma.binstruct.BinStruct`
+        :param req: The MAD's `*Format` that was originally sent.
+        :type path: :class:`~rdma.path.IBPath`
+        :param path: The destination path for the request.
+        :type rep: derived from :class:`~rdma.binstruct.BinStruct`
+        :param rep: The MAD's `*Format` reply.
+        :type rep_buf: :class:`bytearray`
+        :param rep_buf: The entire raw reply MAD data.
+        :type status: :class:`int`
+        :param status: The entire 16 bit status value.
+        :param exc_info: Result of :func:`sys.exc_info` if MAD processing failed due to an unexpected exception.
+        """
         RDMAError.__init__(self);
-        self.req = req;
-        self.rep = rep;
         for k,v in kwargs.iteritems():
-            self.__setattr__(k,v);
+            if k == "msg":
+                self.message(v);
+            else:
+                setattr(self,k,v);
+
+        if self.messages is None:
+            if self.req is not None and self.status is not None:
+                import rdma.IBA;
+                self.message("RPC %s got error status 0x%x - %s"%(
+                    self.req.describe(),self.status,rdma.IBA.mad_status_to_str(self.status)));
+        if self.exc_info is not None:
+            self.message("Internal error, unexpected MAD exception: %r"%(
+                self.exc_info,))
+
+    def _copy_init(self,err):
+        """Copy all the information from err into this class. This calls
+        `__init__` on the base class."""
+        RDMAError.__init__(self);
+        if err is not None:
+            for k,v in err.__dict__.iteritems():
+                if k[0] != "_":
+                    setattr(self,k,v);
+
+    def message(self,s):
+        """Used to annotate additional messages onto the exception. For
+        instance the library function issuing the RPC can call this with a
+        short version of what the RPC actually was trying to do."""
+        if self.messages is None:
+            self.messages = [s];
+        else:
+            self.messages.append(s);
+
+    def dump_detailed(self,F=None,prefix="",level=1):
+        """Display detailed information about the exception. This prints
+        a multi-line description to *F*. Many lines are prefixed with
+        the text *prefix*. If *level* is 0 then the default summary
+        line is displayed. If *level* is 1 then all summary information
+        is shown. If *level* is 2 then request and reply packets are dumped.
+
+        If the :class:`MADError` includes a captured exception then
+        dump_detailed will re-throw it after printing our information."""
+        if F is None:
+            F = sys.stderr;
+        if level == 0 and self.exc_info is not None:
+            print >> F,prefix,self.__str__();
+            return;
+        if self.messages:
+            first = True;
+            for I in reversed(self.messages):
+                if first:
+                    print >> F, prefix,I;
+                    first = False;
+                else:
+                    print >> F, prefix,"+%s"%(I);
+        else:
+            print >> F, prefix,self.__str__();
+        if level >= 1 and self.path is not None:
+            print >> F, prefix,"+MAD path was %r"%(self.path);
+        if level >= 2 and self.req is not None:
+            print >> F, prefix,"+Request Packet %s"%(self.req.__class__.__name__)
+            self.req.printer(F,header=False);
+            if self.rep:
+                print >> F, prefix,"+Reply Packet %s"%(self.rep.__class__.__name__)
+                self.rep.printer(F,header=False);
+        if self.exc_info is not None:
+            raise self.exc_info[0],self.exc_info[1],self.exc_info[2];
 
     def __str__(self):
-        if "exc_info" in self.__dict__:
-            return repr(self.exc_info);
-        # FIXME: Decode what it was we asked for...
-        import rdma.IBA;
-        return "MAD error reply status 0x%x - %s"%(self.status,
-                                                   rdma.IBA.mad_status_to_str(self.status));
+        if self.messages is not None:
+            if len(self.messages) == 1:
+                return self.messages[-1];
+            return "%s [%s]"%(self.messages[-1],self.messages[-2]);
+        return "Unlabeled exception %s: %r"%(self.__name__,self.__dict__);
 
 class MADTimeoutError(MADError):
-    '''Exception thrown when a MAD RPC times out.'''
-    def __str__(self):
-        if "exc_info" in self.__dict__:
-            return repr(self.exc_info);
-        return "MAD timed out";
+    '''Thrown when a MAD RPC times out.'''
+    def __init__(self,req,path):
+        MADError.__init__(self,req=req,path=path,
+                          msg="RPC %s timed out to '%s'"%(
+                              req.describe(),path));
+
+class MADClassError(MADError):
+    '''Thrown when a MAD RPC returns with a class specific error code.'''
+    #: Decoded error code
+    code = None;
+
+    def __init__(self,req,code,**kwargs):
+        MADError.__init__(self,req=req,code=code,
+                          msg="RPC %s got class specific error %u"%(
+                              req.describe(),code),**kwargs);
 
 def get_end_port(name=None):
     """Return a :class:`rdma.devices.EndPort` for the default end port if name

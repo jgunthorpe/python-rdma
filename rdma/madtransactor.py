@@ -2,6 +2,37 @@
 import rdma,rdma.path,sys;
 import rdma.IBA as IBA;
 
+TRACE_SEND = 0;
+TRACE_COMPLETE = 1;
+
+def simple_tracer(mt,kind,fmt=None,path=None,ret=None):
+    """Simply logs summaries of what is happening to :data:`sys.stdout`.
+    Assign to :attr:`rdma.madtransactor.MADTransactor.trace_func`."""
+    if kind != TRACE_COMPLETE:
+        return;
+    desc = fmt.describe();
+
+    if ret is None:
+        print "debug: RPC %s TIMED OUT to '%s'."%(desc,path);
+        return;
+    else:
+        print "debug: RPC %s completed to '%s'."%(desc,path);
+
+def dumper_tracer(mt,kind,fmt=None,path=None,ret=None):
+    """Logs full decoded packet dumps of what is happening to
+    :data:`sys.stdout`.  Assign to
+    :attr:`rdma.madtransactor.MADTransactor.trace_func`."""
+    if kind != TRACE_COMPLETE:
+        return;
+
+    simple_tracer(mt,kind,fmt=fmt,path=path,ret=ret);
+    print "debug: Request",fmt.describe();
+    fmt.printer(sys.stdout,header=False);
+    if ret is not None:
+        res = fmt.__class__(bytes(ret[0]));
+        print "debug: Reply",res.describe()
+        res.printer(sys.stdout,header=False);
+
 class MADTransactor(object):
     """This class is a mixin for everything that implements a MAD RPC
     transaction interface. Derived classes must provide the :meth:`_execute`
@@ -17,6 +48,8 @@ class MADTransactor(object):
     reply_path = None;
     #: The MADFormat for the last reply packet processed
     reply_fmt = None;
+    #: A function to call for tracing.
+    trace_func = None;
 
     def __init__(self):
         self._tid = 0;
@@ -47,7 +80,7 @@ class MADTransactor(object):
         x = MADTransactor._get_match_key(buf)
         return (x[0],x[1] | IBA.MAD_METHOD_RESPONSE,x[2]);
 
-    def _prepareMAD(self,fmt,payload,attributeModifier,method):
+    def _prepareMAD(self,fmt,payload,attributeModifier,method,path):
         fmt.baseVersion = IBA.MAD_BASE_VERSION;
         fmt.mgmtClass = fmt.MAD_CLASS;
         fmt.classVersion = fmt.MAD_CLASS_VERSION;
@@ -64,27 +97,57 @@ class MADTransactor(object):
         fmt._buf = bytearray(fmt.MAD_LENGTH);
         fmt.pack_into(fmt._buf);
 
+        if self.trace_func is not None:
+            self.trace_func(self,TRACE_SEND,fmt=fmt,path=path);
+
     def _completeMAD(self,ret,fmt,path,newer,completer):
+        if self.trace_func is not None:
+            self.trace_func(self,TRACE_COMPLETE,ret=ret,fmt=fmt,path=path);
+
         if ret is None:
-            raise rdma.MADTimeoutError(fmt,path);
+            raise rdma.MADTimeoutError(req=fmt,path=path);
         rbuf,self.reply_path = ret;
 
         # The try wrappers the unpack incase the MAD is busted somehow.
+        if len(rbuf) != fmt.MAD_LENGTH:
+            raise rdma.MADError(req=fmt,rep_buf=rbuf,path=path,
+                                msg="Invalid reply size. Got %u, expected %u"%(len(rbuf),
+                                                                               fmt.MAD_LENGTH));
         try:
-            if len(rbuf) != fmt.MAD_LENGTH:
-                raise rdma.MADError(fmt,rbuf,path=path,status=IBA.MAD_XSTATUS_INVALID_REP_SIZE);
-            self.reply_fmt = fmt.__class__(bytes(rbuf));
-
-            # FIXME: Handle BUSY
-            # FIXME: Handle redirect
-            if self.reply_fmt.status & 0x1F != 0:
-                raise rdma.MADError(fmt,rbuf,path=path,
-                                    status=self.reply_fmt.status);
-            rpayload = newer(self.reply_fmt.data);
-        except rdma.MADError:
-            raise
+            self.reply_fmt = fmt.__class__(rbuf);
         except:
-            raise rdma.MADError(fmt,rbuf,path=path,exc_info=sys.exc_info());
+            e = rdma.MADError(req=fmt,rep_buf=rbuf,path=path,
+                                exc_info=sys.exc_info());
+            raise rdma.MADError,e,e.exc_info[2]
+
+        if (fmt.baseVersion != self.reply_fmt.baseVersion or
+            fmt.mgmtClass != self.reply_fmt.mgmtClass or
+            fmt.classVersion != self.reply_fmt.classVersion or
+            fmt.attributeID != self.reply_fmt.attributeID or
+            (fmt.method | IBA.MAD_METHOD_RESPONSE) != self.reply_fmt.method):
+            raise rdma.MADError(req=fmt,rep=self.reply_fmt,path=path,
+                                msg="Reply header does not match what is expected.");
+
+        # FIXME: Handle BUSY
+        # FIXME: Handle redirect
+        status = self.reply_fmt.status;
+        if status & 0x1F != 0:
+            raise rdma.MADError(req=fmt,rep=self.reply_fmt,path=path,
+                                status=self.reply_fmt.status);
+
+        # Throw a class specific code..
+        class_code = (status >> IBA.MAD_STATUS_CLASS_SHIFT) & IBA.MAD_STATUS_CLASS_MASK;
+        if class_code != 0:
+            raise rdma.MADClassError(req=fmt,rep=self.reply_fmt,path=path,
+                                     status=self.reply_fmt.status,
+                                     code=class_code);
+
+        try:
+            rpayload = newer(self.reply_fmt.data);
+        except:
+            e = rdma.MADError(req=fmt,rep_buf=rbuf,path=path,
+                                exc_info=sys.exc_info());
+            raise rdma.MADError,e,e.exc_info[2]
 
         if completer:
             return completer(rpayload);
@@ -95,7 +158,7 @@ class MADTransactor(object):
         caller must always return _doMAD(). If for some reason there is some
         post-processing work to do then a completer function must be specified
         to do it."""
-        self._prepareMAD(fmt,payload,attributeModifier,method);
+        self._prepareMAD(fmt,payload,attributeModifier,method,path);
         ret = self._execute(fmt._buf,path);
         newer = payload if isinstance(payload,type) else payload.__class__;
         return self._completeMAD(ret,fmt,path,newer,completer);

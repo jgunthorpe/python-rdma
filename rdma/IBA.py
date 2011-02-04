@@ -116,13 +116,20 @@ MAD_STATUS_UNSUP_METHOD_ATTR_COMBO = 3<<2;
 MAD_STATUS_INVALID_ATTR_OR_MODIFIER = 7<<2;
 MAD_STATUS_DIRECTED_RESPONSE = 1<<15;
 
-#: Internal MAD Status Constants
-MAD_XSTATUS_INVALID_REP_SIZE = 1<<16;
+#: SUBNET_ADMIN Class Specific Status Codes
+MAD_STATUS_SA_NO_RESOURCE = 1;
+MAD_STATUS_SA_REQ_INVALID = 2;
+MAD_STATUS_SA_NO_RECORDS = 3;
+MAD_STATUS_SA_TOO_MANY_RECORDS = 4;
+MAD_STATUS_SA_INVALID_GID = 5;
+MAD_STATUS_SA_INSUFFICIENT_COMPONENTS = 6;
+MAD_STATUS_SA_DENIED = 7;
+
+MAD_STATUS_CLASS_SHIFT = 8;
+MAD_STATUS_CLASS_MASK = 0x7F;
 
 def mad_status_to_str(status):
     """Decode a MAD status into a string."""
-    if status == MAD_XSTATUS_INVALID_REP_SIZE:
-        return "Invalid reply size";
     res = "";
     if status & MAD_STATUS_BUSY:
         res = res + "BUSY ";
@@ -394,6 +401,35 @@ class ComponentMask(object):
         def __setattr__(self,name,value):
             self._parent._touch("%s.%s"%(self._name,name));
             return setattr(self._obj,name,value);
+
+def const_str(prefix,value,with_int=False):
+    """Generalized constant integer to string that uses introspection
+    to figure it out."""
+    me = sys.modules[__name__];
+    for k,v in me.__dict__.iteritems():
+        if k.startswith(prefix):
+            try:
+                if value == v:
+                    if with_int:
+                        return "%s(%u)"%(k,value);
+                    else:
+                        return k;
+            except rdma.RDMAError:
+                pass;
+    if with_int:
+        return "%s??(%u)"%(prefix,value)
+    return "%s?%u"%(prefix,value)
+
+def get_fmt_payload(class_id,class_version,attribute_id):
+    """Find the MAD format and MAD payload classes for class_id and
+    attribute_id."""
+    cls = CLASS_TO_STRUCT.get((class_id,class_version));
+    if cls is None:
+        return (None,None);
+    attr = ATTR_TO_STRUCT.get((cls,attribute_id));
+    if attr is None:
+        return (cls,None);
+    return (cls,attr);
 
 from rdma.IBA_struct import *;
 def _make_IBA_link():
