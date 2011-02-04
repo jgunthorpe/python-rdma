@@ -48,7 +48,7 @@ class LazyIBPath(rdma.path.IBPath):
          self.SGID,
          flow_label,
          self.pkey_index) = \
-         UMAD.ib_mad_addr_t.unpack(self._cache_umad_ah);
+         UMAD.ib_mad_addr_t.unpack(self._cached_umad_ah);
         self.sqpn = cpu_to_be32(sqpn);
         # FIXME: dqpn can be derived from agent_id
         self.qkey = cpu_to_be32(qkey);
@@ -188,7 +188,7 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
                                                 path.SL,
                                                 slid_bits,
                                                 path.pkey_index);
-        path._cache_umad_ah = res;
+        path._cached_umad_ah = res;
         return res;
 
     # The kernel API is lame, you'd think setting a 0 timeout would be fine to
@@ -208,7 +208,7 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
         '''Send a MAD packet. *buf* is the raw MAD to send, starting with the first
         byte of :class:`rdma.IBA.MADHeader`. *path* is the destination.'''
         try:
-            addr = path._cache_umad_ah;
+            addr = path._cached_umad_ah;
         except AttributeError:
             addr = self._cache_make_ah(path);
 
@@ -242,7 +242,7 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
 
             path = rdma.path.IBPath(self.parent);
             (path.umad_agent_id,status,timeout_ms,retries,length,
-             path._cache_umad_ah) = self.ib_user_mad_t.unpack_from(bytes(buf),0);
+             path._cached_umad_ah) = self.ib_user_mad_t.unpack_from(bytes(buf),0);
             path.__class__ = LazyIBPath;
 
             if status != 0:
@@ -270,9 +270,9 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
         MADs received during this call are discarded until the reply is seen."""
         if path.umad_agent_id is None:
             if isinstance(buf,bytearray):
-                agent_id = self.register_client(buf[2],buf[3]);
+                agent_id = self.register_client(buf[1],buf[2]);
             else:
-                agent_id = self.register_client(buf[2],buf[3]);
+                agent_id = self.register_client(ord(buf[1]),ord(buf[2]));
         else:
             agent_id = None;
         try:

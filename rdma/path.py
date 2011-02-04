@@ -25,6 +25,7 @@ class Path(object):
         care of the internal caching mechanism.  *kwargs* is applied to set
         attributes of the instance after copying."""
         ret = copy.copy(self);
+        ret.drop_cache();
         for k,v in kwargs.iteritems():
             setattr(ret,k,v);
         return ret;
