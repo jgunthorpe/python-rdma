@@ -1,4 +1,5 @@
 #!/usr/bin/python
+import copy;
 import rdma;
 import rdma.IBA as IBA;
 
@@ -18,6 +19,15 @@ class Path(object):
         self.end_port = end_port;
         for k,v in kwargs.iteritems():
             setattr(self,k,v);
+
+    def copy(self,**kwargs):
+        """Return a new path object that is a copy of this one. This takes
+        care of the internal caching mechanism.  *kwargs* is applied to set
+        attributes of the instance after copying."""
+        ret = copy.copy(self);
+        for k,v in kwargs.iteritems():
+            setattr(ret,k,v);
+        return ret;
 
     def drop_cache(self):
         """Release any cached information."""
