@@ -20,6 +20,15 @@ class LazyIBPath(rdma.path.IBPath):
             LazyIBPath._unpack_rcv(self);
         return object.__getattribute__(self,name);
 
+    def __repr__(self):
+        object.__setattr__(self,"__class__",rdma.path.IBPath);
+        LazyIBPath._unpack_rcv(self);
+        return rdma.path.IBPath.__repr__(self);
+    def __str__(self):
+        object.__setattr__(self,"__class__",rdma.path.IBPath);
+        LazyIBPath._unpack_rcv(self);
+        return rdma.path.IBPath.__repr__(self);
+
     @staticmethod
     def _unpack_rcv(self):
         """Switch a UMAD AH back into an IBPath. Note this is only
