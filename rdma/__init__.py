@@ -41,9 +41,10 @@ class MADError(RDMAError):
 
         if self.messages is None:
             if self.req is not None and self.status is not None:
-                import rdma.IBA;
+                import rdma.IBA_describe;
                 self.message("RPC %s got error status 0x%x - %s"%(
-                    self.req.describe(),self.status,rdma.IBA.mad_status_to_str(self.status)));
+                    self.req.describe(),self.status,
+                    rdma.IBA_describe.mad_status(self.status)));
         if self.exc_info is not None:
             self.message("Internal error, unexpected MAD exception: %r"%(
                 self.exc_info,))

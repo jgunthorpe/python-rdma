@@ -128,26 +128,6 @@ MAD_STATUS_SA_DENIED = 7;
 MAD_STATUS_CLASS_SHIFT = 8;
 MAD_STATUS_CLASS_MASK = 0x7F;
 
-def mad_status_to_str(status):
-    """Decode a MAD status into a string."""
-    res = "";
-    if status & MAD_STATUS_BUSY:
-        res = res + "BUSY ";
-    if status & MAD_STATUS_REDIRECT:
-        res = res + "REDIECT ";
-    code = (status >> 2) & 7;
-    if code == 0:
-        return res + "Ok";
-    if code == 1:
-        return res + "Bad version";
-    if code == 2:
-        return res + "Unsupported method";
-    if code == 3:
-        return res + "Unsupported method+attr";
-    if code == 7:
-        return res + "Invalid attr or modifier";
-    return res + "??";
-
 #: MAD Class Constants
 MAD_SUBNET = 0x01;
 MAD_SUBNET_DIRECTED = 0x81;

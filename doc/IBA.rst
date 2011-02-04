@@ -127,9 +127,9 @@ Word about Versions
 
 The library has some limited support for versioning the MAD Formats, but it is
 not yet fully developed. The basic notion is that each version of a management
-class will have a separate `*Format` class and separate attribute classes.
+class will have a separate `Format` class and separate attribute classes.
 The attribute class will be enhanced to contain the lowest format version it
-applies to and the generic layer will instantiate the correct '*Format' class.
+applies to and the generic layer will instantiate the correct `Format` class.
 
 Generally the message is that client programmers should ignore versions, and
 the library will forever process todays current version with the current code.
@@ -144,10 +144,16 @@ be required there.
    :members:
    :undoc-members:
 
+:mod:`rdma.IBA_describe` Convert values descriptive strings
+-----------------------------------------------------------
+.. automodule:: rdma.IBA_describe
+   :members:
+   :undoc-members:
+
 :mod:`rdma.IBA` InfiniBand Architecture (IBA) definitions
 ---------------------------------------------------------
 .. automodule:: rdma.IBA
-   :members: BinFormat,ComponentMask,GID,GUID,ZERO_GID,ZERO_GUID,conv_ep_addr,conv_lid,mad_status_to_str
+   :members: BinFormat,ComponentMask,GID,GUID,ZERO_GID,ZERO_GUID,conv_ep_addr,conv_lid
    :undoc-members:
    :show-inheritance:
 
