@@ -64,6 +64,8 @@ class SysFSDevice(object):
         return self;
     def __exit__(self,*exc_info):
         return self.dev.close();
+    def close(self):
+        return self.dev.close();
 
 import ctypes;
 class timespec(ctypes.Structure):
