@@ -81,7 +81,11 @@ class MADTransactor(object):
         If two keys match then they are the same transaction."""
         # baseVersion,mgmtClass,classVersion method transactionID[31:0],attributeID
         x = MADTransactor._get_match_key(buf)
-        return (x[0],x[1] | IBA.MAD_METHOD_RESPONSE,x[2]);
+        # Hmmm, I wonder if this should live someplace else?
+        if x[1] == IBA.MAD_METHOD_SET:
+            return (x[0],IBA.MAD_METHOD_GET_RESP,x[2]);
+        else:
+            return (x[0],x[1] | IBA.MAD_METHOD_RESPONSE,x[2]);
 
     def _prepareMAD(self,fmt,payload,attributeModifier,method,path):
         fmt.baseVersion = IBA.MAD_BASE_VERSION;
