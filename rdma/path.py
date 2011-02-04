@@ -1,4 +1,5 @@
 #!/usr/bin/python
+import rdma;
 import rdma.IBA as IBA;
 
 class Path(object):
@@ -27,8 +28,9 @@ class Path(object):
     def __repr__(self):
         cls = self.__class__;
         keys = ("%s=%r"%(k,v) for k,v in self.__dict__.iteritems()
-                if getattr(cls,k,None) != v);
-        return "%s(%s)"%(cls.__name__,", ".join(keys));
+                if k[0] != "_" and k != "end_port" and getattr(cls,k,None) != v);
+        return "%s(end_port=%r, %s)"%(cls.__name__,str(self.end_port),
+                                      ", ".join(keys));
 
 class IBPath(Path):
     """Describe a path in an IB network with a LRH and GRH and BTH
@@ -222,6 +224,13 @@ class IBDRPath(IBPath):
         # Double ended
         return "DR Path %u -> %r -> %u"%(self.DLID,drPath,self.drDLID);
 
+class SAPathNotFoundError(rdma.MADClassError):
+    """Thrown when a path record query fails with a no records error
+    from the SM."""
+    def __init__(self,fmt,err=None):
+        rdma.MADClassError._copy_init(self,err);
+        self.message(fmt);
+
 def get_mad_path(mad,ep_addr):
     """Query the SA and return a path for *ep_addr* (:func:rdma.IBA.conv_ep_addr is
     called automatically).
@@ -232,7 +241,8 @@ def get_mad_path(mad,ep_addr):
     This returns a single reversible path.
 
     :raises ValueError: If dest is not appropriate.
-    :raises rdma.RDMAError: If no matching end_port is found."""
+    :raises rdma.path.SAPathNotFoundError: If *ep_addr* was not found at the SA.
+    :raises rdma.MADError: If the RPC failed in some way."""
     ep_addr = IBA.conv_ep_addr(ep_addr);
 
     q = IBA.ComponentMask(IBA.SAPathRecord());
@@ -243,7 +253,18 @@ def get_mad_path(mad,ep_addr):
     else:
         q.DLID = ep_addr;
 
-    rep = mad.SubnAdmGet(q,mad.parent.sa_path);
+    try:
+        rep = mad.SubnAdmGet(q,mad.parent.sa_path);
+    except rdma.MADClassError as err:
+        if err.code == IBA.MAD_STATUS_SA_NO_RECORDS:
+            raise SAPathNotFoundError("Failed getting MAD path record for end port %r."%(ep_addr),
+                                      err);
+        err.message("Failed getting MAD path record for end port %r."%(ep_addr));
+        raise
+    except rdma.MADError as err:
+        err.message("Failed getting MAD path record for end port %r."%(ep_addr));
+        raise
+
     return IBPath(mad.parent,
                   DGID=rep.DGID,
                   SGID=rep.SGID,
