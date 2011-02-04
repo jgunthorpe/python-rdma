@@ -11,10 +11,13 @@ class madschedule_test(unittest.TestCase):
     tid = 0;
 
     def setUp(self):
-        if self.umad is None:
-            self.end_port = rdma.get_end_port();
-            self.umad = rdma.get_umad(self.end_port);
-            self.local_path = rdma.path.IBDRPath(self.end_port);
+        self.end_port = rdma.get_end_port();
+        self.umad = rdma.get_umad(self.end_port);
+        self.local_path = rdma.path.IBDRPath(self.end_port);
+
+    def tearDown(self):
+        self.umad.close();
+        self.umad = None;
 
     @contextmanager
     def with_assertRaises(self,excClass):
