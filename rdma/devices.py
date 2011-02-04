@@ -187,6 +187,7 @@ class EndPort(SysFSCache):
                 raise rdma.RDMAError("Could not find the SA default PKey");
 
         self._cached_sa_path = rdma.path.IBPath(self,DLID=self.sm_lid,
+                                                SLID=self.lid,
                                                 SL=self.sm_sl,dqpn=1,sqpn=1,
                                                 qkey=IBA.IB_DEFAULT_QP1_QKEY,
                                                 pkey_index=pkey_idx,
