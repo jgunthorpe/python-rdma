@@ -24,7 +24,7 @@ LID_RESERVED = 0; # for uninitialized ports
 LID_MULTICAST = 0xC000; # first multicast LID
 LID_PERMISSIVE = 0xFFFF;
 LID_COUNT_UNICAST = 0xC000;
-LID_COUNT_MULTICAST = 0xFFFE - 0xC000;
+LID_COUNT_MULTICAST = (0xFFFE - 0xC000) + 1;
 
 #: Partition Key Constants
 PKEY_DEFAULT = 0xFFFF;
