@@ -140,7 +140,10 @@ MAD_SNMP = 0x8;
 #: ClassPortInfo capabilityMask Constants
 generatesTraps = 1<<0;
 implementsNotice = 1<<1;
-allPortSelect = 1<<8; # Performance Management
+
+#: PMA ClassPortInfo capabilityMask Constants
+allPortSelect = 1<<8;
+portCountersXmitWaitSupported = 1<<12;
 
 #: PortInfo capabilityMask Constants
 isSM = 1<<1;
