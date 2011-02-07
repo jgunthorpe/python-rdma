@@ -1306,7 +1306,7 @@ class MADHeaderDirected(rdma.binstruct.BinStruct):
 
 class MADClassPortInfo(rdma.binstruct.BinStruct):
     '''Class Port Info (section 13.4.8.1)'''
-    __slots__ = ('baseVersion','classVersion','capabilityMask','reserved1','respTimeValue','redirectGID','redirectTC','redirectSL','redirectFL','redirectLID','redirectPKey','reserved2','redirectQP','redirectQKey','trapGID','trapTC','trapSL','trapFL','trapLID','trapPKey','trapHL','trapQP','trapQKey');
+    __slots__ = ('baseVersion','classVersion','capabilityMask','capabilityMask2','respTimeValue','redirectGID','redirectTC','redirectSL','redirectFL','redirectLID','redirectPKey','reserved1','redirectQP','redirectQKey','trapGID','trapTC','trapSL','trapFL','trapLID','trapPKey','trapHL','trapQP','trapQKey');
     MAD_LENGTH = 72
     MAD_ATTRIBUTE_ID = 0x1
     MAD_COMMMGTGET = 0x1 # MAD_METHOD_GET
@@ -1318,12 +1318,12 @@ class MADClassPortInfo(rdma.binstruct.BinStruct):
     MAD_DEVMGTSET = 0x2 # MAD_METHOD_SET
     MAD_SNMPGET = 0x1 # MAD_METHOD_GET
     MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
-    COMPONENT_MASK = {'baseVersion':0, 'classVersion':1, 'capabilityMask':2, 'reserved1':3, 'respTimeValue':4, 'redirectGID':5, 'redirectTC':6, 'redirectSL':7, 'redirectFL':8, 'redirectLID':9, 'redirectPKey':10, 'reserved2':11, 'redirectQP':12, 'redirectQKey':13, 'trapGID':14, 'trapTC':15, 'trapSL':16, 'trapFL':17, 'trapLID':18, 'trapPKey':19, 'trapHL':20, 'trapQP':21, 'trapQKey':22}
+    COMPONENT_MASK = {'baseVersion':0, 'classVersion':1, 'capabilityMask':2, 'capabilityMask2':3, 'respTimeValue':4, 'redirectGID':5, 'redirectTC':6, 'redirectSL':7, 'redirectFL':8, 'redirectLID':9, 'redirectPKey':10, 'reserved1':11, 'redirectQP':12, 'redirectQKey':13, 'trapGID':14, 'trapTC':15, 'trapSL':16, 'trapFL':17, 'trapLID':18, 'trapPKey':19, 'trapHL':20, 'trapQP':21, 'trapQKey':22}
     def zero(self):
         self.baseVersion = 0;
         self.classVersion = 0;
         self.capabilityMask = 0;
-        self.reserved1 = 0;
+        self.capabilityMask2 = 0;
         self.respTimeValue = 0;
         self.redirectGID = IBA.GID();
         self.redirectTC = 0;
@@ -1331,7 +1331,7 @@ class MADClassPortInfo(rdma.binstruct.BinStruct):
         self.redirectFL = 0;
         self.redirectLID = 0;
         self.redirectPKey = 0;
-        self.reserved2 = 0;
+        self.reserved1 = 0;
         self.redirectQP = 0;
         self.redirectQKey = 0;
         self.trapGID = IBA.GID();
@@ -1346,11 +1346,11 @@ class MADClassPortInfo(rdma.binstruct.BinStruct):
 
     @property
     def _pack_0_32(self):
-        return ((self.reserved1 & 0x7FFFFFF) << 5) | ((self.respTimeValue & 0x1F) << 0)
+        return ((self.capabilityMask2 & 0x7FFFFFF) << 5) | ((self.respTimeValue & 0x1F) << 0)
 
     @_pack_0_32.setter
     def _pack_0_32(self,value):
-        self.reserved1 = (value >> 5) & 0x7FFFFFF;
+        self.capabilityMask2 = (value >> 5) & 0x7FFFFFF;
         self.respTimeValue = (value >> 0) & 0x1F;
 
     @property
@@ -1365,11 +1365,11 @@ class MADClassPortInfo(rdma.binstruct.BinStruct):
 
     @property
     def _pack_2_32(self):
-        return ((self.reserved2 & 0xFF) << 24) | ((self.redirectQP & 0xFFFFFF) << 0)
+        return ((self.reserved1 & 0xFF) << 24) | ((self.redirectQP & 0xFFFFFF) << 0)
 
     @_pack_2_32.setter
     def _pack_2_32(self,value):
-        self.reserved2 = (value >> 24) & 0xFF;
+        self.reserved1 = (value >> 24) & 0xFF;
         self.redirectQP = (value >> 0) & 0xFFFFFF;
 
     @property
@@ -1410,7 +1410,7 @@ class MADClassPortInfo(rdma.binstruct.BinStruct):
         rdma.binstruct.BinStruct.printer(self,F,offset,header);
         label = "baseVersion=%r,classVersion=%r,capabilityMask=%r"%(self.baseVersion,self.classVersion,self.capabilityMask);
         self.dump(F,0,32,label,offset);
-        label = "reserved1=%r,respTimeValue=%r"%(self.reserved1,self.respTimeValue);
+        label = "capabilityMask2=%r,respTimeValue=%r"%(self.capabilityMask2,self.respTimeValue);
         self.dump(F,32,64,label,offset);
         label = "redirectGID=%r"%(self.redirectGID);
         self.dump(F,64,192,label,offset);
@@ -1418,7 +1418,7 @@ class MADClassPortInfo(rdma.binstruct.BinStruct):
         self.dump(F,192,224,label,offset);
         label = "redirectLID=%r,redirectPKey=%r"%(self.redirectLID,self.redirectPKey);
         self.dump(F,224,256,label,offset);
-        label = "reserved2=%r,redirectQP=%r"%(self.reserved2,self.redirectQP);
+        label = "reserved1=%r,redirectQP=%r"%(self.reserved1,self.redirectQP);
         self.dump(F,256,288,label,offset);
         label = "redirectQKey=%r"%(self.redirectQKey);
         self.dump(F,288,320,label,offset);

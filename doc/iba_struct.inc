@@ -301,35 +301,35 @@ Generic MAD (13.4)
     .. attribute:: MAD_DEVMGTSET = 0x2 # MAD_METHOD_SET
     .. attribute:: MAD_SNMPGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
-    .. attribute:: COMPONENT_MASK = {'baseVersion':0, 'classVersion':1, 'capabilityMask':2, 'reserved1':3, 'respTimeValue':4, 'redirectGID':5, 'redirectTC':6, 'redirectSL':7, 'redirectFL':8, 'redirectLID':9, 'redirectPKey':10, 'reserved2':11, 'redirectQP':12, 'redirectQKey':13, 'trapGID':14, 'trapTC':15, 'trapSL':16, 'trapFL':17, 'trapLID':18, 'trapPKey':19, 'trapHL':20, 'trapQP':21, 'trapQKey':22}
+    .. attribute:: COMPONENT_MASK = {'baseVersion':0, 'classVersion':1, 'capabilityMask':2, 'capabilityMask2':3, 'respTimeValue':4, 'redirectGID':5, 'redirectTC':6, 'redirectSL':7, 'redirectFL':8, 'redirectLID':9, 'redirectPKey':10, 'reserved1':11, 'redirectQP':12, 'redirectQKey':13, 'trapGID':14, 'trapTC':15, 'trapSL':16, 'trapFL':17, 'trapLID':18, 'trapPKey':19, 'trapHL':20, 'trapQP':21, 'trapQKey':22}
 
-    ====================== ============= ======================
-    Member                 Position      Type                  
-    ====================== ============= ======================
-    :attr:`baseVersion`    0:8 (8)       :class:`int`          
-    :attr:`classVersion`   8:16 (8)      :class:`int`          
-    :attr:`capabilityMask` 16:32 (16)    :class:`int`          
-    :attr:`reserved1`      32:59 (27)    :class:`int`          
-    :attr:`respTimeValue`  59:64 (5)     :class:`int`          
-    :attr:`redirectGID`    64:192 (128)  :class:`~rdma.IBA.GID`
-    :attr:`redirectTC`     192:200 (8)   :class:`int`          
-    :attr:`redirectSL`     200:204 (4)   :class:`int`          
-    :attr:`redirectFL`     204:224 (20)  :class:`int`          
-    :attr:`redirectLID`    224:240 (16)  :class:`int`          
-    :attr:`redirectPKey`   240:256 (16)  :class:`int`          
-    :attr:`reserved2`      256:264 (8)   :class:`int`          
-    :attr:`redirectQP`     264:288 (24)  :class:`int`          
-    :attr:`redirectQKey`   288:320 (32)  :class:`int`          
-    :attr:`trapGID`        320:448 (128) :class:`~rdma.IBA.GID`
-    :attr:`trapTC`         448:456 (8)   :class:`int`          
-    :attr:`trapSL`         456:460 (4)   :class:`int`          
-    :attr:`trapFL`         460:480 (20)  :class:`int`          
-    :attr:`trapLID`        480:496 (16)  :class:`int`          
-    :attr:`trapPKey`       496:512 (16)  :class:`int`          
-    :attr:`trapHL`         512:520 (8)   :class:`int`          
-    :attr:`trapQP`         520:544 (24)  :class:`int`          
-    :attr:`trapQKey`       544:576 (32)  :class:`int`          
-    ====================== ============= ======================
+    ======================= ============= ======================
+    Member                  Position      Type                  
+    ======================= ============= ======================
+    :attr:`baseVersion`     0:8 (8)       :class:`int`          
+    :attr:`classVersion`    8:16 (8)      :class:`int`          
+    :attr:`capabilityMask`  16:32 (16)    :class:`int`          
+    :attr:`capabilityMask2` 32:59 (27)    :class:`int`          
+    :attr:`respTimeValue`   59:64 (5)     :class:`int`          
+    :attr:`redirectGID`     64:192 (128)  :class:`~rdma.IBA.GID`
+    :attr:`redirectTC`      192:200 (8)   :class:`int`          
+    :attr:`redirectSL`      200:204 (4)   :class:`int`          
+    :attr:`redirectFL`      204:224 (20)  :class:`int`          
+    :attr:`redirectLID`     224:240 (16)  :class:`int`          
+    :attr:`redirectPKey`    240:256 (16)  :class:`int`          
+    :attr:`reserved1`       256:264 (8)   :class:`int`          
+    :attr:`redirectQP`      264:288 (24)  :class:`int`          
+    :attr:`redirectQKey`    288:320 (32)  :class:`int`          
+    :attr:`trapGID`         320:448 (128) :class:`~rdma.IBA.GID`
+    :attr:`trapTC`          448:456 (8)   :class:`int`          
+    :attr:`trapSL`          456:460 (4)   :class:`int`          
+    :attr:`trapFL`          460:480 (20)  :class:`int`          
+    :attr:`trapLID`         480:496 (16)  :class:`int`          
+    :attr:`trapPKey`        496:512 (16)  :class:`int`          
+    :attr:`trapHL`          512:520 (8)   :class:`int`          
+    :attr:`trapQP`          520:544 (24)  :class:`int`          
+    :attr:`trapQKey`        544:576 (32)  :class:`int`          
+    ======================= ============= ======================
 
 .. class:: rdma.IBA.MADHeader
 

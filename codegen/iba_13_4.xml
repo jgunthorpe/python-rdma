@@ -46,7 +46,7 @@
     <mb bits="8" off="0[0]">baseVersion<!--BaseVersion--></mb>
     <mb bits="8" off="0[8]">classVersion<!--ClassVersion--></mb>
     <mb bits="16" off="0[16]">capabilityMask<!--CapabilityMask--></mb>
-    <mb bits="27" off="0[32]"><!--Reserved--></mb>
+    <mb bits="27" off="0[32]">capabilityMask2<!--CapabilityMask2--></mb>
     <mb bits="5" off="0[59]">respTimeValue<!--RespTimeValue--></mb>
     <mb bits="128" off="0[64]" type="HdrIPv6Addr">redirectGID<!--RedirectGID--></mb>
     <mb bits="8" off="0[192]">redirectTC<!--RedirectTC--></mb>
