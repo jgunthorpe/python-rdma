@@ -90,7 +90,7 @@ class Type(object):
         elif self.bits > 64:
             base = "bytearray(%u)"%(self.bits/8);
         if self.count != 1:
-            if self.bits <= 8:
+            if self.bits == 8:
                 return "bytearray(%u)"%(self.count);
             return "[%s]*%u"%(base,self.count);
         return base;
@@ -105,7 +105,7 @@ class Type(object):
         elif self.bits > 64:
             base = ":class:`bytearray` (%u)"%(self.bits/8);
         if self.count != 1:
-            if self.bits <= 8:
+            if self.bits == 8:
                 base = ":class:`bytearray` (%u)"%(self.count);
             return "[%s]*%u"%(base,self.count);
         return base;

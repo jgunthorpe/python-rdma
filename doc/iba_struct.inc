@@ -784,11 +784,11 @@ Subnet Management (14)
     .. attribute:: MAD_SUBNGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNSET = 0x2 # MAD_METHOD_SET
 
-    ============== ======== ============================
-    Member         Position Type                        
-    ============== ======== ============================
-    :attr:`SLtoVL` 0:64 (4) [:class:`bytearray` (16)]*16
-    ============== ======== ============================
+    ============== ======== =================
+    Member         Position Type             
+    ============== ======== =================
+    :attr:`SLtoVL` 0:64 (4) [:class:`int`]*16
+    ============== ======== =================
 
 .. class:: rdma.IBA.SMPSMInfo
 
@@ -1668,14 +1668,14 @@ Performance Management (16.1)
     .. attribute:: MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_PERFORMANCESET = 0x2 # MAD_METHOD_SET
 
-    ===================================== ========== ============================
-    Member                                Position   Type                        
-    ===================================== ========== ============================
-    :attr:`reserved1`                     0:8 (8)    :class:`int`                
-    :attr:`portSelect`                    8:16 (8)   :class:`int`                
-    :attr:`counterSelect`                 16:32 (16) :class:`int`                
-    :attr:`portVLXmitFlowCtlUpdateErrors` 32:64 (2)  [:class:`bytearray` (16)]*16
-    ===================================== ========== ============================
+    ===================================== ========== =================
+    Member                                Position   Type             
+    ===================================== ========== =================
+    :attr:`reserved1`                     0:8 (8)    :class:`int`     
+    :attr:`portSelect`                    8:16 (8)   :class:`int`     
+    :attr:`counterSelect`                 16:32 (16) :class:`int`     
+    :attr:`portVLXmitFlowCtlUpdateErrors` 32:64 (2)  [:class:`int`]*16
+    ===================================== ========== =================
 
 .. class:: rdma.IBA.PMPortVLXmitWaitCounters
 

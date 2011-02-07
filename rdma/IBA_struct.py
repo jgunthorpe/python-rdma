@@ -2306,11 +2306,11 @@ class SMPSLToVLMappingTable(rdma.binstruct.BinStruct):
     MAD_SUBNGET = 0x1 # MAD_METHOD_GET
     MAD_SUBNSET = 0x2 # MAD_METHOD_SET
     def __init__(self,*args):
-        self.SLtoVL = bytearray(16);
+        self.SLtoVL = [0]*16;
         rdma.binstruct.BinStruct.__init__(self,*args);
 
     def zero(self):
-        self.SLtoVL = bytearray(16);
+        self.SLtoVL = [0]*16;
 
     def pack_into(self,buffer,offset=0):
         rdma.binstruct.pack_array8(buffer,0,4,16,self.SLtoVL);
@@ -4169,14 +4169,14 @@ class PMPortVLXmitFlowCtlUpdateErrors(rdma.binstruct.BinStruct):
     MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
     MAD_PERFORMANCESET = 0x2 # MAD_METHOD_SET
     def __init__(self,*args):
-        self.portVLXmitFlowCtlUpdateErrors = bytearray(16);
+        self.portVLXmitFlowCtlUpdateErrors = [0]*16;
         rdma.binstruct.BinStruct.__init__(self,*args);
 
     def zero(self):
         self.reserved1 = 0;
         self.portSelect = 0;
         self.counterSelect = 0;
-        self.portVLXmitFlowCtlUpdateErrors = bytearray(16);
+        self.portVLXmitFlowCtlUpdateErrors = [0]*16;
 
     def pack_into(self,buffer,offset=0):
         rdma.binstruct.pack_array8(buffer,4,2,16,self.portVLXmitFlowCtlUpdateErrors);
