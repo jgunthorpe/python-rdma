@@ -1734,6 +1734,42 @@ Performance Management (16.1)
     :attr:`swPortVLCongestion` 32:288 (16) [:class:`int`]*16
     ========================== =========== =================
 
+.. class:: rdma.IBA.PMPortRcvDataSL
+
+    Receive SL Port Counters (section A13.6.5)
+
+    .. attribute:: MAD_LENGTH = 68
+    .. attribute:: MAD_ATTRIBUTE_ID = 0x37
+    .. attribute:: MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
+    .. attribute:: MAD_PERFORMANCESET = 0x2 # MAD_METHOD_SET
+
+    ===================== =========== =================
+    Member                Position    Type             
+    ===================== =========== =================
+    :attr:`reserved1`     0:8 (8)     :class:`int`     
+    :attr:`portSelect`    8:16 (8)    :class:`int`     
+    :attr:`counterSelect` 16:32 (16)  :class:`int`     
+    :attr:`portRcvDataSL` 64:576 (32) [:class:`int`]*16
+    ===================== =========== =================
+
+.. class:: rdma.IBA.PMPortXmitDataSL
+
+    Transmit SL Port Counters (section A13.6.5)
+
+    .. attribute:: MAD_LENGTH = 68
+    .. attribute:: MAD_ATTRIBUTE_ID = 0x36
+    .. attribute:: MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
+    .. attribute:: MAD_PERFORMANCESET = 0x2 # MAD_METHOD_SET
+
+    ====================== =========== =================
+    Member                 Position    Type             
+    ====================== =========== =================
+    :attr:`reserved1`      0:8 (8)     :class:`int`     
+    :attr:`portSelect`     8:16 (8)    :class:`int`     
+    :attr:`counterSelect`  16:32 (16)  :class:`int`     
+    :attr:`portXmitDataSL` 64:576 (32) [:class:`int`]*16
+    ====================== =========== =================
+
 Device Management (16.3)
 ^^^^^^^^^^^^^^^^^^^^^^^^
 

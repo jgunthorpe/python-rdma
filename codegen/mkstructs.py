@@ -136,7 +136,7 @@ class Struct(object):
         self.name = xml.get("name");
         self.size = int(xml.get("bytes"));
         self.desc = "%s (section %s)"%(xml.get("desc"),xml.get("sect"));
-        self.sect = tuple(int(I) for I in xml.get("sect").split("."));
+        self.sect = tuple(I for I in xml.get("sect").split("."));
 
         self.mgmtClass = xml.get("mgmtClass");
         self.mgmtClassVersion = xml.get("mgmtClassVersion");
@@ -523,21 +523,25 @@ class BinFormat(rdma.binstruct.BinStruct):
 with safeUpdateCtx(options.rst_out) as F:
     def is_sect_prefix(x,y):
         return x == y[:len(x)];
-    sects = [((12,),"Communication Management"),
-             ((13,4),"Generic MAD"),
-             ((13,6),"RMPP"),
-             ((14,),"Subnet Management"),
-             ((15,),"Subnet Administration"),
-             ((16,1),"Performance Management"),
-             ((16,3),"Device Management"),
-             ((16,4),"SNMP Tunneling")];
+    sects = [(("12",),"Communication Management"),
+             (("13","4"),"Generic MAD"),
+             (("13","6"),"RMPP"),
+             (("14",),"Subnet Management"),
+             (("15",),"Subnet Administration"),
+             (("16","1"),"Performance Management"),
+             (("A13","6"),"Performance Management"),
+             (("16","3"),"Device Management"),
+             (("16","4"),"SNMP Tunneling")];
     lst = sorted(structs,key=lambda x:x.name);
     done = set();
+    last = None;
     for I,name in sects:
-        header = "%s (%s)"%(name,".".join("%s"%(x) for x in I));
-        print >> F, header;
-        print >> F, "^"*len(header);
-        print >> F
+        if name != last:
+            header = "%s (%s)"%(name,".".join("%s"%(x) for x in I));
+            print >> F, header;
+            print >> F, "^"*len(header);
+            print >> F
+            last = name;
         for J in lst:
             if J not in done and is_sect_prefix(I,J.sect):
                 J.asRST(F);

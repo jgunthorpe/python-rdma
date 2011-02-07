@@ -276,4 +276,29 @@
     <mb bits="64" off="0[512]">portMulticastRcvPkts<!--PortUnicastRcvPkts--></mb>
   </struct>
 
+  <struct name="PMPortXmitDataSL"
+          bytes="68"
+          desc="Transmit SL Port Counters"
+          sect="A13.6.5"
+          attributeID="0x36"
+          attributeName="PM_PORT_XMIT_DATA_SL"
+          methods="PerformanceGet PerformanceSet">
+    <mb bits="8" off="0[0]"><!--Reserved--></mb>
+    <mb bits="8" off="0[8]">portSelect<!--Reserved--></mb>
+    <mb bits="16" off="0[16]">counterSelect<!--CounterSelect--></mb>
+    <mb bits="32" off="0[64]" count="16">portXmitDataSL<!--PortXmitDataSL--></mb>
+  </struct>
+
+  <struct name="PMPortRcvDataSL"
+          bytes="68"
+          desc="Receive SL Port Counters"
+          sect="A13.6.5"
+          attributeID="0x37"
+          attributeName="PM_PORT_RCV_DATA_SL"
+          methods="PerformanceGet PerformanceSet">
+    <mb bits="8" off="0[0]"><!--Reserved--></mb>
+    <mb bits="8" off="0[8]">portSelect<!--Reserved--></mb>
+    <mb bits="16" off="0[16]">counterSelect<!--CounterSelect--></mb>
+    <mb bits="32" off="0[64]" count="16">portRcvDataSL<!--PortRcvDataSL--></mb>
+  </struct>
 </makestructs>

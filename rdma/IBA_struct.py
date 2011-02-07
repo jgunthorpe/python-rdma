@@ -4363,6 +4363,68 @@ class PMPortCountersExt(rdma.binstruct.BinStruct):
         label = "portMulticastRcvPkts=%r"%(self.portMulticastRcvPkts);
         self.dump(F,512,576,label,offset);
 
+class PMPortXmitDataSL(rdma.binstruct.BinStruct):
+    '''Transmit SL Port Counters (section A13.6.5)'''
+    __slots__ = ('reserved1','portSelect','counterSelect','portXmitDataSL');
+    MAD_LENGTH = 68
+    MAD_ATTRIBUTE_ID = 0x36
+    MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
+    MAD_PERFORMANCESET = 0x2 # MAD_METHOD_SET
+    def __init__(self,*args):
+        self.portXmitDataSL = [0]*16;
+        rdma.binstruct.BinStruct.__init__(self,*args);
+
+    def zero(self):
+        self.reserved1 = 0;
+        self.portSelect = 0;
+        self.counterSelect = 0;
+        self.portXmitDataSL = [0]*16;
+
+    def pack_into(self,buffer,offset=0):
+        struct.pack_into('>BBHLLLLLLLLLLLLLLLL',buffer,offset+0,self.reserved1,self.portSelect,self.counterSelect,self.portXmitDataSL[0],self.portXmitDataSL[1],self.portXmitDataSL[2],self.portXmitDataSL[3],self.portXmitDataSL[4],self.portXmitDataSL[5],self.portXmitDataSL[6],self.portXmitDataSL[7],self.portXmitDataSL[8],self.portXmitDataSL[9],self.portXmitDataSL[10],self.portXmitDataSL[11],self.portXmitDataSL[12],self.portXmitDataSL[13],self.portXmitDataSL[14],self.portXmitDataSL[15]);
+
+    def unpack_from(self,buffer,offset=0):
+        self._buf = buffer[offset:];
+        (self.reserved1,self.portSelect,self.counterSelect,self.portXmitDataSL[0],self.portXmitDataSL[1],self.portXmitDataSL[2],self.portXmitDataSL[3],self.portXmitDataSL[4],self.portXmitDataSL[5],self.portXmitDataSL[6],self.portXmitDataSL[7],self.portXmitDataSL[8],self.portXmitDataSL[9],self.portXmitDataSL[10],self.portXmitDataSL[11],self.portXmitDataSL[12],self.portXmitDataSL[13],self.portXmitDataSL[14],self.portXmitDataSL[15],) = struct.unpack_from('>BBHLLLLLLLLLLLLLLLL',buffer,offset+0);
+
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
+        label = "reserved1=%r,portSelect=%r,counterSelect=%r"%(self.reserved1,self.portSelect,self.counterSelect);
+        self.dump(F,0,32,label,offset);
+        label = "portXmitDataSL=%r"%(self.portXmitDataSL);
+        self.dump(F,32,544,label,offset);
+
+class PMPortRcvDataSL(rdma.binstruct.BinStruct):
+    '''Receive SL Port Counters (section A13.6.5)'''
+    __slots__ = ('reserved1','portSelect','counterSelect','portRcvDataSL');
+    MAD_LENGTH = 68
+    MAD_ATTRIBUTE_ID = 0x37
+    MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
+    MAD_PERFORMANCESET = 0x2 # MAD_METHOD_SET
+    def __init__(self,*args):
+        self.portRcvDataSL = [0]*16;
+        rdma.binstruct.BinStruct.__init__(self,*args);
+
+    def zero(self):
+        self.reserved1 = 0;
+        self.portSelect = 0;
+        self.counterSelect = 0;
+        self.portRcvDataSL = [0]*16;
+
+    def pack_into(self,buffer,offset=0):
+        struct.pack_into('>BBHLLLLLLLLLLLLLLLL',buffer,offset+0,self.reserved1,self.portSelect,self.counterSelect,self.portRcvDataSL[0],self.portRcvDataSL[1],self.portRcvDataSL[2],self.portRcvDataSL[3],self.portRcvDataSL[4],self.portRcvDataSL[5],self.portRcvDataSL[6],self.portRcvDataSL[7],self.portRcvDataSL[8],self.portRcvDataSL[9],self.portRcvDataSL[10],self.portRcvDataSL[11],self.portRcvDataSL[12],self.portRcvDataSL[13],self.portRcvDataSL[14],self.portRcvDataSL[15]);
+
+    def unpack_from(self,buffer,offset=0):
+        self._buf = buffer[offset:];
+        (self.reserved1,self.portSelect,self.counterSelect,self.portRcvDataSL[0],self.portRcvDataSL[1],self.portRcvDataSL[2],self.portRcvDataSL[3],self.portRcvDataSL[4],self.portRcvDataSL[5],self.portRcvDataSL[6],self.portRcvDataSL[7],self.portRcvDataSL[8],self.portRcvDataSL[9],self.portRcvDataSL[10],self.portRcvDataSL[11],self.portRcvDataSL[12],self.portRcvDataSL[13],self.portRcvDataSL[14],self.portRcvDataSL[15],) = struct.unpack_from('>BBHLLLLLLLLLLLLLLLL',buffer,offset+0);
+
+    def printer(self,F,offset=0,header=True):
+        rdma.binstruct.BinStruct.printer(self,F,offset,header);
+        label = "reserved1=%r,portSelect=%r,counterSelect=%r"%(self.reserved1,self.portSelect,self.counterSelect);
+        self.dump(F,0,32,label,offset);
+        label = "portRcvDataSL=%r"%(self.portRcvDataSL);
+        self.dump(F,32,544,label,offset);
+
 class DMFormat(BinFormat):
     '''Device Management MAD Format (section 16.3.1)'''
     __slots__ = ('baseVersion','mgmtClass','classVersion','method','status','classSpecific','transactionID','attributeID','reserved1','attributeModifier','reserved2','data');
@@ -4885,6 +4947,8 @@ ATTR_TO_STRUCT = {(CMFormat,16):CMREQ,
 	(PMFormat,48):PMSwPortVLCongestion,
 	(PMFormat,30):PMPortSamplesResExt,
 	(PMFormat,29):PMPortCountersExt,
+	(PMFormat,54):PMPortXmitDataSL,
+	(PMFormat,55):PMPortRcvDataSL,
 	(DMFormat,16):DMIOUnitInfo,
 	(DMFormat,17):DMIOControllerProfile,
 	(DMFormat,18):DMServiceEntries,

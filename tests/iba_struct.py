@@ -368,6 +368,14 @@ class structs_test(unittest.TestCase):
         IBA.PMPortCountersExt().unpack_from(testr);
         IBA.PMPortCountersExt(testr);
         assert(len(test) == 512);
+        IBA.PMPortXmitDataSL().pack_into(test);
+        IBA.PMPortXmitDataSL().unpack_from(testr);
+        IBA.PMPortXmitDataSL(testr);
+        assert(len(test) == 512);
+        IBA.PMPortRcvDataSL().pack_into(test);
+        IBA.PMPortRcvDataSL().unpack_from(testr);
+        IBA.PMPortRcvDataSL(testr);
+        assert(len(test) == 512);
         IBA.DMFormat().pack_into(test);
         IBA.DMFormat().unpack_from(testr);
         IBA.DMFormat(testr);
@@ -509,6 +517,8 @@ class structs_test(unittest.TestCase):
         IBA.PMSwPortVLCongestion().printer(sys.stdout);
         IBA.PMPortSamplesResExt().printer(sys.stdout);
         IBA.PMPortCountersExt().printer(sys.stdout);
+        IBA.PMPortXmitDataSL().printer(sys.stdout);
+        IBA.PMPortRcvDataSL().printer(sys.stdout);
         IBA.DMFormat().printer(sys.stdout);
         IBA.DMServiceEntry().printer(sys.stdout);
         IBA.DMIOUnitInfo().printer(sys.stdout);
