@@ -236,15 +236,26 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
 
         :returns: tuple(buf,path)'''
         buf = bytearray(320);
+        first = True;
         while True:
             timeout = wakeat - rdma.tools.clock_monotonic();
-            rc = self.dev.readinto(buf);
+            try:
+                rc = self.dev.readinto(buf);
+            except IOError as err:
+                if err.errno == errno.ENOSPC:
+                    # Hmm.. Must be RMPP.. Resize the buffer accordingly.
+                    rmpp_data2 = struct.unpack_from(">L",bytes(buf),32);
+                    buf = bytearray(min(len(buf)*2,rmpp_data2));
+                    continue;
+                raise;
+
             if rc is None:
+                if not first:
+                    raise IOError(errno.EAGAIN,"Invalid read after poll");
                 if timeout <= 0 or not self._poll.poll(timeout*1000):
                     return None;
-                rc = self.dev.readinto(buf);
-                if rc is None:
-                    raise IOError(errno.EAGAIN,"Invalid read after poll");
+                first = False;
+                continue;
 
             path = rdma.path.IBPath(self.parent);
             (path.umad_agent_id,status,timeout_ms,retries,length,
@@ -253,9 +264,10 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
 
             if status != 0:
                 if status == errno.ETIMEDOUT:
+                    first = True;
                     continue;
                 raise rdma.RDMAError("umad send failure code=%d for %s"%(status,repr(buf)));
-            return (buf[64:],path);
+            return (buf[64:rc],path);
 
     def _gen_error(self,buf,path):
         """Sadly the kernel can return EINVAL if it could not process the MAD,

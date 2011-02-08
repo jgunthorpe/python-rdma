@@ -137,6 +137,11 @@ MAD_PERFORMANCE = 0x4;
 MAD_DEVICE = 0x6;
 MAD_SNMP = 0x8;
 
+#: RMPP Constants
+RMPP_ACTIVE = (1<<0);
+RMPP_FIRST = (1<<1);
+RMPP_LAST = (1<<2);
+
 #: ClassPortInfo capabilityMask Constants
 generatesTraps = 1<<0;
 implementsNotice = 1<<1;

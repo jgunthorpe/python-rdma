@@ -112,13 +112,22 @@ class MADTransactor(object):
             raise rdma.MADTimeoutError(req=fmt,path=path);
         rbuf,self.reply_path = ret;
 
-        # The try wrappers the unpack incase the MAD is busted somehow.
-        if len(rbuf) != fmt.MAD_LENGTH:
+        rmpp = False;
+        nfmt = fmt.__class__;
+        if getattr(fmt,"RMPPVersion",None) is not None:
+            # Quick check if RMPP was used
+            if (rbuf[26] & IBA.RMPP_ACTIVE):
+                nfmt = IBA.SAHeader; # FIXME, should be class specific
+                rmpp = True;
+
+        if ((not rmpp and len(rbuf) != fmt.MAD_LENGTH) or
+            (rmpp and len(rbuf) < nfmt.MAD_LENGTH)):
             raise rdma.MADError(req=fmt,rep_buf=rbuf,path=path,
                                 msg="Invalid reply size. Got %u, expected %u"%(len(rbuf),
                                                                                fmt.MAD_LENGTH));
+        # The try wrappers the unpack incase the MAD is busted somehow.
         try:
-            self.reply_fmt = fmt.__class__(rbuf);
+            self.reply_fmt = nfmt(rbuf);
         except:
             e = rdma.MADError(req=fmt,rep_buf=rbuf,path=path,
                                 exc_info=sys.exc_info());
@@ -142,7 +151,36 @@ class MADTransactor(object):
                                      code=class_code);
 
         try:
-            rpayload = newer(self.reply_fmt.data);
+            if rmpp:
+                # For this path the entire RMPP protocol must have been done
+                # and we expect a single MAD that contains a SAHeader plus
+                # all the data.
+                if self.reply_fmt.attributeOffset == 0:
+                    rpayload = [];
+                else:
+                    step = 8*self.reply_fmt.attributeOffset;
+                    if step < newer.MAD_LENGTH:
+                        raise rdma.MADError(req=fmt,rep_buf=rbuf,path=path,
+                                            status=self.reply_fmt.status,
+                                            msg="RMPP attribute is too small. Got %u, expected %u"%(
+                                                step,newer.MAD_LENGTH));
+
+                    start = self.reply_fmt.MAD_LENGTH;
+                    count = (len(rbuf) - start)//(step);
+                    #self.reply_fmt.printer(sys.stdout);
+                    #print start,step,len(rpayload),len(rbuf);
+                    #print repr(rbuf[start+step*len(rpayload):]);
+                    # I wonder why the data2 element makes no sense?
+                    if start + step*count > len(rbuf):
+                        raise rdma.MADError(req=fmt,rep_buf=rbuf,path=path,
+                                            status=self.reply_fmt.status,
+                                            msg="RMPP complete packet was too short.");
+                    rpayload = [newer(rbuf[start + step*I:start + step*(I+1)])
+                                for I in range(count)];
+            else:
+                rpayload = newer(self.reply_fmt.data);
+        except rdma.MADError:
+            raise
         except:
             e = rdma.MADError(req=fmt,rep_buf=rbuf,path=path,
                                 exc_info=sys.exc_info());
@@ -198,6 +236,9 @@ class MADTransactor(object):
     def SubnAdmGet(self,payload,path,attributeModifier=0):
         return self._subn_adm_do(payload,path,attributeModifier,
                            payload.MAD_SUBNADMGET);
+    def SubnAdmGetTable(self,payload,path,attributeModifier=0):
+        return self._subn_adm_do(payload,path,attributeModifier,
+                                 payload.MAD_SUBNADMGETTABLE);
     def SubnAdmSet(self,payload,path,attributeModifier=0):
         return self._subn_adm_do(payload,path,attributeModifier,
                            payload.MAD_SUBNADMSET);
