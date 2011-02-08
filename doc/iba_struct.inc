@@ -880,7 +880,7 @@ Subnet Administration (15)
 
 .. class:: rdma.IBA.SAFormat
 
-    An *aggregation* of: MADHeader, RMPPHeader, SAHeader
+    An *aggregation* of: SAHeader
 
     SA Format (section 15.2.1.1)
 
@@ -937,21 +937,39 @@ Subnet Administration (15)
 
 .. class:: rdma.IBA.SAHeader
 
+    An *aggregation* of: MADHeader, RMPPHeader
+
     SA Header (section 15.2.1.1)
 
     .. attribute:: MAD_LENGTH = 56
     .. attribute:: MAD_CLASS = 0x3
     .. attribute:: MAD_CLASS_VERSION = 0x2
 
-    ======================= ============ =============================
-    Member                  Position     Type                         
-    ======================= ============ =============================
-    :attr:`RMPPHeader`      0:288 (288)  :class:`~rdma.IBA.RMPPHeader`
-    :attr:`SMKey`           288:352 (64) :class:`int`                 
-    :attr:`attributeOffset` 352:368 (16) :class:`int`                 
-    :attr:`reserved1`       368:384 (16) :class:`int`                 
-    :attr:`componentMask`   384:448 (64) :class:`int`                 
-    ======================= ============ =============================
+    ========================= ============ ============
+    Member                    Position     Type        
+    ========================= ============ ============
+    :attr:`baseVersion`       0:8 (8)      :class:`int`
+    :attr:`mgmtClass`         8:16 (8)     :class:`int`
+    :attr:`classVersion`      16:24 (8)    :class:`int`
+    :attr:`method`            24:32 (8)    :class:`int`
+    :attr:`status`            32:48 (16)   :class:`int`
+    :attr:`classSpecific`     48:64 (16)   :class:`int`
+    :attr:`transactionID`     64:128 (64)  :class:`int`
+    :attr:`attributeID`       128:144 (16) :class:`int`
+    :attr:`reserved1`         144:160 (16) :class:`int`
+    :attr:`attributeModifier` 160:192 (32) :class:`int`
+    :attr:`RMPPVersion`       192:200 (8)  :class:`int`
+    :attr:`RMPPType`          200:208 (8)  :class:`int`
+    :attr:`RRespTime`         208:213 (5)  :class:`int`
+    :attr:`RMPPFlags`         213:216 (3)  :class:`int`
+    :attr:`RMPPStatus`        216:224 (8)  :class:`int`
+    :attr:`data1`             224:256 (32) :class:`int`
+    :attr:`data2`             256:288 (32) :class:`int`
+    :attr:`SMKey`             288:352 (64) :class:`int`
+    :attr:`attributeOffset`   352:368 (16) :class:`int`
+    :attr:`reserved2`         368:384 (16) :class:`int`
+    :attr:`componentMask`     384:448 (64) :class:`int`
+    ========================= ============ ============
 
 .. class:: rdma.IBA.SAInformInfoRecord
 

@@ -169,7 +169,7 @@ class Struct(object):
     def make_inherit(self):
         """*Format structures inherit from the first element, but
         we optimize the codegen a little bit..."""
-        if not self.is_format:
+        if not self.is_format and not self.name == "SAHeader":
             return;
 
         first = self.mb[0];

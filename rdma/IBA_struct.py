@@ -2564,37 +2564,73 @@ class SMPLedInfo(rdma.binstruct.BinStruct):
 
 class SAHeader(rdma.binstruct.BinStruct):
     '''SA Header (section 15.2.1.1)'''
-    __slots__ = ('RMPPHeader','SMKey','attributeOffset','reserved1','componentMask');
+    __slots__ = ('baseVersion','mgmtClass','classVersion','method','status','classSpecific','transactionID','attributeID','reserved1','attributeModifier','RMPPVersion','RMPPType','RRespTime','RMPPFlags','RMPPStatus','data1','data2','SMKey','attributeOffset','reserved2','componentMask');
     MAD_LENGTH = 56
     MAD_CLASS = 0x3
     MAD_CLASS_VERSION = 0x2
-    def __init__(self,*args):
-        self.RMPPHeader = RMPPHeader();
-        rdma.binstruct.BinStruct.__init__(self,*args);
-
     def zero(self):
-        self.RMPPHeader = RMPPHeader();
+        self.baseVersion = 0;
+        self.mgmtClass = 0;
+        self.classVersion = 0;
+        self.method = 0;
+        self.status = 0;
+        self.classSpecific = 0;
+        self.transactionID = 0;
+        self.attributeID = 0;
+        self.reserved1 = 0;
+        self.attributeModifier = 0;
+        self.RMPPVersion = 0;
+        self.RMPPType = 0;
+        self.RRespTime = 0;
+        self.RMPPFlags = 0;
+        self.RMPPStatus = 0;
+        self.data1 = 0;
+        self.data2 = 0;
         self.SMKey = 0;
         self.attributeOffset = 0;
-        self.reserved1 = 0;
+        self.reserved2 = 0;
         self.componentMask = 0;
 
+    @property
+    def _pack_0_32(self):
+        return ((self.RMPPVersion & 0xFF) << 24) | ((self.RMPPType & 0xFF) << 16) | ((self.RRespTime & 0x1F) << 11) | ((self.RMPPFlags & 0x7) << 8) | ((self.RMPPStatus & 0xFF) << 0)
+
+    @_pack_0_32.setter
+    def _pack_0_32(self,value):
+        self.RMPPVersion = (value >> 24) & 0xFF;
+        self.RMPPType = (value >> 16) & 0xFF;
+        self.RRespTime = (value >> 11) & 0x1F;
+        self.RMPPFlags = (value >> 8) & 0x7;
+        self.RMPPStatus = (value >> 0) & 0xFF;
+
     def pack_into(self,buffer,offset=0):
-        self.RMPPHeader.pack_into(buffer,offset + 0);
-        struct.pack_into('>QHHQ',buffer,offset+36,self.SMKey,self.attributeOffset,self.reserved1,self.componentMask);
+        struct.pack_into('>BBBBHHQHHLLLLQHHQ',buffer,offset+0,self.baseVersion,self.mgmtClass,self.classVersion,self.method,self.status,self.classSpecific,self.transactionID,self.attributeID,self.reserved1,self.attributeModifier,self._pack_0_32,self.data1,self.data2,self.SMKey,self.attributeOffset,self.reserved2,self.componentMask);
 
     def unpack_from(self,buffer,offset=0):
         self._buf = buffer[offset:];
-        self.RMPPHeader.unpack_from(buffer,offset + 0);
-        (self.SMKey,self.attributeOffset,self.reserved1,self.componentMask,) = struct.unpack_from('>QHHQ',buffer,offset+36);
+        (self.baseVersion,self.mgmtClass,self.classVersion,self.method,self.status,self.classSpecific,self.transactionID,self.attributeID,self.reserved1,self.attributeModifier,self._pack_0_32,self.data1,self.data2,self.SMKey,self.attributeOffset,self.reserved2,self.componentMask,) = struct.unpack_from('>BBBBHHQHHLLLLQHHQ',buffer,offset+0);
 
     def printer(self,F,offset=0,header=True):
         rdma.binstruct.BinStruct.printer(self,F,offset,header);
-        label = "RMPPHeader=%r"%(self.RMPPHeader);
-        self.dump(F,0,288,label,offset);
+        label = "baseVersion=%r,mgmtClass=%r,classVersion=%r,method=%r"%(self.baseVersion,self.mgmtClass,self.classVersion,self.method);
+        self.dump(F,0,32,label,offset);
+        label = "status=%r,classSpecific=%r"%(self.status,self.classSpecific);
+        self.dump(F,32,64,label,offset);
+        label = "transactionID=%r"%(self.transactionID);
+        self.dump(F,64,128,label,offset);
+        label = "attributeID=%r,reserved1=%r"%(self.attributeID,self.reserved1);
+        self.dump(F,128,160,label,offset);
+        label = "attributeModifier=%r"%(self.attributeModifier);
+        self.dump(F,160,192,label,offset);
+        label = "RMPPVersion=%r,RMPPType=%r,RRespTime=%r,RMPPFlags=%r,RMPPStatus=%r"%(self.RMPPVersion,self.RMPPType,self.RRespTime,self.RMPPFlags,self.RMPPStatus);
+        self.dump(F,192,224,label,offset);
+        label = "data1=%r"%(self.data1);
+        self.dump(F,224,256,label,offset);
+        label = "data2=%r"%(self.data2);
+        self.dump(F,256,288,label,offset);
         label = "SMKey=%r"%(self.SMKey);
         self.dump(F,288,352,label,offset);
-        label = "attributeOffset=%r,reserved1=%r"%(self.attributeOffset,self.reserved1);
+        label = "attributeOffset=%r,reserved2=%r"%(self.attributeOffset,self.reserved2);
         self.dump(F,352,384,label,offset);
         label = "componentMask=%r"%(self.componentMask);
         self.dump(F,384,448,label,offset);
