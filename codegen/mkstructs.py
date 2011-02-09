@@ -356,35 +356,6 @@ class Struct(object):
                           "".join(J[0] for J in I),
                           off/8));
 
-    def genPrinter(self):
-        x = ["def printer(self,F,offset=0,header=True):",
-             "    rdma.binstruct.BinStruct.printer(self,F,offset,header);"];
-        groups = list(self.mbGroup);
-        I = 0;
-        while I < len(groups):
-            bits = sum(J[1].lenBits() for J in groups[I]);
-            if bits >= 32:
-                I = I + 1;
-                continue;
-            groups[I] = groups[I] + groups[I+1];
-            del groups[I+1];
-
-        off = 0;
-        for I in groups:
-            bits = sum(J[1].lenBits() for J in I);
-            assert bits % 32 == 0;
-            if self.is_format and I[0][0] == "data":
-                x.append('    self._format_data(F,%u,%u,offset);'%(off,off+bits));
-            else:
-                label = ','.join("%s=%%r"%(J[0]) for J in I);
-                label2 = ','.join("self.%s"%(J[0]) for J in I);
-                x.append('    label = "%s"%%(%s);'%(label,label2));
-                x.append('    self.dump(F,%u,%u,label,offset);'%(off,off+bits));
-            off = off + bits;
-        if len(x) == 1:
-            x.append('    return;');
-        self.funcs.append(x);
-
     def get_properties(self):
         yield "MAD_LENGTH","%u"%(self.size);
         if self.mgmtClass:
@@ -403,6 +374,7 @@ class Struct(object):
                 cm = self.gen_component_mask();
                 if cm:
                     yield "COMPONENT_MASK","{%s}"%(", ".join("%r:%u"%(name,I) for I,name in enumerate(cm)));
+        yield "MEMBERS","[%s]"%(", ".join("(%r,%r,%r)"%(name,ty.bits,ty.count) for name,ty in self.mb if ty.bits != 0));
 
     def asPython(self,F):
         self.funcs = [];
@@ -432,8 +404,6 @@ class Struct(object):
             unpack.append("    return;");
         self.funcs.append(pack);
         self.funcs.append(unpack);
-
-        self.genPrinter();
 
         self.slots = ','.join(repr(I[0]) for I in self.mb if I[1].lenBits() != 0);
         if self.is_format:
@@ -514,11 +484,6 @@ with safeUpdateCtx(options.struct_out) as F:
     print >> F, """import struct,rdma.binstruct;
 class BinFormat(rdma.binstruct.BinStruct):
     '''Base class for all `*Format` type packet layouts.'''
-    def _format_data(self,F,start_bits,end_bits,offset):
-        attr = ATTR_TO_STRUCT.get((self.__class__,self.attributeID));
-        if attr is None:
-            return self.dump(F,start_bits,end_bits,'data',offset);
-        attr(self,offset+start_bits/8).printer(F,offset+start_bits/8);
     def describe(self):
         '''Return a short description of the RPC described by this format.'''
         attr = ATTR_TO_STRUCT.get((self.__class__,self.attributeID));

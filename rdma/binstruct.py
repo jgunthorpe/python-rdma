@@ -42,31 +42,8 @@ class BinStruct(object):
         class type on the first line."""
         if header:
             print >> F, "%s"%(self.__class__.__name__);
-
-    def dump(self,F,start_bits,end_bits,label,offset=0):
-        """Internal use. Display a single 'thing'. The display format is
-        ``offest hexdword fmt`` where fmt is the string version of the thing."""
-        buf = None;
-        if isinstance(self._buf,bytes):
-            buf = self._buf;
-        if isinstance(self._buf,bytearray):
-            buf = bytes(self._buf);
-        if buf is None:
-            buf = bytearray(256);
-            self.pack_into(buf);
-            buf = bytes(buf);
-            self._buf = buf;
-
-        end_bits = end_bits/8;
-        start_bits = start_bits/8;
-        while start_bits < end_bits:
-            print >> F, "%3u %02X%02X%02X%02X %s"%\
-                  (offset + start_bits,
-                   ord(buf[start_bits]),ord(buf[start_bits+1]),
-                   ord(buf[start_bits+2]),ord(buf[start_bits+3]),
-                   label);
-            label = '';
-            start_bits = start_bits + 4;
+        import rdma.IBA_describe;
+        rdma.IBA_describe.struct_dump(F,self,offset=offset);
 
     # 'pure virtual' functions
     def zero(self):
