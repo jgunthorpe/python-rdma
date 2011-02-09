@@ -9,17 +9,17 @@ Communication Management (12)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x1a
     .. attribute:: MAD_COMMMGTSEND = 0x3 # MAD_METHOD_SEND
 
-    ============================ =============== ========================
-    Member                       Position        Type                    
-    ============================ =============== ========================
-    :attr:`LCID`                 0:32 (32)       :class:`int`            
-    :attr:`RCID`                 32:64 (32)      :class:`int`            
-    :attr:`additionalInfoLength` 64:72 (8)       :class:`int`            
-    :attr:`APstatus`             72:80 (8)       :class:`int`            
-    :attr:`reserved1`            80:96 (16)      :class:`int`            
-    :attr:`additionalInfo`       96:672 (576)    :class:`bytearray` (72) 
-    :attr:`privateData`          672:1856 (1184) :class:`bytearray` (148)
-    ============================ =============== ========================
+    ============================ ============= ========================
+    Member                       Position      Type                    
+    ============================ ============= ========================
+    :attr:`LCID`                 0:4 (32)      :class:`int`            
+    :attr:`RCID`                 4:8 (32)      :class:`int`            
+    :attr:`additionalInfoLength` 8:9 (8)       :class:`int`            
+    :attr:`APstatus`             9:10 (8)      :class:`int`            
+    :attr:`reserved_80`          10:12 (16)    :class:`int`            
+    :attr:`additionalInfo`       12:84 (576)   :class:`bytearray` (72) 
+    :attr:`privateData`          84:232 (1184) :class:`bytearray` (148)
+    ============================ ============= ========================
 
 .. class:: rdma.IBA.CMDREP
 
@@ -29,13 +29,13 @@ Communication Management (12)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x16
     .. attribute:: MAD_COMMMGTSEND = 0x3 # MAD_METHOD_SEND
 
-    =================== ============== ========================
-    Member              Position       Type                    
-    =================== ============== ========================
-    :attr:`LCID`        0:32 (32)      :class:`int`            
-    :attr:`RCID`        32:64 (32)     :class:`int`            
-    :attr:`privateData` 64:1856 (1792) :class:`bytearray` (224)
-    =================== ============== ========================
+    =================== ============ ========================
+    Member              Position     Type                    
+    =================== ============ ========================
+    :attr:`LCID`        0:4 (32)     :class:`int`            
+    :attr:`RCID`        4:8 (32)     :class:`int`            
+    :attr:`privateData` 8:232 (1792) :class:`bytearray` (224)
+    =================== ============ ========================
 
 .. class:: rdma.IBA.CMDREQ
 
@@ -45,15 +45,15 @@ Communication Management (12)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x15
     .. attribute:: MAD_COMMMGTSEND = 0x3 # MAD_METHOD_SEND
 
-    =================== ============== ========================
-    Member              Position       Type                    
-    =================== ============== ========================
-    :attr:`LCID`        0:32 (32)      :class:`int`            
-    :attr:`RCID`        32:64 (32)     :class:`int`            
-    :attr:`remoteQPN`   64:88 (24)     :class:`int`            
-    :attr:`reserved1`   88:96 (8)      :class:`int`            
-    :attr:`privateData` 96:1856 (1760) :class:`bytearray` (220)
-    =================== ============== ========================
+    =================== ============= ========================
+    Member              Position      Type                    
+    =================== ============= ========================
+    :attr:`LCID`        0:4 (32)      :class:`int`            
+    :attr:`RCID`        4:8 (32)      :class:`int`            
+    :attr:`remoteQPN`   8:11 (24)     :class:`int`            
+    :attr:`reserved_88` 11:12 (8)     :class:`int`            
+    :attr:`privateData` 12:232 (1760) :class:`bytearray` (220)
+    =================== ============= ========================
 
 .. class:: rdma.IBA.CMLAP
 
@@ -66,29 +66,29 @@ Communication Management (12)
     ========================== =============== ========================
     Member                     Position        Type                    
     ========================== =============== ========================
-    :attr:`LCID`               0:32 (32)       :class:`int`            
-    :attr:`RCID`               32:64 (32)      :class:`int`            
-    :attr:`QKey`               64:96 (32)      :class:`int`            
-    :attr:`RQPN`               96:120 (24)     :class:`int`            
-    :attr:`RCMTimeout`         120:125 (5)     :class:`int`            
-    :attr:`reserved1`          125:128 (3)     :class:`int`            
-    :attr:`reserved2`          128:160 (32)    :class:`int`            
-    :attr:`altSLID`            160:176 (16)    :class:`int`            
-    :attr:`altDLID`            176:192 (16)    :class:`int`            
-    :attr:`altSGID`            192:320 (128)   :class:`~rdma.IBA.GID`  
-    :attr:`altDGID`            320:448 (128)   :class:`~rdma.IBA.GID`  
-    :attr:`altFlowLabel`       448:468 (20)    :class:`int`            
-    :attr:`reserved3`          468:472 (4)     :class:`int`            
-    :attr:`altTClass`          472:480 (8)     :class:`int`            
-    :attr:`altHopLimit`        480:488 (8)     :class:`int`            
-    :attr:`reserved4`          488:490 (2)     :class:`int`            
-    :attr:`altIPD`             490:496 (6)     :class:`int`            
-    :attr:`altSL`              496:500 (4)     :class:`int`            
-    :attr:`altSubnetLocal`     500:501 (1)     :class:`int`            
-    :attr:`reserved5`          501:504 (3)     :class:`int`            
-    :attr:`altLocalACKTimeout` 504:509 (5)     :class:`int`            
-    :attr:`reserved6`          509:512 (3)     :class:`int`            
-    :attr:`privateData`        512:1856 (1344) :class:`bytearray` (168)
+    :attr:`LCID`               0:4 (32)        :class:`int`            
+    :attr:`RCID`               4:8 (32)        :class:`int`            
+    :attr:`QKey`               8:12 (32)       :class:`int`            
+    :attr:`RQPN`               12:15 (24)      :class:`int`            
+    :attr:`RCMTimeout`         15:15[5] (5)    :class:`int`            
+    :attr:`reserved_125`       15[5]:16 (3)    :class:`int`            
+    :attr:`reserved_128`       16:20 (32)      :class:`int`            
+    :attr:`altSLID`            20:22 (16)      :class:`int`            
+    :attr:`altDLID`            22:24 (16)      :class:`int`            
+    :attr:`altSGID`            24:40 (128)     :class:`~rdma.IBA.GID`  
+    :attr:`altDGID`            40:56 (128)     :class:`~rdma.IBA.GID`  
+    :attr:`altFlowLabel`       56:58[4] (20)   :class:`int`            
+    :attr:`reserved_468`       58[4]:59 (4)    :class:`int`            
+    :attr:`altTClass`          59:60 (8)       :class:`int`            
+    :attr:`altHopLimit`        60:61 (8)       :class:`int`            
+    :attr:`reserved_488`       61:61[2] (2)    :class:`int`            
+    :attr:`altIPD`             61[2]:62 (6)    :class:`int`            
+    :attr:`altSL`              62:62[4] (4)    :class:`int`            
+    :attr:`altSubnetLocal`     62[4]:62[5] (1) :class:`int`            
+    :attr:`reserved_501`       62[5]:63 (3)    :class:`int`            
+    :attr:`altLocalACKTimeout` 63:63[5] (5)    :class:`int`            
+    :attr:`reserved_509`       63[5]:64 (3)    :class:`int`            
+    :attr:`privateData`        64:232 (1344)   :class:`bytearray` (168)
     ========================== =============== ========================
 
 .. class:: rdma.IBA.CMMRA
@@ -99,18 +99,18 @@ Communication Management (12)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x11
     .. attribute:: MAD_COMMMGTSEND = 0x3 # MAD_METHOD_SEND
 
-    ====================== ============== ========================
-    Member                 Position       Type                    
-    ====================== ============== ========================
-    :attr:`LCID`           0:32 (32)      :class:`int`            
-    :attr:`RCID`           32:64 (32)     :class:`int`            
-    :attr:`messageMRAed`   64:66 (2)      :class:`int`            
-    :attr:`reserved1`      66:72 (6)      :class:`int`            
-    :attr:`serviceTimeout` 72:77 (5)      :class:`int`            
-    :attr:`reserved2`      77:80 (3)      :class:`int`            
-    :attr:`reserved3`      80:96 (16)     :class:`int`            
-    :attr:`privateData`    96:1856 (1760) :class:`bytearray` (220)
-    ====================== ============== ========================
+    ====================== ============= ========================
+    Member                 Position      Type                    
+    ====================== ============= ========================
+    :attr:`LCID`           0:4 (32)      :class:`int`            
+    :attr:`RCID`           4:8 (32)      :class:`int`            
+    :attr:`messageMRAed`   8:8[2] (2)    :class:`int`            
+    :attr:`reserved_66`    8[2]:9 (6)    :class:`int`            
+    :attr:`serviceTimeout` 9:9[5] (5)    :class:`int`            
+    :attr:`reserved_77`    9[5]:10 (3)   :class:`int`            
+    :attr:`reserved_80`    10:12 (16)    :class:`int`            
+    :attr:`privateData`    12:232 (1760) :class:`bytearray` (220)
+    ====================== ============= ========================
 
 .. class:: rdma.IBA.CMPath
 
@@ -118,25 +118,25 @@ Communication Management (12)
 
     .. attribute:: MAD_LENGTH = 44
 
-    ======================= ============= ======================
-    Member                  Position      Type                  
-    ======================= ============= ======================
-    :attr:`SLID`            0:16 (16)     :class:`int`          
-    :attr:`DLID`            16:32 (16)    :class:`int`          
-    :attr:`SGID`            32:160 (128)  :class:`~rdma.IBA.GID`
-    :attr:`DGID`            160:288 (128) :class:`~rdma.IBA.GID`
-    :attr:`flowLabel`       288:308 (20)  :class:`int`          
-    :attr:`reserved1`       308:312 (4)   :class:`int`          
-    :attr:`reserved2`       312:314 (2)   :class:`int`          
-    :attr:`PD`              314:320 (6)   :class:`int`          
-    :attr:`TClass`          320:328 (8)   :class:`int`          
-    :attr:`hopLimit`        328:336 (8)   :class:`int`          
-    :attr:`SL`              336:340 (4)   :class:`int`          
-    :attr:`subnetLocal`     340:341 (1)   :class:`int`          
-    :attr:`reserved3`       341:344 (3)   :class:`int`          
-    :attr:`localACKTimeout` 344:349 (5)   :class:`int`          
-    :attr:`reserved4`       349:352 (3)   :class:`int`          
-    ======================= ============= ======================
+    ======================= =============== ======================
+    Member                  Position        Type                  
+    ======================= =============== ======================
+    :attr:`SLID`            0:2 (16)        :class:`int`          
+    :attr:`DLID`            2:4 (16)        :class:`int`          
+    :attr:`SGID`            4:20 (128)      :class:`~rdma.IBA.GID`
+    :attr:`DGID`            20:36 (128)     :class:`~rdma.IBA.GID`
+    :attr:`flowLabel`       36:38[4] (20)   :class:`int`          
+    :attr:`reserved_308`    38[4]:39 (4)    :class:`int`          
+    :attr:`reserved_312`    39:39[2] (2)    :class:`int`          
+    :attr:`PD`              39[2]:40 (6)    :class:`int`          
+    :attr:`TClass`          40:41 (8)       :class:`int`          
+    :attr:`hopLimit`        41:42 (8)       :class:`int`          
+    :attr:`SL`              42:42[4] (4)    :class:`int`          
+    :attr:`subnetLocal`     42[4]:42[5] (1) :class:`int`          
+    :attr:`reserved_341`    42[5]:43 (3)    :class:`int`          
+    :attr:`localACKTimeout` 43:43[5] (5)    :class:`int`          
+    :attr:`reserved_349`    43[5]:44 (3)    :class:`int`          
+    ======================= =============== ======================
 
 .. class:: rdma.IBA.CMREJ
 
@@ -146,19 +146,19 @@ Communication Management (12)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x12
     .. attribute:: MAD_COMMMGTSEND = 0x3 # MAD_METHOD_SEND
 
-    ======================== =============== ========================
-    Member                   Position        Type                    
-    ======================== =============== ========================
-    :attr:`LCID`             0:32 (32)       :class:`int`            
-    :attr:`RCID`             32:64 (32)      :class:`int`            
-    :attr:`messageRejected`  64:66 (2)       :class:`int`            
-    :attr:`reserved1`        66:72 (6)       :class:`int`            
-    :attr:`rejectInfoLength` 72:79 (7)       :class:`int`            
-    :attr:`reserved2`        79:80 (1)       :class:`int`            
-    :attr:`reason`           80:96 (16)      :class:`int`            
-    :attr:`ARI`              96:672 (576)    :class:`bytearray` (72) 
-    :attr:`privateData`      672:1856 (1184) :class:`bytearray` (148)
-    ======================== =============== ========================
+    ======================== ============= ========================
+    Member                   Position      Type                    
+    ======================== ============= ========================
+    :attr:`LCID`             0:4 (32)      :class:`int`            
+    :attr:`RCID`             4:8 (32)      :class:`int`            
+    :attr:`messageRejected`  8:8[2] (2)    :class:`int`            
+    :attr:`reserved_66`      8[2]:9 (6)    :class:`int`            
+    :attr:`rejectInfoLength` 9:9[7] (7)    :class:`int`            
+    :attr:`reserved_79`      9[7]:10 (1)   :class:`int`            
+    :attr:`reason`           10:12 (16)    :class:`int`            
+    :attr:`ARI`              12:84 (576)   :class:`bytearray` (72) 
+    :attr:`privateData`      84:232 (1184) :class:`bytearray` (148)
+    ======================== ============= ========================
 
 .. class:: rdma.IBA.CMREP
 
@@ -171,24 +171,24 @@ Communication Management (12)
     ========================== =============== ========================
     Member                     Position        Type                    
     ========================== =============== ========================
-    :attr:`LCID`               0:32 (32)       :class:`int`            
-    :attr:`RCID`               32:64 (32)      :class:`int`            
-    :attr:`localQKey`          64:96 (32)      :class:`int`            
-    :attr:`localQPN`           96:120 (24)     :class:`int`            
-    :attr:`reserved1`          120:128 (8)     :class:`int`            
-    :attr:`localEEContext`     128:152 (24)    :class:`int`            
-    :attr:`reserved2`          152:160 (8)     :class:`int`            
-    :attr:`startingPSN`        160:184 (24)    :class:`int`            
-    :attr:`reserved3`          184:192 (8)     :class:`int`            
-    :attr:`responderResources` 192:200 (8)     :class:`int`            
-    :attr:`initiatorDepth`     200:208 (8)     :class:`int`            
-    :attr:`targetACKDelay`     208:213 (5)     :class:`int`            
-    :attr:`failoverAccepted`   213:215 (2)     :class:`int`            
-    :attr:`flowControl`        215:216 (1)     :class:`int`            
-    :attr:`RNRRetryCount`      216:219 (3)     :class:`int`            
-    :attr:`reserved4`          219:224 (5)     :class:`int`            
-    :attr:`LGUID`              224:288 (64)    :class:`~rdma.IBA.GUID` 
-    :attr:`privateData`        288:1856 (1568) :class:`bytearray` (196)
+    :attr:`LCID`               0:4 (32)        :class:`int`            
+    :attr:`RCID`               4:8 (32)        :class:`int`            
+    :attr:`localQKey`          8:12 (32)       :class:`int`            
+    :attr:`localQPN`           12:15 (24)      :class:`int`            
+    :attr:`reserved_120`       15:16 (8)       :class:`int`            
+    :attr:`localEEContext`     16:19 (24)      :class:`int`            
+    :attr:`reserved_152`       19:20 (8)       :class:`int`            
+    :attr:`startingPSN`        20:23 (24)      :class:`int`            
+    :attr:`reserved_184`       23:24 (8)       :class:`int`            
+    :attr:`responderResources` 24:25 (8)       :class:`int`            
+    :attr:`initiatorDepth`     25:26 (8)       :class:`int`            
+    :attr:`targetACKDelay`     26:26[5] (5)    :class:`int`            
+    :attr:`failoverAccepted`   26[5]:26[7] (2) :class:`int`            
+    :attr:`flowControl`        26[7]:27 (1)    :class:`int`            
+    :attr:`RNRRetryCount`      27:27[3] (3)    :class:`int`            
+    :attr:`reserved_219`       27[3]:28 (5)    :class:`int`            
+    :attr:`LGUID`              28:36 (64)      :class:`~rdma.IBA.GUID` 
+    :attr:`privateData`        36:232 (1568)   :class:`bytearray` (196)
     ========================== =============== ========================
 
 .. class:: rdma.IBA.CMREQ
@@ -202,32 +202,32 @@ Communication Management (12)
     ============================= =============== =========================
     Member                        Position        Type                     
     ============================= =============== =========================
-    :attr:`LCID`                  0:32 (32)       :class:`int`             
-    :attr:`reserved1`             32:64 (32)      :class:`int`             
-    :attr:`serviceID`             64:128 (64)     :class:`int`             
-    :attr:`LGUID`                 128:192 (64)    :class:`~rdma.IBA.GUID`  
-    :attr:`localCMQKey`           192:224 (32)    :class:`int`             
-    :attr:`localQKey`             224:256 (32)    :class:`int`             
-    :attr:`localQPN`              256:280 (24)    :class:`int`             
-    :attr:`responderResources`    280:288 (8)     :class:`int`             
-    :attr:`localEECN`             288:312 (24)    :class:`int`             
-    :attr:`initiatorDepth`        312:320 (8)     :class:`int`             
-    :attr:`remoteEECN`            320:344 (24)    :class:`int`             
-    :attr:`remoteResponseTimeout` 344:349 (5)     :class:`int`             
-    :attr:`transportService`      349:351 (2)     :class:`int`             
-    :attr:`flowControl`           351:352 (1)     :class:`int`             
-    :attr:`startingPSN`           352:376 (24)    :class:`int`             
-    :attr:`localResponseTimeout`  376:381 (5)     :class:`int`             
-    :attr:`retryCount`            381:384 (3)     :class:`int`             
-    :attr:`PKey`                  384:400 (16)    :class:`int`             
-    :attr:`pathPacketMTU`         400:404 (4)     :class:`int`             
-    :attr:`RDCExists`             404:405 (1)     :class:`int`             
-    :attr:`RNRRetryCount`         405:408 (3)     :class:`int`             
-    :attr:`maxCMRetries`          408:412 (4)     :class:`int`             
-    :attr:`reserved2`             412:416 (4)     :class:`int`             
-    :attr:`primaryPath`           416:768 (352)   :class:`~rdma.IBA.CMPath`
-    :attr:`alternatePath`         768:1120 (352)  :class:`~rdma.IBA.CMPath`
-    :attr:`privateData`           1120:1856 (736) :class:`bytearray` (92)  
+    :attr:`LCID`                  0:4 (32)        :class:`int`             
+    :attr:`reserved_32`           4:8 (32)        :class:`int`             
+    :attr:`serviceID`             8:16 (64)       :class:`int`             
+    :attr:`LGUID`                 16:24 (64)      :class:`~rdma.IBA.GUID`  
+    :attr:`localCMQKey`           24:28 (32)      :class:`int`             
+    :attr:`localQKey`             28:32 (32)      :class:`int`             
+    :attr:`localQPN`              32:35 (24)      :class:`int`             
+    :attr:`responderResources`    35:36 (8)       :class:`int`             
+    :attr:`localEECN`             36:39 (24)      :class:`int`             
+    :attr:`initiatorDepth`        39:40 (8)       :class:`int`             
+    :attr:`remoteEECN`            40:43 (24)      :class:`int`             
+    :attr:`remoteResponseTimeout` 43:43[5] (5)    :class:`int`             
+    :attr:`transportService`      43[5]:43[7] (2) :class:`int`             
+    :attr:`flowControl`           43[7]:44 (1)    :class:`int`             
+    :attr:`startingPSN`           44:47 (24)      :class:`int`             
+    :attr:`localResponseTimeout`  47:47[5] (5)    :class:`int`             
+    :attr:`retryCount`            47[5]:48 (3)    :class:`int`             
+    :attr:`PKey`                  48:50 (16)      :class:`int`             
+    :attr:`pathPacketMTU`         50:50[4] (4)    :class:`int`             
+    :attr:`RDCExists`             50[4]:50[5] (1) :class:`int`             
+    :attr:`RNRRetryCount`         50[5]:51 (3)    :class:`int`             
+    :attr:`maxCMRetries`          51:51[4] (4)    :class:`int`             
+    :attr:`reserved_412`          51[4]:52 (4)    :class:`int`             
+    :attr:`primaryPath`           52:96 (352)     :class:`~rdma.IBA.CMPath`
+    :attr:`alternatePath`         96:140 (352)    :class:`~rdma.IBA.CMPath`
+    :attr:`privateData`           140:232 (736)   :class:`bytearray` (92)  
     ============================= =============== =========================
 
 .. class:: rdma.IBA.CMRTU
@@ -238,13 +238,13 @@ Communication Management (12)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x14
     .. attribute:: MAD_COMMMGTSEND = 0x3 # MAD_METHOD_SEND
 
-    =================== ============== ========================
-    Member              Position       Type                    
-    =================== ============== ========================
-    :attr:`LCID`        0:32 (32)      :class:`int`            
-    :attr:`RCID`        32:64 (32)     :class:`int`            
-    :attr:`privateData` 64:1856 (1792) :class:`bytearray` (224)
-    =================== ============== ========================
+    =================== ============ ========================
+    Member              Position     Type                    
+    =================== ============ ========================
+    :attr:`LCID`        0:4 (32)     :class:`int`            
+    :attr:`RCID`        4:8 (32)     :class:`int`            
+    :attr:`privateData` 8:232 (1792) :class:`bytearray` (224)
+    =================== ============ ========================
 
 .. class:: rdma.IBA.CMSIDR_REP
 
@@ -254,17 +254,17 @@ Communication Management (12)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x18
     .. attribute:: MAD_COMMMGTSEND = 0x3 # MAD_METHOD_SEND
 
-    ===================== =============== ===================================
-    Member                Position        Type                               
-    ===================== =============== ===================================
-    :attr:`requestID`     0:32 (32)       :class:`int`                       
-    :attr:`QPN`           32:56 (24)      :class:`int`                       
-    :attr:`status`        56:64 (8)       :class:`int`                       
-    :attr:`serviceID`     64:128 (64)     :class:`int`                       
-    :attr:`QKey`          128:160 (32)    :class:`int`                       
-    :attr:`classPortinfo` 160:736 (576)   :class:`~rdma.IBA.MADClassPortInfo`
-    :attr:`privateData`   736:1856 (1120) :class:`bytearray` (140)           
-    ===================== =============== ===================================
+    ===================== ============= ===================================
+    Member                Position      Type                               
+    ===================== ============= ===================================
+    :attr:`requestID`     0:4 (32)      :class:`int`                       
+    :attr:`QPN`           4:7 (24)      :class:`int`                       
+    :attr:`status`        7:8 (8)       :class:`int`                       
+    :attr:`serviceID`     8:16 (64)     :class:`int`                       
+    :attr:`QKey`          16:20 (32)    :class:`int`                       
+    :attr:`classPortinfo` 20:92 (576)   :class:`~rdma.IBA.MADClassPortInfo`
+    :attr:`privateData`   92:232 (1120) :class:`bytearray` (140)           
+    ===================== ============= ===================================
 
 .. class:: rdma.IBA.CMSIDR_REQ
 
@@ -274,14 +274,14 @@ Communication Management (12)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x17
     .. attribute:: MAD_COMMMGTSEND = 0x3 # MAD_METHOD_SEND
 
-    =================== =============== ========================
-    Member              Position        Type                    
-    =================== =============== ========================
-    :attr:`requestID`   0:32 (32)       :class:`int`            
-    :attr:`reserved1`   32:64 (32)      :class:`int`            
-    :attr:`serviceID`   64:128 (64)     :class:`int`            
-    :attr:`privateData` 128:1856 (1728) :class:`bytearray` (216)
-    =================== =============== ========================
+    =================== ============= ========================
+    Member              Position      Type                    
+    =================== ============= ========================
+    :attr:`requestID`   0:4 (32)      :class:`int`            
+    :attr:`reserved_32` 4:8 (32)      :class:`int`            
+    :attr:`serviceID`   8:16 (64)     :class:`int`            
+    :attr:`privateData` 16:232 (1728) :class:`bytearray` (216)
+    =================== ============= ========================
 
 Generic MAD (13.4)
 ^^^^^^^^^^^^^^^^^^
@@ -301,34 +301,34 @@ Generic MAD (13.4)
     .. attribute:: MAD_DEVMGTSET = 0x2 # MAD_METHOD_SET
     .. attribute:: MAD_SNMPGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
-    .. attribute:: COMPONENT_MASK = {'baseVersion':0, 'classVersion':1, 'capabilityMask':2, 'capabilityMask2':3, 'respTimeValue':4, 'redirectGID':5, 'redirectTC':6, 'redirectSL':7, 'redirectFL':8, 'redirectLID':9, 'redirectPKey':10, 'reserved1':11, 'redirectQP':12, 'redirectQKey':13, 'trapGID':14, 'trapTC':15, 'trapSL':16, 'trapFL':17, 'trapLID':18, 'trapPKey':19, 'trapHL':20, 'trapQP':21, 'trapQKey':22}
+    .. attribute:: COMPONENT_MASK = {'baseVersion':0, 'classVersion':1, 'capabilityMask':2, 'capabilityMask2':3, 'respTimeValue':4, 'redirectGID':5, 'redirectTC':6, 'redirectSL':7, 'redirectFL':8, 'redirectLID':9, 'redirectPKey':10, 'reserved_256':11, 'redirectQP':12, 'redirectQKey':13, 'trapGID':14, 'trapTC':15, 'trapSL':16, 'trapFL':17, 'trapLID':18, 'trapPKey':19, 'trapHL':20, 'trapQP':21, 'trapQKey':22}
 
     ======================= ============= ======================
     Member                  Position      Type                  
     ======================= ============= ======================
-    :attr:`baseVersion`     0:8 (8)       :class:`int`          
-    :attr:`classVersion`    8:16 (8)      :class:`int`          
-    :attr:`capabilityMask`  16:32 (16)    :class:`int`          
-    :attr:`capabilityMask2` 32:59 (27)    :class:`int`          
-    :attr:`respTimeValue`   59:64 (5)     :class:`int`          
-    :attr:`redirectGID`     64:192 (128)  :class:`~rdma.IBA.GID`
-    :attr:`redirectTC`      192:200 (8)   :class:`int`          
-    :attr:`redirectSL`      200:204 (4)   :class:`int`          
-    :attr:`redirectFL`      204:224 (20)  :class:`int`          
-    :attr:`redirectLID`     224:240 (16)  :class:`int`          
-    :attr:`redirectPKey`    240:256 (16)  :class:`int`          
-    :attr:`reserved1`       256:264 (8)   :class:`int`          
-    :attr:`redirectQP`      264:288 (24)  :class:`int`          
-    :attr:`redirectQKey`    288:320 (32)  :class:`int`          
-    :attr:`trapGID`         320:448 (128) :class:`~rdma.IBA.GID`
-    :attr:`trapTC`          448:456 (8)   :class:`int`          
-    :attr:`trapSL`          456:460 (4)   :class:`int`          
-    :attr:`trapFL`          460:480 (20)  :class:`int`          
-    :attr:`trapLID`         480:496 (16)  :class:`int`          
-    :attr:`trapPKey`        496:512 (16)  :class:`int`          
-    :attr:`trapHL`          512:520 (8)   :class:`int`          
-    :attr:`trapQP`          520:544 (24)  :class:`int`          
-    :attr:`trapQKey`        544:576 (32)  :class:`int`          
+    :attr:`baseVersion`     0:1 (8)       :class:`int`          
+    :attr:`classVersion`    1:2 (8)       :class:`int`          
+    :attr:`capabilityMask`  2:4 (16)      :class:`int`          
+    :attr:`capabilityMask2` 4:7[3] (27)   :class:`int`          
+    :attr:`respTimeValue`   7[3]:8 (5)    :class:`int`          
+    :attr:`redirectGID`     8:24 (128)    :class:`~rdma.IBA.GID`
+    :attr:`redirectTC`      24:25 (8)     :class:`int`          
+    :attr:`redirectSL`      25:25[4] (4)  :class:`int`          
+    :attr:`redirectFL`      25[4]:28 (20) :class:`int`          
+    :attr:`redirectLID`     28:30 (16)    :class:`int`          
+    :attr:`redirectPKey`    30:32 (16)    :class:`int`          
+    :attr:`reserved_256`    32:33 (8)     :class:`int`          
+    :attr:`redirectQP`      33:36 (24)    :class:`int`          
+    :attr:`redirectQKey`    36:40 (32)    :class:`int`          
+    :attr:`trapGID`         40:56 (128)   :class:`~rdma.IBA.GID`
+    :attr:`trapTC`          56:57 (8)     :class:`int`          
+    :attr:`trapSL`          57:57[4] (4)  :class:`int`          
+    :attr:`trapFL`          57[4]:60 (20) :class:`int`          
+    :attr:`trapLID`         60:62 (16)    :class:`int`          
+    :attr:`trapPKey`        62:64 (16)    :class:`int`          
+    :attr:`trapHL`          64:65 (8)     :class:`int`          
+    :attr:`trapQP`          65:68 (24)    :class:`int`          
+    :attr:`trapQKey`        68:72 (32)    :class:`int`          
     ======================= ============= ======================
 
 .. class:: rdma.IBA.MADHeader
@@ -337,20 +337,20 @@ Generic MAD (13.4)
 
     .. attribute:: MAD_LENGTH = 24
 
-    ========================= ============ ============
-    Member                    Position     Type        
-    ========================= ============ ============
-    :attr:`baseVersion`       0:8 (8)      :class:`int`
-    :attr:`mgmtClass`         8:16 (8)     :class:`int`
-    :attr:`classVersion`      16:24 (8)    :class:`int`
-    :attr:`method`            24:32 (8)    :class:`int`
-    :attr:`status`            32:48 (16)   :class:`int`
-    :attr:`classSpecific`     48:64 (16)   :class:`int`
-    :attr:`transactionID`     64:128 (64)  :class:`int`
-    :attr:`attributeID`       128:144 (16) :class:`int`
-    :attr:`reserved1`         144:160 (16) :class:`int`
-    :attr:`attributeModifier` 160:192 (32) :class:`int`
-    ========================= ============ ============
+    ========================= ========== ============
+    Member                    Position   Type        
+    ========================= ========== ============
+    :attr:`baseVersion`       0:1 (8)    :class:`int`
+    :attr:`mgmtClass`         1:2 (8)    :class:`int`
+    :attr:`classVersion`      2:3 (8)    :class:`int`
+    :attr:`method`            3:4 (8)    :class:`int`
+    :attr:`status`            4:6 (16)   :class:`int`
+    :attr:`classSpecific`     6:8 (16)   :class:`int`
+    :attr:`transactionID`     8:16 (64)  :class:`int`
+    :attr:`attributeID`       16:18 (16) :class:`int`
+    :attr:`reserved_144`      18:20 (16) :class:`int`
+    :attr:`attributeModifier` 20:24 (32) :class:`int`
+    ========================= ========== ============
 
 .. class:: rdma.IBA.MADHeaderDirected
 
@@ -358,22 +358,22 @@ Generic MAD (13.4)
 
     .. attribute:: MAD_LENGTH = 24
 
-    ========================= ============ ============
-    Member                    Position     Type        
-    ========================= ============ ============
-    :attr:`baseVersion`       0:8 (8)      :class:`int`
-    :attr:`mgmtClass`         8:16 (8)     :class:`int`
-    :attr:`classVersion`      16:24 (8)    :class:`int`
-    :attr:`method`            24:32 (8)    :class:`int`
-    :attr:`D`                 32:33 (1)    :class:`int`
-    :attr:`status`            33:48 (15)   :class:`int`
-    :attr:`hopPointer`        48:56 (8)    :class:`int`
-    :attr:`hopCount`          56:64 (8)    :class:`int`
-    :attr:`transactionID`     64:128 (64)  :class:`int`
-    :attr:`attributeID`       128:144 (16) :class:`int`
-    :attr:`reserved1`         144:160 (16) :class:`int`
-    :attr:`attributeModifier` 160:192 (32) :class:`int`
-    ========================= ============ ============
+    ========================= =========== ============
+    Member                    Position    Type        
+    ========================= =========== ============
+    :attr:`baseVersion`       0:1 (8)     :class:`int`
+    :attr:`mgmtClass`         1:2 (8)     :class:`int`
+    :attr:`classVersion`      2:3 (8)     :class:`int`
+    :attr:`method`            3:4 (8)     :class:`int`
+    :attr:`D`                 4:4[1] (1)  :class:`int`
+    :attr:`status`            4[1]:6 (15) :class:`int`
+    :attr:`hopPointer`        6:7 (8)     :class:`int`
+    :attr:`hopCount`          7:8 (8)     :class:`int`
+    :attr:`transactionID`     8:16 (64)   :class:`int`
+    :attr:`attributeID`       16:18 (16)  :class:`int`
+    :attr:`reserved_144`      18:20 (16)  :class:`int`
+    :attr:`attributeModifier` 20:24 (32)  :class:`int`
+    ========================= =========== ============
 
 .. class:: rdma.IBA.MADInformInfo
 
@@ -382,24 +382,24 @@ Generic MAD (13.4)
     .. attribute:: MAD_LENGTH = 36
     .. attribute:: MAD_ATTRIBUTE_ID = 0x3
     .. attribute:: MAD_SUBNADMSET = 0x2 # MAD_METHOD_SET
-    .. attribute:: COMPONENT_MASK = {'GID':0, 'LIDRangeBegin':1, 'LIDRangeEnd':2, 'reserved1':3, 'isGeneric':4, 'subscribe':5, 'type':6, 'trapNumber':7, 'QPN':8, 'reserved2':9, 'respTimeValue':10, 'reserved3':11, 'producerType':12}
+    .. attribute:: COMPONENT_MASK = {'GID':0, 'LIDRangeBegin':1, 'LIDRangeEnd':2, 'reserved_160':3, 'isGeneric':4, 'subscribe':5, 'type':6, 'trapNumber':7, 'QPN':8, 'reserved_248':9, 'respTimeValue':10, 'reserved_256':11, 'producerType':12}
 
     ===================== ============ ======================
     Member                Position     Type                  
     ===================== ============ ======================
-    :attr:`GID`           0:128 (128)  :class:`~rdma.IBA.GID`
-    :attr:`LIDRangeBegin` 128:144 (16) :class:`int`          
-    :attr:`LIDRangeEnd`   144:160 (16) :class:`int`          
-    :attr:`reserved1`     160:176 (16) :class:`int`          
-    :attr:`isGeneric`     176:184 (8)  :class:`int`          
-    :attr:`subscribe`     184:192 (8)  :class:`int`          
-    :attr:`type`          192:208 (16) :class:`int`          
-    :attr:`trapNumber`    208:224 (16) :class:`int`          
-    :attr:`QPN`           224:248 (24) :class:`int`          
-    :attr:`reserved2`     248:251 (3)  :class:`int`          
-    :attr:`respTimeValue` 251:256 (5)  :class:`int`          
-    :attr:`reserved3`     256:264 (8)  :class:`int`          
-    :attr:`producerType`  264:288 (24) :class:`int`          
+    :attr:`GID`           0:16 (128)   :class:`~rdma.IBA.GID`
+    :attr:`LIDRangeBegin` 16:18 (16)   :class:`int`          
+    :attr:`LIDRangeEnd`   18:20 (16)   :class:`int`          
+    :attr:`reserved_160`  20:22 (16)   :class:`int`          
+    :attr:`isGeneric`     22:23 (8)    :class:`int`          
+    :attr:`subscribe`     23:24 (8)    :class:`int`          
+    :attr:`type`          24:26 (16)   :class:`int`          
+    :attr:`trapNumber`    26:28 (16)   :class:`int`          
+    :attr:`QPN`           28:31 (24)   :class:`int`          
+    :attr:`reserved_248`  31:31[3] (3) :class:`int`          
+    :attr:`respTimeValue` 31[3]:32 (5) :class:`int`          
+    :attr:`reserved_256`  32:33 (8)    :class:`int`          
+    :attr:`producerType`  33:36 (24)   :class:`int`          
     ===================== ============ ======================
 
 RMPP (13.6)
@@ -411,14 +411,14 @@ RMPP (13.6)
 
     .. attribute:: MAD_LENGTH = 256
 
-    ================== =============== ==================================
-    Member             Position        Type                              
-    ================== =============== ==================================
-    :attr:`RMPPHeader` 0:224 (224)     :class:`~rdma.IBA.RMPPShortHeader`
-    :attr:`reserved1`  224:256 (32)    :class:`int`                      
-    :attr:`reserved2`  256:288 (32)    :class:`int`                      
-    :attr:`errorData`  288:2048 (1760) :class:`bytearray` (220)          
-    ================== =============== ==================================
+    ==================== ============= ==================================
+    Member               Position      Type                              
+    ==================== ============= ==================================
+    :attr:`RMPPHeader`   0:28 (224)    :class:`~rdma.IBA.RMPPShortHeader`
+    :attr:`reserved_224` 28:32 (32)    :class:`int`                      
+    :attr:`reserved_256` 32:36 (32)    :class:`int`                      
+    :attr:`errorData`    36:256 (1760) :class:`bytearray` (220)          
+    ==================== ============= ==================================
 
 .. class:: rdma.IBA.RMPPAck
 
@@ -426,14 +426,14 @@ RMPP (13.6)
 
     .. attribute:: MAD_LENGTH = 256
 
-    ===================== =============== ==================================
-    Member                Position        Type                              
-    ===================== =============== ==================================
-    :attr:`RMPPHeader`    0:224 (224)     :class:`~rdma.IBA.RMPPShortHeader`
-    :attr:`segmentNumber` 224:256 (32)    :class:`int`                      
-    :attr:`newWindowLast` 256:288 (32)    :class:`int`                      
-    :attr:`reserved1`     288:2048 (1760) :class:`bytearray` (220)          
-    ===================== =============== ==================================
+    ===================== ============= ==================================
+    Member                Position      Type                              
+    ===================== ============= ==================================
+    :attr:`RMPPHeader`    0:28 (224)    :class:`~rdma.IBA.RMPPShortHeader`
+    :attr:`segmentNumber` 28:32 (32)    :class:`int`                      
+    :attr:`newWindowLast` 32:36 (32)    :class:`int`                      
+    :attr:`reserved_288`  36:256 (1760) :class:`bytearray` (220)          
+    ===================== ============= ==================================
 
 .. class:: rdma.IBA.RMPPData
 
@@ -441,14 +441,14 @@ RMPP (13.6)
 
     .. attribute:: MAD_LENGTH = 256
 
-    ===================== =============== ==================================
-    Member                Position        Type                              
-    ===================== =============== ==================================
-    :attr:`RMPPHeader`    0:224 (224)     :class:`~rdma.IBA.RMPPShortHeader`
-    :attr:`segmentNumber` 224:256 (32)    :class:`int`                      
-    :attr:`payLoadLength` 256:288 (32)    :class:`int`                      
-    :attr:`data`          288:2048 (1760) :class:`bytearray` (220)          
-    ===================== =============== ==================================
+    ===================== ============= ==================================
+    Member                Position      Type                              
+    ===================== ============= ==================================
+    :attr:`RMPPHeader`    0:28 (224)    :class:`~rdma.IBA.RMPPShortHeader`
+    :attr:`segmentNumber` 28:32 (32)    :class:`int`                      
+    :attr:`payLoadLength` 32:36 (32)    :class:`int`                      
+    :attr:`data`          36:256 (1760) :class:`bytearray` (220)          
+    ===================== ============= ==================================
 
 .. class:: rdma.IBA.RMPPHeader
 
@@ -459,14 +459,14 @@ RMPP (13.6)
     =================== ============ ============================
     Member              Position     Type                        
     =================== ============ ============================
-    :attr:`MADHeader`   0:192 (192)  :class:`~rdma.IBA.MADHeader`
-    :attr:`RMPPVersion` 192:200 (8)  :class:`int`                
-    :attr:`RMPPType`    200:208 (8)  :class:`int`                
-    :attr:`RRespTime`   208:213 (5)  :class:`int`                
-    :attr:`RMPPFlags`   213:216 (3)  :class:`int`                
-    :attr:`RMPPStatus`  216:224 (8)  :class:`int`                
-    :attr:`data1`       224:256 (32) :class:`int`                
-    :attr:`data2`       256:288 (32) :class:`int`                
+    :attr:`MADHeader`   0:24 (192)   :class:`~rdma.IBA.MADHeader`
+    :attr:`RMPPVersion` 24:25 (8)    :class:`int`                
+    :attr:`RMPPType`    25:26 (8)    :class:`int`                
+    :attr:`RRespTime`   26:26[5] (5) :class:`int`                
+    :attr:`RMPPFlags`   26[5]:27 (3) :class:`int`                
+    :attr:`RMPPStatus`  27:28 (8)    :class:`int`                
+    :attr:`data1`       28:32 (32)   :class:`int`                
+    :attr:`data2`       32:36 (32)   :class:`int`                
     =================== ============ ============================
 
 .. class:: rdma.IBA.RMPPShortHeader
@@ -475,16 +475,16 @@ RMPP (13.6)
 
     .. attribute:: MAD_LENGTH = 28
 
-    =================== =========== ============================
-    Member              Position    Type                        
-    =================== =========== ============================
-    :attr:`MADHeader`   0:192 (192) :class:`~rdma.IBA.MADHeader`
-    :attr:`RMPPVersion` 192:200 (8) :class:`int`                
-    :attr:`RMPPType`    200:208 (8) :class:`int`                
-    :attr:`RRespTime`   208:213 (5) :class:`int`                
-    :attr:`RMPPFlags`   213:216 (3) :class:`int`                
-    :attr:`RMPPStatus`  216:224 (8) :class:`int`                
-    =================== =========== ============================
+    =================== ============ ============================
+    Member              Position     Type                        
+    =================== ============ ============================
+    :attr:`MADHeader`   0:24 (192)   :class:`~rdma.IBA.MADHeader`
+    :attr:`RMPPVersion` 24:25 (8)    :class:`int`                
+    :attr:`RMPPType`    25:26 (8)    :class:`int`                
+    :attr:`RRespTime`   26:26[5] (5) :class:`int`                
+    :attr:`RMPPFlags`   26[5]:27 (3) :class:`int`                
+    :attr:`RMPPStatus`  27:28 (8)    :class:`int`                
+    =================== ============ ============================
 
 .. class:: rdma.IBA.RMPPStop
 
@@ -492,14 +492,14 @@ RMPP (13.6)
 
     .. attribute:: MAD_LENGTH = 256
 
-    ================== =============== ==================================
-    Member             Position        Type                              
-    ================== =============== ==================================
-    :attr:`RMPPHeader` 0:224 (224)     :class:`~rdma.IBA.RMPPShortHeader`
-    :attr:`reserved1`  224:256 (32)    :class:`int`                      
-    :attr:`reserved2`  256:288 (32)    :class:`int`                      
-    :attr:`errorData`  288:2048 (1760) :class:`bytearray` (220)          
-    ================== =============== ==================================
+    ==================== ============= ==================================
+    Member               Position      Type                              
+    ==================== ============= ==================================
+    :attr:`RMPPHeader`   0:28 (224)    :class:`~rdma.IBA.RMPPShortHeader`
+    :attr:`reserved_224` 28:32 (32)    :class:`int`                      
+    :attr:`reserved_256` 32:36 (32)    :class:`int`                      
+    :attr:`errorData`    36:256 (1760) :class:`bytearray` (220)          
+    ==================== ============= ==================================
 
 Subnet Management (14)
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -514,24 +514,24 @@ Subnet Management (14)
     .. attribute:: MAD_CLASS = 0x1
     .. attribute:: MAD_CLASS_VERSION = 0x1
 
-    ========================= ================ ========================
-    Member                    Position         Type                    
-    ========================= ================ ========================
-    :attr:`baseVersion`       0:8 (8)          :class:`int`            
-    :attr:`mgmtClass`         8:16 (8)         :class:`int`            
-    :attr:`classVersion`      16:24 (8)        :class:`int`            
-    :attr:`method`            24:32 (8)        :class:`int`            
-    :attr:`status`            32:48 (16)       :class:`int`            
-    :attr:`classSpecific`     48:64 (16)       :class:`int`            
-    :attr:`transactionID`     64:128 (64)      :class:`int`            
-    :attr:`attributeID`       128:144 (16)     :class:`int`            
-    :attr:`reserved1`         144:160 (16)     :class:`int`            
-    :attr:`attributeModifier` 160:192 (32)     :class:`int`            
-    :attr:`MKey`              192:256 (64)     :class:`int`            
-    :attr:`reserved2`         256:512 (256)    :class:`bytearray` (32) 
-    :attr:`data`              512:1024 (512)   :class:`bytearray` (64) 
-    :attr:`reserved3`         1024:2048 (1024) :class:`bytearray` (128)
-    ========================= ================ ========================
+    ========================= ============== ========================
+    Member                    Position       Type                    
+    ========================= ============== ========================
+    :attr:`baseVersion`       0:1 (8)        :class:`int`            
+    :attr:`mgmtClass`         1:2 (8)        :class:`int`            
+    :attr:`classVersion`      2:3 (8)        :class:`int`            
+    :attr:`method`            3:4 (8)        :class:`int`            
+    :attr:`status`            4:6 (16)       :class:`int`            
+    :attr:`classSpecific`     6:8 (16)       :class:`int`            
+    :attr:`transactionID`     8:16 (64)      :class:`int`            
+    :attr:`attributeID`       16:18 (16)     :class:`int`            
+    :attr:`reserved_144`      18:20 (16)     :class:`int`            
+    :attr:`attributeModifier` 20:24 (32)     :class:`int`            
+    :attr:`MKey`              24:32 (64)     :class:`int`            
+    :attr:`reserved_256`      32:64 (256)    :class:`bytearray` (32) 
+    :attr:`data`              64:128 (512)   :class:`bytearray` (64) 
+    :attr:`reserved_1024`     128:256 (1024) :class:`bytearray` (128)
+    ========================= ============== ========================
 
 .. class:: rdma.IBA.SMPFormatDirected
 
@@ -543,29 +543,29 @@ Subnet Management (14)
     .. attribute:: MAD_CLASS = 0x81
     .. attribute:: MAD_CLASS_VERSION = 0x1
 
-    ========================= ============== ============================
-    Member                    Position       Type                        
-    ========================= ============== ============================
-    :attr:`baseVersion`       0:8 (8)        :class:`int`                
-    :attr:`mgmtClass`         8:16 (8)       :class:`int`                
-    :attr:`classVersion`      16:24 (8)      :class:`int`                
-    :attr:`method`            24:32 (8)      :class:`int`                
-    :attr:`D`                 32:33 (1)      :class:`int`                
-    :attr:`status`            33:48 (15)     :class:`int`                
-    :attr:`hopPointer`        48:56 (8)      :class:`int`                
-    :attr:`hopCount`          56:64 (8)      :class:`int`                
-    :attr:`transactionID`     64:128 (64)    :class:`int`                
-    :attr:`attributeID`       128:144 (16)   :class:`int`                
-    :attr:`reserved1`         144:160 (16)   :class:`int`                
-    :attr:`attributeModifier` 160:192 (32)   :class:`int`                
-    :attr:`MKey`              192:256 (64)   :class:`int`                
-    :attr:`drSLID`            256:272 (16)   :class:`int`                
-    :attr:`drDLID`            272:288 (16)   :class:`int`                
-    :attr:`reserved2`         288:512 (224)  :class:`bytearray` (28)     
-    :attr:`data`              512:1024 (512) :class:`bytearray` (64)     
-    :attr:`initialPath`       1024:1536 (8)  [:class:`bytearray` (64)]*64
-    :attr:`returnPath`        1536:2048 (8)  [:class:`bytearray` (64)]*64
-    ========================= ============== ============================
+    ========================= ============ ============================
+    Member                    Position     Type                        
+    ========================= ============ ============================
+    :attr:`baseVersion`       0:1 (8)      :class:`int`                
+    :attr:`mgmtClass`         1:2 (8)      :class:`int`                
+    :attr:`classVersion`      2:3 (8)      :class:`int`                
+    :attr:`method`            3:4 (8)      :class:`int`                
+    :attr:`D`                 4:4[1] (1)   :class:`int`                
+    :attr:`status`            4[1]:6 (15)  :class:`int`                
+    :attr:`hopPointer`        6:7 (8)      :class:`int`                
+    :attr:`hopCount`          7:8 (8)      :class:`int`                
+    :attr:`transactionID`     8:16 (64)    :class:`int`                
+    :attr:`attributeID`       16:18 (16)   :class:`int`                
+    :attr:`reserved_144`      18:20 (16)   :class:`int`                
+    :attr:`attributeModifier` 20:24 (32)   :class:`int`                
+    :attr:`MKey`              24:32 (64)   :class:`int`                
+    :attr:`drSLID`            32:34 (16)   :class:`int`                
+    :attr:`drDLID`            34:36 (16)   :class:`int`                
+    :attr:`reserved_288`      36:64 (224)  :class:`bytearray` (28)     
+    :attr:`data`              64:128 (512) :class:`bytearray` (64)     
+    :attr:`initialPath`       128:192 (8)  [:class:`bytearray` (64)]*64
+    :attr:`returnPath`        192:256 (8)  [:class:`bytearray` (64)]*64
+    ========================= ============ ============================
 
 .. class:: rdma.IBA.SMPGUIDInfo
 
@@ -576,11 +576,11 @@ Subnet Management (14)
     .. attribute:: MAD_SUBNGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNSET = 0x2 # MAD_METHOD_SET
 
-    ================= ========== ===========================
-    Member            Position   Type                       
-    ================= ========== ===========================
-    :attr:`GUIDBlock` 0:512 (64) [:class:`~rdma.IBA.GUID`]*8
-    ================= ========== ===========================
+    ================= ========= ===========================
+    Member            Position  Type                       
+    ================= ========= ===========================
+    :attr:`GUIDBlock` 0:64 (64) [:class:`~rdma.IBA.GUID`]*8
+    ================= ========= ===========================
 
 .. class:: rdma.IBA.SMPLIDPortBlock
 
@@ -588,15 +588,15 @@ Subnet Management (14)
 
     .. attribute:: MAD_LENGTH = 4
 
-    ================= ========= ============
-    Member            Position  Type        
-    ================= ========= ============
-    :attr:`LID`       0:16 (16) :class:`int`
-    :attr:`valid`     16:17 (1) :class:`int`
-    :attr:`LMC`       17:20 (3) :class:`int`
-    :attr:`reserved1` 20:24 (4) :class:`int`
-    :attr:`port`      24:32 (8) :class:`int`
-    ================= ========= ============
+    =================== ============= ============
+    Member              Position      Type        
+    =================== ============= ============
+    :attr:`LID`         0:2 (16)      :class:`int`
+    :attr:`valid`       2:2[1] (1)    :class:`int`
+    :attr:`LMC`         2[1]:2[4] (3) :class:`int`
+    :attr:`reserved_20` 2[4]:3 (4)    :class:`int`
+    :attr:`port`        3:4 (8)       :class:`int`
+    =================== ============= ============
 
 .. class:: rdma.IBA.SMPLedInfo
 
@@ -607,12 +607,12 @@ Subnet Management (14)
     .. attribute:: MAD_SUBNGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNSET = 0x2 # MAD_METHOD_SET
 
-    ================= ========= ============
-    Member            Position  Type        
-    ================= ========= ============
-    :attr:`ledMask`   0:1 (1)   :class:`int`
-    :attr:`reserved1` 1:32 (31) :class:`int`
-    ================= ========= ============
+    ================== =========== ============
+    Member             Position    Type        
+    ================== =========== ============
+    :attr:`ledMask`    0:0[1] (1)  :class:`int`
+    :attr:`reserved_1` 0[1]:4 (31) :class:`int`
+    ================== =========== ============
 
 .. class:: rdma.IBA.SMPLinearForwardingTable
 
@@ -623,11 +623,11 @@ Subnet Management (14)
     .. attribute:: MAD_SUBNGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNSET = 0x2 # MAD_METHOD_SET
 
-    ================= ========= ============================
-    Member            Position  Type                        
-    ================= ========= ============================
-    :attr:`portBlock` 0:512 (8) [:class:`bytearray` (64)]*64
-    ================= ========= ============================
+    ================= ======== ============================
+    Member            Position Type                        
+    ================= ======== ============================
+    :attr:`portBlock` 0:64 (8) [:class:`bytearray` (64)]*64
+    ================= ======== ============================
 
 .. class:: rdma.IBA.SMPMulticastForwardingTable
 
@@ -638,11 +638,11 @@ Subnet Management (14)
     .. attribute:: MAD_SUBNGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNSET = 0x2 # MAD_METHOD_SET
 
-    ===================== ========== =================
-    Member                Position   Type             
-    ===================== ========== =================
-    :attr:`portMaskBlock` 0:512 (16) [:class:`int`]*32
-    ===================== ========== =================
+    ===================== ========= =================
+    Member                Position  Type             
+    ===================== ========= =================
+    :attr:`portMaskBlock` 0:64 (16) [:class:`int`]*32
+    ===================== ========= =================
 
 .. class:: rdma.IBA.SMPNodeDescription
 
@@ -652,11 +652,11 @@ Subnet Management (14)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x10
     .. attribute:: MAD_SUBNGET = 0x1 # MAD_METHOD_GET
 
-    ================== ========= ============================
-    Member             Position  Type                        
-    ================== ========= ============================
-    :attr:`nodeString` 0:512 (8) [:class:`bytearray` (64)]*64
-    ================== ========= ============================
+    ================== ======== ============================
+    Member             Position Type                        
+    ================== ======== ============================
+    :attr:`nodeString` 0:64 (8) [:class:`bytearray` (64)]*64
+    ================== ======== ============================
 
 .. class:: rdma.IBA.SMPNodeInfo
 
@@ -666,22 +666,22 @@ Subnet Management (14)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x11
     .. attribute:: MAD_SUBNGET = 0x1 # MAD_METHOD_GET
 
-    ======================= ============ =======================
-    Member                  Position     Type                   
-    ======================= ============ =======================
-    :attr:`baseVersion`     0:8 (8)      :class:`int`           
-    :attr:`classVersion`    8:16 (8)     :class:`int`           
-    :attr:`nodeType`        16:24 (8)    :class:`int`           
-    :attr:`numPorts`        24:32 (8)    :class:`int`           
-    :attr:`systemImageGUID` 32:96 (64)   :class:`~rdma.IBA.GUID`
-    :attr:`nodeGUID`        96:160 (64)  :class:`~rdma.IBA.GUID`
-    :attr:`portGUID`        160:224 (64) :class:`~rdma.IBA.GUID`
-    :attr:`partitionCap`    224:240 (16) :class:`int`           
-    :attr:`deviceID`        240:256 (16) :class:`int`           
-    :attr:`revision`        256:288 (32) :class:`int`           
-    :attr:`localPortNum`    288:296 (8)  :class:`int`           
-    :attr:`vendorID`        296:320 (24) :class:`int`           
-    ======================= ============ =======================
+    ======================= ========== =======================
+    Member                  Position   Type                   
+    ======================= ========== =======================
+    :attr:`baseVersion`     0:1 (8)    :class:`int`           
+    :attr:`classVersion`    1:2 (8)    :class:`int`           
+    :attr:`nodeType`        2:3 (8)    :class:`int`           
+    :attr:`numPorts`        3:4 (8)    :class:`int`           
+    :attr:`systemImageGUID` 4:12 (64)  :class:`~rdma.IBA.GUID`
+    :attr:`nodeGUID`        12:20 (64) :class:`~rdma.IBA.GUID`
+    :attr:`portGUID`        20:28 (64) :class:`~rdma.IBA.GUID`
+    :attr:`partitionCap`    28:30 (16) :class:`int`           
+    :attr:`deviceID`        30:32 (16) :class:`int`           
+    :attr:`revision`        32:36 (32) :class:`int`           
+    :attr:`localPortNum`    36:37 (8)  :class:`int`           
+    :attr:`vendorID`        37:40 (24) :class:`int`           
+    ======================= ========== =======================
 
 .. class:: rdma.IBA.SMPPKeyTable
 
@@ -692,11 +692,11 @@ Subnet Management (14)
     .. attribute:: MAD_SUBNGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNSET = 0x2 # MAD_METHOD_SET
 
-    ================= ========== =================
-    Member            Position   Type             
-    ================= ========== =================
-    :attr:`PKeyBlock` 0:512 (16) [:class:`int`]*32
-    ================= ========== =================
+    ================= ========= =================
+    Member            Position  Type             
+    ================= ========= =================
+    :attr:`PKeyBlock` 0:64 (16) [:class:`int`]*32
+    ================= ========= =================
 
 .. class:: rdma.IBA.SMPPortInfo
 
@@ -707,58 +707,58 @@ Subnet Management (14)
     .. attribute:: MAD_SUBNGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNSET = 0x2 # MAD_METHOD_SET
 
-    ==================================== ============ ============
-    Member                               Position     Type        
-    ==================================== ============ ============
-    :attr:`MKey`                         0:64 (64)    :class:`int`
-    :attr:`GIDPrefix`                    64:128 (64)  :class:`int`
-    :attr:`LID`                          128:144 (16) :class:`int`
-    :attr:`masterSMLID`                  144:160 (16) :class:`int`
-    :attr:`capabilityMask`               160:192 (32) :class:`int`
-    :attr:`diagCode`                     192:208 (16) :class:`int`
-    :attr:`MKeyLeasePeriod`              208:224 (16) :class:`int`
-    :attr:`localPortNum`                 224:232 (8)  :class:`int`
-    :attr:`linkWidthEnabled`             232:240 (8)  :class:`int`
-    :attr:`linkWidthSupported`           240:248 (8)  :class:`int`
-    :attr:`linkWidthActive`              248:256 (8)  :class:`int`
-    :attr:`linkSpeedSupported`           256:260 (4)  :class:`int`
-    :attr:`portState`                    260:264 (4)  :class:`int`
-    :attr:`portPhysicalState`            264:268 (4)  :class:`int`
-    :attr:`linkDownDefaultState`         268:272 (4)  :class:`int`
-    :attr:`MKeyProtectBits`              272:274 (2)  :class:`int`
-    :attr:`reserved1`                    274:277 (3)  :class:`int`
-    :attr:`LMC`                          277:280 (3)  :class:`int`
-    :attr:`linkSpeedActive`              280:284 (4)  :class:`int`
-    :attr:`linkSpeedEnabled`             284:288 (4)  :class:`int`
-    :attr:`neighborMTU`                  288:292 (4)  :class:`int`
-    :attr:`masterSMSL`                   292:296 (4)  :class:`int`
-    :attr:`VLCap`                        296:300 (4)  :class:`int`
-    :attr:`initType`                     300:304 (4)  :class:`int`
-    :attr:`VLHighLimit`                  304:312 (8)  :class:`int`
-    :attr:`VLArbitrationHighCap`         312:320 (8)  :class:`int`
-    :attr:`VLArbitrationLowCap`          320:328 (8)  :class:`int`
-    :attr:`initTypeReply`                328:332 (4)  :class:`int`
-    :attr:`MTUCap`                       332:336 (4)  :class:`int`
-    :attr:`VLStallCount`                 336:339 (3)  :class:`int`
-    :attr:`HOQLife`                      339:344 (5)  :class:`int`
-    :attr:`operationalVLs`               344:348 (4)  :class:`int`
-    :attr:`partitionEnforcementInbound`  348:349 (1)  :class:`int`
-    :attr:`partitionEnforcementOutbound` 349:350 (1)  :class:`int`
-    :attr:`filterRawInbound`             350:351 (1)  :class:`int`
-    :attr:`filterRawOutbound`            351:352 (1)  :class:`int`
-    :attr:`MKeyViolations`               352:368 (16) :class:`int`
-    :attr:`PKeyViolations`               368:384 (16) :class:`int`
-    :attr:`QKeyViolations`               384:400 (16) :class:`int`
-    :attr:`GUIDCap`                      400:408 (8)  :class:`int`
-    :attr:`clientReregister`             408:409 (1)  :class:`int`
-    :attr:`reserved2`                    409:411 (2)  :class:`int`
-    :attr:`subnetTimeOut`                411:416 (5)  :class:`int`
-    :attr:`reserved3`                    416:419 (3)  :class:`int`
-    :attr:`respTimeValue`                419:424 (5)  :class:`int`
-    :attr:`localPhyErrors`               424:428 (4)  :class:`int`
-    :attr:`overrunErrors`                428:432 (4)  :class:`int`
-    :attr:`reserved4`                    432:448 (16) :class:`int`
-    ==================================== ============ ============
+    ==================================== =============== ============
+    Member                               Position        Type        
+    ==================================== =============== ============
+    :attr:`MKey`                         0:8 (64)        :class:`int`
+    :attr:`GIDPrefix`                    8:16 (64)       :class:`int`
+    :attr:`LID`                          16:18 (16)      :class:`int`
+    :attr:`masterSMLID`                  18:20 (16)      :class:`int`
+    :attr:`capabilityMask`               20:24 (32)      :class:`int`
+    :attr:`diagCode`                     24:26 (16)      :class:`int`
+    :attr:`MKeyLeasePeriod`              26:28 (16)      :class:`int`
+    :attr:`localPortNum`                 28:29 (8)       :class:`int`
+    :attr:`linkWidthEnabled`             29:30 (8)       :class:`int`
+    :attr:`linkWidthSupported`           30:31 (8)       :class:`int`
+    :attr:`linkWidthActive`              31:32 (8)       :class:`int`
+    :attr:`linkSpeedSupported`           32:32[4] (4)    :class:`int`
+    :attr:`portState`                    32[4]:33 (4)    :class:`int`
+    :attr:`portPhysicalState`            33:33[4] (4)    :class:`int`
+    :attr:`linkDownDefaultState`         33[4]:34 (4)    :class:`int`
+    :attr:`MKeyProtectBits`              34:34[2] (2)    :class:`int`
+    :attr:`reserved_274`                 34[2]:34[5] (3) :class:`int`
+    :attr:`LMC`                          34[5]:35 (3)    :class:`int`
+    :attr:`linkSpeedActive`              35:35[4] (4)    :class:`int`
+    :attr:`linkSpeedEnabled`             35[4]:36 (4)    :class:`int`
+    :attr:`neighborMTU`                  36:36[4] (4)    :class:`int`
+    :attr:`masterSMSL`                   36[4]:37 (4)    :class:`int`
+    :attr:`VLCap`                        37:37[4] (4)    :class:`int`
+    :attr:`initType`                     37[4]:38 (4)    :class:`int`
+    :attr:`VLHighLimit`                  38:39 (8)       :class:`int`
+    :attr:`VLArbitrationHighCap`         39:40 (8)       :class:`int`
+    :attr:`VLArbitrationLowCap`          40:41 (8)       :class:`int`
+    :attr:`initTypeReply`                41:41[4] (4)    :class:`int`
+    :attr:`MTUCap`                       41[4]:42 (4)    :class:`int`
+    :attr:`VLStallCount`                 42:42[3] (3)    :class:`int`
+    :attr:`HOQLife`                      42[3]:43 (5)    :class:`int`
+    :attr:`operationalVLs`               43:43[4] (4)    :class:`int`
+    :attr:`partitionEnforcementInbound`  43[4]:43[5] (1) :class:`int`
+    :attr:`partitionEnforcementOutbound` 43[5]:43[6] (1) :class:`int`
+    :attr:`filterRawInbound`             43[6]:43[7] (1) :class:`int`
+    :attr:`filterRawOutbound`            43[7]:44 (1)    :class:`int`
+    :attr:`MKeyViolations`               44:46 (16)      :class:`int`
+    :attr:`PKeyViolations`               46:48 (16)      :class:`int`
+    :attr:`QKeyViolations`               48:50 (16)      :class:`int`
+    :attr:`GUIDCap`                      50:51 (8)       :class:`int`
+    :attr:`clientReregister`             51:51[1] (1)    :class:`int`
+    :attr:`reserved_409`                 51[1]:51[3] (2) :class:`int`
+    :attr:`subnetTimeOut`                51[3]:52 (5)    :class:`int`
+    :attr:`reserved_416`                 52:52[3] (3)    :class:`int`
+    :attr:`respTimeValue`                52[3]:53 (5)    :class:`int`
+    :attr:`localPhyErrors`               53:53[4] (4)    :class:`int`
+    :attr:`overrunErrors`                53[4]:54 (4)    :class:`int`
+    :attr:`reserved_432`                 54:56 (16)      :class:`int`
+    ==================================== =============== ============
 
 .. class:: rdma.IBA.SMPRandomForwardingTable
 
@@ -769,11 +769,11 @@ Subnet Management (14)
     .. attribute:: MAD_SUBNGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNSET = 0x2 # MAD_METHOD_SET
 
-    ==================== ========== =======================================
-    Member               Position   Type                                   
-    ==================== ========== =======================================
-    :attr:`LIDPortBlock` 0:512 (32) [:class:`~rdma.IBA.SMPLIDPortBlock`]*16
-    ==================== ========== =======================================
+    ==================== ========= =======================================
+    Member               Position  Type                                   
+    ==================== ========= =======================================
+    :attr:`LIDPortBlock` 0:64 (32) [:class:`~rdma.IBA.SMPLIDPortBlock`]*16
+    ==================== ========= =======================================
 
 .. class:: rdma.IBA.SMPSLToVLMappingTable
 
@@ -787,7 +787,7 @@ Subnet Management (14)
     ============== ======== =================
     Member         Position Type             
     ============== ======== =================
-    :attr:`SLtoVL` 0:64 (4) [:class:`int`]*16
+    :attr:`SLtoVL` 0:8 (4)  [:class:`int`]*16
     ============== ======== =================
 
 .. class:: rdma.IBA.SMPSMInfo
@@ -799,16 +799,16 @@ Subnet Management (14)
     .. attribute:: MAD_SUBNGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNSET = 0x2 # MAD_METHOD_SET
 
-    ================= ============ =======================
-    Member            Position     Type                   
-    ================= ============ =======================
-    :attr:`GUID`      0:64 (64)    :class:`~rdma.IBA.GUID`
-    :attr:`SMKey`     64:128 (64)  :class:`int`           
-    :attr:`actCount`  128:160 (32) :class:`int`           
-    :attr:`priority`  160:164 (4)  :class:`int`           
-    :attr:`SMState`   164:168 (4)  :class:`int`           
-    :attr:`reserved1` 168:192 (24) :class:`int`           
-    ================= ============ =======================
+    ==================== ============ =======================
+    Member               Position     Type                   
+    ==================== ============ =======================
+    :attr:`GUID`         0:8 (64)     :class:`~rdma.IBA.GUID`
+    :attr:`SMKey`        8:16 (64)    :class:`int`           
+    :attr:`actCount`     16:20 (32)   :class:`int`           
+    :attr:`priority`     20:20[4] (4) :class:`int`           
+    :attr:`SMState`      20[4]:21 (4) :class:`int`           
+    :attr:`reserved_168` 21:24 (24)   :class:`int`           
+    ==================== ============ =======================
 
 .. class:: rdma.IBA.SMPSwitchInfo
 
@@ -819,30 +819,30 @@ Subnet Management (14)
     .. attribute:: MAD_SUBNGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNSET = 0x2 # MAD_METHOD_SET
 
-    ========================================= ============ ============
-    Member                                    Position     Type        
-    ========================================= ============ ============
-    :attr:`linearFDBCap`                      0:16 (16)    :class:`int`
-    :attr:`randomFDBCap`                      16:32 (16)   :class:`int`
-    :attr:`multicastFDBCap`                   32:48 (16)   :class:`int`
-    :attr:`linearFDBTop`                      48:64 (16)   :class:`int`
-    :attr:`defaultPort`                       64:72 (8)    :class:`int`
-    :attr:`defaultMulticastPrimaryPort`       72:80 (8)    :class:`int`
-    :attr:`defaultMulticastNotPrimaryPort`    80:88 (8)    :class:`int`
-    :attr:`lifeTimeValue`                     88:93 (5)    :class:`int`
-    :attr:`portStateChange`                   93:94 (1)    :class:`int`
-    :attr:`reserved1`                         94:95 (1)    :class:`int`
-    :attr:`optimizedSLtoVLMappingProgramming` 95:96 (1)    :class:`int`
-    :attr:`LIDsPerPort`                       96:112 (16)  :class:`int`
-    :attr:`partitionEnforcementCap`           112:128 (16) :class:`int`
-    :attr:`inboundEnforcementCap`             128:129 (1)  :class:`int`
-    :attr:`outboundEnforcementCap`            129:130 (1)  :class:`int`
-    :attr:`filterRawInboundCap`               130:131 (1)  :class:`int`
-    :attr:`filterRawOutboundCap`              131:132 (1)  :class:`int`
-    :attr:`enhancedPort0`                     132:133 (1)  :class:`int`
-    :attr:`reserved2`                         133:136 (3)  :class:`int`
-    :attr:`reserved3`                         136:160 (24) :class:`int`
-    ========================================= ============ ============
+    ========================================= =============== ============
+    Member                                    Position        Type        
+    ========================================= =============== ============
+    :attr:`linearFDBCap`                      0:2 (16)        :class:`int`
+    :attr:`randomFDBCap`                      2:4 (16)        :class:`int`
+    :attr:`multicastFDBCap`                   4:6 (16)        :class:`int`
+    :attr:`linearFDBTop`                      6:8 (16)        :class:`int`
+    :attr:`defaultPort`                       8:9 (8)         :class:`int`
+    :attr:`defaultMulticastPrimaryPort`       9:10 (8)        :class:`int`
+    :attr:`defaultMulticastNotPrimaryPort`    10:11 (8)       :class:`int`
+    :attr:`lifeTimeValue`                     11:11[5] (5)    :class:`int`
+    :attr:`portStateChange`                   11[5]:11[6] (1) :class:`int`
+    :attr:`reserved_94`                       11[6]:11[7] (1) :class:`int`
+    :attr:`optimizedSLtoVLMappingProgramming` 11[7]:12 (1)    :class:`int`
+    :attr:`LIDsPerPort`                       12:14 (16)      :class:`int`
+    :attr:`partitionEnforcementCap`           14:16 (16)      :class:`int`
+    :attr:`inboundEnforcementCap`             16:16[1] (1)    :class:`int`
+    :attr:`outboundEnforcementCap`            16[1]:16[2] (1) :class:`int`
+    :attr:`filterRawInboundCap`               16[2]:16[3] (1) :class:`int`
+    :attr:`filterRawOutboundCap`              16[3]:16[4] (1) :class:`int`
+    :attr:`enhancedPort0`                     16[4]:16[5] (1) :class:`int`
+    :attr:`reserved_133`                      16[5]:17 (3)    :class:`int`
+    :attr:`reserved_136`                      17:20 (24)      :class:`int`
+    ========================================= =============== ============
 
 .. class:: rdma.IBA.SMPVLArbitrationTable
 
@@ -853,11 +853,11 @@ Subnet Management (14)
     .. attribute:: MAD_SUBNGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNSET = 0x2 # MAD_METHOD_SET
 
-    ===================== ========== =================
-    Member                Position   Type             
-    ===================== ========== =================
-    :attr:`VLWeightBlock` 0:512 (16) [:class:`int`]*32
-    ===================== ========== =================
+    ===================== ========= =================
+    Member                Position  Type             
+    ===================== ========= =================
+    :attr:`VLWeightBlock` 0:64 (16) [:class:`int`]*32
+    ===================== ========= =================
 
 .. class:: rdma.IBA.SMPVendorDiag
 
@@ -867,13 +867,13 @@ Subnet Management (14)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x30
     .. attribute:: MAD_SUBNGET = 0x1 # MAD_METHOD_GET
 
-    ================= ============ =======================
-    Member            Position     Type                   
-    ================= ============ =======================
-    :attr:`nextIndex` 0:16 (16)    :class:`int`           
-    :attr:`reserved1` 16:32 (16)   :class:`int`           
-    :attr:`diagData`  32:512 (480) :class:`bytearray` (60)
-    ================= ============ =======================
+    =================== ========== =======================
+    Member              Position   Type                   
+    =================== ========== =======================
+    :attr:`nextIndex`   0:2 (16)   :class:`int`           
+    :attr:`reserved_16` 2:4 (16)   :class:`int`           
+    :attr:`diagData`    4:64 (480) :class:`bytearray` (60)
+    =================== ========== =======================
 
 Subnet Administration (15)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -888,32 +888,32 @@ Subnet Administration (15)
     .. attribute:: MAD_CLASS = 0x3
     .. attribute:: MAD_CLASS_VERSION = 0x2
 
-    ========================= =============== ========================
-    Member                    Position        Type                    
-    ========================= =============== ========================
-    :attr:`baseVersion`       0:8 (8)         :class:`int`            
-    :attr:`mgmtClass`         8:16 (8)        :class:`int`            
-    :attr:`classVersion`      16:24 (8)       :class:`int`            
-    :attr:`method`            24:32 (8)       :class:`int`            
-    :attr:`status`            32:48 (16)      :class:`int`            
-    :attr:`classSpecific`     48:64 (16)      :class:`int`            
-    :attr:`transactionID`     64:128 (64)     :class:`int`            
-    :attr:`attributeID`       128:144 (16)    :class:`int`            
-    :attr:`reserved1`         144:160 (16)    :class:`int`            
-    :attr:`attributeModifier` 160:192 (32)    :class:`int`            
-    :attr:`RMPPVersion`       192:200 (8)     :class:`int`            
-    :attr:`RMPPType`          200:208 (8)     :class:`int`            
-    :attr:`RRespTime`         208:213 (5)     :class:`int`            
-    :attr:`RMPPFlags`         213:216 (3)     :class:`int`            
-    :attr:`RMPPStatus`        216:224 (8)     :class:`int`            
-    :attr:`data1`             224:256 (32)    :class:`int`            
-    :attr:`data2`             256:288 (32)    :class:`int`            
-    :attr:`SMKey`             288:352 (64)    :class:`int`            
-    :attr:`attributeOffset`   352:368 (16)    :class:`int`            
-    :attr:`reserved2`         368:384 (16)    :class:`int`            
-    :attr:`componentMask`     384:448 (64)    :class:`int`            
-    :attr:`data`              448:2048 (1600) :class:`bytearray` (200)
-    ========================= =============== ========================
+    ========================= ============= ========================
+    Member                    Position      Type                    
+    ========================= ============= ========================
+    :attr:`baseVersion`       0:1 (8)       :class:`int`            
+    :attr:`mgmtClass`         1:2 (8)       :class:`int`            
+    :attr:`classVersion`      2:3 (8)       :class:`int`            
+    :attr:`method`            3:4 (8)       :class:`int`            
+    :attr:`status`            4:6 (16)      :class:`int`            
+    :attr:`classSpecific`     6:8 (16)      :class:`int`            
+    :attr:`transactionID`     8:16 (64)     :class:`int`            
+    :attr:`attributeID`       16:18 (16)    :class:`int`            
+    :attr:`reserved_144`      18:20 (16)    :class:`int`            
+    :attr:`attributeModifier` 20:24 (32)    :class:`int`            
+    :attr:`RMPPVersion`       24:25 (8)     :class:`int`            
+    :attr:`RMPPType`          25:26 (8)     :class:`int`            
+    :attr:`RRespTime`         26:26[5] (5)  :class:`int`            
+    :attr:`RMPPFlags`         26[5]:27 (3)  :class:`int`            
+    :attr:`RMPPStatus`        27:28 (8)     :class:`int`            
+    :attr:`data1`             28:32 (32)    :class:`int`            
+    :attr:`data2`             32:36 (32)    :class:`int`            
+    :attr:`SMKey`             36:44 (64)    :class:`int`            
+    :attr:`attributeOffset`   44:46 (16)    :class:`int`            
+    :attr:`reserved_368`      46:48 (16)    :class:`int`            
+    :attr:`componentMask`     48:56 (64)    :class:`int`            
+    :attr:`data`              56:256 (1600) :class:`bytearray` (200)
+    ========================= ============= ========================
 
 .. class:: rdma.IBA.SAGUIDInfoRecord
 
@@ -923,17 +923,17 @@ Subnet Administration (15)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x30
     .. attribute:: MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
-    .. attribute:: COMPONENT_MASK = {'LID':0, 'blockNum':1, 'reserved1':2, 'reserved2':3, 'GUIDInfo.GUIDBlock':4}
+    .. attribute:: COMPONENT_MASK = {'LID':0, 'blockNum':1, 'reserved_24':2, 'reserved_32':3, 'GUIDInfo.GUIDBlock':4}
 
-    ================= ============ ==============================
-    Member            Position     Type                          
-    ================= ============ ==============================
-    :attr:`LID`       0:16 (16)    :class:`int`                  
-    :attr:`blockNum`  16:24 (8)    :class:`int`                  
-    :attr:`reserved1` 24:32 (8)    :class:`int`                  
-    :attr:`reserved2` 32:64 (32)   :class:`int`                  
-    :attr:`GUIDInfo`  64:576 (512) :class:`~rdma.IBA.SMPGUIDInfo`
-    ================= ============ ==============================
+    =================== ========== ==============================
+    Member              Position   Type                          
+    =================== ========== ==============================
+    :attr:`LID`         0:2 (16)   :class:`int`                  
+    :attr:`blockNum`    2:3 (8)    :class:`int`                  
+    :attr:`reserved_24` 3:4 (8)    :class:`int`                  
+    :attr:`reserved_32` 4:8 (32)   :class:`int`                  
+    :attr:`GUIDInfo`    8:72 (512) :class:`~rdma.IBA.SMPGUIDInfo`
+    =================== ========== ==============================
 
 .. class:: rdma.IBA.SAHeader
 
@@ -948,27 +948,27 @@ Subnet Administration (15)
     ========================= ============ ============
     Member                    Position     Type        
     ========================= ============ ============
-    :attr:`baseVersion`       0:8 (8)      :class:`int`
-    :attr:`mgmtClass`         8:16 (8)     :class:`int`
-    :attr:`classVersion`      16:24 (8)    :class:`int`
-    :attr:`method`            24:32 (8)    :class:`int`
-    :attr:`status`            32:48 (16)   :class:`int`
-    :attr:`classSpecific`     48:64 (16)   :class:`int`
-    :attr:`transactionID`     64:128 (64)  :class:`int`
-    :attr:`attributeID`       128:144 (16) :class:`int`
-    :attr:`reserved1`         144:160 (16) :class:`int`
-    :attr:`attributeModifier` 160:192 (32) :class:`int`
-    :attr:`RMPPVersion`       192:200 (8)  :class:`int`
-    :attr:`RMPPType`          200:208 (8)  :class:`int`
-    :attr:`RRespTime`         208:213 (5)  :class:`int`
-    :attr:`RMPPFlags`         213:216 (3)  :class:`int`
-    :attr:`RMPPStatus`        216:224 (8)  :class:`int`
-    :attr:`data1`             224:256 (32) :class:`int`
-    :attr:`data2`             256:288 (32) :class:`int`
-    :attr:`SMKey`             288:352 (64) :class:`int`
-    :attr:`attributeOffset`   352:368 (16) :class:`int`
-    :attr:`reserved2`         368:384 (16) :class:`int`
-    :attr:`componentMask`     384:448 (64) :class:`int`
+    :attr:`baseVersion`       0:1 (8)      :class:`int`
+    :attr:`mgmtClass`         1:2 (8)      :class:`int`
+    :attr:`classVersion`      2:3 (8)      :class:`int`
+    :attr:`method`            3:4 (8)      :class:`int`
+    :attr:`status`            4:6 (16)     :class:`int`
+    :attr:`classSpecific`     6:8 (16)     :class:`int`
+    :attr:`transactionID`     8:16 (64)    :class:`int`
+    :attr:`attributeID`       16:18 (16)   :class:`int`
+    :attr:`reserved_144`      18:20 (16)   :class:`int`
+    :attr:`attributeModifier` 20:24 (32)   :class:`int`
+    :attr:`RMPPVersion`       24:25 (8)    :class:`int`
+    :attr:`RMPPType`          25:26 (8)    :class:`int`
+    :attr:`RRespTime`         26:26[5] (5) :class:`int`
+    :attr:`RMPPFlags`         26[5]:27 (3) :class:`int`
+    :attr:`RMPPStatus`        27:28 (8)    :class:`int`
+    :attr:`data1`             28:32 (32)   :class:`int`
+    :attr:`data2`             32:36 (32)   :class:`int`
+    :attr:`SMKey`             36:44 (64)   :class:`int`
+    :attr:`attributeOffset`   44:46 (16)   :class:`int`
+    :attr:`reserved_368`      46:48 (16)   :class:`int`
+    :attr:`componentMask`     48:56 (64)   :class:`int`
     ========================= ============ ============
 
 .. class:: rdma.IBA.SAInformInfoRecord
@@ -979,18 +979,18 @@ Subnet Administration (15)
     .. attribute:: MAD_ATTRIBUTE_ID = 0xf3
     .. attribute:: MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
-    .. attribute:: COMPONENT_MASK = {'subscriberGID':0, 'enumeration':1, 'reserved1':2, 'reserved2':3, 'informInfo.GID':4, 'informInfo.LIDRangeBegin':5, 'informInfo.LIDRangeEnd':6, 'informInfo.reserved1':7, 'informInfo.isGeneric':8, 'informInfo.subscribe':9, 'informInfo.type':10, 'informInfo.trapNumber':11, 'informInfo.QPN':12, 'informInfo.reserved2':13, 'informInfo.respTimeValue':14, 'informInfo.reserved3':15, 'informInfo.producerType':16, 'reserved3':17}
+    .. attribute:: COMPONENT_MASK = {'subscriberGID':0, 'enumeration':1, 'reserved_144':2, 'reserved_160':3, 'informInfo.GID':4, 'informInfo.LIDRangeBegin':5, 'informInfo.LIDRangeEnd':6, 'informInfo.reserved_160':7, 'informInfo.isGeneric':8, 'informInfo.subscribe':9, 'informInfo.type':10, 'informInfo.trapNumber':11, 'informInfo.QPN':12, 'informInfo.reserved_248':13, 'informInfo.respTimeValue':14, 'informInfo.reserved_256':15, 'informInfo.producerType':16, 'reserved_480':17}
 
-    ===================== ============= ================================
-    Member                Position      Type                            
-    ===================== ============= ================================
-    :attr:`subscriberGID` 0:128 (128)   :class:`~rdma.IBA.GID`          
-    :attr:`enumeration`   128:144 (16)  :class:`int`                    
-    :attr:`reserved1`     144:160 (16)  :class:`int`                    
-    :attr:`reserved2`     160:192 (32)  :class:`int`                    
-    :attr:`informInfo`    192:480 (288) :class:`~rdma.IBA.MADInformInfo`
-    :attr:`reserved3`     480:640 (160) :class:`bytearray` (20)         
-    ===================== ============= ================================
+    ===================== =========== ================================
+    Member                Position    Type                            
+    ===================== =========== ================================
+    :attr:`subscriberGID` 0:16 (128)  :class:`~rdma.IBA.GID`          
+    :attr:`enumeration`   16:18 (16)  :class:`int`                    
+    :attr:`reserved_144`  18:20 (16)  :class:`int`                    
+    :attr:`reserved_160`  20:24 (32)  :class:`int`                    
+    :attr:`informInfo`    24:60 (288) :class:`~rdma.IBA.MADInformInfo`
+    :attr:`reserved_480`  60:80 (160) :class:`bytearray` (20)         
+    ===================== =========== ================================
 
 .. class:: rdma.IBA.SALinearForwardingTableRecord
 
@@ -1000,16 +1000,16 @@ Subnet Administration (15)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x15
     .. attribute:: MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
-    .. attribute:: COMPONENT_MASK = {'LID':0, 'blockNum':1, 'reserved1':2, 'linearForwardingTable.portBlock':3}
+    .. attribute:: COMPONENT_MASK = {'LID':0, 'blockNum':1, 'reserved_32':2, 'linearForwardingTable.portBlock':3}
 
-    ============================= ============ ===========================================
-    Member                        Position     Type                                       
-    ============================= ============ ===========================================
-    :attr:`LID`                   0:16 (16)    :class:`int`                               
-    :attr:`blockNum`              16:32 (16)   :class:`int`                               
-    :attr:`reserved1`             32:64 (32)   :class:`int`                               
-    :attr:`linearForwardingTable` 64:576 (512) :class:`~rdma.IBA.SMPLinearForwardingTable`
-    ============================= ============ ===========================================
+    ============================= ========== ===========================================
+    Member                        Position   Type                                       
+    ============================= ========== ===========================================
+    :attr:`LID`                   0:2 (16)   :class:`int`                               
+    :attr:`blockNum`              2:4 (16)   :class:`int`                               
+    :attr:`reserved_32`           4:8 (32)   :class:`int`                               
+    :attr:`linearForwardingTable` 8:72 (512) :class:`~rdma.IBA.SMPLinearForwardingTable`
+    ============================= ========== ===========================================
 
 .. class:: rdma.IBA.SALinkRecord
 
@@ -1019,17 +1019,17 @@ Subnet Administration (15)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x20
     .. attribute:: MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
-    .. attribute:: COMPONENT_MASK = {'fromLID':0, 'fromPort':1, 'toPort':2, 'toLID':3, 'reserved1':4}
+    .. attribute:: COMPONENT_MASK = {'fromLID':0, 'fromPort':1, 'toPort':2, 'toLID':3, 'reserved_48':4}
 
-    ================= ========== ============
-    Member            Position   Type        
-    ================= ========== ============
-    :attr:`fromLID`   0:16 (16)  :class:`int`
-    :attr:`fromPort`  16:24 (8)  :class:`int`
-    :attr:`toPort`    24:32 (8)  :class:`int`
-    :attr:`toLID`     32:48 (16) :class:`int`
-    :attr:`reserved1` 48:64 (16) :class:`int`
-    ================= ========== ============
+    =================== ======== ============
+    Member              Position Type        
+    =================== ======== ============
+    :attr:`fromLID`     0:2 (16) :class:`int`
+    :attr:`fromPort`    2:3 (8)  :class:`int`
+    :attr:`toPort`      3:4 (8)  :class:`int`
+    :attr:`toLID`       4:6 (16) :class:`int`
+    :attr:`reserved_48` 6:8 (16) :class:`int`
+    =================== ======== ============
 
 .. class:: rdma.IBA.SAMCMemberRecord
 
@@ -1041,30 +1041,30 @@ Subnet Administration (15)
     .. attribute:: MAD_SUBNADMSET = 0x2 # MAD_METHOD_SET
     .. attribute:: MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
     .. attribute:: MAD_SUBNADMDELETE = 0x15 # MAD_METHOD_DELETE
-    .. attribute:: COMPONENT_MASK = {'MGID':0, 'portGID':1, 'QKey':2, 'MLID':3, 'MTUSelector':4, 'MTU':5, 'TClass':6, 'PKey':7, 'rateSelector':8, 'rate':9, 'packetLifeTimeSelector':10, 'packetLifeTime':11, 'SL':12, 'flowLabel':13, 'hopLimit':14, 'scope':15, 'joinState':16, 'proxyJoin':17, 'reserved1':18}
+    .. attribute:: COMPONENT_MASK = {'MGID':0, 'portGID':1, 'QKey':2, 'MLID':3, 'MTUSelector':4, 'MTU':5, 'TClass':6, 'PKey':7, 'rateSelector':8, 'rate':9, 'packetLifeTimeSelector':10, 'packetLifeTime':11, 'SL':12, 'flowLabel':13, 'hopLimit':14, 'scope':15, 'joinState':16, 'proxyJoin':17, 'reserved_393':18}
 
     ============================== ============= ======================
     Member                         Position      Type                  
     ============================== ============= ======================
-    :attr:`MGID`                   0:128 (128)   :class:`~rdma.IBA.GID`
-    :attr:`portGID`                128:256 (128) :class:`~rdma.IBA.GID`
-    :attr:`QKey`                   256:288 (32)  :class:`int`          
-    :attr:`MLID`                   288:304 (16)  :class:`int`          
-    :attr:`MTUSelector`            304:306 (2)   :class:`int`          
-    :attr:`MTU`                    306:312 (6)   :class:`int`          
-    :attr:`TClass`                 312:320 (8)   :class:`int`          
-    :attr:`PKey`                   320:336 (16)  :class:`int`          
-    :attr:`rateSelector`           336:338 (2)   :class:`int`          
-    :attr:`rate`                   338:344 (6)   :class:`int`          
-    :attr:`packetLifeTimeSelector` 344:346 (2)   :class:`int`          
-    :attr:`packetLifeTime`         346:352 (6)   :class:`int`          
-    :attr:`SL`                     352:356 (4)   :class:`int`          
-    :attr:`flowLabel`              356:376 (20)  :class:`int`          
-    :attr:`hopLimit`               376:384 (8)   :class:`int`          
-    :attr:`scope`                  384:388 (4)   :class:`int`          
-    :attr:`joinState`              388:392 (4)   :class:`int`          
-    :attr:`proxyJoin`              392:393 (1)   :class:`int`          
-    :attr:`reserved1`              393:416 (23)  :class:`int`          
+    :attr:`MGID`                   0:16 (128)    :class:`~rdma.IBA.GID`
+    :attr:`portGID`                16:32 (128)   :class:`~rdma.IBA.GID`
+    :attr:`QKey`                   32:36 (32)    :class:`int`          
+    :attr:`MLID`                   36:38 (16)    :class:`int`          
+    :attr:`MTUSelector`            38:38[2] (2)  :class:`int`          
+    :attr:`MTU`                    38[2]:39 (6)  :class:`int`          
+    :attr:`TClass`                 39:40 (8)     :class:`int`          
+    :attr:`PKey`                   40:42 (16)    :class:`int`          
+    :attr:`rateSelector`           42:42[2] (2)  :class:`int`          
+    :attr:`rate`                   42[2]:43 (6)  :class:`int`          
+    :attr:`packetLifeTimeSelector` 43:43[2] (2)  :class:`int`          
+    :attr:`packetLifeTime`         43[2]:44 (6)  :class:`int`          
+    :attr:`SL`                     44:44[4] (4)  :class:`int`          
+    :attr:`flowLabel`              44[4]:47 (20) :class:`int`          
+    :attr:`hopLimit`               47:48 (8)     :class:`int`          
+    :attr:`scope`                  48:48[4] (4)  :class:`int`          
+    :attr:`joinState`              48[4]:49 (4)  :class:`int`          
+    :attr:`proxyJoin`              49:49[1] (1)  :class:`int`          
+    :attr:`reserved_393`           49[1]:52 (23) :class:`int`          
     ============================== ============= ======================
 
 .. class:: rdma.IBA.SAMultiPathRecord
@@ -1074,35 +1074,35 @@ Subnet Administration (15)
     .. attribute:: MAD_LENGTH = 40
     .. attribute:: MAD_ATTRIBUTE_ID = 0x3a
     .. attribute:: MAD_SUBNADMGETMULTI = 0x14 # MAD_METHOD_GET_MULTI
-    .. attribute:: COMPONENT_MASK = {'rawTraffic':0, 'reserved1':1, 'flowLabel':2, 'hopLimit':3, 'TClass':4, 'reversible':5, 'numbPath':6, 'PKey':7, 'reserved2':8, 'SL':9, 'MTUSelector':10, 'MTU':11, 'rateSelector':12, 'rate':13, 'packetLifeTimeSelector':14, 'packetLifeTime':15, 'reserved3':16, 'independenceSelector':17, 'reserved4':18, 'SGIDCount':19, 'DGIDCount':20, 'reserved5':21, 'reserved6':22, 'SDGID':23}
+    .. attribute:: COMPONENT_MASK = {'rawTraffic':0, 'reserved_1':1, 'flowLabel':2, 'hopLimit':3, 'TClass':4, 'reversible':5, 'numbPath':6, 'PKey':7, 'reserved_64':8, 'SL':9, 'MTUSelector':10, 'MTU':11, 'rateSelector':12, 'rate':13, 'packetLifeTimeSelector':14, 'packetLifeTime':15, 'reserved_104':16, 'independenceSelector':17, 'reserved_114':18, 'SGIDCount':19, 'DGIDCount':20, 'reserved_136':21, 'reserved_160':22, 'SDGID':23}
 
     ============================== ============= ======================
     Member                         Position      Type                  
     ============================== ============= ======================
-    :attr:`rawTraffic`             0:1 (1)       :class:`int`          
-    :attr:`reserved1`              1:4 (3)       :class:`int`          
-    :attr:`flowLabel`              4:24 (20)     :class:`int`          
-    :attr:`hopLimit`               24:32 (8)     :class:`int`          
-    :attr:`TClass`                 32:40 (8)     :class:`int`          
-    :attr:`reversible`             40:41 (1)     :class:`int`          
-    :attr:`numbPath`               41:48 (7)     :class:`int`          
-    :attr:`PKey`                   48:64 (16)    :class:`int`          
-    :attr:`reserved2`              64:76 (12)    :class:`int`          
-    :attr:`SL`                     76:80 (4)     :class:`int`          
-    :attr:`MTUSelector`            80:82 (2)     :class:`int`          
-    :attr:`MTU`                    82:88 (6)     :class:`int`          
-    :attr:`rateSelector`           88:90 (2)     :class:`int`          
-    :attr:`rate`                   90:96 (6)     :class:`int`          
-    :attr:`packetLifeTimeSelector` 96:98 (2)     :class:`int`          
-    :attr:`packetLifeTime`         98:104 (6)    :class:`int`          
-    :attr:`reserved3`              104:112 (8)   :class:`int`          
-    :attr:`independenceSelector`   112:114 (2)   :class:`int`          
-    :attr:`reserved4`              114:120 (6)   :class:`int`          
-    :attr:`SGIDCount`              120:128 (8)   :class:`int`          
-    :attr:`DGIDCount`              128:136 (8)   :class:`int`          
-    :attr:`reserved5`              136:160 (24)  :class:`int`          
-    :attr:`reserved6`              160:192 (32)  :class:`int`          
-    :attr:`SDGID`                  192:320 (128) :class:`~rdma.IBA.GID`
+    :attr:`rawTraffic`             0:0[1] (1)    :class:`int`          
+    :attr:`reserved_1`             0[1]:0[4] (3) :class:`int`          
+    :attr:`flowLabel`              0[4]:3 (20)   :class:`int`          
+    :attr:`hopLimit`               3:4 (8)       :class:`int`          
+    :attr:`TClass`                 4:5 (8)       :class:`int`          
+    :attr:`reversible`             5:5[1] (1)    :class:`int`          
+    :attr:`numbPath`               5[1]:6 (7)    :class:`int`          
+    :attr:`PKey`                   6:8 (16)      :class:`int`          
+    :attr:`reserved_64`            8:9[4] (12)   :class:`int`          
+    :attr:`SL`                     9[4]:10 (4)   :class:`int`          
+    :attr:`MTUSelector`            10:10[2] (2)  :class:`int`          
+    :attr:`MTU`                    10[2]:11 (6)  :class:`int`          
+    :attr:`rateSelector`           11:11[2] (2)  :class:`int`          
+    :attr:`rate`                   11[2]:12 (6)  :class:`int`          
+    :attr:`packetLifeTimeSelector` 12:12[2] (2)  :class:`int`          
+    :attr:`packetLifeTime`         12[2]:13 (6)  :class:`int`          
+    :attr:`reserved_104`           13:14 (8)     :class:`int`          
+    :attr:`independenceSelector`   14:14[2] (2)  :class:`int`          
+    :attr:`reserved_114`           14[2]:15 (6)  :class:`int`          
+    :attr:`SGIDCount`              15:16 (8)     :class:`int`          
+    :attr:`DGIDCount`              16:17 (8)     :class:`int`          
+    :attr:`reserved_136`           17:20 (24)    :class:`int`          
+    :attr:`reserved_160`           20:24 (32)    :class:`int`          
+    :attr:`SDGID`                  24:40 (128)   :class:`~rdma.IBA.GID`
     ============================== ============= ======================
 
 .. class:: rdma.IBA.SAMulticastForwardingTableRecord
@@ -1113,18 +1113,18 @@ Subnet Administration (15)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x17
     .. attribute:: MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
-    .. attribute:: COMPONENT_MASK = {'LID':0, 'reserved1':1, 'position':2, 'blockNum':3, 'reserved2':4, 'multicastForwardingTable.portMaskBlock':5}
+    .. attribute:: COMPONENT_MASK = {'LID':0, 'reserved_16':1, 'position':2, 'blockNum':3, 'reserved_32':4, 'multicastForwardingTable.portMaskBlock':5}
 
-    ================================ ============ ==============================================
-    Member                           Position     Type                                          
-    ================================ ============ ==============================================
-    :attr:`LID`                      0:16 (16)    :class:`int`                                  
-    :attr:`reserved1`                16:18 (2)    :class:`int`                                  
-    :attr:`position`                 18:22 (4)    :class:`int`                                  
-    :attr:`blockNum`                 22:32 (10)   :class:`int`                                  
-    :attr:`reserved2`                32:64 (32)   :class:`int`                                  
-    :attr:`multicastForwardingTable` 64:576 (512) :class:`~rdma.IBA.SMPMulticastForwardingTable`
-    ================================ ============ ==============================================
+    ================================ ============= ==============================================
+    Member                           Position      Type                                          
+    ================================ ============= ==============================================
+    :attr:`LID`                      0:2 (16)      :class:`int`                                  
+    :attr:`reserved_16`              2:2[2] (2)    :class:`int`                                  
+    :attr:`position`                 2[2]:2[6] (4) :class:`int`                                  
+    :attr:`blockNum`                 2[6]:4 (10)   :class:`int`                                  
+    :attr:`reserved_32`              4:8 (32)      :class:`int`                                  
+    :attr:`multicastForwardingTable` 8:72 (512)    :class:`~rdma.IBA.SMPMulticastForwardingTable`
+    ================================ ============= ==============================================
 
 .. class:: rdma.IBA.SANodeRecord
 
@@ -1134,16 +1134,16 @@ Subnet Administration (15)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x11
     .. attribute:: MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
-    .. attribute:: COMPONENT_MASK = {'LID':0, 'reserved1':1, 'nodeInfo.baseVersion':2, 'nodeInfo.classVersion':3, 'nodeInfo.nodeType':4, 'nodeInfo.numPorts':5, 'nodeInfo.systemImageGUID':6, 'nodeInfo.nodeGUID':7, 'nodeInfo.portGUID':8, 'nodeInfo.partitionCap':9, 'nodeInfo.deviceID':10, 'nodeInfo.revision':11, 'nodeInfo.localPortNum':12, 'nodeInfo.vendorID':13, 'nodeDescription.nodeString':14}
+    .. attribute:: COMPONENT_MASK = {'LID':0, 'reserved_16':1, 'nodeInfo.baseVersion':2, 'nodeInfo.classVersion':3, 'nodeInfo.nodeType':4, 'nodeInfo.numPorts':5, 'nodeInfo.systemImageGUID':6, 'nodeInfo.nodeGUID':7, 'nodeInfo.portGUID':8, 'nodeInfo.partitionCap':9, 'nodeInfo.deviceID':10, 'nodeInfo.revision':11, 'nodeInfo.localPortNum':12, 'nodeInfo.vendorID':13, 'nodeDescription.nodeString':14}
 
-    ======================= ============= =====================================
-    Member                  Position      Type                                 
-    ======================= ============= =====================================
-    :attr:`LID`             0:16 (16)     :class:`int`                         
-    :attr:`reserved1`       16:32 (16)    :class:`int`                         
-    :attr:`nodeInfo`        32:352 (320)  :class:`~rdma.IBA.SMPNodeInfo`       
-    :attr:`nodeDescription` 352:864 (512) :class:`~rdma.IBA.SMPNodeDescription`
-    ======================= ============= =====================================
+    ======================= ============ =====================================
+    Member                  Position     Type                                 
+    ======================= ============ =====================================
+    :attr:`LID`             0:2 (16)     :class:`int`                         
+    :attr:`reserved_16`     2:4 (16)     :class:`int`                         
+    :attr:`nodeInfo`        4:44 (320)   :class:`~rdma.IBA.SMPNodeInfo`       
+    :attr:`nodeDescription` 44:108 (512) :class:`~rdma.IBA.SMPNodeDescription`
+    ======================= ============ =====================================
 
 .. class:: rdma.IBA.SAPKeyTableRecord
 
@@ -1153,17 +1153,17 @@ Subnet Administration (15)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x33
     .. attribute:: MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
-    .. attribute:: COMPONENT_MASK = {'LID':0, 'blockNum':1, 'portNum':2, 'reserved1':3, 'PKeyTable.PKeyBlock':4}
+    .. attribute:: COMPONENT_MASK = {'LID':0, 'blockNum':1, 'portNum':2, 'reserved_40':3, 'PKeyTable.PKeyBlock':4}
 
-    ================= ============ ===============================
-    Member            Position     Type                           
-    ================= ============ ===============================
-    :attr:`LID`       0:16 (16)    :class:`int`                   
-    :attr:`blockNum`  16:32 (16)   :class:`int`                   
-    :attr:`portNum`   32:40 (8)    :class:`int`                   
-    :attr:`reserved1` 40:64 (24)   :class:`int`                   
-    :attr:`PKeyTable` 64:576 (512) :class:`~rdma.IBA.SMPPKeyTable`
-    ================= ============ ===============================
+    =================== ========== ===============================
+    Member              Position   Type                           
+    =================== ========== ===============================
+    :attr:`LID`         0:2 (16)   :class:`int`                   
+    :attr:`blockNum`    2:4 (16)   :class:`int`                   
+    :attr:`portNum`     4:5 (8)    :class:`int`                   
+    :attr:`reserved_40` 5:8 (24)   :class:`int`                   
+    :attr:`PKeyTable`   8:72 (512) :class:`~rdma.IBA.SMPPKeyTable`
+    =================== ========== ===============================
 
 .. class:: rdma.IBA.SAPathRecord
 
@@ -1173,37 +1173,37 @@ Subnet Administration (15)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x35
     .. attribute:: MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
-    .. attribute:: COMPONENT_MASK = {'serviceID':0, 'serviceID56LSB':1, 'DGID':2, 'SGID':3, 'DLID':4, 'SLID':5, 'rawTraffic':6, 'reserved1':7, 'flowLabel':8, 'hopLimit':9, 'TClass':10, 'reversible':11, 'numbPath':12, 'PKey':13, 'QOSClass':14, 'SL':15, 'MTUSelector':16, 'MTU':17, 'rateSelector':18, 'rate':19, 'packetLifeTimeSelector':20, 'packetLifeTime':21, 'preference':22, 'reserved2':23, 'reserved3':24}
+    .. attribute:: COMPONENT_MASK = {'serviceID':0, 'serviceID56LSB':1, 'DGID':2, 'SGID':3, 'DLID':4, 'SLID':5, 'rawTraffic':6, 'reserved_353':7, 'flowLabel':8, 'hopLimit':9, 'TClass':10, 'reversible':11, 'numbPath':12, 'PKey':13, 'QOSClass':14, 'SL':15, 'MTUSelector':16, 'MTU':17, 'rateSelector':18, 'rate':19, 'packetLifeTimeSelector':20, 'packetLifeTime':21, 'preference':22, 'reserved_464':23, 'reserved_480':24}
 
-    ============================== ============= ======================
-    Member                         Position      Type                  
-    ============================== ============= ======================
-    :attr:`serviceID`              0:64 (64)     :class:`int`          
-    :attr:`serviceID56LSB`         32:32 (0)     :class:`int`          
-    :attr:`DGID`                   64:192 (128)  :class:`~rdma.IBA.GID`
-    :attr:`SGID`                   192:320 (128) :class:`~rdma.IBA.GID`
-    :attr:`DLID`                   320:336 (16)  :class:`int`          
-    :attr:`SLID`                   336:352 (16)  :class:`int`          
-    :attr:`rawTraffic`             352:353 (1)   :class:`int`          
-    :attr:`reserved1`              353:356 (3)   :class:`int`          
-    :attr:`flowLabel`              356:376 (20)  :class:`int`          
-    :attr:`hopLimit`               376:384 (8)   :class:`int`          
-    :attr:`TClass`                 384:392 (8)   :class:`int`          
-    :attr:`reversible`             392:393 (1)   :class:`int`          
-    :attr:`numbPath`               393:400 (7)   :class:`int`          
-    :attr:`PKey`                   400:416 (16)  :class:`int`          
-    :attr:`QOSClass`               416:428 (12)  :class:`int`          
-    :attr:`SL`                     428:432 (4)   :class:`int`          
-    :attr:`MTUSelector`            432:434 (2)   :class:`int`          
-    :attr:`MTU`                    434:440 (6)   :class:`int`          
-    :attr:`rateSelector`           440:442 (2)   :class:`int`          
-    :attr:`rate`                   442:448 (6)   :class:`int`          
-    :attr:`packetLifeTimeSelector` 448:450 (2)   :class:`int`          
-    :attr:`packetLifeTime`         450:456 (6)   :class:`int`          
-    :attr:`preference`             456:464 (8)   :class:`int`          
-    :attr:`reserved2`              464:480 (16)  :class:`int`          
-    :attr:`reserved3`              480:512 (32)  :class:`int`          
-    ============================== ============= ======================
+    ============================== =============== ======================
+    Member                         Position        Type                  
+    ============================== =============== ======================
+    :attr:`serviceID`              0:8 (64)        :class:`int`          
+    :attr:`serviceID56LSB`         4:4 (0)         :class:`int`          
+    :attr:`DGID`                   8:24 (128)      :class:`~rdma.IBA.GID`
+    :attr:`SGID`                   24:40 (128)     :class:`~rdma.IBA.GID`
+    :attr:`DLID`                   40:42 (16)      :class:`int`          
+    :attr:`SLID`                   42:44 (16)      :class:`int`          
+    :attr:`rawTraffic`             44:44[1] (1)    :class:`int`          
+    :attr:`reserved_353`           44[1]:44[4] (3) :class:`int`          
+    :attr:`flowLabel`              44[4]:47 (20)   :class:`int`          
+    :attr:`hopLimit`               47:48 (8)       :class:`int`          
+    :attr:`TClass`                 48:49 (8)       :class:`int`          
+    :attr:`reversible`             49:49[1] (1)    :class:`int`          
+    :attr:`numbPath`               49[1]:50 (7)    :class:`int`          
+    :attr:`PKey`                   50:52 (16)      :class:`int`          
+    :attr:`QOSClass`               52:53[4] (12)   :class:`int`          
+    :attr:`SL`                     53[4]:54 (4)    :class:`int`          
+    :attr:`MTUSelector`            54:54[2] (2)    :class:`int`          
+    :attr:`MTU`                    54[2]:55 (6)    :class:`int`          
+    :attr:`rateSelector`           55:55[2] (2)    :class:`int`          
+    :attr:`rate`                   55[2]:56 (6)    :class:`int`          
+    :attr:`packetLifeTimeSelector` 56:56[2] (2)    :class:`int`          
+    :attr:`packetLifeTime`         56[2]:57 (6)    :class:`int`          
+    :attr:`preference`             57:58 (8)       :class:`int`          
+    :attr:`reserved_464`           58:60 (16)      :class:`int`          
+    :attr:`reserved_480`           60:64 (32)      :class:`int`          
+    ============================== =============== ======================
 
 .. class:: rdma.IBA.SAPortInfoRecord
 
@@ -1213,16 +1213,16 @@ Subnet Administration (15)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x12
     .. attribute:: MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
-    .. attribute:: COMPONENT_MASK = {'endportLID':0, 'portNum':1, 'reserved1':2, 'portInfo.MKey':3, 'portInfo.GIDPrefix':4, 'portInfo.LID':5, 'portInfo.masterSMLID':6, 'portInfo.capabilityMask':7, 'portInfo.diagCode':8, 'portInfo.MKeyLeasePeriod':9, 'portInfo.localPortNum':10, 'portInfo.linkWidthEnabled':11, 'portInfo.linkWidthSupported':12, 'portInfo.linkWidthActive':13, 'portInfo.linkSpeedSupported':14, 'portInfo.portState':15, 'portInfo.portPhysicalState':16, 'portInfo.linkDownDefaultState':17, 'portInfo.MKeyProtectBits':18, 'portInfo.reserved1':19, 'portInfo.LMC':20, 'portInfo.linkSpeedActive':21, 'portInfo.linkSpeedEnabled':22, 'portInfo.neighborMTU':23, 'portInfo.masterSMSL':24, 'portInfo.VLCap':25, 'portInfo.initType':26, 'portInfo.VLHighLimit':27, 'portInfo.VLArbitrationHighCap':28, 'portInfo.VLArbitrationLowCap':29, 'portInfo.initTypeReply':30, 'portInfo.MTUCap':31, 'portInfo.VLStallCount':32, 'portInfo.HOQLife':33, 'portInfo.operationalVLs':34, 'portInfo.partitionEnforcementInbound':35, 'portInfo.partitionEnforcementOutbound':36, 'portInfo.filterRawInbound':37, 'portInfo.filterRawOutbound':38, 'portInfo.MKeyViolations':39, 'portInfo.PKeyViolations':40, 'portInfo.QKeyViolations':41, 'portInfo.GUIDCap':42, 'portInfo.clientReregister':43, 'portInfo.reserved2':44, 'portInfo.subnetTimeOut':45, 'portInfo.reserved3':46, 'portInfo.respTimeValue':47, 'portInfo.localPhyErrors':48, 'portInfo.overrunErrors':49, 'portInfo.reserved4':50}
+    .. attribute:: COMPONENT_MASK = {'endportLID':0, 'portNum':1, 'reserved_24':2, 'portInfo.MKey':3, 'portInfo.GIDPrefix':4, 'portInfo.LID':5, 'portInfo.masterSMLID':6, 'portInfo.capabilityMask':7, 'portInfo.diagCode':8, 'portInfo.MKeyLeasePeriod':9, 'portInfo.localPortNum':10, 'portInfo.linkWidthEnabled':11, 'portInfo.linkWidthSupported':12, 'portInfo.linkWidthActive':13, 'portInfo.linkSpeedSupported':14, 'portInfo.portState':15, 'portInfo.portPhysicalState':16, 'portInfo.linkDownDefaultState':17, 'portInfo.MKeyProtectBits':18, 'portInfo.reserved_274':19, 'portInfo.LMC':20, 'portInfo.linkSpeedActive':21, 'portInfo.linkSpeedEnabled':22, 'portInfo.neighborMTU':23, 'portInfo.masterSMSL':24, 'portInfo.VLCap':25, 'portInfo.initType':26, 'portInfo.VLHighLimit':27, 'portInfo.VLArbitrationHighCap':28, 'portInfo.VLArbitrationLowCap':29, 'portInfo.initTypeReply':30, 'portInfo.MTUCap':31, 'portInfo.VLStallCount':32, 'portInfo.HOQLife':33, 'portInfo.operationalVLs':34, 'portInfo.partitionEnforcementInbound':35, 'portInfo.partitionEnforcementOutbound':36, 'portInfo.filterRawInbound':37, 'portInfo.filterRawOutbound':38, 'portInfo.MKeyViolations':39, 'portInfo.PKeyViolations':40, 'portInfo.QKeyViolations':41, 'portInfo.GUIDCap':42, 'portInfo.clientReregister':43, 'portInfo.reserved_409':44, 'portInfo.subnetTimeOut':45, 'portInfo.reserved_416':46, 'portInfo.respTimeValue':47, 'portInfo.localPhyErrors':48, 'portInfo.overrunErrors':49, 'portInfo.reserved_432':50}
 
-    ================== ============ ==============================
-    Member             Position     Type                          
-    ================== ============ ==============================
-    :attr:`endportLID` 0:16 (16)    :class:`int`                  
-    :attr:`portNum`    16:24 (8)    :class:`int`                  
-    :attr:`reserved1`  24:32 (8)    :class:`int`                  
-    :attr:`portInfo`   32:480 (448) :class:`~rdma.IBA.SMPPortInfo`
-    ================== ============ ==============================
+    =================== ========== ==============================
+    Member              Position   Type                          
+    =================== ========== ==============================
+    :attr:`endportLID`  0:2 (16)   :class:`int`                  
+    :attr:`portNum`     2:3 (8)    :class:`int`                  
+    :attr:`reserved_24` 3:4 (8)    :class:`int`                  
+    :attr:`portInfo`    4:60 (448) :class:`~rdma.IBA.SMPPortInfo`
+    =================== ========== ==============================
 
 .. class:: rdma.IBA.SARandomForwardingTableRecord
 
@@ -1232,16 +1232,16 @@ Subnet Administration (15)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x16
     .. attribute:: MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
-    .. attribute:: COMPONENT_MASK = {'LID':0, 'blockNum':1, 'reserved1':2, 'randomForwardingTable.LIDPortBlock':3}
+    .. attribute:: COMPONENT_MASK = {'LID':0, 'blockNum':1, 'reserved_32':2, 'randomForwardingTable.LIDPortBlock':3}
 
-    ============================= ============ ===========================================
-    Member                        Position     Type                                       
-    ============================= ============ ===========================================
-    :attr:`LID`                   0:16 (16)    :class:`int`                               
-    :attr:`blockNum`              16:32 (16)   :class:`int`                               
-    :attr:`reserved1`             32:64 (32)   :class:`int`                               
-    :attr:`randomForwardingTable` 64:576 (512) :class:`~rdma.IBA.SMPRandomForwardingTable`
-    ============================= ============ ===========================================
+    ============================= ========== ===========================================
+    Member                        Position   Type                                       
+    ============================= ========== ===========================================
+    :attr:`LID`                   0:2 (16)   :class:`int`                               
+    :attr:`blockNum`              2:4 (16)   :class:`int`                               
+    :attr:`reserved_32`           4:8 (32)   :class:`int`                               
+    :attr:`randomForwardingTable` 8:72 (512) :class:`~rdma.IBA.SMPRandomForwardingTable`
+    ============================= ========== ===========================================
 
 .. class:: rdma.IBA.SASLToVLMappingTableRecord
 
@@ -1251,17 +1251,17 @@ Subnet Administration (15)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x13
     .. attribute:: MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
-    .. attribute:: COMPONENT_MASK = {'LID':0, 'inputPortNum':1, 'outputPortNum':2, 'reserved1':3, 'SLToVLMappingTable.SLtoVL':4}
+    .. attribute:: COMPONENT_MASK = {'LID':0, 'inputPortNum':1, 'outputPortNum':2, 'reserved_32':3, 'SLToVLMappingTable.SLtoVL':4}
 
-    ========================== =========== ========================================
-    Member                     Position    Type                                    
-    ========================== =========== ========================================
-    :attr:`LID`                0:16 (16)   :class:`int`                            
-    :attr:`inputPortNum`       16:24 (8)   :class:`int`                            
-    :attr:`outputPortNum`      24:32 (8)   :class:`int`                            
-    :attr:`reserved1`          32:64 (32)  :class:`int`                            
-    :attr:`SLToVLMappingTable` 64:128 (64) :class:`~rdma.IBA.SMPSLToVLMappingTable`
-    ========================== =========== ========================================
+    ========================== ========= ========================================
+    Member                     Position  Type                                    
+    ========================== ========= ========================================
+    :attr:`LID`                0:2 (16)  :class:`int`                            
+    :attr:`inputPortNum`       2:3 (8)   :class:`int`                            
+    :attr:`outputPortNum`      3:4 (8)   :class:`int`                            
+    :attr:`reserved_32`        4:8 (32)  :class:`int`                            
+    :attr:`SLToVLMappingTable` 8:16 (64) :class:`~rdma.IBA.SMPSLToVLMappingTable`
+    ========================== ========= ========================================
 
 .. class:: rdma.IBA.SASMInfoRecord
 
@@ -1271,15 +1271,15 @@ Subnet Administration (15)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x18
     .. attribute:: MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
-    .. attribute:: COMPONENT_MASK = {'LID':0, 'reserved1':1, 'SMInfo.GUID':2, 'SMInfo.SMKey':3, 'SMInfo.actCount':4, 'SMInfo.priority':5, 'SMInfo.SMState':6, 'SMInfo.reserved1':7}
+    .. attribute:: COMPONENT_MASK = {'LID':0, 'reserved_16':1, 'SMInfo.GUID':2, 'SMInfo.SMKey':3, 'SMInfo.actCount':4, 'SMInfo.priority':5, 'SMInfo.SMState':6, 'SMInfo.reserved_168':7}
 
-    ================= ============ ============================
-    Member            Position     Type                        
-    ================= ============ ============================
-    :attr:`LID`       0:16 (16)    :class:`int`                
-    :attr:`reserved1` 16:32 (16)   :class:`int`                
-    :attr:`SMInfo`    32:224 (192) :class:`~rdma.IBA.SMPSMInfo`
-    ================= ============ ============================
+    =================== ========== ============================
+    Member              Position   Type                        
+    =================== ========== ============================
+    :attr:`LID`         0:2 (16)   :class:`int`                
+    :attr:`reserved_16` 2:4 (16)   :class:`int`                
+    :attr:`SMInfo`      4:28 (192) :class:`~rdma.IBA.SMPSMInfo`
+    =================== ========== ============================
 
 .. class:: rdma.IBA.SAServiceAssociationRecord
 
@@ -1291,12 +1291,12 @@ Subnet Administration (15)
     .. attribute:: MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
     .. attribute:: COMPONENT_MASK = {'serviceKey':0, 'serviceName':1}
 
-    =================== =========== ============================
-    Member              Position    Type                        
-    =================== =========== ============================
-    :attr:`serviceKey`  0:128 (128) :class:`~rdma.IBA.GID`      
-    :attr:`serviceName` 128:640 (8) [:class:`bytearray` (64)]*64
-    =================== =========== ============================
+    =================== ========== ============================
+    Member              Position   Type                        
+    =================== ========== ============================
+    :attr:`serviceKey`  0:16 (128) :class:`~rdma.IBA.GID`      
+    :attr:`serviceName` 16:80 (8)  [:class:`bytearray` (64)]*64
+    =================== ========== ============================
 
 .. class:: rdma.IBA.SAServiceRecord
 
@@ -1308,23 +1308,23 @@ Subnet Administration (15)
     .. attribute:: MAD_SUBNADMSET = 0x2 # MAD_METHOD_SET
     .. attribute:: MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
     .. attribute:: MAD_SUBNADMDELETE = 0x15 # MAD_METHOD_DELETE
-    .. attribute:: COMPONENT_MASK = {'serviceID':0, 'serviceGID':1, 'servicePKey':2, 'reserved1':3, 'serviceLease':4, 'serviceKey':5, 'serviceName':6, 'serviceData8':7, 'serviceData16':8, 'serviceData32':9, 'serviceData64':10}
+    .. attribute:: COMPONENT_MASK = {'serviceID':0, 'serviceGID':1, 'servicePKey':2, 'reserved_208':3, 'serviceLease':4, 'serviceKey':5, 'serviceName':6, 'serviceData8':7, 'serviceData16':8, 'serviceData32':9, 'serviceData64':10}
 
-    ===================== ============== ============================
-    Member                Position       Type                        
-    ===================== ============== ============================
-    :attr:`serviceID`     0:64 (64)      :class:`int`                
-    :attr:`serviceGID`    64:192 (128)   :class:`~rdma.IBA.GID`      
-    :attr:`servicePKey`   192:208 (16)   :class:`int`                
-    :attr:`reserved1`     208:224 (16)   :class:`int`                
-    :attr:`serviceLease`  224:256 (32)   :class:`int`                
-    :attr:`serviceKey`    256:384 (128)  :class:`~rdma.IBA.GID`      
-    :attr:`serviceName`   384:896 (8)    [:class:`bytearray` (64)]*64
-    :attr:`serviceData8`  896:1024 (8)   [:class:`bytearray` (16)]*16
-    :attr:`serviceData16` 1024:1152 (16) [:class:`int`]*8            
-    :attr:`serviceData32` 1152:1280 (32) [:class:`int`]*4            
-    :attr:`serviceData64` 1280:1408 (64) [:class:`int`]*2            
-    ===================== ============== ============================
+    ===================== ============ ============================
+    Member                Position     Type                        
+    ===================== ============ ============================
+    :attr:`serviceID`     0:8 (64)     :class:`int`                
+    :attr:`serviceGID`    8:24 (128)   :class:`~rdma.IBA.GID`      
+    :attr:`servicePKey`   24:26 (16)   :class:`int`                
+    :attr:`reserved_208`  26:28 (16)   :class:`int`                
+    :attr:`serviceLease`  28:32 (32)   :class:`int`                
+    :attr:`serviceKey`    32:48 (128)  :class:`~rdma.IBA.GID`      
+    :attr:`serviceName`   48:112 (8)   [:class:`bytearray` (64)]*64
+    :attr:`serviceData8`  112:128 (8)  [:class:`bytearray` (16)]*16
+    :attr:`serviceData16` 128:144 (16) [:class:`int`]*8            
+    :attr:`serviceData32` 144:160 (32) [:class:`int`]*4            
+    :attr:`serviceData64` 160:176 (64) [:class:`int`]*2            
+    ===================== ============ ============================
 
 .. class:: rdma.IBA.SASwitchInfoRecord
 
@@ -1334,15 +1334,15 @@ Subnet Administration (15)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x14
     .. attribute:: MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
-    .. attribute:: COMPONENT_MASK = {'LID':0, 'reserved1':1, 'switchInfo.linearFDBCap':2, 'switchInfo.randomFDBCap':3, 'switchInfo.multicastFDBCap':4, 'switchInfo.linearFDBTop':5, 'switchInfo.defaultPort':6, 'switchInfo.defaultMulticastPrimaryPort':7, 'switchInfo.defaultMulticastNotPrimaryPort':8, 'switchInfo.lifeTimeValue':9, 'switchInfo.portStateChange':10, 'switchInfo.reserved1':11, 'switchInfo.optimizedSLtoVLMappingProgramming':12, 'switchInfo.LIDsPerPort':13, 'switchInfo.partitionEnforcementCap':14, 'switchInfo.inboundEnforcementCap':15, 'switchInfo.outboundEnforcementCap':16, 'switchInfo.filterRawInboundCap':17, 'switchInfo.filterRawOutboundCap':18, 'switchInfo.enhancedPort0':19, 'switchInfo.reserved2':20, 'switchInfo.reserved3':21}
+    .. attribute:: COMPONENT_MASK = {'LID':0, 'reserved_16':1, 'switchInfo.linearFDBCap':2, 'switchInfo.randomFDBCap':3, 'switchInfo.multicastFDBCap':4, 'switchInfo.linearFDBTop':5, 'switchInfo.defaultPort':6, 'switchInfo.defaultMulticastPrimaryPort':7, 'switchInfo.defaultMulticastNotPrimaryPort':8, 'switchInfo.lifeTimeValue':9, 'switchInfo.portStateChange':10, 'switchInfo.reserved_94':11, 'switchInfo.optimizedSLtoVLMappingProgramming':12, 'switchInfo.LIDsPerPort':13, 'switchInfo.partitionEnforcementCap':14, 'switchInfo.inboundEnforcementCap':15, 'switchInfo.outboundEnforcementCap':16, 'switchInfo.filterRawInboundCap':17, 'switchInfo.filterRawOutboundCap':18, 'switchInfo.enhancedPort0':19, 'switchInfo.reserved_133':20, 'switchInfo.reserved_136':21}
 
-    ================== ============ ================================
-    Member             Position     Type                            
-    ================== ============ ================================
-    :attr:`LID`        0:16 (16)    :class:`int`                    
-    :attr:`reserved1`  16:32 (16)   :class:`int`                    
-    :attr:`switchInfo` 32:192 (160) :class:`~rdma.IBA.SMPSwitchInfo`
-    ================== ============ ================================
+    =================== ========== ================================
+    Member              Position   Type                            
+    =================== ========== ================================
+    :attr:`LID`         0:2 (16)   :class:`int`                    
+    :attr:`reserved_16` 2:4 (16)   :class:`int`                    
+    :attr:`switchInfo`  4:24 (160) :class:`~rdma.IBA.SMPSwitchInfo`
+    =================== ========== ================================
 
 .. class:: rdma.IBA.SATraceRecord
 
@@ -1351,23 +1351,23 @@ Subnet Administration (15)
     .. attribute:: MAD_LENGTH = 48
     .. attribute:: MAD_ATTRIBUTE_ID = 0x39
     .. attribute:: MAD_SUBNADMGETTRACETABLE = 0x13 # MAD_METHOD_GET_TRACE_TABLE
-    .. attribute:: COMPONENT_MASK = {'GIDPrefix':0, 'IDGeneration':1, 'reserved1':2, 'nodeType':3, 'nodeID':4, 'chassisID':5, 'entryPortID':6, 'exitPortID':7, 'entryPort':8, 'exitPort':9, 'reserved2':10}
+    .. attribute:: COMPONENT_MASK = {'GIDPrefix':0, 'IDGeneration':1, 'reserved_80':2, 'nodeType':3, 'nodeID':4, 'chassisID':5, 'entryPortID':6, 'exitPortID':7, 'entryPort':8, 'exitPort':9, 'reserved_368':10}
 
-    ==================== ============ ============
-    Member               Position     Type        
-    ==================== ============ ============
-    :attr:`GIDPrefix`    0:64 (64)    :class:`int`
-    :attr:`IDGeneration` 64:80 (16)   :class:`int`
-    :attr:`reserved1`    80:88 (8)    :class:`int`
-    :attr:`nodeType`     88:96 (8)    :class:`int`
-    :attr:`nodeID`       96:160 (64)  :class:`int`
-    :attr:`chassisID`    160:224 (64) :class:`int`
-    :attr:`entryPortID`  224:288 (64) :class:`int`
-    :attr:`exitPortID`   288:352 (64) :class:`int`
-    :attr:`entryPort`    352:360 (8)  :class:`int`
-    :attr:`exitPort`     360:368 (8)  :class:`int`
-    :attr:`reserved2`    368:384 (16) :class:`int`
-    ==================== ============ ============
+    ==================== ========== ============
+    Member               Position   Type        
+    ==================== ========== ============
+    :attr:`GIDPrefix`    0:8 (64)   :class:`int`
+    :attr:`IDGeneration` 8:10 (16)  :class:`int`
+    :attr:`reserved_80`  10:11 (8)  :class:`int`
+    :attr:`nodeType`     11:12 (8)  :class:`int`
+    :attr:`nodeID`       12:20 (64) :class:`int`
+    :attr:`chassisID`    20:28 (64) :class:`int`
+    :attr:`entryPortID`  28:36 (64) :class:`int`
+    :attr:`exitPortID`   36:44 (64) :class:`int`
+    :attr:`entryPort`    44:45 (8)  :class:`int`
+    :attr:`exitPort`     45:46 (8)  :class:`int`
+    :attr:`reserved_368` 46:48 (16) :class:`int`
+    ==================== ========== ============
 
 .. class:: rdma.IBA.SAVLArbitrationTableRecord
 
@@ -1377,17 +1377,17 @@ Subnet Administration (15)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x36
     .. attribute:: MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
-    .. attribute:: COMPONENT_MASK = {'LID':0, 'outputPortNum':1, 'blockNum':2, 'reserved1':3, 'VLArbitrationTable.VLWeightBlock':4}
+    .. attribute:: COMPONENT_MASK = {'LID':0, 'outputPortNum':1, 'blockNum':2, 'reserved_32':3, 'VLArbitrationTable.VLWeightBlock':4}
 
-    ========================== ============ ========================================
-    Member                     Position     Type                                    
-    ========================== ============ ========================================
-    :attr:`LID`                0:16 (16)    :class:`int`                            
-    :attr:`outputPortNum`      16:24 (8)    :class:`int`                            
-    :attr:`blockNum`           24:32 (8)    :class:`int`                            
-    :attr:`reserved1`          32:64 (32)   :class:`int`                            
-    :attr:`VLArbitrationTable` 64:576 (512) :class:`~rdma.IBA.SMPVLArbitrationTable`
-    ========================== ============ ========================================
+    ========================== ========== ========================================
+    Member                     Position   Type                                    
+    ========================== ========== ========================================
+    :attr:`LID`                0:2 (16)   :class:`int`                            
+    :attr:`outputPortNum`      2:3 (8)    :class:`int`                            
+    :attr:`blockNum`           3:4 (8)    :class:`int`                            
+    :attr:`reserved_32`        4:8 (32)   :class:`int`                            
+    :attr:`VLArbitrationTable` 8:72 (512) :class:`~rdma.IBA.SMPVLArbitrationTable`
+    ========================== ========== ========================================
 
 Performance Management (16.1)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1402,22 +1402,22 @@ Performance Management (16.1)
     .. attribute:: MAD_CLASS = 0x4
     .. attribute:: MAD_CLASS_VERSION = 0x1
 
-    ========================= =============== ========================
-    Member                    Position        Type                    
-    ========================= =============== ========================
-    :attr:`baseVersion`       0:8 (8)         :class:`int`            
-    :attr:`mgmtClass`         8:16 (8)        :class:`int`            
-    :attr:`classVersion`      16:24 (8)       :class:`int`            
-    :attr:`method`            24:32 (8)       :class:`int`            
-    :attr:`status`            32:48 (16)      :class:`int`            
-    :attr:`classSpecific`     48:64 (16)      :class:`int`            
-    :attr:`transactionID`     64:128 (64)     :class:`int`            
-    :attr:`attributeID`       128:144 (16)    :class:`int`            
-    :attr:`reserved1`         144:160 (16)    :class:`int`            
-    :attr:`attributeModifier` 160:192 (32)    :class:`int`            
-    :attr:`reserved2`         192:512 (320)   :class:`bytearray` (40) 
-    :attr:`data`              512:2048 (1536) :class:`bytearray` (192)
-    ========================= =============== ========================
+    ========================= ============= ========================
+    Member                    Position      Type                    
+    ========================= ============= ========================
+    :attr:`baseVersion`       0:1 (8)       :class:`int`            
+    :attr:`mgmtClass`         1:2 (8)       :class:`int`            
+    :attr:`classVersion`      2:3 (8)       :class:`int`            
+    :attr:`method`            3:4 (8)       :class:`int`            
+    :attr:`status`            4:6 (16)      :class:`int`            
+    :attr:`classSpecific`     6:8 (16)      :class:`int`            
+    :attr:`transactionID`     8:16 (64)     :class:`int`            
+    :attr:`attributeID`       16:18 (16)    :class:`int`            
+    :attr:`reserved_144`      18:20 (16)    :class:`int`            
+    :attr:`attributeModifier` 20:24 (32)    :class:`int`            
+    :attr:`reserved_192`      24:64 (320)   :class:`bytearray` (40) 
+    :attr:`data`              64:256 (1536) :class:`bytearray` (192)
+    ========================= ============= ========================
 
 .. class:: rdma.IBA.PMPortCounters
 
@@ -1431,28 +1431,28 @@ Performance Management (16.1)
     ==================================== ============ ============
     Member                               Position     Type        
     ==================================== ============ ============
-    :attr:`reserved1`                    0:8 (8)      :class:`int`
-    :attr:`portSelect`                   8:16 (8)     :class:`int`
-    :attr:`counterSelect`                16:32 (16)   :class:`int`
-    :attr:`symbolErrorCounter`           32:48 (16)   :class:`int`
-    :attr:`linkErrorRecoveryCounter`     48:56 (8)    :class:`int`
-    :attr:`linkDownedCounter`            56:64 (8)    :class:`int`
-    :attr:`portRcvErrors`                64:80 (16)   :class:`int`
-    :attr:`portRcvRemotePhysicalErrors`  80:96 (16)   :class:`int`
-    :attr:`portRcvSwitchRelayErrors`     96:112 (16)  :class:`int`
-    :attr:`portXmitDiscards`             112:128 (16) :class:`int`
-    :attr:`portXmitConstraintErrors`     128:136 (8)  :class:`int`
-    :attr:`portRcvConstraintErrors`      136:144 (8)  :class:`int`
-    :attr:`counterSelect2`               144:152 (8)  :class:`int`
-    :attr:`localLinkIntegrityErrors`     152:156 (4)  :class:`int`
-    :attr:`excessiveBufferOverrunErrors` 156:160 (4)  :class:`int`
-    :attr:`reserved2`                    160:176 (16) :class:`int`
-    :attr:`VL15Dropped`                  176:192 (16) :class:`int`
-    :attr:`portXmitData`                 192:224 (32) :class:`int`
-    :attr:`portRcvData`                  224:256 (32) :class:`int`
-    :attr:`portXmitPkts`                 256:288 (32) :class:`int`
-    :attr:`portRcvPkts`                  288:320 (32) :class:`int`
-    :attr:`portXmitWait`                 320:352 (32) :class:`int`
+    :attr:`reserved_0`                   0:1 (8)      :class:`int`
+    :attr:`portSelect`                   1:2 (8)      :class:`int`
+    :attr:`counterSelect`                2:4 (16)     :class:`int`
+    :attr:`symbolErrorCounter`           4:6 (16)     :class:`int`
+    :attr:`linkErrorRecoveryCounter`     6:7 (8)      :class:`int`
+    :attr:`linkDownedCounter`            7:8 (8)      :class:`int`
+    :attr:`portRcvErrors`                8:10 (16)    :class:`int`
+    :attr:`portRcvRemotePhysicalErrors`  10:12 (16)   :class:`int`
+    :attr:`portRcvSwitchRelayErrors`     12:14 (16)   :class:`int`
+    :attr:`portXmitDiscards`             14:16 (16)   :class:`int`
+    :attr:`portXmitConstraintErrors`     16:17 (8)    :class:`int`
+    :attr:`portRcvConstraintErrors`      17:18 (8)    :class:`int`
+    :attr:`counterSelect2`               18:19 (8)    :class:`int`
+    :attr:`localLinkIntegrityErrors`     19:19[4] (4) :class:`int`
+    :attr:`excessiveBufferOverrunErrors` 19[4]:20 (4) :class:`int`
+    :attr:`reserved_160`                 20:22 (16)   :class:`int`
+    :attr:`VL15Dropped`                  22:24 (16)   :class:`int`
+    :attr:`portXmitData`                 24:28 (32)   :class:`int`
+    :attr:`portRcvData`                  28:32 (32)   :class:`int`
+    :attr:`portXmitPkts`                 32:36 (32)   :class:`int`
+    :attr:`portRcvPkts`                  36:40 (32)   :class:`int`
+    :attr:`portXmitWait`                 40:44 (32)   :class:`int`
     ==================================== ============ ============
 
 .. class:: rdma.IBA.PMPortCountersExt
@@ -1464,22 +1464,22 @@ Performance Management (16.1)
     .. attribute:: MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_PERFORMANCESET = 0x2 # MAD_METHOD_SET
 
-    ============================= ============ ============
-    Member                        Position     Type        
-    ============================= ============ ============
-    :attr:`reserved1`             0:8 (8)      :class:`int`
-    :attr:`portSelect`            8:16 (8)     :class:`int`
-    :attr:`counterSelect`         16:32 (16)   :class:`int`
-    :attr:`reserved2`             32:64 (32)   :class:`int`
-    :attr:`portXmitData`          64:128 (64)  :class:`int`
-    :attr:`portRcvData`           128:192 (64) :class:`int`
-    :attr:`portXmitPkts`          192:256 (64) :class:`int`
-    :attr:`portRcvPkts`           256:320 (64) :class:`int`
-    :attr:`portUnicastXmitPkts`   320:384 (64) :class:`int`
-    :attr:`portUnicastRcvPkts`    384:448 (64) :class:`int`
-    :attr:`portMulticastXmitPkts` 448:512 (64) :class:`int`
-    :attr:`portMulticastRcvPkts`  512:576 (64) :class:`int`
-    ============================= ============ ============
+    ============================= ========== ============
+    Member                        Position   Type        
+    ============================= ========== ============
+    :attr:`reserved_0`            0:1 (8)    :class:`int`
+    :attr:`portSelect`            1:2 (8)    :class:`int`
+    :attr:`counterSelect`         2:4 (16)   :class:`int`
+    :attr:`reserved_32`           4:8 (32)   :class:`int`
+    :attr:`portXmitData`          8:16 (64)  :class:`int`
+    :attr:`portRcvData`           16:24 (64) :class:`int`
+    :attr:`portXmitPkts`          24:32 (64) :class:`int`
+    :attr:`portRcvPkts`           32:40 (64) :class:`int`
+    :attr:`portUnicastXmitPkts`   40:48 (64) :class:`int`
+    :attr:`portUnicastRcvPkts`    48:56 (64) :class:`int`
+    :attr:`portMulticastXmitPkts` 56:64 (64) :class:`int`
+    :attr:`portMulticastRcvPkts`  64:72 (64) :class:`int`
+    ============================= ========== ============
 
 .. class:: rdma.IBA.PMPortFlowCtlCounters
 
@@ -1490,15 +1490,15 @@ Performance Management (16.1)
     .. attribute:: MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_PERFORMANCESET = 0x2 # MAD_METHOD_SET
 
-    ======================== ========== ============
-    Member                   Position   Type        
-    ======================== ========== ============
-    :attr:`reserved1`        0:8 (8)    :class:`int`
-    :attr:`portSelect`       8:16 (8)   :class:`int`
-    :attr:`counterSelect`    16:32 (16) :class:`int`
-    :attr:`portXmitFlowPkts` 32:64 (32) :class:`int`
-    :attr:`portRcvFlowPkts`  64:96 (32) :class:`int`
-    ======================== ========== ============
+    ======================== ========= ============
+    Member                   Position  Type        
+    ======================== ========= ============
+    :attr:`reserved_0`       0:1 (8)   :class:`int`
+    :attr:`portSelect`       1:2 (8)   :class:`int`
+    :attr:`counterSelect`    2:4 (16)  :class:`int`
+    :attr:`portXmitFlowPkts` 4:8 (32)  :class:`int`
+    :attr:`portRcvFlowPkts`  8:12 (32) :class:`int`
+    ======================== ========= ============
 
 .. class:: rdma.IBA.PMPortOpRcvCounters
 
@@ -1509,15 +1509,15 @@ Performance Management (16.1)
     .. attribute:: MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_PERFORMANCESET = 0x2 # MAD_METHOD_SET
 
-    ===================== ========== ============
-    Member                Position   Type        
-    ===================== ========== ============
-    :attr:`opCode`        0:8 (8)    :class:`int`
-    :attr:`portSelect`    8:16 (8)   :class:`int`
-    :attr:`counterSelect` 16:32 (16) :class:`int`
-    :attr:`portOpRcvPkts` 32:64 (32) :class:`int`
-    :attr:`portOpRcvData` 64:96 (32) :class:`int`
-    ===================== ========== ============
+    ===================== ========= ============
+    Member                Position  Type        
+    ===================== ========= ============
+    :attr:`opCode`        0:1 (8)   :class:`int`
+    :attr:`portSelect`    1:2 (8)   :class:`int`
+    :attr:`counterSelect` 2:4 (16)  :class:`int`
+    :attr:`portOpRcvPkts` 4:8 (32)  :class:`int`
+    :attr:`portOpRcvData` 8:12 (32) :class:`int`
+    ===================== ========= ============
 
 .. class:: rdma.IBA.PMPortRcvErrorDetails
 
@@ -1528,19 +1528,19 @@ Performance Management (16.1)
     .. attribute:: MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_PERFORMANCESET = 0x2 # MAD_METHOD_SET
 
-    ================================= ============ ============
-    Member                            Position     Type        
-    ================================= ============ ============
-    :attr:`reserved1`                 0:8 (8)      :class:`int`
-    :attr:`portSelect`                8:16 (8)     :class:`int`
-    :attr:`counterSelect`             16:32 (16)   :class:`int`
-    :attr:`portLocalPhysicalErrors`   32:48 (16)   :class:`int`
-    :attr:`portMalformedPacketErrors` 48:64 (16)   :class:`int`
-    :attr:`portBufferOverrunErrors`   64:80 (16)   :class:`int`
-    :attr:`portDLIDMappingErrors`     80:96 (16)   :class:`int`
-    :attr:`portVLMappingErrors`       96:112 (16)  :class:`int`
-    :attr:`portLoopingErrors`         112:128 (16) :class:`int`
-    ================================= ============ ============
+    ================================= ========== ============
+    Member                            Position   Type        
+    ================================= ========== ============
+    :attr:`reserved_0`                0:1 (8)    :class:`int`
+    :attr:`portSelect`                1:2 (8)    :class:`int`
+    :attr:`counterSelect`             2:4 (16)   :class:`int`
+    :attr:`portLocalPhysicalErrors`   4:6 (16)   :class:`int`
+    :attr:`portMalformedPacketErrors` 6:8 (16)   :class:`int`
+    :attr:`portBufferOverrunErrors`   8:10 (16)  :class:`int`
+    :attr:`portDLIDMappingErrors`     10:12 (16) :class:`int`
+    :attr:`portVLMappingErrors`       12:14 (16) :class:`int`
+    :attr:`portLoopingErrors`         14:16 (16) :class:`int`
+    ================================= ========== ============
 
 .. class:: rdma.IBA.PMPortSamplesCtl
 
@@ -1551,58 +1551,58 @@ Performance Management (16.1)
     .. attribute:: MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_PERFORMANCESET = 0x2 # MAD_METHOD_SET
 
-    ============================= ============== ========================
-    Member                        Position       Type                    
-    ============================= ============== ========================
-    :attr:`opCode`                0:8 (8)        :class:`int`            
-    :attr:`portSelect`            8:16 (8)       :class:`int`            
-    :attr:`tick`                  16:24 (8)      :class:`int`            
-    :attr:`reserved1`             24:29 (5)      :class:`int`            
-    :attr:`counterWidth`          29:32 (3)      :class:`int`            
-    :attr:`reserved2`             32:34 (2)      :class:`int`            
-    :attr:`counterMask0`          34:37 (3)      :class:`int`            
-    :attr:`counterMask1`          37:40 (3)      :class:`int`            
-    :attr:`counterMask2`          40:43 (3)      :class:`int`            
-    :attr:`counterMask3`          43:46 (3)      :class:`int`            
-    :attr:`counterMask4`          46:49 (3)      :class:`int`            
-    :attr:`counterMask5`          49:52 (3)      :class:`int`            
-    :attr:`counterMask6`          52:55 (3)      :class:`int`            
-    :attr:`counterMask7`          55:58 (3)      :class:`int`            
-    :attr:`counterMask8`          58:61 (3)      :class:`int`            
-    :attr:`counterMask9`          61:64 (3)      :class:`int`            
-    :attr:`reserved3`             64:65 (1)      :class:`int`            
-    :attr:`counterMask10`         65:68 (3)      :class:`int`            
-    :attr:`counterMask11`         68:71 (3)      :class:`int`            
-    :attr:`counterMask12`         71:74 (3)      :class:`int`            
-    :attr:`counterMask13`         74:77 (3)      :class:`int`            
-    :attr:`counterMask14`         77:80 (3)      :class:`int`            
-    :attr:`sampleMechanisms`      80:88 (8)      :class:`int`            
-    :attr:`reserved4`             88:94 (6)      :class:`int`            
-    :attr:`sampleStatus`          94:96 (2)      :class:`int`            
-    :attr:`optionMask`            96:160 (64)    :class:`int`            
-    :attr:`vendorMask`            160:224 (64)   :class:`int`            
-    :attr:`sampleStart`           224:256 (32)   :class:`int`            
-    :attr:`sampleInterval`        256:288 (32)   :class:`int`            
-    :attr:`tag`                   288:304 (16)   :class:`int`            
-    :attr:`counterSelect0`        304:320 (16)   :class:`int`            
-    :attr:`counterSelect1`        320:336 (16)   :class:`int`            
-    :attr:`counterSelect2`        336:352 (16)   :class:`int`            
-    :attr:`counterSelect3`        352:368 (16)   :class:`int`            
-    :attr:`counterSelect4`        368:384 (16)   :class:`int`            
-    :attr:`counterSelect5`        384:400 (16)   :class:`int`            
-    :attr:`counterSelect6`        400:416 (16)   :class:`int`            
-    :attr:`counterSelect7`        416:432 (16)   :class:`int`            
-    :attr:`counterSelect8`        432:448 (16)   :class:`int`            
-    :attr:`counterSelect9`        448:464 (16)   :class:`int`            
-    :attr:`counterSelect10`       464:480 (16)   :class:`int`            
-    :attr:`counterSelect11`       480:496 (16)   :class:`int`            
-    :attr:`counterSelect12`       496:512 (16)   :class:`int`            
-    :attr:`counterSelect13`       512:528 (16)   :class:`int`            
-    :attr:`counterSelect14`       528:544 (16)   :class:`int`            
-    :attr:`reserved5`             544:576 (32)   :class:`int`            
-    :attr:`samplesOnlyOptionMask` 576:640 (64)   :class:`int`            
-    :attr:`reserved6`             640:1536 (896) :class:`bytearray` (112)
-    ============================= ============== ========================
+    ============================= ============= ========================
+    Member                        Position      Type                    
+    ============================= ============= ========================
+    :attr:`opCode`                0:1 (8)       :class:`int`            
+    :attr:`portSelect`            1:2 (8)       :class:`int`            
+    :attr:`tick`                  2:3 (8)       :class:`int`            
+    :attr:`reserved_24`           3:3[5] (5)    :class:`int`            
+    :attr:`counterWidth`          3[5]:4 (3)    :class:`int`            
+    :attr:`reserved_32`           4:4[2] (2)    :class:`int`            
+    :attr:`counterMask0`          4[2]:4[5] (3) :class:`int`            
+    :attr:`counterMask1`          4[5]:5 (3)    :class:`int`            
+    :attr:`counterMask2`          5:5[3] (3)    :class:`int`            
+    :attr:`counterMask3`          5[3]:5[6] (3) :class:`int`            
+    :attr:`counterMask4`          5[6]:6[1] (3) :class:`int`            
+    :attr:`counterMask5`          6[1]:6[4] (3) :class:`int`            
+    :attr:`counterMask6`          6[4]:6[7] (3) :class:`int`            
+    :attr:`counterMask7`          6[7]:7[2] (3) :class:`int`            
+    :attr:`counterMask8`          7[2]:7[5] (3) :class:`int`            
+    :attr:`counterMask9`          7[5]:8 (3)    :class:`int`            
+    :attr:`reserved_64`           8:8[1] (1)    :class:`int`            
+    :attr:`counterMask10`         8[1]:8[4] (3) :class:`int`            
+    :attr:`counterMask11`         8[4]:8[7] (3) :class:`int`            
+    :attr:`counterMask12`         8[7]:9[2] (3) :class:`int`            
+    :attr:`counterMask13`         9[2]:9[5] (3) :class:`int`            
+    :attr:`counterMask14`         9[5]:10 (3)   :class:`int`            
+    :attr:`sampleMechanisms`      10:11 (8)     :class:`int`            
+    :attr:`reserved_88`           11:11[6] (6)  :class:`int`            
+    :attr:`sampleStatus`          11[6]:12 (2)  :class:`int`            
+    :attr:`optionMask`            12:20 (64)    :class:`int`            
+    :attr:`vendorMask`            20:28 (64)    :class:`int`            
+    :attr:`sampleStart`           28:32 (32)    :class:`int`            
+    :attr:`sampleInterval`        32:36 (32)    :class:`int`            
+    :attr:`tag`                   36:38 (16)    :class:`int`            
+    :attr:`counterSelect0`        38:40 (16)    :class:`int`            
+    :attr:`counterSelect1`        40:42 (16)    :class:`int`            
+    :attr:`counterSelect2`        42:44 (16)    :class:`int`            
+    :attr:`counterSelect3`        44:46 (16)    :class:`int`            
+    :attr:`counterSelect4`        46:48 (16)    :class:`int`            
+    :attr:`counterSelect5`        48:50 (16)    :class:`int`            
+    :attr:`counterSelect6`        50:52 (16)    :class:`int`            
+    :attr:`counterSelect7`        52:54 (16)    :class:`int`            
+    :attr:`counterSelect8`        54:56 (16)    :class:`int`            
+    :attr:`counterSelect9`        56:58 (16)    :class:`int`            
+    :attr:`counterSelect10`       58:60 (16)    :class:`int`            
+    :attr:`counterSelect11`       60:62 (16)    :class:`int`            
+    :attr:`counterSelect12`       62:64 (16)    :class:`int`            
+    :attr:`counterSelect13`       64:66 (16)    :class:`int`            
+    :attr:`counterSelect14`       66:68 (16)    :class:`int`            
+    :attr:`reserved_544`          68:72 (32)    :class:`int`            
+    :attr:`samplesOnlyOptionMask` 72:80 (64)    :class:`int`            
+    :attr:`reserved_640`          80:192 (896)  :class:`bytearray` (112)
+    ============================= ============= ========================
 
 .. class:: rdma.IBA.PMPortSamplesRes
 
@@ -1615,10 +1615,10 @@ Performance Management (16.1)
     ==================== =========== =================
     Member               Position    Type             
     ==================== =========== =================
-    :attr:`tag`          0:16 (16)   :class:`int`     
-    :attr:`reserved1`    16:30 (14)  :class:`int`     
-    :attr:`sampleStatus` 30:32 (2)   :class:`int`     
-    :attr:`counter`      32:512 (32) [:class:`int`]*15
+    :attr:`tag`          0:2 (16)    :class:`int`     
+    :attr:`reserved_16`  2:3[6] (14) :class:`int`     
+    :attr:`sampleStatus` 3[6]:4 (2)  :class:`int`     
+    :attr:`counter`      4:64 (32)   [:class:`int`]*15
     ==================== =========== =================
 
 .. class:: rdma.IBA.PMPortSamplesResExt
@@ -1630,16 +1630,16 @@ Performance Management (16.1)
     .. attribute:: MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_PERFORMANCESET = 0x2 # MAD_METHOD_SET
 
-    ===================== ============ =================
-    Member                Position     Type             
-    ===================== ============ =================
-    :attr:`tag`           0:16 (16)    :class:`int`     
-    :attr:`reserved1`     16:30 (14)   :class:`int`     
-    :attr:`sampleStatus`  30:32 (2)    :class:`int`     
-    :attr:`extendedWidth` 32:34 (2)    :class:`int`     
-    :attr:`reserved2`     34:64 (30)   :class:`int`     
-    :attr:`counter`       64:1024 (64) [:class:`int`]*15
-    ===================== ============ =================
+    ===================== =========== =================
+    Member                Position    Type             
+    ===================== =========== =================
+    :attr:`tag`           0:2 (16)    :class:`int`     
+    :attr:`reserved_16`   2:3[6] (14) :class:`int`     
+    :attr:`sampleStatus`  3[6]:4 (2)  :class:`int`     
+    :attr:`extendedWidth` 4:4[2] (2)  :class:`int`     
+    :attr:`reserved_34`   4[2]:8 (30) :class:`int`     
+    :attr:`counter`       8:128 (64)  [:class:`int`]*15
+    ===================== =========== =================
 
 .. class:: rdma.IBA.PMPortVLOpData
 
@@ -1650,14 +1650,14 @@ Performance Management (16.1)
     .. attribute:: MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_PERFORMANCESET = 0x2 # MAD_METHOD_SET
 
-    ===================== =========== =================
-    Member                Position    Type             
-    ===================== =========== =================
-    :attr:`opCode`        0:8 (8)     :class:`int`     
-    :attr:`portSelect`    8:16 (8)    :class:`int`     
-    :attr:`counterSelect` 16:32 (16)  :class:`int`     
-    :attr:`portVLOpData`  32:544 (32) [:class:`int`]*16
-    ===================== =========== =================
+    ===================== ========= =================
+    Member                Position  Type             
+    ===================== ========= =================
+    :attr:`opCode`        0:1 (8)   :class:`int`     
+    :attr:`portSelect`    1:2 (8)   :class:`int`     
+    :attr:`counterSelect` 2:4 (16)  :class:`int`     
+    :attr:`portVLOpData`  4:68 (32) [:class:`int`]*16
+    ===================== ========= =================
 
 .. class:: rdma.IBA.PMPortVLOpPackets
 
@@ -1668,14 +1668,14 @@ Performance Management (16.1)
     .. attribute:: MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_PERFORMANCESET = 0x2 # MAD_METHOD_SET
 
-    ======================= =========== =================
-    Member                  Position    Type             
-    ======================= =========== =================
-    :attr:`opCode`          0:8 (8)     :class:`int`     
-    :attr:`portSelect`      8:16 (8)    :class:`int`     
-    :attr:`counterSelect`   16:32 (16)  :class:`int`     
-    :attr:`portVLOpPackets` 32:288 (16) [:class:`int`]*16
-    ======================= =========== =================
+    ======================= ========= =================
+    Member                  Position  Type             
+    ======================= ========= =================
+    :attr:`opCode`          0:1 (8)   :class:`int`     
+    :attr:`portSelect`      1:2 (8)   :class:`int`     
+    :attr:`counterSelect`   2:4 (16)  :class:`int`     
+    :attr:`portVLOpPackets` 4:36 (16) [:class:`int`]*16
+    ======================= ========= =================
 
 .. class:: rdma.IBA.PMPortVLXmitFlowCtlUpdateErrors
 
@@ -1686,14 +1686,14 @@ Performance Management (16.1)
     .. attribute:: MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_PERFORMANCESET = 0x2 # MAD_METHOD_SET
 
-    ===================================== ========== =================
-    Member                                Position   Type             
-    ===================================== ========== =================
-    :attr:`reserved1`                     0:8 (8)    :class:`int`     
-    :attr:`portSelect`                    8:16 (8)   :class:`int`     
-    :attr:`counterSelect`                 16:32 (16) :class:`int`     
-    :attr:`portVLXmitFlowCtlUpdateErrors` 32:64 (2)  [:class:`int`]*16
-    ===================================== ========== =================
+    ===================================== ======== =================
+    Member                                Position Type             
+    ===================================== ======== =================
+    :attr:`reserved_0`                    0:1 (8)  :class:`int`     
+    :attr:`portSelect`                    1:2 (8)  :class:`int`     
+    :attr:`counterSelect`                 2:4 (16) :class:`int`     
+    :attr:`portVLXmitFlowCtlUpdateErrors` 4:8 (2)  [:class:`int`]*16
+    ===================================== ======== =================
 
 .. class:: rdma.IBA.PMPortVLXmitWaitCounters
 
@@ -1704,14 +1704,14 @@ Performance Management (16.1)
     .. attribute:: MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_PERFORMANCESET = 0x2 # MAD_METHOD_SET
 
-    ====================== =========== =================
-    Member                 Position    Type             
-    ====================== =========== =================
-    :attr:`reserved1`      0:8 (8)     :class:`int`     
-    :attr:`portSelect`     8:16 (8)    :class:`int`     
-    :attr:`counterSelect`  16:32 (16)  :class:`int`     
-    :attr:`portVLXmitWait` 32:288 (16) [:class:`int`]*16
-    ====================== =========== =================
+    ====================== ========= =================
+    Member                 Position  Type             
+    ====================== ========= =================
+    :attr:`reserved_0`     0:1 (8)   :class:`int`     
+    :attr:`portSelect`     1:2 (8)   :class:`int`     
+    :attr:`counterSelect`  2:4 (16)  :class:`int`     
+    :attr:`portVLXmitWait` 4:36 (16) [:class:`int`]*16
+    ====================== ========= =================
 
 .. class:: rdma.IBA.PMPortXmitDiscardDetails
 
@@ -1725,13 +1725,13 @@ Performance Management (16.1)
     =================================== ========== ============
     Member                              Position   Type        
     =================================== ========== ============
-    :attr:`reserved1`                   0:8 (8)    :class:`int`
-    :attr:`portSelect`                  8:16 (8)   :class:`int`
-    :attr:`counterSelect`               16:32 (16) :class:`int`
-    :attr:`portInactiveDiscards`        32:48 (16) :class:`int`
-    :attr:`portNeighborMTUDiscards`     48:64 (16) :class:`int`
-    :attr:`portSwLifetimeLimitDiscards` 64:80 (16) :class:`int`
-    :attr:`portSwHOQLimitDiscards`      80:96 (16) :class:`int`
+    :attr:`reserved_0`                  0:1 (8)    :class:`int`
+    :attr:`portSelect`                  1:2 (8)    :class:`int`
+    :attr:`counterSelect`               2:4 (16)   :class:`int`
+    :attr:`portInactiveDiscards`        4:6 (16)   :class:`int`
+    :attr:`portNeighborMTUDiscards`     6:8 (16)   :class:`int`
+    :attr:`portSwLifetimeLimitDiscards` 8:10 (16)  :class:`int`
+    :attr:`portSwHOQLimitDiscards`      10:12 (16) :class:`int`
     =================================== ========== ============
 
 .. class:: rdma.IBA.PMSwPortVLCongestion
@@ -1743,14 +1743,14 @@ Performance Management (16.1)
     .. attribute:: MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_PERFORMANCESET = 0x2 # MAD_METHOD_SET
 
-    ========================== =========== =================
-    Member                     Position    Type             
-    ========================== =========== =================
-    :attr:`reserved1`          0:8 (8)     :class:`int`     
-    :attr:`portSelect`         8:16 (8)    :class:`int`     
-    :attr:`counterSelect`      16:32 (16)  :class:`int`     
-    :attr:`swPortVLCongestion` 32:288 (16) [:class:`int`]*16
-    ========================== =========== =================
+    ========================== ========= =================
+    Member                     Position  Type             
+    ========================== ========= =================
+    :attr:`reserved_0`         0:1 (8)   :class:`int`     
+    :attr:`portSelect`         1:2 (8)   :class:`int`     
+    :attr:`counterSelect`      2:4 (16)  :class:`int`     
+    :attr:`swPortVLCongestion` 4:36 (16) [:class:`int`]*16
+    ========================== ========= =================
 
 .. class:: rdma.IBA.PMPortRcvDataSL
 
@@ -1761,14 +1761,14 @@ Performance Management (16.1)
     .. attribute:: MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_PERFORMANCESET = 0x2 # MAD_METHOD_SET
 
-    ===================== =========== =================
-    Member                Position    Type             
-    ===================== =========== =================
-    :attr:`reserved1`     0:8 (8)     :class:`int`     
-    :attr:`portSelect`    8:16 (8)    :class:`int`     
-    :attr:`counterSelect` 16:32 (16)  :class:`int`     
-    :attr:`portRcvDataSL` 64:576 (32) [:class:`int`]*16
-    ===================== =========== =================
+    ===================== ========= =================
+    Member                Position  Type             
+    ===================== ========= =================
+    :attr:`reserved_0`    0:1 (8)   :class:`int`     
+    :attr:`portSelect`    1:2 (8)   :class:`int`     
+    :attr:`counterSelect` 2:4 (16)  :class:`int`     
+    :attr:`portRcvDataSL` 8:72 (32) [:class:`int`]*16
+    ===================== ========= =================
 
 .. class:: rdma.IBA.PMPortXmitDataSL
 
@@ -1779,14 +1779,14 @@ Performance Management (16.1)
     .. attribute:: MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_PERFORMANCESET = 0x2 # MAD_METHOD_SET
 
-    ====================== =========== =================
-    Member                 Position    Type             
-    ====================== =========== =================
-    :attr:`reserved1`      0:8 (8)     :class:`int`     
-    :attr:`portSelect`     8:16 (8)    :class:`int`     
-    :attr:`counterSelect`  16:32 (16)  :class:`int`     
-    :attr:`portXmitDataSL` 64:576 (32) [:class:`int`]*16
-    ====================== =========== =================
+    ====================== ========= =================
+    Member                 Position  Type             
+    ====================== ========= =================
+    :attr:`reserved_0`     0:1 (8)   :class:`int`     
+    :attr:`portSelect`     1:2 (8)   :class:`int`     
+    :attr:`counterSelect`  2:4 (16)  :class:`int`     
+    :attr:`portXmitDataSL` 8:72 (32) [:class:`int`]*16
+    ====================== ========= =================
 
 Device Management (16.3)
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1799,12 +1799,12 @@ Device Management (16.3)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x24
     .. attribute:: MAD_DEVMGTGET = 0x1 # MAD_METHOD_GET
 
-    ================= ========== ============
-    Member            Position   Type        
-    ================= ========== ============
-    :attr:`diagCode`  0:16 (16)  :class:`int`
-    :attr:`reserved1` 16:32 (16) :class:`int`
-    ================= ========== ============
+    =================== ======== ============
+    Member              Position Type        
+    =================== ======== ============
+    :attr:`diagCode`    0:2 (16) :class:`int`
+    :attr:`reserved_16` 2:4 (16) :class:`int`
+    =================== ======== ============
 
 .. class:: rdma.IBA.DMDiagnosticTimeout
 
@@ -1814,11 +1814,11 @@ Device Management (16.3)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x20
     .. attribute:: MAD_DEVMGTGET = 0x1 # MAD_METHOD_GET
 
-    =================== ========= ============
-    Member              Position  Type        
-    =================== ========= ============
-    :attr:`maxDiagTime` 0:32 (32) :class:`int`
-    =================== ========= ============
+    =================== ======== ============
+    Member              Position Type        
+    =================== ======== ============
+    :attr:`maxDiagTime` 0:4 (32) :class:`int`
+    =================== ======== ============
 
 .. class:: rdma.IBA.DMFormat
 
@@ -1830,22 +1830,22 @@ Device Management (16.3)
     .. attribute:: MAD_CLASS = 0x6
     .. attribute:: MAD_CLASS_VERSION = 0x1
 
-    ========================= =============== ========================
-    Member                    Position        Type                    
-    ========================= =============== ========================
-    :attr:`baseVersion`       0:8 (8)         :class:`int`            
-    :attr:`mgmtClass`         8:16 (8)        :class:`int`            
-    :attr:`classVersion`      16:24 (8)       :class:`int`            
-    :attr:`method`            24:32 (8)       :class:`int`            
-    :attr:`status`            32:48 (16)      :class:`int`            
-    :attr:`classSpecific`     48:64 (16)      :class:`int`            
-    :attr:`transactionID`     64:128 (64)     :class:`int`            
-    :attr:`attributeID`       128:144 (16)    :class:`int`            
-    :attr:`reserved1`         144:160 (16)    :class:`int`            
-    :attr:`attributeModifier` 160:192 (32)    :class:`int`            
-    :attr:`reserved2`         192:512 (320)   :class:`bytearray` (40) 
-    :attr:`data`              512:2048 (1536) :class:`bytearray` (192)
-    ========================= =============== ========================
+    ========================= ============= ========================
+    Member                    Position      Type                    
+    ========================= ============= ========================
+    :attr:`baseVersion`       0:1 (8)       :class:`int`            
+    :attr:`mgmtClass`         1:2 (8)       :class:`int`            
+    :attr:`classVersion`      2:3 (8)       :class:`int`            
+    :attr:`method`            3:4 (8)       :class:`int`            
+    :attr:`status`            4:6 (16)      :class:`int`            
+    :attr:`classSpecific`     6:8 (16)      :class:`int`            
+    :attr:`transactionID`     8:16 (64)     :class:`int`            
+    :attr:`attributeID`       16:18 (16)    :class:`int`            
+    :attr:`reserved_144`      18:20 (16)    :class:`int`            
+    :attr:`attributeModifier` 20:24 (32)    :class:`int`            
+    :attr:`reserved_192`      24:64 (320)   :class:`bytearray` (40) 
+    :attr:`data`              64:256 (1536) :class:`bytearray` (192)
+    ========================= ============= ========================
 
 .. class:: rdma.IBA.DMIOControllerProfile
 
@@ -1855,36 +1855,36 @@ Device Management (16.3)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x11
     .. attribute:: MAD_DEVMGTGET = 0x1 # MAD_METHOD_GET
 
-    ================================ ============ ============================
-    Member                           Position     Type                        
-    ================================ ============ ============================
-    :attr:`GUID`                     0:64 (64)    :class:`~rdma.IBA.GUID`     
-    :attr:`vendorID`                 64:88 (24)   :class:`int`                
-    :attr:`reserved1`                88:96 (8)    :class:`int`                
-    :attr:`deviceID`                 96:128 (32)  :class:`int`                
-    :attr:`deviceVersion`            128:144 (16) :class:`int`                
-    :attr:`reserved2`                144:160 (16) :class:`int`                
-    :attr:`subsystemVendorID`        160:184 (24) :class:`int`                
-    :attr:`reserved3`                184:192 (8)  :class:`int`                
-    :attr:`subsystemID`              192:224 (32) :class:`int`                
-    :attr:`IOClass`                  224:240 (16) :class:`int`                
-    :attr:`IOSubclass`               240:256 (16) :class:`int`                
-    :attr:`protocol`                 256:272 (16) :class:`int`                
-    :attr:`protocolVersion`          272:288 (16) :class:`int`                
-    :attr:`reserved4`                288:304 (16) :class:`int`                
-    :attr:`reserved5`                304:320 (16) :class:`int`                
-    :attr:`sendMessageDepth`         320:336 (16) :class:`int`                
-    :attr:`reserved6`                336:344 (8)  :class:`int`                
-    :attr:`RDMAReadDepth`            344:352 (8)  :class:`int`                
-    :attr:`sendMessageSize`          352:384 (32) :class:`int`                
-    :attr:`RDMATransferSize`         384:416 (32) :class:`int`                
-    :attr:`controllerOperationsMask` 416:424 (8)  :class:`int`                
-    :attr:`reserved7`                424:432 (8)  :class:`int`                
-    :attr:`serviceEntries`           432:440 (8)  :class:`int`                
-    :attr:`reserved8`                440:448 (8)  :class:`int`                
-    :attr:`reserved9`                448:512 (64) :class:`int`                
-    :attr:`IDString`                 512:1024 (8) [:class:`bytearray` (64)]*64
-    ================================ ============ ============================
+    ================================ ========== ============================
+    Member                           Position   Type                        
+    ================================ ========== ============================
+    :attr:`GUID`                     0:8 (64)   :class:`~rdma.IBA.GUID`     
+    :attr:`vendorID`                 8:11 (24)  :class:`int`                
+    :attr:`reserved_88`              11:12 (8)  :class:`int`                
+    :attr:`deviceID`                 12:16 (32) :class:`int`                
+    :attr:`deviceVersion`            16:18 (16) :class:`int`                
+    :attr:`reserved_144`             18:20 (16) :class:`int`                
+    :attr:`subsystemVendorID`        20:23 (24) :class:`int`                
+    :attr:`reserved_184`             23:24 (8)  :class:`int`                
+    :attr:`subsystemID`              24:28 (32) :class:`int`                
+    :attr:`IOClass`                  28:30 (16) :class:`int`                
+    :attr:`IOSubclass`               30:32 (16) :class:`int`                
+    :attr:`protocol`                 32:34 (16) :class:`int`                
+    :attr:`protocolVersion`          34:36 (16) :class:`int`                
+    :attr:`reserved_288`             36:38 (16) :class:`int`                
+    :attr:`reserved_304`             38:40 (16) :class:`int`                
+    :attr:`sendMessageDepth`         40:42 (16) :class:`int`                
+    :attr:`reserved_336`             42:43 (8)  :class:`int`                
+    :attr:`RDMAReadDepth`            43:44 (8)  :class:`int`                
+    :attr:`sendMessageSize`          44:48 (32) :class:`int`                
+    :attr:`RDMATransferSize`         48:52 (32) :class:`int`                
+    :attr:`controllerOperationsMask` 52:53 (8)  :class:`int`                
+    :attr:`reserved_424`             53:54 (8)  :class:`int`                
+    :attr:`serviceEntries`           54:55 (8)  :class:`int`                
+    :attr:`reserved_440`             55:56 (8)  :class:`int`                
+    :attr:`reserved_448`             56:64 (64) :class:`int`                
+    :attr:`IDString`                 64:128 (8) [:class:`bytearray` (64)]*64
+    ================================ ========== ============================
 
 .. class:: rdma.IBA.DMIOUnitInfo
 
@@ -1894,16 +1894,16 @@ Device Management (16.3)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x10
     .. attribute:: MAD_DEVMGTGET = 0x1 # MAD_METHOD_GET
 
-    ====================== ============== ========================
-    Member                 Position       Type                    
-    ====================== ============== ========================
-    :attr:`changeID`       0:16 (16)      :class:`int`            
-    :attr:`maxControllers` 16:24 (8)      :class:`int`            
-    :attr:`reserved1`      24:30 (6)      :class:`int`            
-    :attr:`diagDeviceID`   30:31 (1)      :class:`int`            
-    :attr:`optionROM`      31:32 (1)      :class:`int`            
-    :attr:`controllerList` 32:1056 (1024) :class:`bytearray` (128)
-    ====================== ============== ========================
+    ====================== ============= ========================
+    Member                 Position      Type                    
+    ====================== ============= ========================
+    :attr:`changeID`       0:2 (16)      :class:`int`            
+    :attr:`maxControllers` 2:3 (8)       :class:`int`            
+    :attr:`reserved_24`    3:3[6] (6)    :class:`int`            
+    :attr:`diagDeviceID`   3[6]:3[7] (1) :class:`int`            
+    :attr:`optionROM`      3[7]:4 (1)    :class:`int`            
+    :attr:`controllerList` 4:132 (1024)  :class:`bytearray` (128)
+    ====================== ============= ========================
 
 .. class:: rdma.IBA.DMPrepareToTest
 
@@ -1927,11 +1927,11 @@ Device Management (16.3)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x12
     .. attribute:: MAD_DEVMGTGET = 0x1 # MAD_METHOD_GET
 
-    ==================== ============ =====================================
-    Member               Position     Type                                 
-    ==================== ============ =====================================
-    :attr:`serviceEntry` 0:1536 (384) [:class:`~rdma.IBA.DMServiceEntry`]*4
-    ==================== ============ =====================================
+    ==================== =========== =====================================
+    Member               Position    Type                                 
+    ==================== =========== =====================================
+    :attr:`serviceEntry` 0:192 (384) [:class:`~rdma.IBA.DMServiceEntry`]*4
+    ==================== =========== =====================================
 
 .. class:: rdma.IBA.DMServiceEntry
 
@@ -1939,12 +1939,12 @@ Device Management (16.3)
 
     .. attribute:: MAD_LENGTH = 48
 
-    =================== ============ ============================
-    Member              Position     Type                        
-    =================== ============ ============================
-    :attr:`serviceName` 0:320 (8)    [:class:`bytearray` (40)]*40
-    :attr:`serviceID`   320:384 (64) :class:`int`                
-    =================== ============ ============================
+    =================== ========== ============================
+    Member              Position   Type                        
+    =================== ========== ============================
+    :attr:`serviceName` 0:40 (8)   [:class:`bytearray` (40)]*40
+    :attr:`serviceID`   40:48 (64) :class:`int`                
+    =================== ========== ============================
 
 .. class:: rdma.IBA.DMTestDeviceLoop
 
@@ -1983,11 +1983,11 @@ SNMP Tunneling (16.4)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x10
     .. attribute:: MAD_SNMPSEND = 0x3 # MAD_METHOD_SEND
 
-    ===================== ========= ============================
-    Member                Position  Type                        
-    ===================== ========= ============================
-    :attr:`communityName` 0:512 (8) [:class:`bytearray` (64)]*64
-    ===================== ========= ============================
+    ===================== ======== ============================
+    Member                Position Type                        
+    ===================== ======== ============================
+    :attr:`communityName` 0:64 (8) [:class:`bytearray` (64)]*64
+    ===================== ======== ============================
 
 .. class:: rdma.IBA.SNMPFormat
 
@@ -1999,26 +1999,26 @@ SNMP Tunneling (16.4)
     .. attribute:: MAD_CLASS = 0x8
     .. attribute:: MAD_CLASS_VERSION = 0x1
 
-    ========================= =============== ========================
-    Member                    Position        Type                    
-    ========================= =============== ========================
-    :attr:`baseVersion`       0:8 (8)         :class:`int`            
-    :attr:`mgmtClass`         8:16 (8)        :class:`int`            
-    :attr:`classVersion`      16:24 (8)       :class:`int`            
-    :attr:`method`            24:32 (8)       :class:`int`            
-    :attr:`status`            32:48 (16)      :class:`int`            
-    :attr:`classSpecific`     48:64 (16)      :class:`int`            
-    :attr:`transactionID`     64:128 (64)     :class:`int`            
-    :attr:`attributeID`       128:144 (16)    :class:`int`            
-    :attr:`reserved1`         144:160 (16)    :class:`int`            
-    :attr:`attributeModifier` 160:192 (32)    :class:`int`            
-    :attr:`reserved2`         192:448 (256)   :class:`bytearray` (32) 
-    :attr:`RAddress`          448:480 (32)    :class:`int`            
-    :attr:`payloadLength`     480:488 (8)     :class:`int`            
-    :attr:`segmentNumber`     488:496 (8)     :class:`int`            
-    :attr:`sourceLID`         496:512 (16)    :class:`int`            
-    :attr:`data`              512:2048 (1536) :class:`bytearray` (192)
-    ========================= =============== ========================
+    ========================= ============= ========================
+    Member                    Position      Type                    
+    ========================= ============= ========================
+    :attr:`baseVersion`       0:1 (8)       :class:`int`            
+    :attr:`mgmtClass`         1:2 (8)       :class:`int`            
+    :attr:`classVersion`      2:3 (8)       :class:`int`            
+    :attr:`method`            3:4 (8)       :class:`int`            
+    :attr:`status`            4:6 (16)      :class:`int`            
+    :attr:`classSpecific`     6:8 (16)      :class:`int`            
+    :attr:`transactionID`     8:16 (64)     :class:`int`            
+    :attr:`attributeID`       16:18 (16)    :class:`int`            
+    :attr:`reserved_144`      18:20 (16)    :class:`int`            
+    :attr:`attributeModifier` 20:24 (32)    :class:`int`            
+    :attr:`reserved_192`      24:56 (256)   :class:`bytearray` (32) 
+    :attr:`RAddress`          56:60 (32)    :class:`int`            
+    :attr:`payloadLength`     60:61 (8)     :class:`int`            
+    :attr:`segmentNumber`     61:62 (8)     :class:`int`            
+    :attr:`sourceLID`         62:64 (16)    :class:`int`            
+    :attr:`data`              64:256 (1536) :class:`bytearray` (192)
+    ========================= ============= ========================
 
 .. class:: rdma.IBA.SNMPPDUInfo
 
@@ -2028,11 +2028,11 @@ SNMP Tunneling (16.4)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x11
     .. attribute:: MAD_SNMPSEND = 0x3 # MAD_METHOD_SEND
 
-    =============== ============= ========================
-    Member          Position      Type                    
-    =============== ============= ========================
-    :attr:`PDUData` 0:1536 (1536) :class:`bytearray` (192)
-    =============== ============= ========================
+    =============== ============ ========================
+    Member          Position     Type                    
+    =============== ============ ========================
+    :attr:`PDUData` 0:192 (1536) :class:`bytearray` (192)
+    =============== ============ ========================
 
 Miscellaneous IBA Structures
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -2047,21 +2047,21 @@ Miscellaneous IBA Structures
     .. attribute:: MAD_CLASS = 0x7
     .. attribute:: MAD_CLASS_VERSION = 0x2
 
-    ========================= =============== ========================
-    Member                    Position        Type                    
-    ========================= =============== ========================
-    :attr:`baseVersion`       0:8 (8)         :class:`int`            
-    :attr:`mgmtClass`         8:16 (8)        :class:`int`            
-    :attr:`classVersion`      16:24 (8)       :class:`int`            
-    :attr:`method`            24:32 (8)       :class:`int`            
-    :attr:`status`            32:48 (16)      :class:`int`            
-    :attr:`classSpecific`     48:64 (16)      :class:`int`            
-    :attr:`transactionID`     64:128 (64)     :class:`int`            
-    :attr:`attributeID`       128:144 (16)    :class:`int`            
-    :attr:`reserved1`         144:160 (16)    :class:`int`            
-    :attr:`attributeModifier` 160:192 (32)    :class:`int`            
-    :attr:`data`              192:2048 (1856) :class:`bytearray` (232)
-    ========================= =============== ========================
+    ========================= ============= ========================
+    Member                    Position      Type                    
+    ========================= ============= ========================
+    :attr:`baseVersion`       0:1 (8)       :class:`int`            
+    :attr:`mgmtClass`         1:2 (8)       :class:`int`            
+    :attr:`classVersion`      2:3 (8)       :class:`int`            
+    :attr:`method`            3:4 (8)       :class:`int`            
+    :attr:`status`            4:6 (16)      :class:`int`            
+    :attr:`classSpecific`     6:8 (16)      :class:`int`            
+    :attr:`transactionID`     8:16 (64)     :class:`int`            
+    :attr:`attributeID`       16:18 (16)    :class:`int`            
+    :attr:`reserved_144`      18:20 (16)    :class:`int`            
+    :attr:`attributeModifier` 20:24 (32)    :class:`int`            
+    :attr:`data`              24:256 (1856) :class:`bytearray` (232)
+    ========================= ============= ========================
 
 .. class:: rdma.IBA.HdrAETH
 
@@ -2069,12 +2069,12 @@ Miscellaneous IBA Structures
 
     .. attribute:: MAD_LENGTH = 4
 
-    ================ ========= ============
-    Member           Position  Type        
-    ================ ========= ============
-    :attr:`syndrome` 0:8 (8)   :class:`int`
-    :attr:`MSN`      8:32 (24) :class:`int`
-    ================ ========= ============
+    ================ ======== ============
+    Member           Position Type        
+    ================ ======== ============
+    :attr:`syndrome` 0:1 (8)  :class:`int`
+    :attr:`MSN`      1:4 (24) :class:`int`
+    ================ ======== ============
 
 .. class:: rdma.IBA.HdrAtomicAckETH
 
@@ -2082,11 +2082,11 @@ Miscellaneous IBA Structures
 
     .. attribute:: MAD_LENGTH = 8
 
-    ================= ========= ============
-    Member            Position  Type        
-    ================= ========= ============
-    :attr:`origRData` 0:64 (64) :class:`int`
-    ================= ========= ============
+    ================= ======== ============
+    Member            Position Type        
+    ================= ======== ============
+    :attr:`origRData` 0:8 (64) :class:`int`
+    ================= ======== ============
 
 .. class:: rdma.IBA.HdrAtomicETH
 
@@ -2094,14 +2094,14 @@ Miscellaneous IBA Structures
 
     .. attribute:: MAD_LENGTH = 28
 
-    ================ ============ ============
-    Member           Position     Type        
-    ================ ============ ============
-    :attr:`VA`       0:64 (64)    :class:`int`
-    :attr:`RKey`     64:96 (32)   :class:`int`
-    :attr:`swapData` 96:160 (64)  :class:`int`
-    :attr:`cmpData`  160:224 (64) :class:`int`
-    ================ ============ ============
+    ================ ========== ============
+    Member           Position   Type        
+    ================ ========== ============
+    :attr:`VA`       0:8 (64)   :class:`int`
+    :attr:`RKey`     8:12 (32)  :class:`int`
+    :attr:`swapData` 12:20 (64) :class:`int`
+    :attr:`cmpData`  20:28 (64) :class:`int`
+    ================ ========== ============
 
 .. class:: rdma.IBA.HdrBTH
 
@@ -2109,22 +2109,22 @@ Miscellaneous IBA Structures
 
     .. attribute:: MAD_LENGTH = 12
 
-    ================= ========== ============
-    Member            Position   Type        
-    ================= ========== ============
-    :attr:`service`   0:3 (3)    :class:`int`
-    :attr:`function`  3:8 (5)    :class:`int`
-    :attr:`SE`        8:9 (1)    :class:`int`
-    :attr:`migReq`    9:10 (1)   :class:`int`
-    :attr:`padCnt`    10:12 (2)  :class:`int`
-    :attr:`TVer`      12:16 (4)  :class:`int`
-    :attr:`PKey`      16:32 (16) :class:`int`
-    :attr:`reserved1` 32:40 (8)  :class:`int`
-    :attr:`destQP`    40:64 (24) :class:`int`
-    :attr:`ackReq`    64:65 (1)  :class:`int`
-    :attr:`reserved2` 65:72 (7)  :class:`int`
-    :attr:`PSN`       72:96 (24) :class:`int`
-    ================= ========== ============
+    =================== ============= ============
+    Member              Position      Type        
+    =================== ============= ============
+    :attr:`service`     0:0[3] (3)    :class:`int`
+    :attr:`function`    0[3]:1 (5)    :class:`int`
+    :attr:`SE`          1:1[1] (1)    :class:`int`
+    :attr:`migReq`      1[1]:1[2] (1) :class:`int`
+    :attr:`padCnt`      1[2]:1[4] (2) :class:`int`
+    :attr:`TVer`        1[4]:2 (4)    :class:`int`
+    :attr:`PKey`        2:4 (16)      :class:`int`
+    :attr:`reserved_32` 4:5 (8)       :class:`int`
+    :attr:`destQP`      5:8 (24)      :class:`int`
+    :attr:`ackReq`      8:8[1] (1)    :class:`int`
+    :attr:`reserved_65` 8[1]:9 (7)    :class:`int`
+    :attr:`PSN`         9:12 (24)     :class:`int`
+    =================== ============= ============
 
 .. class:: rdma.IBA.HdrDETH
 
@@ -2132,13 +2132,13 @@ Miscellaneous IBA Structures
 
     .. attribute:: MAD_LENGTH = 8
 
-    ================= ========== ============
-    Member            Position   Type        
-    ================= ========== ============
-    :attr:`QKey`      0:32 (32)  :class:`int`
-    :attr:`reserved1` 32:40 (8)  :class:`int`
-    :attr:`srcQP`     40:64 (24) :class:`int`
-    ================= ========== ============
+    =================== ======== ============
+    Member              Position Type        
+    =================== ======== ============
+    :attr:`QKey`        0:4 (32) :class:`int`
+    :attr:`reserved_32` 4:5 (8)  :class:`int`
+    :attr:`srcQP`       5:8 (24) :class:`int`
+    =================== ======== ============
 
 .. class:: rdma.IBA.HdrFlowControl
 
@@ -2146,14 +2146,14 @@ Miscellaneous IBA Structures
 
     .. attribute:: MAD_LENGTH = 4
 
-    ============= ========== ============
-    Member        Position   Type        
-    ============= ========== ============
-    :attr:`op`    0:4 (4)    :class:`int`
-    :attr:`FCTBS` 4:16 (12)  :class:`int`
-    :attr:`VL`    16:20 (4)  :class:`int`
-    :attr:`FCCL`  20:32 (12) :class:`int`
-    ============= ========== ============
+    ============= =========== ============
+    Member        Position    Type        
+    ============= =========== ============
+    :attr:`op`    0:0[4] (4)  :class:`int`
+    :attr:`FCTBS` 0[4]:2 (12) :class:`int`
+    :attr:`VL`    2:2[4] (4)  :class:`int`
+    :attr:`FCCL`  2[4]:4 (12) :class:`int`
+    ============= =========== ============
 
 .. class:: rdma.IBA.HdrGRH
 
@@ -2164,14 +2164,14 @@ Miscellaneous IBA Structures
     ================= ============= ======================
     Member            Position      Type                  
     ================= ============= ======================
-    :attr:`IPVer`     0:4 (4)       :class:`int`          
-    :attr:`TClass`    4:12 (8)      :class:`int`          
-    :attr:`flowLabel` 12:32 (20)    :class:`int`          
-    :attr:`payLen`    32:48 (16)    :class:`int`          
-    :attr:`nxtHdr`    48:56 (8)     :class:`int`          
-    :attr:`hopLmt`    56:64 (8)     :class:`int`          
-    :attr:`SGID`      64:192 (128)  :class:`~rdma.IBA.GID`
-    :attr:`DGID`      192:320 (128) :class:`~rdma.IBA.GID`
+    :attr:`IPVer`     0:0[4] (4)    :class:`int`          
+    :attr:`TClass`    0[4]:1[4] (8) :class:`int`          
+    :attr:`flowLabel` 1[4]:4 (20)   :class:`int`          
+    :attr:`payLen`    4:6 (16)      :class:`int`          
+    :attr:`nxtHdr`    6:7 (8)       :class:`int`          
+    :attr:`hopLmt`    7:8 (8)       :class:`int`          
+    :attr:`SGID`      8:24 (128)    :class:`~rdma.IBA.GID`
+    :attr:`DGID`      24:40 (128)   :class:`~rdma.IBA.GID`
     ================= ============= ======================
 
 .. class:: rdma.IBA.HdrIETH
@@ -2180,11 +2180,11 @@ Miscellaneous IBA Structures
 
     .. attribute:: MAD_LENGTH = 4
 
-    ============ ========= ============
-    Member       Position  Type        
-    ============ ========= ============
-    :attr:`RKey` 0:32 (32) :class:`int`
-    ============ ========= ============
+    ============ ======== ============
+    Member       Position Type        
+    ============ ======== ============
+    :attr:`RKey` 0:4 (32) :class:`int`
+    ============ ======== ============
 
 .. class:: rdma.IBA.HdrImmDt
 
@@ -2192,11 +2192,11 @@ Miscellaneous IBA Structures
 
     .. attribute:: MAD_LENGTH = 4
 
-    ===================== ========= ============
-    Member                Position  Type        
-    ===================== ========= ============
-    :attr:`immediateData` 0:32 (32) :class:`int`
-    ===================== ========= ============
+    ===================== ======== ============
+    Member                Position Type        
+    ===================== ======== ============
+    :attr:`immediateData` 0:4 (32) :class:`int`
+    ===================== ======== ============
 
 .. class:: rdma.IBA.HdrLRH
 
@@ -2204,19 +2204,19 @@ Miscellaneous IBA Structures
 
     .. attribute:: MAD_LENGTH = 8
 
-    ================= ========== ============
-    Member            Position   Type        
-    ================= ========== ============
-    :attr:`VL`        0:4 (4)    :class:`int`
-    :attr:`LVer`      4:8 (4)    :class:`int`
-    :attr:`SL`        8:12 (4)   :class:`int`
-    :attr:`reserved1` 12:14 (2)  :class:`int`
-    :attr:`LNH`       14:16 (2)  :class:`int`
-    :attr:`DLID`      16:32 (16) :class:`int`
-    :attr:`reserved2` 32:37 (5)  :class:`int`
-    :attr:`pktLen`    37:48 (11) :class:`int`
-    :attr:`SLID`      48:64 (16) :class:`int`
-    ================= ========== ============
+    =================== ============= ============
+    Member              Position      Type        
+    =================== ============= ============
+    :attr:`VL`          0:0[4] (4)    :class:`int`
+    :attr:`LVer`        0[4]:1 (4)    :class:`int`
+    :attr:`SL`          1:1[4] (4)    :class:`int`
+    :attr:`reserved_12` 1[4]:1[6] (2) :class:`int`
+    :attr:`LNH`         1[6]:2 (2)    :class:`int`
+    :attr:`DLID`        2:4 (16)      :class:`int`
+    :attr:`reserved_32` 4:4[5] (5)    :class:`int`
+    :attr:`pktLen`      4[5]:6 (11)   :class:`int`
+    :attr:`SLID`        6:8 (16)      :class:`int`
+    =================== ============= ============
 
 .. class:: rdma.IBA.HdrRDETH
 
@@ -2224,12 +2224,12 @@ Miscellaneous IBA Structures
 
     .. attribute:: MAD_LENGTH = 4
 
-    ================= ========= ============
-    Member            Position  Type        
-    ================= ========= ============
-    :attr:`reserved1` 0:8 (8)   :class:`int`
-    :attr:`EEC`       8:32 (24) :class:`int`
-    ================= ========= ============
+    ================== ======== ============
+    Member             Position Type        
+    ================== ======== ============
+    :attr:`reserved_0` 0:1 (8)  :class:`int`
+    :attr:`EEC`        1:4 (24) :class:`int`
+    ================== ======== ============
 
 .. class:: rdma.IBA.HdrRETH
 
@@ -2237,13 +2237,13 @@ Miscellaneous IBA Structures
 
     .. attribute:: MAD_LENGTH = 16
 
-    ============== =========== ============
-    Member         Position    Type        
-    ============== =========== ============
-    :attr:`VA`     0:64 (64)   :class:`int`
-    :attr:`RKey`   64:96 (32)  :class:`int`
-    :attr:`DMALen` 96:128 (32) :class:`int`
-    ============== =========== ============
+    ============== ========== ============
+    Member         Position   Type        
+    ============== ========== ============
+    :attr:`VA`     0:8 (64)   :class:`int`
+    :attr:`RKey`   8:12 (32)  :class:`int`
+    :attr:`DMALen` 12:16 (32) :class:`int`
+    ============== ========== ============
 
 .. class:: rdma.IBA.HdrRWH
 
@@ -2251,10 +2251,10 @@ Miscellaneous IBA Structures
 
     .. attribute:: MAD_LENGTH = 4
 
-    ================= ========== ============
-    Member            Position   Type        
-    ================= ========== ============
-    :attr:`reserved1` 0:16 (16)  :class:`int`
-    :attr:`etherType` 16:32 (16) :class:`int`
-    ================= ========== ============
+    ================== ======== ============
+    Member             Position Type        
+    ================== ======== ============
+    :attr:`reserved_0` 0:2 (16) :class:`int`
+    :attr:`etherType`  2:4 (16) :class:`int`
+    ================== ======== ============
 

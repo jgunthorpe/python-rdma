@@ -149,21 +149,20 @@ class Struct(object):
         self.inherits = {};
         self.mb = [];
         self.packCount = 0;
-        self.reserved = 0;
 
         for I in xml.getiterator("mb"):
             self.mb.append((I.text or "",Type(I)));
         assert(sum((I[1].lenBits() for I in self.mb),0) <= self.size*8);
 
     def set_reserved(self):
-        def to_reserved(s):
+        def to_reserved(s,ty):
             if not s:
                 self.reserved = self.reserved + 1;
-                return "reserved%u"%(self.reserved);
+                return "reserved_%u"%(ty.off);
             return s;
 
         self.reserved = 0;
-        self.mb = [(to_reserved(name),ty) for name,ty in self.mb];
+        self.mb = [(to_reserved(name,ty),ty) for name,ty in self.mb];
         self.mbGroup = self.groupMB();
 
     def make_inherit(self):
@@ -444,6 +443,11 @@ class Struct(object):
             print >> F, "   ", "\n    ".join(I);
             print >> F
 
+    def as_RST_pos(self,off):
+        if off % 8 == 0:
+            return "%u"%(off//8);
+        return "%u[%u]"%(off//8,off%8);
+
     def asRST(self,F):
         print >> F,".. class:: rdma.IBA.%s"%(self.name)
         print >> F,""
@@ -459,7 +463,8 @@ class Struct(object):
         rows = [("Member","Position","Type")];
         for name,ty in self.mb:
             rows.append((":attr:`%s`"%(name),
-                         "%u:%u (%u)"%(ty.off,ty.off+ty.lenBits(),
+                         "%s:%s (%u)"%(self.as_RST_pos(ty.off),
+                                       self.as_RST_pos(ty.off+ty.lenBits()),
                                        ty.bits),
                          ty.type_desc()));
         if rows:
