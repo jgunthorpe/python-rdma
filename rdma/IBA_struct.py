@@ -3281,28 +3281,27 @@ class SAPKeyTableRecord(rdma.binstruct.BinStruct):
 
 class SAPathRecord(rdma.binstruct.BinStruct):
     '''Information on paths through the subnet (section 15.2.5.16)'''
-    __slots__ = ('reserved1','reserved2','DGID','SGID','DLID','SLID','rawTraffic','reserved3','flowLabel','hopLimit','TClass','reversible','numbPath','PKey','reserved4','SL','MTUSelector','MTU','rateSelector','rate','packetLifeTimeSelector','packetLifeTime','preference','reserved5','reserved6');
+    __slots__ = ('serviceID','DGID','SGID','DLID','SLID','rawTraffic','reserved1','flowLabel','hopLimit','TClass','reversible','numbPath','PKey','QOSClass','SL','MTUSelector','MTU','rateSelector','rate','packetLifeTimeSelector','packetLifeTime','preference','reserved2','reserved3');
     MAD_LENGTH = 64
     MAD_ATTRIBUTE_ID = 0x35
     MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
-    COMPONENT_MASK = {'reserved1':0, 'reserved2':1, 'DGID':2, 'SGID':3, 'DLID':4, 'SLID':5, 'rawTraffic':6, 'reserved3':7, 'flowLabel':8, 'hopLimit':9, 'TClass':10, 'reversible':11, 'numbPath':12, 'PKey':13, 'reserved4':14, 'SL':15, 'MTUSelector':16, 'MTU':17, 'rateSelector':18, 'rate':19, 'packetLifeTimeSelector':20, 'packetLifeTime':21, 'preference':22, 'reserved5':23, 'reserved6':24}
+    COMPONENT_MASK = {'serviceID':0, 'serviceID56LSB':1, 'DGID':2, 'SGID':3, 'DLID':4, 'SLID':5, 'rawTraffic':6, 'reserved1':7, 'flowLabel':8, 'hopLimit':9, 'TClass':10, 'reversible':11, 'numbPath':12, 'PKey':13, 'QOSClass':14, 'SL':15, 'MTUSelector':16, 'MTU':17, 'rateSelector':18, 'rate':19, 'packetLifeTimeSelector':20, 'packetLifeTime':21, 'preference':22, 'reserved2':23, 'reserved3':24}
     def zero(self):
-        self.reserved1 = 0;
-        self.reserved2 = 0;
+        self.serviceID = 0;
         self.DGID = IBA.GID();
         self.SGID = IBA.GID();
         self.DLID = 0;
         self.SLID = 0;
         self.rawTraffic = 0;
-        self.reserved3 = 0;
+        self.reserved1 = 0;
         self.flowLabel = 0;
         self.hopLimit = 0;
         self.TClass = 0;
         self.reversible = 0;
         self.numbPath = 0;
         self.PKey = 0;
-        self.reserved4 = 0;
+        self.QOSClass = 0;
         self.SL = 0;
         self.MTUSelector = 0;
         self.MTU = 0;
@@ -3311,17 +3310,17 @@ class SAPathRecord(rdma.binstruct.BinStruct):
         self.packetLifeTimeSelector = 0;
         self.packetLifeTime = 0;
         self.preference = 0;
-        self.reserved5 = 0;
-        self.reserved6 = 0;
+        self.reserved2 = 0;
+        self.reserved3 = 0;
 
     @property
     def _pack_0_32(self):
-        return ((self.rawTraffic & 0x1) << 31) | ((self.reserved3 & 0x7) << 28) | ((self.flowLabel & 0xFFFFF) << 8) | ((self.hopLimit & 0xFF) << 0)
+        return ((self.rawTraffic & 0x1) << 31) | ((self.reserved1 & 0x7) << 28) | ((self.flowLabel & 0xFFFFF) << 8) | ((self.hopLimit & 0xFF) << 0)
 
     @_pack_0_32.setter
     def _pack_0_32(self,value):
         self.rawTraffic = (value >> 31) & 0x1;
-        self.reserved3 = (value >> 28) & 0x7;
+        self.reserved1 = (value >> 28) & 0x7;
         self.flowLabel = (value >> 8) & 0xFFFFF;
         self.hopLimit = (value >> 0) & 0xFF;
 
@@ -3338,11 +3337,11 @@ class SAPathRecord(rdma.binstruct.BinStruct):
 
     @property
     def _pack_2_32(self):
-        return ((self.reserved4 & 0xFFF) << 20) | ((self.SL & 0xF) << 16) | ((self.MTUSelector & 0x3) << 14) | ((self.MTU & 0x3F) << 8) | ((self.rateSelector & 0x3) << 6) | ((self.rate & 0x3F) << 0)
+        return ((self.QOSClass & 0xFFF) << 20) | ((self.SL & 0xF) << 16) | ((self.MTUSelector & 0x3) << 14) | ((self.MTU & 0x3F) << 8) | ((self.rateSelector & 0x3) << 6) | ((self.rate & 0x3F) << 0)
 
     @_pack_2_32.setter
     def _pack_2_32(self,value):
-        self.reserved4 = (value >> 20) & 0xFFF;
+        self.QOSClass = (value >> 20) & 0xFFF;
         self.SL = (value >> 16) & 0xF;
         self.MTUSelector = (value >> 14) & 0x3;
         self.MTU = (value >> 8) & 0x3F;
@@ -3351,65 +3350,62 @@ class SAPathRecord(rdma.binstruct.BinStruct):
 
     @property
     def _pack_3_32(self):
-        return ((self.packetLifeTimeSelector & 0x3) << 30) | ((self.packetLifeTime & 0x3F) << 24) | ((self.preference & 0xFF) << 16) | ((self.reserved5 & 0xFFFF) << 0)
+        return ((self.packetLifeTimeSelector & 0x3) << 30) | ((self.packetLifeTime & 0x3F) << 24) | ((self.preference & 0xFF) << 16) | ((self.reserved2 & 0xFFFF) << 0)
 
     @_pack_3_32.setter
     def _pack_3_32(self,value):
         self.packetLifeTimeSelector = (value >> 30) & 0x3;
         self.packetLifeTime = (value >> 24) & 0x3F;
         self.preference = (value >> 16) & 0xFF;
-        self.reserved5 = (value >> 0) & 0xFFFF;
+        self.reserved2 = (value >> 0) & 0xFFFF;
 
     def pack_into(self,buffer,offset=0):
         self.DGID.pack_into(buffer,offset + 8);
         self.SGID.pack_into(buffer,offset + 24);
-        struct.pack_into('>LL',buffer,offset+0,self.reserved1,self.reserved2);
-        struct.pack_into('>HHLLLLL',buffer,offset+40,self.DLID,self.SLID,self._pack_0_32,self._pack_1_32,self._pack_2_32,self._pack_3_32,self.reserved6);
+        struct.pack_into('>Q',buffer,offset+0,self.serviceID);
+        struct.pack_into('>HHLLLLL',buffer,offset+40,self.DLID,self.SLID,self._pack_0_32,self._pack_1_32,self._pack_2_32,self._pack_3_32,self.reserved3);
 
     def unpack_from(self,buffer,offset=0):
         self._buf = buffer[offset:];
         self.DGID = IBA.GID(buffer[offset + 8:offset + 24],raw=True);
         self.SGID = IBA.GID(buffer[offset + 24:offset + 40],raw=True);
-        (self.reserved1,self.reserved2,) = struct.unpack_from('>LL',buffer,offset+0);
-        (self.DLID,self.SLID,self._pack_0_32,self._pack_1_32,self._pack_2_32,self._pack_3_32,self.reserved6,) = struct.unpack_from('>HHLLLLL',buffer,offset+40);
+        (self.serviceID,) = struct.unpack_from('>Q',buffer,offset+0);
+        (self.DLID,self.SLID,self._pack_0_32,self._pack_1_32,self._pack_2_32,self._pack_3_32,self.reserved3,) = struct.unpack_from('>HHLLLLL',buffer,offset+40);
 
     def printer(self,F,offset=0,header=True):
         rdma.binstruct.BinStruct.printer(self,F,offset,header);
-        label = "reserved1=%r"%(self.reserved1);
-        self.dump(F,0,32,label,offset);
-        label = "reserved2=%r"%(self.reserved2);
-        self.dump(F,32,64,label,offset);
+        label = "serviceID=%r"%(self.serviceID);
+        self.dump(F,0,64,label,offset);
         label = "DGID=%r"%(self.DGID);
         self.dump(F,64,192,label,offset);
         label = "SGID=%r"%(self.SGID);
         self.dump(F,192,320,label,offset);
         label = "DLID=%r,SLID=%r"%(self.DLID,self.SLID);
         self.dump(F,320,352,label,offset);
-        label = "rawTraffic=%r,reserved3=%r,flowLabel=%r,hopLimit=%r"%(self.rawTraffic,self.reserved3,self.flowLabel,self.hopLimit);
+        label = "rawTraffic=%r,reserved1=%r,flowLabel=%r,hopLimit=%r"%(self.rawTraffic,self.reserved1,self.flowLabel,self.hopLimit);
         self.dump(F,352,384,label,offset);
         label = "TClass=%r,reversible=%r,numbPath=%r,PKey=%r"%(self.TClass,self.reversible,self.numbPath,self.PKey);
         self.dump(F,384,416,label,offset);
-        label = "reserved4=%r,SL=%r,MTUSelector=%r,MTU=%r,rateSelector=%r,rate=%r"%(self.reserved4,self.SL,self.MTUSelector,self.MTU,self.rateSelector,self.rate);
+        label = "QOSClass=%r,SL=%r,MTUSelector=%r,MTU=%r,rateSelector=%r,rate=%r"%(self.QOSClass,self.SL,self.MTUSelector,self.MTU,self.rateSelector,self.rate);
         self.dump(F,416,448,label,offset);
-        label = "packetLifeTimeSelector=%r,packetLifeTime=%r,preference=%r,reserved5=%r"%(self.packetLifeTimeSelector,self.packetLifeTime,self.preference,self.reserved5);
+        label = "packetLifeTimeSelector=%r,packetLifeTime=%r,preference=%r,reserved2=%r"%(self.packetLifeTimeSelector,self.packetLifeTime,self.preference,self.reserved2);
         self.dump(F,448,480,label,offset);
-        label = "reserved6=%r"%(self.reserved6);
+        label = "reserved3=%r"%(self.reserved3);
         self.dump(F,480,512,label,offset);
 
 class SAMCMemberRecord(rdma.binstruct.BinStruct):
     '''Multicast member attribute (section 15.2.5.17)'''
-    __slots__ = ('MGID','portGID','requesterGID','QKey','MLID','MTUSelector','MTU','TClass','PKey','rateSelector','rate','packetLifeTimeSelector','packetLifeTime','SL','flowLabel','hopLimit','scope','joinState','reserved1');
-    MAD_LENGTH = 68
+    __slots__ = ('MGID','portGID','QKey','MLID','MTUSelector','MTU','TClass','PKey','rateSelector','rate','packetLifeTimeSelector','packetLifeTime','SL','flowLabel','hopLimit','scope','joinState','proxyJoin','reserved1');
+    MAD_LENGTH = 52
     MAD_ATTRIBUTE_ID = 0x38
     MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     MAD_SUBNADMSET = 0x2 # MAD_METHOD_SET
     MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
     MAD_SUBNADMDELETE = 0x15 # MAD_METHOD_DELETE
-    COMPONENT_MASK = {'MGID':0, 'portGID':1, 'requesterGID':2, 'QKey':3, 'MLID':4, 'MTUSelector':5, 'MTU':6, 'TClass':7, 'PKey':8, 'rateSelector':9, 'rate':10, 'packetLifeTimeSelector':11, 'packetLifeTime':12, 'SL':13, 'flowLabel':14, 'hopLimit':15, 'scope':16, 'joinState':17, 'reserved1':18}
+    COMPONENT_MASK = {'MGID':0, 'portGID':1, 'QKey':2, 'MLID':3, 'MTUSelector':4, 'MTU':5, 'TClass':6, 'PKey':7, 'rateSelector':8, 'rate':9, 'packetLifeTimeSelector':10, 'packetLifeTime':11, 'SL':12, 'flowLabel':13, 'hopLimit':14, 'scope':15, 'joinState':16, 'proxyJoin':17, 'reserved1':18}
     def zero(self):
         self.MGID = IBA.GID();
         self.portGID = IBA.GID();
-        self.requesterGID = IBA.GID();
         self.QKey = 0;
         self.MLID = 0;
         self.MTUSelector = 0;
@@ -3425,6 +3421,7 @@ class SAMCMemberRecord(rdma.binstruct.BinStruct):
         self.hopLimit = 0;
         self.scope = 0;
         self.joinState = 0;
+        self.proxyJoin = 0;
         self.reserved1 = 0;
 
     @property
@@ -3462,26 +3459,25 @@ class SAMCMemberRecord(rdma.binstruct.BinStruct):
 
     @property
     def _pack_3_32(self):
-        return ((self.scope & 0xF) << 28) | ((self.joinState & 0xF) << 24) | ((self.reserved1 & 0xFFFFFF) << 0)
+        return ((self.scope & 0xF) << 28) | ((self.joinState & 0xF) << 24) | ((self.proxyJoin & 0x1) << 23) | ((self.reserved1 & 0x7FFFFF) << 0)
 
     @_pack_3_32.setter
     def _pack_3_32(self,value):
         self.scope = (value >> 28) & 0xF;
         self.joinState = (value >> 24) & 0xF;
-        self.reserved1 = (value >> 0) & 0xFFFFFF;
+        self.proxyJoin = (value >> 23) & 0x1;
+        self.reserved1 = (value >> 0) & 0x7FFFFF;
 
     def pack_into(self,buffer,offset=0):
         self.MGID.pack_into(buffer,offset + 0);
         self.portGID.pack_into(buffer,offset + 16);
-        self.requesterGID.pack_into(buffer,offset + 32);
-        struct.pack_into('>LLLLL',buffer,offset+48,self.QKey,self._pack_0_32,self._pack_1_32,self._pack_2_32,self._pack_3_32);
+        struct.pack_into('>LLLLL',buffer,offset+32,self.QKey,self._pack_0_32,self._pack_1_32,self._pack_2_32,self._pack_3_32);
 
     def unpack_from(self,buffer,offset=0):
         self._buf = buffer[offset:];
         self.MGID = IBA.GID(buffer[offset + 0:offset + 16],raw=True);
         self.portGID = IBA.GID(buffer[offset + 16:offset + 32],raw=True);
-        self.requesterGID = IBA.GID(buffer[offset + 32:offset + 48],raw=True);
-        (self.QKey,self._pack_0_32,self._pack_1_32,self._pack_2_32,self._pack_3_32,) = struct.unpack_from('>LLLLL',buffer,offset+48);
+        (self.QKey,self._pack_0_32,self._pack_1_32,self._pack_2_32,self._pack_3_32,) = struct.unpack_from('>LLLLL',buffer,offset+32);
 
     def printer(self,F,offset=0,header=True):
         rdma.binstruct.BinStruct.printer(self,F,offset,header);
@@ -3489,18 +3485,16 @@ class SAMCMemberRecord(rdma.binstruct.BinStruct):
         self.dump(F,0,128,label,offset);
         label = "portGID=%r"%(self.portGID);
         self.dump(F,128,256,label,offset);
-        label = "requesterGID=%r"%(self.requesterGID);
-        self.dump(F,256,384,label,offset);
         label = "QKey=%r"%(self.QKey);
-        self.dump(F,384,416,label,offset);
+        self.dump(F,256,288,label,offset);
         label = "MLID=%r,MTUSelector=%r,MTU=%r,TClass=%r"%(self.MLID,self.MTUSelector,self.MTU,self.TClass);
-        self.dump(F,416,448,label,offset);
+        self.dump(F,288,320,label,offset);
         label = "PKey=%r,rateSelector=%r,rate=%r,packetLifeTimeSelector=%r,packetLifeTime=%r"%(self.PKey,self.rateSelector,self.rate,self.packetLifeTimeSelector,self.packetLifeTime);
-        self.dump(F,448,480,label,offset);
+        self.dump(F,320,352,label,offset);
         label = "SL=%r,flowLabel=%r,hopLimit=%r"%(self.SL,self.flowLabel,self.hopLimit);
-        self.dump(F,480,512,label,offset);
-        label = "scope=%r,joinState=%r,reserved1=%r"%(self.scope,self.joinState,self.reserved1);
-        self.dump(F,512,544,label,offset);
+        self.dump(F,352,384,label,offset);
+        label = "scope=%r,joinState=%r,proxyJoin=%r,reserved1=%r"%(self.scope,self.joinState,self.proxyJoin,self.reserved1);
+        self.dump(F,384,416,label,offset);
 
 class SATraceRecord(rdma.binstruct.BinStruct):
     '''Path trace information (section 15.2.5.19)'''

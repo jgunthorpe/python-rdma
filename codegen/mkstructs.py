@@ -213,6 +213,8 @@ class Struct(object):
         off = 0;
         for I in self.mb:
             bits = I[1].lenBits();
+            if bits == 0:
+                continue;
             curGroup.append(I);
 
             if (off == 0 and (off + bits) % 32 == 0) or \
@@ -409,7 +411,8 @@ class Struct(object):
                 self.funcs.append(x);
             x = ["def zero(self):"];
             for name,ty in self.mb:
-                x.append("    self.%s = %s;"%(name,ty.initStr()));
+                if ty.lenBits() != 0:
+                    x.append("    self.%s = %s;"%(name,ty.initStr()));
             self.funcs.append(x);
 
         pack = ["def pack_into(self,buffer,offset=0):"];
@@ -426,7 +429,7 @@ class Struct(object):
 
         self.genPrinter();
 
-        self.slots = ','.join(repr(I[0]) for I in self.mb);
+        self.slots = ','.join(repr(I[0]) for I in self.mb if I[1].lenBits() != 0);
         if self.is_format:
             print >> F,"class %s(BinFormat):"%(self.name);
         else:

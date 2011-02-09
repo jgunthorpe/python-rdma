@@ -228,8 +228,9 @@
           attributeID="0x35"
           attributeName="SA_PATH_RECORD"
           methods="SubnAdmGet SubnAdmGetTable">
-    <mb bits="32" off="0[0]"><!--Reserved--></mb>
-    <mb bits="32" off="0[32]"><!--Reserved--></mb>
+    <mb bits="64" off="0[0]">serviceID<!--ServiceID8MSB--></mb>
+    <!-- Gap so component mask computes properly. Grr. -->
+    <mb bits="0" off="0[32]">serviceID56LSB<!--ServiceID56LSB--></mb>
     <mb bits="128" off="0[64]" type="HdrIPv6Addr">DGID<!--DGID--></mb>
     <mb bits="128" off="0[192]" type="HdrIPv6Addr">SGID<!--SGID--></mb>
     <mb bits="16" off="0[320]">DLID<!--DLID--></mb>
@@ -242,7 +243,7 @@
     <mb bits="1" off="0[392]">reversible<!--Reversible--></mb>
     <mb bits="7" off="0[393]">numbPath<!--NumbPath--></mb>
     <mb bits="16" off="0[400]">PKey<!--P_Key--></mb>
-    <mb bits="12" off="0[416]"><!--Reserved--></mb>
+    <mb bits="12" off="0[416]">QOSClass<!--QoSClass--></mb>
     <mb bits="4" off="0[428]">SL<!--SL--></mb>
     <mb bits="2" off="0[432]">MTUSelector<!--MTUSelector--></mb>
     <mb bits="6" off="0[434]">MTU<!--MTU--></mb>
@@ -256,7 +257,7 @@
   </struct>
 
   <struct name="SAMCMemberRecord"
-          bytes="68"
+          bytes="52"
           desc="Multicast member attribute"
           sect="15.2.5.17"
           attributeID="0x38"
@@ -264,23 +265,23 @@
           methods="SubnAdmGet SubnAdmSet SubnAdmGetTable SubnAdmDelete">
     <mb bits="128" off="0[0]" type="HdrIPv6Addr">MGID<!--MGID--></mb>
     <mb bits="128" off="0[128]" type="HdrIPv6Addr">portGID<!--PortGID--></mb>
-    <mb bits="128" off="0[256]" type="HdrIPv6Addr">requesterGID<!--RequesterGID--></mb>
-    <mb bits="32" off="0[384]">QKey<!--Q_Key--></mb>
-    <mb bits="16" off="0[416]">MLID<!--MLID--></mb>
-    <mb bits="2" off="0[432]">MTUSelector<!--MTUSelector--></mb>
-    <mb bits="6" off="0[434]">MTU<!--MTU--></mb>
-    <mb bits="8" off="0[440]">TClass<!--TClass--></mb>
-    <mb bits="16" off="0[448]">PKey<!--P_Key--></mb>
-    <mb bits="2" off="0[464]">rateSelector<!--RateSelector--></mb>
-    <mb bits="6" off="0[466]">rate<!--Rate--></mb>
-    <mb bits="2" off="0[472]">packetLifeTimeSelector<!--PacketLifeTimeSelector--></mb>
-    <mb bits="6" off="0[474]">packetLifeTime<!--PacketLifeTime--></mb>
-    <mb bits="4" off="0[480]">SL<!--SL--></mb>
-    <mb bits="20" off="0[484]">flowLabel<!--FlowLabel--></mb>
-    <mb bits="8" off="0[504]">hopLimit<!--HopLimit--></mb>
-    <mb bits="4" off="0[512]">scope<!--Scope--></mb>
-    <mb bits="4" off="0[516]">joinState<!--JoinState--></mb>
-    <mb bits="24" off="0[520]"><!--Reserved--></mb>
+    <mb bits="32" off="0[256]">QKey<!--Q_Key--></mb>
+    <mb bits="16" off="0[288]">MLID<!--MLID--></mb>
+    <mb bits="2" off="0[304]">MTUSelector<!--MTUSelector--></mb>
+    <mb bits="6" off="0[306]">MTU<!--MTU--></mb>
+    <mb bits="8" off="0[312]">TClass<!--TClass--></mb>
+    <mb bits="16" off="0[320]">PKey<!--P_Key--></mb>
+    <mb bits="2" off="0[336]">rateSelector<!--RateSelector--></mb>
+    <mb bits="6" off="0[338]">rate<!--Rate--></mb>
+    <mb bits="2" off="0[344]">packetLifeTimeSelector<!--PacketLifeTimeSelector--></mb>
+    <mb bits="6" off="0[346]">packetLifeTime<!--PacketLifeTime--></mb>
+    <mb bits="4" off="0[352]">SL<!--SL--></mb>
+    <mb bits="20" off="0[356]">flowLabel<!--FlowLabel--></mb>
+    <mb bits="8" off="0[376]">hopLimit<!--HopLimit--></mb>
+    <mb bits="4" off="0[384]">scope<!--Scope--></mb>
+    <mb bits="4" off="0[388]">joinState<!--JoinState--></mb>
+    <mb bits="1" off="0[392]">proxyJoin<!--ProxyJoin--></mb>
+    <mb bits="23" off="0[393]"><!--Reserved--></mb>
   </struct>
 
   <struct name="SATraceRecord"
