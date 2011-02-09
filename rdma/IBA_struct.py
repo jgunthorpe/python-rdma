@@ -1309,13 +1309,13 @@ class MADClassPortInfo(rdma.binstruct.BinStruct):
     __slots__ = ('baseVersion','classVersion','capabilityMask','capabilityMask2','respTimeValue','redirectGID','redirectTC','redirectSL','redirectFL','redirectLID','redirectPKey','reserved_256','redirectQP','redirectQKey','trapGID','trapTC','trapSL','trapFL','trapLID','trapPKey','trapHL','trapQP','trapQKey');
     MAD_LENGTH = 72
     MAD_ATTRIBUTE_ID = 0x1
-    MAD_COMMMGTGET = 0x1 # MAD_METHOD_GET
-    MAD_COMMMGTSET = 0x2 # MAD_METHOD_SET
-    MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
     MAD_BMGET = 0x1 # MAD_METHOD_GET
     MAD_BMSET = 0x2 # MAD_METHOD_SET
+    MAD_COMMMGTGET = 0x1 # MAD_METHOD_GET
+    MAD_COMMMGTSET = 0x2 # MAD_METHOD_SET
     MAD_DEVMGTGET = 0x1 # MAD_METHOD_GET
     MAD_DEVMGTSET = 0x2 # MAD_METHOD_SET
+    MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
     MAD_SNMPGET = 0x1 # MAD_METHOD_GET
     MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     COMPONENT_MASK = {'baseVersion':0, 'classVersion':1, 'capabilityMask':2, 'capabilityMask2':3, 'respTimeValue':4, 'redirectGID':5, 'redirectTC':6, 'redirectSL':7, 'redirectFL':8, 'redirectLID':9, 'redirectPKey':10, 'reserved_256':11, 'redirectQP':12, 'redirectQKey':13, 'trapGID':14, 'trapTC':15, 'trapSL':16, 'trapFL':17, 'trapLID':18, 'trapPKey':19, 'trapHL':20, 'trapQP':21, 'trapQKey':22}
@@ -3163,10 +3163,10 @@ class SAServiceRecord(rdma.binstruct.BinStruct):
     __slots__ = ('serviceID','serviceGID','servicePKey','reserved_208','serviceLease','serviceKey','serviceName','serviceData8','serviceData16','serviceData32','serviceData64');
     MAD_LENGTH = 176
     MAD_ATTRIBUTE_ID = 0x31
-    MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
-    MAD_SUBNADMSET = 0x2 # MAD_METHOD_SET
-    MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
     MAD_SUBNADMDELETE = 0x15 # MAD_METHOD_DELETE
+    MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
+    MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
+    MAD_SUBNADMSET = 0x2 # MAD_METHOD_SET
     COMPONENT_MASK = {'serviceID':0, 'serviceGID':1, 'servicePKey':2, 'reserved_208':3, 'serviceLease':4, 'serviceKey':5, 'serviceName':6, 'serviceData8':7, 'serviceData16':8, 'serviceData32':9, 'serviceData64':10}
     def __init__(self,*args):
         self.serviceName = bytearray(64);
@@ -3398,10 +3398,10 @@ class SAMCMemberRecord(rdma.binstruct.BinStruct):
     __slots__ = ('MGID','portGID','QKey','MLID','MTUSelector','MTU','TClass','PKey','rateSelector','rate','packetLifeTimeSelector','packetLifeTime','SL','flowLabel','hopLimit','scope','joinState','proxyJoin','reserved_393');
     MAD_LENGTH = 52
     MAD_ATTRIBUTE_ID = 0x38
-    MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
-    MAD_SUBNADMSET = 0x2 # MAD_METHOD_SET
-    MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
     MAD_SUBNADMDELETE = 0x15 # MAD_METHOD_DELETE
+    MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
+    MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
+    MAD_SUBNADMSET = 0x2 # MAD_METHOD_SET
     COMPONENT_MASK = {'MGID':0, 'portGID':1, 'QKey':2, 'MLID':3, 'MTUSelector':4, 'MTU':5, 'TClass':6, 'PKey':7, 'rateSelector':8, 'rate':9, 'packetLifeTimeSelector':10, 'packetLifeTime':11, 'SL':12, 'flowLabel':13, 'hopLimit':14, 'scope':15, 'joinState':16, 'proxyJoin':17, 'reserved_393':18}
     def zero(self):
         self.MGID = IBA.GID();
@@ -4944,6 +4944,8 @@ ATTR_TO_STRUCT = {(CMFormat,16):CMREQ,
 	(SMPFormatDirected,32):SMPSMInfo,
 	(SMPFormatDirected,48):SMPVendorDiag,
 	(SMPFormatDirected,49):SMPLedInfo,
+	(SAFormat,1):MADClassPortInfo,
+	(SAFormat,3):MADInformInfo,
 	(SAFormat,17):SANodeRecord,
 	(SAFormat,18):SAPortInfoRecord,
 	(SAFormat,19):SASLToVLMappingTableRecord,
@@ -4963,6 +4965,7 @@ ATTR_TO_STRUCT = {(CMFormat,16):CMREQ,
 	(SAFormat,57):SATraceRecord,
 	(SAFormat,58):SAMultiPathRecord,
 	(SAFormat,59):SAServiceAssociationRecord,
+	(PMFormat,1):MADClassPortInfo,
 	(PMFormat,16):PMPortSamplesCtl,
 	(PMFormat,17):PMPortSamplesRes,
 	(PMFormat,18):PMPortCounters,
@@ -4979,6 +4982,7 @@ ATTR_TO_STRUCT = {(CMFormat,16):CMREQ,
 	(PMFormat,29):PMPortCountersExt,
 	(PMFormat,54):PMPortXmitDataSL,
 	(PMFormat,55):PMPortRcvDataSL,
+	(DMFormat,1):MADClassPortInfo,
 	(DMFormat,16):DMIOUnitInfo,
 	(DMFormat,17):DMIOControllerProfile,
 	(DMFormat,18):DMServiceEntries,

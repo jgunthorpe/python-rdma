@@ -292,13 +292,13 @@ Generic MAD (13.4)
 
     .. attribute:: MAD_LENGTH = 72
     .. attribute:: MAD_ATTRIBUTE_ID = 0x1
-    .. attribute:: MAD_COMMMGTGET = 0x1 # MAD_METHOD_GET
-    .. attribute:: MAD_COMMMGTSET = 0x2 # MAD_METHOD_SET
-    .. attribute:: MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_BMGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_BMSET = 0x2 # MAD_METHOD_SET
+    .. attribute:: MAD_COMMMGTGET = 0x1 # MAD_METHOD_GET
+    .. attribute:: MAD_COMMMGTSET = 0x2 # MAD_METHOD_SET
     .. attribute:: MAD_DEVMGTGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_DEVMGTSET = 0x2 # MAD_METHOD_SET
+    .. attribute:: MAD_PERFORMANCEGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SNMPGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     .. attribute:: COMPONENT_MASK = {'baseVersion':0, 'classVersion':1, 'capabilityMask':2, 'capabilityMask2':3, 'respTimeValue':4, 'redirectGID':5, 'redirectTC':6, 'redirectSL':7, 'redirectFL':8, 'redirectLID':9, 'redirectPKey':10, 'reserved_256':11, 'redirectQP':12, 'redirectQKey':13, 'trapGID':14, 'trapTC':15, 'trapSL':16, 'trapFL':17, 'trapLID':18, 'trapPKey':19, 'trapHL':20, 'trapQP':21, 'trapQKey':22}
@@ -1037,10 +1037,10 @@ Subnet Administration (15)
 
     .. attribute:: MAD_LENGTH = 52
     .. attribute:: MAD_ATTRIBUTE_ID = 0x38
-    .. attribute:: MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
-    .. attribute:: MAD_SUBNADMSET = 0x2 # MAD_METHOD_SET
-    .. attribute:: MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
     .. attribute:: MAD_SUBNADMDELETE = 0x15 # MAD_METHOD_DELETE
+    .. attribute:: MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
+    .. attribute:: MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
+    .. attribute:: MAD_SUBNADMSET = 0x2 # MAD_METHOD_SET
     .. attribute:: COMPONENT_MASK = {'MGID':0, 'portGID':1, 'QKey':2, 'MLID':3, 'MTUSelector':4, 'MTU':5, 'TClass':6, 'PKey':7, 'rateSelector':8, 'rate':9, 'packetLifeTimeSelector':10, 'packetLifeTime':11, 'SL':12, 'flowLabel':13, 'hopLimit':14, 'scope':15, 'joinState':16, 'proxyJoin':17, 'reserved_393':18}
 
     ============================== ============= ======================
@@ -1304,10 +1304,10 @@ Subnet Administration (15)
 
     .. attribute:: MAD_LENGTH = 176
     .. attribute:: MAD_ATTRIBUTE_ID = 0x31
-    .. attribute:: MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
-    .. attribute:: MAD_SUBNADMSET = 0x2 # MAD_METHOD_SET
-    .. attribute:: MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
     .. attribute:: MAD_SUBNADMDELETE = 0x15 # MAD_METHOD_DELETE
+    .. attribute:: MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
+    .. attribute:: MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
+    .. attribute:: MAD_SUBNADMSET = 0x2 # MAD_METHOD_SET
     .. attribute:: COMPONENT_MASK = {'serviceID':0, 'serviceGID':1, 'servicePKey':2, 'reserved_208':3, 'serviceLease':4, 'serviceKey':5, 'serviceName':6, 'serviceData8':7, 'serviceData16':8, 'serviceData32':9, 'serviceData64':10}
 
     ===================== ============ ============================

@@ -141,7 +141,14 @@ class Struct(object):
         self.mgmtClass = xml.get("mgmtClass");
         self.mgmtClassVersion = xml.get("mgmtClassVersion");
         self.methods = xml.get("methods");
+        if self.methods is not None:
+            self.methods = set(self.methods.split());
+        else:
+            self.methods = set();
+
         self.attributeID = xml.get("attributeID");
+        if self.attributeID is not None:
+            self.attributeID = int(self.attributeID,0);
 
         self.is_format = (self.name.endswith("Format") or
                           self.name.endswith("FormatDirected"));
@@ -383,11 +390,11 @@ class Struct(object):
         if self.mgmtClass:
             yield "MAD_CLASS","0x%x"%(int(self.mgmtClass,0));
             yield "MAD_CLASS_VERSION","0x%x"%(int(self.mgmtClassVersion,0));
-        if self.attributeID:
-            yield "MAD_ATTRIBUTE_ID","0x%x"%(int(self.attributeID,0));
-        if self.methods:
+        if self.attributeID is not None:
+            yield "MAD_ATTRIBUTE_ID","0x%x"%(self.attributeID);
+        if self.methods and not self.is_format:
             is_sa = False;
-            for I in self.methods.split():
+            for I in sorted(self.methods):
                 if I.startswith("SubnAdm"):
                     is_sa = True;
                 yield "MAD_%s"%(I.upper()),"0x%x # %s"%(globals()[methodMap[I]],
@@ -492,6 +499,17 @@ for I in structs:
 for I in structs:
     I.set_reserved();
 
+# Match up formats and attributes. We infer the matching based on grouping in a file.
+for I in structs:
+    if I.is_format:
+        I.attributes = set();
+        for J in structs:
+            if J.filename == I.filename and J.attributeID is not None:
+                I.attributes.add(J);
+        for J in I.attributes:
+            if J.methods:
+                I.methods.update(J.methods);
+
 with safeUpdateCtx(options.struct_out) as F:
     print >> F, """import struct,rdma.binstruct;
 class BinFormat(rdma.binstruct.BinStruct):
@@ -523,10 +541,10 @@ class BinFormat(rdma.binstruct.BinStruct):
     for I in structs:
         if I.is_format:
             for J in structs:
-                if J.filename == I.filename and J.attributeID is not None:
+                if J.attributeID is not None and not I.methods.isdisjoint(J.methods):
                     res.append((I,J));
     print >> F, "ATTR_TO_STRUCT = {%s};"%(",\n\t".join("(%s,%u):%s"%(
-        I[0].name,int(I[1].attributeID,0),I[1].name) for I in res));
+        I[0].name,I[1].attributeID,I[1].name) for I in res));
 
 with safeUpdateCtx(options.rst_out) as F:
     def is_sect_prefix(x,y):
