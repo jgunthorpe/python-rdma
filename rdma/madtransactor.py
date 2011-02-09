@@ -45,7 +45,10 @@ class MADTransactor(object):
     multi-threaded applications each thread must have a separate
     :class:`MADTransactor` instance.  Simple MAD request/reply transactors
     return payload, other attributes for the last processed reply are
-    available via instance attributes."""
+    available via instance attributes.
+
+    Paths used with this object can have a MKey (for SMPs) and SMKey (for
+    SA GMPs) attribute."""
 
     #: The path for the last reply packet processed
     reply_path = None;
@@ -209,6 +212,7 @@ class MADTransactor(object):
             fmt.hopCount = len(path.drPath)-1;
         else:
             fmt = IBA.SMPFormat();
+        fmt.MKey = getattr(path,"MKey",0);
         return self._doMAD(fmt,payload,path,attributeModifier,method);
 
     def SubnGet(self,payload,path,attributeModifier=0):
@@ -230,7 +234,7 @@ class MADTransactor(object):
         if isinstance(payload,IBA.ComponentMask):
             fmt.componentMask = payload.component_mask;
             payload = payload.payload;
-        # fmt.SMKey = path.SMKey;
+        fmt.SMKey = getattr(path,"SMKey",0);
         return self._doMAD(fmt,payload,path,attributeModifier,method);
 
     def SubnAdmGet(self,payload,path,attributeModifier=0):
