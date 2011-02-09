@@ -36,14 +36,16 @@ class BinStruct(object):
             self._buf = None;
             self.zero();
 
-    def printer(self,F,offset=0,header=True):
+    def printer(self,F,offset=0,header=True,format="dump",**kwargs):
         """Pretty print the structure. *F* is the output file, *offset* is
         added to all printed offsets and *header* causes the display of the
-        class type on the first line."""
+        class type on the first line. *format* may be `dump` or `dotted`."""
         if header:
             print >> F, "%s"%(self.__class__.__name__);
         import rdma.IBA_describe;
-        rdma.IBA_describe.struct_dump(F,self,offset=offset);
+        if format == "dotted":
+            return rdma.IBA_describe.struct_dotted(F,self,**kwargs);
+        return rdma.IBA_describe.struct_dump(F,self,offset=offset,**kwargs);
 
     # 'pure virtual' functions
     def zero(self):

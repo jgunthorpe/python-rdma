@@ -568,6 +568,7 @@ class structs_test(unittest.TestCase):
     print >> F, "    def test_struct_printer(self):";
     for I in structs:
         print >> F,'        IBA.%s().printer(sys.stdout);'%(I.name);
+        print >> F,'        IBA.%s().printer(sys.stdout,format="dotted");'%(I.name);
     print >> F,\
 """if __name__ == '__main__':
     unittest.main()""";

@@ -158,3 +158,43 @@ def struct_dump(F,s,offset=0,name_prefix=''):
                ord(buf[cur_dword+2]),ord(buf[cur_dword+3]),
                ",".join(mb));
         cur_dword = cur_dword + 4;
+
+def struct_dotted(F,s,name_prefix='',dump_list=False,skip_reserved=True):
+    """This tries to emulate the libib structure print format. Members are
+    printed one per line with values aligned on column 32."""
+    for name,mbits,count in s.MEMBERS:
+        if skip_reserved and name.startswith("reserved_"):
+            continue;
+        attr = getattr(s,name);
+        cname = name[0].upper() + name[1:];
+
+        # Special automagic decode of format data members based on
+        # attribute ID.
+        if name == "data" and isinstance(s,rdma.IBA.BinFormat):
+            nattr = IBA.ATTR_TO_STRUCT.get((s.__class__,s.attributeID));
+            if nattr != None:
+                if nattr.MAD_LENGTH <= len(attr):
+                    attr = nattr(attr);
+
+        if isinstance(attr,rdma.binstruct.BinStruct):
+            struct_dotted(F,attr,"%s%s."%(name_prefix,name));
+            continue;
+
+        fmt = "%r";
+        if count != 1 and len(attr) == count:
+            if isinstance(attr[0],rdma.binstruct.BinStruct):
+                for I,v in enumerate(attr):
+                    struct_dotted(F,v,"%s%s[%u]."%(name_prefix,name,I));
+                continue;
+
+            if mbits > 16 or dump_list:
+                for I,v in enumerate(attr):
+                    n = "%s%s[%u]."%(name_prefix,cname,I);
+                    print >> F, ("%s%s"+fmt)%(n,"."*(32-len(n)),v);
+                continue;
+            else:
+                attr = "[%s]"%(", ".join(("%u:"+fmt)%(I,v) for I,v in enumerate(attr)));
+                fmt = "%s";
+
+        n = "%s%s"%(name_prefix,cname);
+        print >> F, ("%s%s"+fmt)%(n,"."*(32-len(n)),attr);

@@ -38,7 +38,7 @@ new instance is unpacked using the original byte buffer that the first instance
 was unpacked from. Changing the attributes has no effect.
 
 .. NOTE::
-   This is based on Pythons :mod:`struct` module, which requires a :class:`bytes`
+   This is based on Python's :mod:`struct` module, which requires a :class:`bytes`
    object for unpack and a :class:`bytearray` for packing. This conversion
    is generally handled transparently..
 
@@ -54,41 +54,41 @@ Structure Pretty Printer
 All of the :class:`~rdma.binstruct.BinStruct` classes feature an automatic
 pretty printer for the class content. The pretty printer understands some of
 the structure of the data and properly pretty prints things like the data
-member of a `*Format` object. Here is the pretty print output for a
+member of a `*Format` object. Here is the `dump` pretty print output for a
 :class:`~rdma.IBA.SAFormat` containing a :class:`~rdma.IBA.SAPathRecord`::
 
  SAFormat
-   0 01030201 baseVersion=1,mgmtClass=3,classVersion=2,method=1
+   0 01030281 baseVersion=1,mgmtClass=3,classVersion=2,method=129
    4 00000000 status=0,classSpecific=0
-   8 00000000 transactionID=1
-  12 00000001
-  16 00350000 attributeID=53,reserved1=0
+   8 000028D6 transactionID=44902842023172
+  12 C1F2BD04
+  16 00350000 attributeID=53,reserved_144=0
   20 00000000 attributeModifier=0
   24 00000000 RMPPVersion=0,RMPPType=0,RRespTime=0,RMPPFlags=0,RMPPStatus=0
   28 00000000 data1=0
   32 00000000 data2=0
   36 00000000 SMKey=0
   40 00000000
-  44 00000000 attributeOffset=0,reserved2=0
-  48 00000000 componentMask=2060
-  52 0000080C
- SAPathRecord
-  56 00000000 reserved1=0
-  60 00000000 reserved2=0
-  64 FE800000 DGID=GID('fe80::2:c903:0:1492')
+  44 00080000 attributeOffset=8,reserved_368=0
+  48 00000000 componentMask=2072
+  52 00000818
+    + data SAPathRecord
+  56 00000000 serviceID=0
+  60 00000000
+  64 FE800000 DGID=GID('fe80::2:c903:0:1491')
   68 00000000
   72 0002C903
-  76 00001492
+  76 00001491
   80 FE800000 SGID=GID('fe80::2:c903:0:1491')
   84 00000000
   88 0002C903
   92 00001491
-  96 00000000 DLID=0,SLID=0
- 100 00000000 rawTraffic=0,reserved3=0,flowLabel=0,hopLimit=0
- 104 00800000 TClass=0,reversible=1,numbPath=0,PKey=0
- 108 00000000 reserved4=0,SL=0,MTUSelector=0,MTU=0,rateSelector=0,rate=0
- 112 00000000 packetLifeTimeSelector=0,packetLifeTime=0,preference=0,reserved5=0
- 116 00000000 reserved6=0
+  96 00050005 DLID=5,SLID=5
+ 100 00000000 rawTraffic=0,reserved_353=0,flowLabel=0,hopLimit=0
+ 104 0080FFFF TClass=0,reversible=1,numbPath=0,PKey=65535
+ 108 00008483 QOSClass=0,SL=0,MTUSelector=2,MTU=4,rateSelector=2,rate=3
+ 112 80000000 packetLifeTimeSelector=2,packetLifeTime=0,preference=0,reserved_464=0
+ 116 00000000 reserved_480=0
 
 Notice that the use of :class:`~rdma.IBA.SAPathRecord` for the payload is
 automatically deduced based on the value of `attributeID`. The printer shows
@@ -102,6 +102,54 @@ MAD printer::
 
   IBA.get_fmt_payload(buf[1],buf[2],0)[0](buf).printer(sys.stdout);
 
+This is the dotted pretty print format::
+
+ SAFormat
+ baseVersion.....................1
+ mgmtClass.......................3
+ classVersion....................2
+ method..........................146
+ status..........................0
+ classSpecific...................0
+ transactionID...................44950782152048
+ attributeID.....................53
+ reserved_144....................0
+ attributeModifier...............0
+ RMPPVersion.....................1
+ RMPPType........................1
+ RRespTime.......................0
+ RMPPFlags.......................7
+ RMPPStatus......................0
+ data1...........................1
+ data2...........................84
+ SMKey...........................0
+ attributeOffset.................8
+ reserved_368....................0
+ componentMask...................12
+ data.serviceID..................0
+ data.DGID.......................GID('fe80::2:c903:0:1491')
+ data.SGID.......................GID('fe80::2:c903:0:1491')
+ data.DLID.......................5
+ data.SLID.......................5
+ data.rawTraffic.................0
+ data.reserved_353...............0
+ data.flowLabel..................0
+ data.hopLimit...................0
+ data.TClass.....................0
+ data.reversible.................1
+ data.numbPath...................0
+ data.PKey.......................65535
+ data.QOSClass...................0
+ data.SL.........................0
+ data.MTUSelector................2
+ data.MTU........................4
+ data.rateSelector...............2
+ data.rate.......................3
+ data.packetLifeTimeSelector.....2
+ data.packetLifeTime.............0
+ data.preference.................0
+ data.reserved_464...............0
+ data.reserved_480...............0
 
 Component Mask Helper
 ---------------------
