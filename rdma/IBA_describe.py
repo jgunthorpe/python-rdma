@@ -30,6 +30,7 @@ def node_type(value):
         return "Switch"
     if value == IBA.NODE_ROUTER:
         return "Router"
+    return "?? %u"%(value);
 
 def description(value):
     """Decodes a fixed length string from a IBA MAD (such as
