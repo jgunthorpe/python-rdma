@@ -465,6 +465,11 @@ for I in options.xml:
                 structs.append(Struct(xml,I));
 structMap = dict((I.name,I) for I in structs);
 for I in structs:
+    for J in I.mb:
+        obj = structMap.get(J[1].getStruct());
+        if obj is not None:
+            assert obj.size*8 == J[1].bits;
+for I in structs:
     I.make_inherit();
 for I in structs:
     I.set_reserved();
