@@ -204,14 +204,19 @@ def struct_dump(F,s,offset=0,name_prefix=''):
                ",".join(mb));
         cur_dword = cur_dword + 4;
 
-def struct_dotted(F,s,name_prefix='',dump_list=False,skip_reserved=True):
+def struct_dotted(F,s,name_prefix='',dump_list=False,skip_reserved=True,
+                  column=33,colon=False,name_map=None):
     """This tries to emulate the libib structure print format. Members are
     printed one per line with values aligned on column 32."""
     for name,mbits,count in s.MEMBERS:
         if skip_reserved and name.startswith("reserved_"):
             continue;
         attr = getattr(s,name);
+        if attr is None:
+            continue;
         cname = name[0].upper() + name[1:];
+        if name_map:
+            cname = name_map.get(cname,cname);
 
         # Special automagic decode of format data members based on
         # attribute ID.
@@ -222,24 +227,57 @@ def struct_dotted(F,s,name_prefix='',dump_list=False,skip_reserved=True):
                     attr = nattr(attr);
 
         if isinstance(attr,rdma.binstruct.BinStruct):
-            struct_dotted(F,attr,"%s%s."%(name_prefix,name));
+            struct_dotted(F,attr,"%s%s."%(name_prefix,name),
+                          dump_list=dump_list,
+                          skip_reserved=skip_reserved,
+                          column=column,
+                          colon=colon,
+                          name_map=name_map);
             continue;
 
-        fmt = "%r";
         if count != 1 and len(attr) == count:
+            ref = attr[0];
+        else:
+            ref = attr;
+
+        conv = None;
+        if isinstance(ref,IBA.GID) or isinstance(ref,IBA.GUID):
+            fmt = "%s";
+        else:
+            fmt = IBA.MEMBER_FORMATS.get(name,"%r");
+            if fmt == "hex":
+                fmt = "0x%%0%ux"%((mbits+3)//4);
+            if fmt == "str":
+                fmt = "%s";
+                conv = lambda value: dstr(description(value),quotes=True);
+
+        if count != 1 and len(attr) == count and conv == None:
             if isinstance(attr[0],rdma.binstruct.BinStruct):
                 for I,v in enumerate(attr):
-                    struct_dotted(F,v,"%s%s[%u]."%(name_prefix,name,I));
+                    struct_dotted(F,v,"%s%s[%u]."%(name_prefix,name,I),
+                                  dump_list=dump_list,
+                                  skip_reserved=skip_reserved,
+                                  column=column,
+                                  colon=colon,
+                                  name_map=name_map);
                 continue;
 
             if mbits > 16 or dump_list:
                 for I,v in enumerate(attr):
-                    n = "%s%s[%u]."%(name_prefix,cname,I);
-                    print >> F, ("%s%s"+fmt)%(n,"."*(32-len(n)),v);
+                    n = "%s%s[%u]"%(name_prefix,cname,I);
+                    if colon:
+                        n = n + ":";
+                    if conv:
+                        v = conv(v);
+                    print >> F, ("%s%s"+fmt)%(n,"."*(column-len(n)),v);
                 continue;
             else:
                 attr = "[%s]"%(", ".join(("%u:"+fmt)%(I,v) for I,v in enumerate(attr)));
                 fmt = "%s";
 
         n = "%s%s"%(name_prefix,cname);
-        print >> F, ("%s%s"+fmt)%(n,"."*(32-len(n)),attr);
+        if colon:
+            n = n + ":";
+        if conv:
+            attr = conv(attr);
+        print >> F, ("%s%s"+fmt)%(n,"."*(column-len(n)),attr);
