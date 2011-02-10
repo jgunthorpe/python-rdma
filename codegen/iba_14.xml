@@ -278,7 +278,7 @@
   </struct>
 
   <struct name="SMPPortInfo"
-          bytes="56"
+          bytes="60"
           desc="Port Information"
           sect="14.2.5.6"
           attributeID="0x15"
@@ -331,7 +331,9 @@
     <mb bits="5" off="0[419]">respTimeValue<!--RespTimeValue--></mb>
     <mb bits="4" off="0[424]">localPhyErrors<!--LocalPhyErrors--></mb>
     <mb bits="4" off="0[428]">overrunErrors<!--OverrunErrors--></mb>
-    <mb bits="16" off="0[432]"><!--Reserved (Padding)--></mb>
+    <mb bits="16" off="0[432]">maxCreditHint<!--MaxCreditHind--></mb>
+    <mb bits="8" off="0[448]"><!--Reserved (Padding)--></mb>
+    <mb bits="24" off="0[456]">linkRoundTripLatency<!--LinkRoundTripLatency--></mb>
   </struct>
 
   <struct name="SMPPKeyTable"
