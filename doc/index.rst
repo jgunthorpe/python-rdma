@@ -16,6 +16,7 @@ Contents:
    IBA.rst
    mads.rst
    subnet.rst
+   ibtool.rst
 
 Indices and tables
 ==================
