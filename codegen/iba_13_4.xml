@@ -10,7 +10,7 @@
     <mb bits="8" off="0[24]">method<!--Method--></mb>
     <mb bits="16" off="0[32]">status<!--Status--></mb>
     <mb bits="16" off="0[48]">classSpecific<!--ClassSpecific--></mb>
-    <mb bits="64" off="0[64]">transactionID<!--TransactionID--></mb>
+    <mb bits="64" off="0[64]" display="hex">transactionID<!--TransactionID--></mb>
     <mb bits="16" off="0[128]">attributeID<!--AttributeID--></mb>
     <mb bits="16" off="0[144]"><!--Reserved--></mb>
     <mb bits="32" off="0[160]">attributeModifier<!--AttributeModifier--></mb>
@@ -30,7 +30,7 @@
     <mb bits="8" off="0[48]">hopPointer<!--Hop Pointer--></mb>
     <mb bits="8" off="0[56]">hopCount<!--Hop Count--></mb>
 
-    <mb bits="64" off="0[64]">transactionID<!--TransactionID--></mb>
+    <mb bits="64" off="0[64]" display="hex">transactionID<!--TransactionID--></mb>
     <mb bits="16" off="0[128]">attributeID<!--AttributeID--></mb>
     <mb bits="16" off="0[144]"><!--Reserved--></mb>
     <mb bits="32" off="0[160]">attributeModifier<!--AttributeModifier--></mb>
@@ -45,27 +45,27 @@
           methods="CommMgtGet CommMgtSet PerformanceGet BMGet BMSet DevMgtGet DevMgtSet SNMPGet SubnAdmGet">
     <mb bits="8" off="0[0]">baseVersion<!--BaseVersion--></mb>
     <mb bits="8" off="0[8]">classVersion<!--ClassVersion--></mb>
-    <mb bits="16" off="0[16]">capabilityMask<!--CapabilityMask--></mb>
-    <mb bits="27" off="0[32]">capabilityMask2<!--CapabilityMask2--></mb>
+    <mb bits="16" off="0[16]" display="hex">capabilityMask<!--CapabilityMask--></mb>
+    <mb bits="27" off="0[32]" display="hex">capabilityMask2<!--CapabilityMask2--></mb>
     <mb bits="5" off="0[59]">respTimeValue<!--RespTimeValue--></mb>
     <mb bits="128" off="0[64]" type="HdrIPv6Addr">redirectGID<!--RedirectGID--></mb>
-    <mb bits="8" off="0[192]">redirectTC<!--RedirectTC--></mb>
+    <mb bits="8" off="0[192]" display="hex">redirectTC<!--RedirectTC--></mb>
     <mb bits="4" off="0[200]">redirectSL<!--RedirectSL--></mb>
     <mb bits="20" off="0[204]">redirectFL<!--RedirectFL--></mb>
     <mb bits="16" off="0[224]">redirectLID<!--RedirectLID--></mb>
-    <mb bits="16" off="0[240]">redirectPKey<!--RedirectP_Key--></mb>
+    <mb bits="16" off="0[240]" display="hex">redirectPKey<!--RedirectP_Key--></mb>
     <mb bits="8" off="0[256]"><!--Reserved--></mb>
-    <mb bits="24" off="0[264]">redirectQP<!--RedirectQP--></mb>
-    <mb bits="32" off="0[288]">redirectQKey<!--RedirectQ_Key--></mb>
+    <mb bits="24" off="0[264]" display="hex">redirectQP<!--RedirectQP--></mb>
+    <mb bits="32" off="0[288]" display="hex">redirectQKey<!--RedirectQ_Key--></mb>
     <mb bits="128" off="0[320]" type="HdrIPv6Addr">trapGID<!--TrapGID--></mb>
     <mb bits="8" off="0[448]">trapTC<!--TrapTC--></mb>
     <mb bits="4" off="0[456]">trapSL<!--TrapSL--></mb>
     <mb bits="20" off="0[460]">trapFL<!--TrapFL--></mb>
     <mb bits="16" off="0[480]">trapLID<!--TrapLID--></mb>
-    <mb bits="16" off="0[496]">trapPKey<!--TrapP_Key--></mb>
+    <mb bits="16" off="0[496]" display="hex">trapPKey<!--TrapP_Key--></mb>
     <mb bits="8" off="0[512]">trapHL<!--TrapHL--></mb>
-    <mb bits="24" off="0[520]">trapQP<!--TrapQP--></mb>
-    <mb bits="32" off="0[544]">trapQKey<!--TrapQ_Key--></mb>
+    <mb bits="24" off="0[520]" display="hex">trapQP<!--TrapQP--></mb>
+    <mb bits="32" off="0[544]" display="hex">trapQKey<!--TrapQ_Key--></mb>
   </struct>
 
   <container name="MADNotice"

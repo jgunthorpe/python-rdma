@@ -17,7 +17,7 @@
           desc="Service Entry"
           sect="16.3.3">
     <mb bits="8" off="0[0]" count="40" display="string">serviceName<!--ServiceName--></mb>
-    <mb bits="64" off="0[320]">serviceID<!--ServiceID--></mb>
+    <mb bits="64" off="0[320]" display="hex">serviceID<!--ServiceID--></mb>
   </struct>
 
   <struct name="DMIOUnitInfo"
@@ -43,9 +43,9 @@
           attributeName="DM_IO_CONTROLLER_PROFILE"
           methods="DevMgtGet">
     <mb bits="64" off="0[0]">GUID<!--GUID--></mb>
-    <mb bits="24" off="0[64]">vendorID<!--VendorID--></mb>
+    <mb bits="24" off="0[64]" display="hex">vendorID<!--VendorID--></mb>
     <mb bits="8" off="0[88]"><!--Reserved--></mb>
-    <mb bits="32" off="0[96]">deviceID<!--DeviceID--></mb>
+    <mb bits="32" off="0[96]" display="hex">deviceID<!--DeviceID--></mb>
     <mb bits="16" off="0[128]">deviceVersion<!--Device Version--></mb>
     <mb bits="16" off="0[144]"><!--Reserved--></mb>
     <mb bits="24" off="0[160]">subsystemVendorID<!--Subsystem VendorID--></mb>
@@ -124,7 +124,7 @@
           attributeID="0x24"
           attributeName="DM_DIAG_CODE"
           methods="DevMgtGet">
-    <mb bits="16" off="0[0]">diagCode<!--DiagCode--></mb>
+    <mb bits="16" off="0[0]" display="hex">diagCode<!--DiagCode--></mb>
     <mb bits="16" off="0[16]"><!--Reserved--></mb>
   </struct>
 

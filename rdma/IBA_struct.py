@@ -1546,12 +1546,12 @@ class SMPNodeInfo(rdma.binstruct.BinStruct):
 
 class SMPSwitchInfo(rdma.binstruct.BinStruct):
     '''Switch Information (section 14.2.5.4)'''
-    __slots__ = ('linearFDBCap','randomFDBCap','multicastFDBCap','linearFDBTop','defaultPort','defaultMulticastPrimaryPort','defaultMulticastNotPrimaryPort','lifeTimeValue','portStateChange','reserved_94','optimizedSLtoVLMappingProgramming','LIDsPerPort','partitionEnforcementCap','inboundEnforcementCap','outboundEnforcementCap','filterRawInboundCap','filterRawOutboundCap','enhancedPort0','reserved_133','reserved_136');
+    __slots__ = ('linearFDBCap','randomFDBCap','multicastFDBCap','linearFDBTop','defaultPort','defaultMulticastPrimaryPort','defaultMulticastNotPrimaryPort','lifeTimeValue','portStateChange','optimizedSLtoVLMappingProgramming','LIDsPerPort','partitionEnforcementCap','inboundEnforcementCap','outboundEnforcementCap','filterRawInboundCap','filterRawOutboundCap','enhancedPort0','reserved_133','reserved_136');
     MAD_LENGTH = 20
     MAD_ATTRIBUTE_ID = 0x12
     MAD_SUBNGET = 0x1 # MAD_METHOD_GET
     MAD_SUBNSET = 0x2 # MAD_METHOD_SET
-    MEMBERS = [('linearFDBCap',16,1), ('randomFDBCap',16,1), ('multicastFDBCap',16,1), ('linearFDBTop',16,1), ('defaultPort',8,1), ('defaultMulticastPrimaryPort',8,1), ('defaultMulticastNotPrimaryPort',8,1), ('lifeTimeValue',5,1), ('portStateChange',1,1), ('reserved_94',1,1), ('optimizedSLtoVLMappingProgramming',1,1), ('LIDsPerPort',16,1), ('partitionEnforcementCap',16,1), ('inboundEnforcementCap',1,1), ('outboundEnforcementCap',1,1), ('filterRawInboundCap',1,1), ('filterRawOutboundCap',1,1), ('enhancedPort0',1,1), ('reserved_133',3,1), ('reserved_136',24,1)]
+    MEMBERS = [('linearFDBCap',16,1), ('randomFDBCap',16,1), ('multicastFDBCap',16,1), ('linearFDBTop',16,1), ('defaultPort',8,1), ('defaultMulticastPrimaryPort',8,1), ('defaultMulticastNotPrimaryPort',8,1), ('lifeTimeValue',5,1), ('portStateChange',1,1), ('optimizedSLtoVLMappingProgramming',2,1), ('LIDsPerPort',16,1), ('partitionEnforcementCap',16,1), ('inboundEnforcementCap',1,1), ('outboundEnforcementCap',1,1), ('filterRawInboundCap',1,1), ('filterRawOutboundCap',1,1), ('enhancedPort0',1,1), ('reserved_133',3,1), ('reserved_136',24,1)]
     def zero(self):
         self.linearFDBCap = 0;
         self.randomFDBCap = 0;
@@ -1562,7 +1562,6 @@ class SMPSwitchInfo(rdma.binstruct.BinStruct):
         self.defaultMulticastNotPrimaryPort = 0;
         self.lifeTimeValue = 0;
         self.portStateChange = 0;
-        self.reserved_94 = 0;
         self.optimizedSLtoVLMappingProgramming = 0;
         self.LIDsPerPort = 0;
         self.partitionEnforcementCap = 0;
@@ -1576,7 +1575,7 @@ class SMPSwitchInfo(rdma.binstruct.BinStruct):
 
     @property
     def _pack_0_32(self):
-        return ((self.defaultPort & 0xFF) << 24) | ((self.defaultMulticastPrimaryPort & 0xFF) << 16) | ((self.defaultMulticastNotPrimaryPort & 0xFF) << 8) | ((self.lifeTimeValue & 0x1F) << 3) | ((self.portStateChange & 0x1) << 2) | ((self.reserved_94 & 0x1) << 1) | ((self.optimizedSLtoVLMappingProgramming & 0x1) << 0)
+        return ((self.defaultPort & 0xFF) << 24) | ((self.defaultMulticastPrimaryPort & 0xFF) << 16) | ((self.defaultMulticastNotPrimaryPort & 0xFF) << 8) | ((self.lifeTimeValue & 0x1F) << 3) | ((self.portStateChange & 0x1) << 2) | ((self.optimizedSLtoVLMappingProgramming & 0x3) << 0)
 
     @_pack_0_32.setter
     def _pack_0_32(self,value):
@@ -1585,8 +1584,7 @@ class SMPSwitchInfo(rdma.binstruct.BinStruct):
         self.defaultMulticastNotPrimaryPort = (value >> 8) & 0xFF;
         self.lifeTimeValue = (value >> 3) & 0x1F;
         self.portStateChange = (value >> 2) & 0x1;
-        self.reserved_94 = (value >> 1) & 0x1;
-        self.optimizedSLtoVLMappingProgramming = (value >> 0) & 0x1;
+        self.optimizedSLtoVLMappingProgramming = (value >> 0) & 0x3;
 
     @property
     def _pack_1_32(self):
@@ -2233,7 +2231,7 @@ class SASwitchInfoRecord(rdma.binstruct.BinStruct):
     MAD_ATTRIBUTE_ID = 0x14
     MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
-    COMPONENT_MASK = {'LID':0, 'reserved_16':1, 'switchInfo.linearFDBCap':2, 'switchInfo.randomFDBCap':3, 'switchInfo.multicastFDBCap':4, 'switchInfo.linearFDBTop':5, 'switchInfo.defaultPort':6, 'switchInfo.defaultMulticastPrimaryPort':7, 'switchInfo.defaultMulticastNotPrimaryPort':8, 'switchInfo.lifeTimeValue':9, 'switchInfo.portStateChange':10, 'switchInfo.reserved_94':11, 'switchInfo.optimizedSLtoVLMappingProgramming':12, 'switchInfo.LIDsPerPort':13, 'switchInfo.partitionEnforcementCap':14, 'switchInfo.inboundEnforcementCap':15, 'switchInfo.outboundEnforcementCap':16, 'switchInfo.filterRawInboundCap':17, 'switchInfo.filterRawOutboundCap':18, 'switchInfo.enhancedPort0':19, 'switchInfo.reserved_133':20, 'switchInfo.reserved_136':21}
+    COMPONENT_MASK = {'LID':0, 'reserved_16':1, 'switchInfo.linearFDBCap':2, 'switchInfo.randomFDBCap':3, 'switchInfo.multicastFDBCap':4, 'switchInfo.linearFDBTop':5, 'switchInfo.defaultPort':6, 'switchInfo.defaultMulticastPrimaryPort':7, 'switchInfo.defaultMulticastNotPrimaryPort':8, 'switchInfo.lifeTimeValue':9, 'switchInfo.portStateChange':10, 'switchInfo.optimizedSLtoVLMappingProgramming':11, 'switchInfo.LIDsPerPort':12, 'switchInfo.partitionEnforcementCap':13, 'switchInfo.inboundEnforcementCap':14, 'switchInfo.outboundEnforcementCap':15, 'switchInfo.filterRawInboundCap':16, 'switchInfo.filterRawOutboundCap':17, 'switchInfo.enhancedPort0':18, 'switchInfo.reserved_133':19, 'switchInfo.reserved_136':20}
     MEMBERS = [('LID',16,1), ('reserved_16',16,1), ('switchInfo',160,1)]
     def __init__(self,*args):
         self.switchInfo = SMPSwitchInfo();
@@ -3835,6 +3833,7 @@ class SNMPPDUInfo(rdma.binstruct.BinStruct):
         self._buf = buffer[offset:offset+192];
         self.PDUData = bytearray(buffer[offset + 0:offset + 192])
 
+MEMBER_FORMATS = {'counterSelect2': 'hex', 'counterSelect3': 'hex', 'counterSelect0': 'hex', 'counterSelect1': 'hex', 'counterSelect6': 'hex', 'nodeString': 'str', 'counterSelect4': 'hex', 'redirectPKey': 'hex', 'diagCode': 'hex', 'servicePKey': 'hex', 'QOSClass': 'hex', 'initType': 'hex', 'trapQP': 'hex', 'counterSelect10': 'hex', 'altTClass': 'hex', 'counterSelect': 'hex', 'counterSelect12': 'hex', 'counterSelect7': 'hex', 'vendorID': 'hex', 'capabilityMask': 'hex', 'initTypeReply': 'hex', 'counterSelect14': 'hex', 'redirectQKey': 'hex', 'counterSelect5': 'hex', 'serviceName': 'str', 'IDString': 'str', 'PKeyBlock': 'hex', 'communityName': 'str', 'counterSelect8': 'hex', 'revision': 'hex', 'PKey': 'hex', 'capabilityMask2': 'hex', 'counterSelect9': 'hex', 'redirectTC': 'hex', 'trapPKey': 'hex', 'counterSelect11': 'hex', 'transactionID': 'hex', 'counterSelect13': 'hex', 'SMKey': 'hex', 'MKey': 'hex', 'redirectQP': 'hex', 'serviceID': 'hex', 'deviceID': 'hex', 'trapQKey': 'hex', 'TClass': 'hex'};
 CLASS_TO_STRUCT = {(7,2):CMFormat,
 	(1,1):SMPFormat,
 	(129,1):SMPFormatDirected,

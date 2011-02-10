@@ -64,6 +64,13 @@ class Type(object):
         self.count = int(xml.get("count","1"));
         self.bits = int(xml.get("bits"));
         self.off = xml.get("off");
+        self.fmt = xml.get("display");
+        if self.fmt == "data":
+            self.fmt = None;
+        if self.fmt == "string":
+            self.fmt = "str";
+        if self.fmt is None:
+            self.fmt = "%r";
         g = re.match("^(\d+)\[(\d+)\]$",self.off);
         if g:
             g = g.groups();
@@ -502,6 +509,16 @@ class BinFormat(rdma.binstruct.BinStruct):
         """;
     for I in structs:
         I.asPython(F);
+
+    fmts = {};
+    for I in structs:
+       for J in I.mb:
+          if J[0].startswith("reserved"):
+              continue;
+          assert fmts.get(J[0],J[1].fmt) == J[1].fmt;
+          if J[1].fmt != "%r":
+             fmts[J[0]] = J[1].fmt;
+    print >> F, "MEMBER_FORMATS = %r;"%(fmts);
 
     res = (I for I in structs if I.is_format);
     print >> F, "CLASS_TO_STRUCT = {%s};"%(",\n\t".join("(%u,%u):%s"%(

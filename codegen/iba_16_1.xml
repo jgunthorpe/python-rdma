@@ -49,21 +49,21 @@
     <mb bits="32" off="0[224]">sampleStart<!--SampleStart--></mb>
     <mb bits="32" off="0[256]">sampleInterval<!--SampleInterval--></mb>
     <mb bits="16" off="0[288]">tag<!--Tag--></mb>
-    <mb bits="16" off="0[304]">counterSelect0<!--CounterSelect0--></mb>
-    <mb bits="16" off="0[320]">counterSelect1<!--CounterSelect1--></mb>
-    <mb bits="16" off="0[336]">counterSelect2<!--CounterSelect2--></mb>
-    <mb bits="16" off="0[352]">counterSelect3<!--CounterSelect3--></mb>
-    <mb bits="16" off="0[368]">counterSelect4<!--CounterSelect4--></mb>
-    <mb bits="16" off="0[384]">counterSelect5<!--CounterSelect5--></mb>
-    <mb bits="16" off="0[400]">counterSelect6<!--CounterSelect6--></mb>
-    <mb bits="16" off="0[416]">counterSelect7<!--CounterSelect7--></mb>
-    <mb bits="16" off="0[432]">counterSelect8<!--CounterSelect8--></mb>
-    <mb bits="16" off="0[448]">counterSelect9<!--CounterSelect9--></mb>
-    <mb bits="16" off="0[464]">counterSelect10<!--CounterSelect10--></mb>
-    <mb bits="16" off="0[480]">counterSelect11<!--CounterSelect11--></mb>
-    <mb bits="16" off="0[496]">counterSelect12<!--CounterSelect12--></mb>
-    <mb bits="16" off="0[512]">counterSelect13<!--CounterSelect13--></mb>
-    <mb bits="16" off="0[528]">counterSelect14<!--CounterSelect14--></mb>
+    <mb bits="16" off="0[304]" display="hex">counterSelect0<!--CounterSelect0--></mb>
+    <mb bits="16" off="0[320]" display="hex">counterSelect1<!--CounterSelect1--></mb>
+    <mb bits="16" off="0[336]" display="hex">counterSelect2<!--CounterSelect2--></mb>
+    <mb bits="16" off="0[352]" display="hex">counterSelect3<!--CounterSelect3--></mb>
+    <mb bits="16" off="0[368]" display="hex">counterSelect4<!--CounterSelect4--></mb>
+    <mb bits="16" off="0[384]" display="hex">counterSelect5<!--CounterSelect5--></mb>
+    <mb bits="16" off="0[400]" display="hex">counterSelect6<!--CounterSelect6--></mb>
+    <mb bits="16" off="0[416]" display="hex">counterSelect7<!--CounterSelect7--></mb>
+    <mb bits="16" off="0[432]" display="hex">counterSelect8<!--CounterSelect8--></mb>
+    <mb bits="16" off="0[448]" display="hex">counterSelect9<!--CounterSelect9--></mb>
+    <mb bits="16" off="0[464]" display="hex">counterSelect10<!--CounterSelect10--></mb>
+    <mb bits="16" off="0[480]" display="hex">counterSelect11<!--CounterSelect11--></mb>
+    <mb bits="16" off="0[496]" display="hex">counterSelect12<!--CounterSelect12--></mb>
+    <mb bits="16" off="0[512]" display="hex">counterSelect13<!--CounterSelect13--></mb>
+    <mb bits="16" off="0[528]" display="hex">counterSelect14<!--CounterSelect14--></mb>
     <mb bits="32" off="0[544]"><!--Reserved--></mb>
     <mb bits="64" off="0[576]">samplesOnlyOptionMask<!--SamplesOnlyOptionMask--></mb>
     <mb bits="896" off="0[640]"><!--Reserved--></mb>
@@ -91,7 +91,7 @@
           methods="PerformanceGet PerformanceSet">
     <mb bits="8" off="0[0]"><!--Reserved--></mb>
     <mb bits="8" off="0[8]">portSelect<!--PortSelect--></mb>
-    <mb bits="16" off="0[16]">counterSelect<!--CounterSelect--></mb>
+    <mb bits="16" off="0[16]" display="hex">counterSelect<!--CounterSelect--></mb>
     <mb bits="16" off="0[32]">symbolErrorCounter<!--SymbolErrorCounter--></mb>
     <mb bits="8" off="0[48]">linkErrorRecoveryCounter<!--LinkErrorRecoveryCounter--></mb>
     <mb bits="8" off="0[56]">linkDownedCounter<!--LinkDownedCounter--></mb>
@@ -101,7 +101,7 @@
     <mb bits="16" off="0[112]">portXmitDiscards<!--PortXmitDiscards--></mb>
     <mb bits="8" off="0[128]">portXmitConstraintErrors<!--PortXmitConstraintErrors--></mb>
     <mb bits="8" off="0[136]">portRcvConstraintErrors<!--PortRcvConstraintErrors--></mb>
-    <mb bits="8" off="0[144]">counterSelect2<!--CounterSelect2--></mb>
+    <mb bits="8" off="0[144]" display="hex">counterSelect2<!--CounterSelect2--></mb>
     <mb bits="4" off="0[152]">localLinkIntegrityErrors<!--LocalLinkIntegrityErrors--></mb>
     <mb bits="4" off="0[156]">excessiveBufferOverrunErrors<!--ExcessiveBufferOverrunErrors--></mb>
     <mb bits="16" off="0[160]"><!--Reserved--></mb>
@@ -122,7 +122,7 @@
           methods="PerformanceGet PerformanceSet">
     <mb bits="8" off="0[0]"><!--Reserved--></mb>
     <mb bits="8" off="0[8]">portSelect<!--PortSelect--></mb>
-    <mb bits="16" off="0[16]">counterSelect<!--CounterSelect--></mb>
+    <mb bits="16" off="0[16]" display="hex">counterSelect<!--CounterSelect--></mb>
     <mb bits="16" off="0[32]">portLocalPhysicalErrors<!--PortLocalPhysicalErrors--></mb>
     <mb bits="16" off="0[48]">portMalformedPacketErrors<!--PortMalformedPacketErrors--></mb>
     <mb bits="16" off="0[64]">portBufferOverrunErrors<!--PortBufferOverrunErrors--></mb>
@@ -140,7 +140,7 @@
           methods="PerformanceGet PerformanceSet">
     <mb bits="8" off="0[0]"><!--Reserved--></mb>
     <mb bits="8" off="0[8]">portSelect<!--PortSelect--></mb>
-    <mb bits="16" off="0[16]">counterSelect<!--CounterSelect--></mb>
+    <mb bits="16" off="0[16]" display="hex">counterSelect<!--CounterSelect--></mb>
     <mb bits="16" off="0[32]">portInactiveDiscards<!--PortInactiveDiscards--></mb>
     <mb bits="16" off="0[48]">portNeighborMTUDiscards<!--PortNeighborMTUDiscards--></mb>
     <mb bits="16" off="0[64]">portSwLifetimeLimitDiscards<!--PortSwLifetimeLimitDiscards--></mb>
@@ -156,7 +156,7 @@
           methods="PerformanceGet PerformanceSet">
     <mb bits="8" off="0[0]">opCode<!--OpCode--></mb>
     <mb bits="8" off="0[8]">portSelect<!--PortSelect--></mb>
-    <mb bits="16" off="0[16]">counterSelect<!--CounterSelect--></mb>
+    <mb bits="16" off="0[16]" display="hex">counterSelect<!--CounterSelect--></mb>
     <mb bits="32" off="0[32]">portOpRcvPkts<!--PortOpRcvPkts--></mb>
     <mb bits="32" off="0[64]">portOpRcvData<!--PortOpRcvData--></mb>
   </struct>
@@ -170,7 +170,7 @@
           methods="PerformanceGet PerformanceSet">
     <mb bits="8" off="0[0]"><!--Reserved--></mb>
     <mb bits="8" off="0[8]">portSelect<!--PortSelect--></mb>
-    <mb bits="16" off="0[16]">counterSelect<!--CounterSelect--></mb>
+    <mb bits="16" off="0[16]" display="hex">counterSelect<!--CounterSelect--></mb>
     <mb bits="32" off="0[32]">portXmitFlowPkts<!--PortXmitFlowPkts--></mb>
     <mb bits="32" off="0[64]">portRcvFlowPkts<!--PortRcvFlowPkts--></mb>
   </struct>
@@ -184,7 +184,7 @@
           methods="PerformanceGet PerformanceSet">
     <mb bits="8" off="0[0]">opCode<!--OpCode--></mb>
     <mb bits="8" off="0[8]">portSelect<!--PortSelect--></mb>
-    <mb bits="16" off="0[16]">counterSelect<!--CounterSelect--></mb>
+    <mb bits="16" off="0[16]" display="hex">counterSelect<!--CounterSelect--></mb>
     <mb bits="16" off="0[32]" count="16">portVLOpPackets<!--PortVLOpPackets--></mb>
   </struct>
 
@@ -197,7 +197,7 @@
           methods="PerformanceGet PerformanceSet">
     <mb bits="8" off="0[0]">opCode<!--OpCode--></mb>
     <mb bits="8" off="0[8]">portSelect<!--PortSelect--></mb>
-    <mb bits="16" off="0[16]">counterSelect<!--CounterSelect--></mb>
+    <mb bits="16" off="0[16]" display="hex">counterSelect<!--CounterSelect--></mb>
     <mb bits="32" off="0[32]" count="16">portVLOpData<!--PortVLOpData--></mb>
   </struct>
 
@@ -210,7 +210,7 @@
           methods="PerformanceGet PerformanceSet">
     <mb bits="8" off="0[0]"><!--Reserved--></mb>
     <mb bits="8" off="0[8]">portSelect<!--PortSelect--></mb>
-    <mb bits="16" off="0[16]">counterSelect<!--CounterSelect--></mb>
+    <mb bits="16" off="0[16]" display="hex">counterSelect<!--CounterSelect--></mb>
     <mb bits="2" off="0[32]" count="16">portVLXmitFlowCtlUpdateErrors<!--PortVLXmitFlowCtlUpdateErrors--></mb>
   </struct>
 
@@ -223,7 +223,7 @@
           methods="PerformanceGet PerformanceSet">
     <mb bits="8" off="0[0]"><!--Reserved--></mb>
     <mb bits="8" off="0[8]">portSelect<!--PortSelect--></mb>
-    <mb bits="16" off="0[16]">counterSelect<!--CounterSelect--></mb>
+    <mb bits="16" off="0[16]" display="hex">counterSelect<!--CounterSelect--></mb>
     <mb bits="16" off="0[32]" count="16">portVLXmitWait<!--PortVLXmitWait--></mb>
   </struct>
 
@@ -236,7 +236,7 @@
           methods="PerformanceGet PerformanceSet">
     <mb bits="8" off="0[0]"><!--Reserved--></mb>
     <mb bits="8" off="0[8]">portSelect<!--PortSelect--></mb>
-    <mb bits="16" off="0[16]">counterSelect<!--CounterSelect--></mb>
+    <mb bits="16" off="0[16]" display="hex">counterSelect<!--CounterSelect--></mb>
     <mb bits="16" off="0[32]" count="16">swPortVLCongestion<!--SwPortVLCongestion--></mb>
   </struct>
 
@@ -264,7 +264,7 @@
           methods="PerformanceGet PerformanceSet">
     <mb bits="8" off="0[0]"><!--Reserved--></mb>
     <mb bits="8" off="0[8]">portSelect<!--Reserved--></mb>
-    <mb bits="16" off="0[16]">counterSelect<!--CounterSelect--></mb>
+    <mb bits="16" off="0[16]" display="hex">counterSelect<!--CounterSelect--></mb>
     <mb bits="32" off="0[32]"><!--Reserved--></mb>
     <mb bits="64" off="0[64]">portXmitData<!--PortXmitData--></mb>
     <mb bits="64" off="0[128]">portRcvData<!--PortRcvData--></mb>
@@ -285,7 +285,7 @@
           methods="PerformanceGet PerformanceSet">
     <mb bits="8" off="0[0]"><!--Reserved--></mb>
     <mb bits="8" off="0[8]">portSelect<!--Reserved--></mb>
-    <mb bits="16" off="0[16]">counterSelect<!--CounterSelect--></mb>
+    <mb bits="16" off="0[16]" display="hex">counterSelect<!--CounterSelect--></mb>
     <mb bits="32" off="0[64]" count="16">portXmitDataSL<!--PortXmitDataSL--></mb>
   </struct>
 
@@ -298,7 +298,7 @@
           methods="PerformanceGet PerformanceSet">
     <mb bits="8" off="0[0]"><!--Reserved--></mb>
     <mb bits="8" off="0[8]">portSelect<!--Reserved--></mb>
-    <mb bits="16" off="0[16]">counterSelect<!--CounterSelect--></mb>
+    <mb bits="16" off="0[16]" display="hex">counterSelect<!--CounterSelect--></mb>
     <mb bits="32" off="0[64]" count="16">portRcvDataSL<!--PortRcvDataSL--></mb>
   </struct>
 </makestructs>

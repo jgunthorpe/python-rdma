@@ -19,7 +19,7 @@
           mgmtClassVersion="1"
           mgmtClassName="MAD_SUBNET">
     <mb bits="192" off="0" type="struct MADHeader">MADHeader<!--Common MAD Header--></mb>
-    <mb bits="64" off="24">MKey<!--M_Key--></mb>
+    <mb bits="64" off="24" display="hex">MKey<!--M_Key--></mb>
     <mb bits="256" off="32"><!--Reserved--></mb>
     <mb bits="512" off="64" display="data">data<!--SMP Data--></mb>
     <mb bits="1024" off="128"><!--Reserved--></mb>
@@ -33,7 +33,7 @@
           mgmtClassVersion="1"
           mgmtClassName="MAD_SUBNET_DIRECTED">
     <mb bits="192" off="0" type="struct MADHeaderDirected">MADHeader<!--Common MAD Header (Different classSpecific and status fields)--></mb>
-    <mb bits="64" off="24">MKey<!--M_Key--></mb>
+    <mb bits="64" off="24" display="hex">MKey<!--M_Key--></mb>
     <mb bits="16" off="32">drSLID<!--DrSLID--></mb>
     <mb bits="16" off="34">drDLID<!--DrDLID--></mb>
     <mb bits="224" off="36"><!--Reserved--></mb>
@@ -90,7 +90,7 @@
     <mb bits="8" off="0[32]"><!--Reserved--></mb>
     <mb bits="7" off="0[40]"><!--Reserved--></mb>
     <mb bits="1" off="0[47]">otherLocalChanges<!--OtherLocalChanges--></mb>
-    <mb bits="32" off="0[48]">capabilityMask<!--CAPABILITYMASK--></mb>
+    <mb bits="32" off="0[48]" display="hex">capabilityMask<!--CAPABILITYMASK--></mb>
     <mb bits="8" off="0[80]"><!--Reserved--></mb>
     <mb bits="4" off="0[88]"><!--Reserved--></mb>
     <mb bits="1" off="0[92]">smPriorityChange<!--SMPriorityChange--></mb>
@@ -194,7 +194,7 @@
     <mb bits="16" off="0[0]">dataValid<!--DataValid--></mb>
     <mb bits="16" off="0[16]">lidAddr1<!--LIDADDR1--></mb>
     <mb bits="16" off="0[32]">lidAddr2<!--LIDADDR2--></mb>
-    <mb bits="16" off="0[48]">PKey<!--PKEY--></mb>
+    <mb bits="16" off="0[48]" display="hex">PKey<!--PKEY--></mb>
     <mb bits="4" off="0[64]">SL<!--SL--></mb>
     <mb bits="4" off="0[68]"><!--Reserved--></mb>
     <mb bits="24" off="0[72]">qp1<!--QP1--></mb>
@@ -232,10 +232,10 @@
     <mb bits="64" off="0[96]">nodeGUID<!--NodeGUID--></mb>
     <mb bits="64" off="0[160]">portGUID<!--PortGUID--></mb>
     <mb bits="16" off="0[224]">partitionCap<!--PartitionCap--></mb>
-    <mb bits="16" off="0[240]">deviceID<!--DeviceID--></mb>
-    <mb bits="32" off="0[256]">revision<!--Revision--></mb>
+    <mb bits="16" off="0[240]" display="hex">deviceID<!--DeviceID--></mb>
+    <mb bits="32" off="0[256]" display="hex">revision<!--Revision--></mb>
     <mb bits="8" off="0[288]">localPortNum<!--LocalPortNum--></mb>
-    <mb bits="24" off="0[296]">vendorID<!--VendorID--></mb>
+    <mb bits="24" off="0[296]" display="hex">vendorID<!--VendorID--></mb>
   </struct>
 
   <struct name="SMPSwitchInfo"
@@ -254,8 +254,7 @@
     <mb bits="8" off="0[80]">defaultMulticastNotPrimaryPort<!--DefaultMulticastNotPrimaryPort--></mb>
     <mb bits="5" off="0[88]">lifeTimeValue<!--LifeTimeValue--></mb>
     <mb bits="1" off="0[93]">portStateChange<!--PortStateChange--></mb>
-    <mb bits="1" off="0[94]"><!--Reserved--></mb>
-    <mb bits="1" off="0[95]">optimizedSLtoVLMappingProgramming<!--OptimizedSLtoVLMappingProgramming--></mb>
+    <mb bits="2" off="0[94]">optimizedSLtoVLMappingProgramming<!--OptimizedSLtoVLMappingProgramming--></mb>
     <mb bits="16" off="0[96]">LIDsPerPort<!--LIDsPerPort--></mb>
     <mb bits="16" off="0[112]">partitionEnforcementCap<!--PartitionEnforcementCap--></mb>
     <mb bits="1" off="0[128]">inboundEnforcementCap<!--InboundEnforcementCap--></mb>
@@ -284,12 +283,12 @@
           attributeID="0x15"
           attributeName="SMP_PORT_INFO"
           methods="SubnGet SubnSet">
-    <mb bits="64" off="0[0]">MKey<!--M_Key--></mb>
+    <mb bits="64" off="0[0]" display="hex">MKey<!--M_Key--></mb>
     <mb bits="64" off="0[64]">GIDPrefix<!--GIDPrefix--></mb>
     <mb bits="16" off="0[128]">LID<!--LID--></mb>
     <mb bits="16" off="0[144]">masterSMLID<!--MasterSMLID--></mb>
-    <mb bits="32" off="0[160]">capabilityMask<!--CapabilityMask--></mb>
-    <mb bits="16" off="0[192]">diagCode<!--DiagCode--></mb>
+    <mb bits="32" off="0[160]" display="hex">capabilityMask<!--CapabilityMask--></mb>
+    <mb bits="16" off="0[192]" display="hex">diagCode<!--DiagCode--></mb>
     <mb bits="16" off="0[208]">MKeyLeasePeriod<!--M_KeyLeasePeriod--></mb>
     <mb bits="8" off="0[224]">localPortNum<!--LocalPortNum--></mb>
     <mb bits="8" off="0[232]">linkWidthEnabled<!--LinkWidthEnabled--></mb>
@@ -307,11 +306,11 @@
     <mb bits="4" off="0[288]">neighborMTU<!--NeighborMTU--></mb>
     <mb bits="4" off="0[292]">masterSMSL<!--MasterSMSL--></mb>
     <mb bits="4" off="0[296]">VLCap<!--VLCap--></mb>
-    <mb bits="4" off="0[300]">initType<!--InitType--></mb>
+    <mb bits="4" off="0[300]" display="hex">initType<!--InitType--></mb>
     <mb bits="8" off="0[304]">VLHighLimit<!--VLHighLimit--></mb>
     <mb bits="8" off="0[312]">VLArbitrationHighCap<!--VLArbitrationHighCap--></mb>
     <mb bits="8" off="0[320]">VLArbitrationLowCap<!--VLArbitrationLowCap--></mb>
-    <mb bits="4" off="0[328]">initTypeReply<!--InitTypeReply--></mb>
+    <mb bits="4" off="0[328]" display="hex">initTypeReply<!--InitTypeReply--></mb>
     <mb bits="4" off="0[332]">MTUCap<!--MTUCap--></mb>
     <mb bits="3" off="0[336]">VLStallCount<!--VLStallCount--></mb>
     <mb bits="5" off="0[339]">HOQLife<!--HOQLife--></mb>
@@ -343,7 +342,7 @@
           attributeID="0x16"
           attributeName="SMP_PARTITION_TABLE"
           methods="SubnGet SubnSet">
-    <mb bits="16" off="0[0]" count="32">PKeyBlock<!--P_KeyBlock--></mb>
+    <mb bits="16" off="0[0]" count="32" display="hex">PKeyBlock<!--P_KeyBlock--></mb>
   </struct>
 
   <struct name="SMPSLToVLMappingTable"
@@ -404,7 +403,7 @@
           attributeName="SMP_SMINFO"
           methods="SubnGet SubnSet">
     <mb bits="64" off="0[0]">GUID<!--GUID--></mb>
-    <mb bits="64" off="0[64]">SMKey<!--SM_Key--></mb>
+    <mb bits="64" off="0[64]" display="hex">SMKey<!--SM_Key--></mb>
     <mb bits="32" off="0[128]">actCount<!--ActCount--></mb>
     <mb bits="4" off="0[160]">priority<!--Priority--></mb>
     <mb bits="4" off="0[164]">SMState<!--SMState--></mb>

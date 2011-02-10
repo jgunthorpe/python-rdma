@@ -23,7 +23,7 @@
     <mb bits="4" off="38[4]"><!--Reserved--></mb>
     <mb bits="2" off="39"><!--Reserved--></mb>
     <mb bits="6" off="39[2]">PD<!--Packet Rate (IPD)--></mb>
-    <mb bits="8" off="40">TClass<!--Traffic Class--></mb>
+    <mb bits="8" off="40" display="hex">TClass<!--Traffic Class--></mb>
     <mb bits="8" off="41">hopLimit<!--Hop Limit--></mb>
     <mb bits="4" off="42">SL<!--SL--></mb>
     <mb bits="1" off="42[4]">subnetLocal<!--Subnet Local--></mb>
@@ -41,7 +41,7 @@
           methods="CommMgtSend">
     <mb bits="32" off="0">LCID<!--Local Communication ID--></mb>
     <mb bits="32" off="4"><!--Reserved--></mb>
-    <mb bits="64" off="8">serviceID<!--ServiceID--></mb>
+    <mb bits="64" off="8" display="hex">serviceID<!--ServiceID--></mb>
     <mb bits="64" off="16">LGUID<!--Local CA GUID--></mb>
     <mb bits="32" off="24">localCMQKey<!--Local CM Q_Key--></mb>
     <mb bits="32" off="28">localQKey<!--Local Q_Key--></mb>
@@ -56,7 +56,7 @@
     <mb bits="24" off="44">startingPSN<!--Starting PSN--></mb>
     <mb bits="5" off="47">localResponseTimeout<!--Local CM Response Timeout--></mb>
     <mb bits="3" off="47[5]">retryCount<!--Retry Count--></mb>
-    <mb bits="16" off="48">PKey<!--Partition Key--></mb>
+    <mb bits="16" off="48" display="hex">PKey<!--Partition Key--></mb>
     <mb bits="4" off="50">pathPacketMTU<!--Path Packet Payload MTU--></mb>
     <mb bits="1" off="50[4]">RDCExists<!--RDC Exists--></mb>
     <mb bits="3" off="50[5]">RNRRetryCount<!--RNR Retry Count--></mb>
@@ -187,7 +187,7 @@
     <mb bits="128" off="40" type="HdrIPv6Addr">altDGID<!--Alternate Remote Port GID--></mb>
     <mb bits="20" off="56">altFlowLabel<!--Alternate Flow Label--></mb>
     <mb bits="4" off="58[4]"><!--Reserved--></mb>
-    <mb bits="8" off="59">altTClass<!--Alternate Traffic Class--></mb>
+    <mb bits="8" off="59" display="hex">altTClass<!--Alternate Traffic Class--></mb>
     <mb bits="8" off="60">altHopLimit<!--Alternate Hop Limit--></mb>
     <mb bits="2" off="61"><!--Reserved--></mb>
     <mb bits="6" off="61[2]">altIPD<!--Alternate Packet Rate (IPD)--></mb>
@@ -224,7 +224,7 @@
           methods="CommMgtSend">
     <mb bits="32" off="0">requestID<!--RequestID--></mb>
     <mb bits="32" off="4"><!--Reserved--></mb>
-    <mb bits="64" off="8">serviceID<!--ServiceID--></mb>
+    <mb bits="64" off="8" display="hex">serviceID<!--ServiceID--></mb>
     <mb bits="1728" off="16">privateData<!--Private Data--></mb>
   </struct>
 
@@ -238,7 +238,7 @@
     <mb bits="32" off="0">requestID<!--RequestID--></mb>
     <mb bits="24" off="4">QPN<!--QPN--></mb>
     <mb bits="8" off="7">status<!--Status--></mb>
-    <mb bits="64" off="8">serviceID<!--ServiceID--></mb>
+    <mb bits="64" off="8" display="hex">serviceID<!--ServiceID--></mb>
     <mb bits="32" off="16">QKey<!--Q_Key--></mb>
     <mb bits="576" off="20" type="struct MADClassPortInfo">classPortinfo<!--ClassPortinfo--></mb>
     <mb bits="1120" off="92">privateData<!--Private Data--></mb>
