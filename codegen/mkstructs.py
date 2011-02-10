@@ -333,7 +333,7 @@ class Struct(object):
                 assert off % 8 == 0 and I[2] % 8 == 0;
                 pack.append("    buffer[offset + %u:offset + %u] = %s"%\
                             (off/8,off/8 + I[2]/8,I[1]));
-                unpack.append("    %s = buffer[offset + %u:offset + %u]"%\
+                unpack.append("    %s = bytearray(buffer[offset + %u:offset + %u])"%\
                               (I[1],off/8,off/8 + I[2]/8));
                 off = off + I[2];
                 continue;
@@ -395,7 +395,7 @@ class Struct(object):
 
         pack = ["def pack_into(self,buffer,offset=0):"];
         unpack = ["def unpack_from(self,buffer,offset=0):",
-                  "    self._buf = buffer[offset:];"];
+                  "    self._buf = buffer[offset:offset+%u];"%(self.size)];
         fmts = self.structFormat(self.mbGroup,"self.");
         if fmts:
             self.genFormats(fmts,pack,unpack);
