@@ -25,21 +25,65 @@ def mad_status(status):
 def node_type(value):
     """Decode a Node Type *value* into a string."""
     if value == IBA.NODE_CA:
-        return "Channel Adaptor"
+        return "Channel Adapter"
     if value == IBA.NODE_SWITCH:
         return "Switch"
     if value == IBA.NODE_ROUTER:
         return "Router"
     return "?? %u"%(value);
 
+def link_state(value):
+    """Decode a Port Info port state *value* into a string."""
+    if value == IBA.PORT_STATE_DOWN:
+        return "Down";
+    if value == IBA.PORT_STATE_INIT:
+        return "Init";
+    if value == IBA.PORT_STATE_ARMED:
+        return "Armed";
+    if value == IBA.PORT_STATE_ACTIVE:
+        return "Active";
+    return "?? %u"%(value);
+
+def phys_link_state(value):
+    """Decode a Port Info port physical state *value* into a string."""
+    if value == IBA.PHYS_PORT_STATE_SLEEP:
+        return "Sleep";
+    if value == IBA.PHYS_PORT_STATE_POLLING:
+        return "Polling";
+    if value == IBA.PHYS_PORT_STATE_DISABLED:
+        return "Disabled";
+    if value == IBA.PHYS_PORT_STATE_CFG_TRAIN:
+        return "Config.Train";
+    if value == IBA.PHYS_PORT_STATE_LINK_UP:
+        return "Link UP";
+    if value == IBA.PHYS_PORT_STATE_LINK_ERR_RECOVERY:
+        return "Error Recovery";
+    if value == IBA.PHYS_PORT_STATE_LINK_PHY_TEST:
+        return "Phy Test";
+    return "?? %u"%(value);
+
 def description(value):
     """Decodes a fixed length string from a IBA MAD (such as
     :class:`rdma.IBA.SMPNodeDescription`) These strings are considered to be
     UTF-8 and null padding is removed."""
+    if isinstance(value,bytearray):
+        zero = 0;
+    else:
+        zero = ord(0);
     for I in range(len(value)-1,-1,-1):
-        if value[I] != chr(0):
-                break;
-    return value[:I].decode("UTF-8");
+        if value[I] != zero:
+            return value[:I+1].decode("UTF-8");
+    return '';
+
+def dstr(value,quotes = False):
+    """Convert to a display string. This escapes value like `repr` and displays
+    it without extra adornment."""
+    r = repr(value);
+    if isinstance(value,unicode):
+        r = r[1:];
+    if quotes:
+        return r;
+    return r[1:-1];
 
 def _array_dump(F,a,buf,mbits,name,offset=0):
     """Dump an array beside the hex values. Each array member is printed
