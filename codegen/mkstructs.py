@@ -286,9 +286,9 @@ class Struct(object):
 
         # Must be a bit array
         assert(bits % 8 == 0)
-        return (None,("rdma.binstruct.pack_array8(buffer,%u,%u,%u,%s)"%\
+        return (None,("rdma.binstruct.pack_array8(buffer,offset+%u,%u,%u,%s)"%\
                       (mbt.off/8,mbt.bits,mbt.count,name),
-                      "rdma.binstruct.unpack_array8(buffer,%u,%u,%u,%s)"%\
+                      "rdma.binstruct.unpack_array8(buffer,offset+%u,%u,%u,%s)"%\
                       (mbt.off/8,mbt.bits,mbt.count,name)),
                 bits);
 

@@ -160,7 +160,7 @@ def struct_dump(F,s,offset=0,name_prefix=''):
                 if isinstance(attr,rdma.binstruct.BinStruct):
                     print >> F,"   + %s%s %s"%(name_prefix,name,
                                                attr.__class__.__name__)
-                    struct_dump(F,attr,cur_dword,
+                    struct_dump(F,attr,cur_dword+offset,
                                 name_prefix="%s%s."%(name_prefix,name));
                     cur_dword = cur_dword + bits//8;
                     if cur_dword >= max_dword:
@@ -184,7 +184,8 @@ def struct_dump(F,s,offset=0,name_prefix=''):
                     print >> F,"   - %s%s"%(name_prefix,name)
                     continue;
 
-                _array_dump(F,attr,buf,mbits,name,offset=cur_dword);
+                _array_dump(F,attr,buf[cur_dword:cur_dword + bits//8],
+                            mbits,name,offset=cur_dword+offset);
                 cur_dword = cur_dword + bits//8;
                 continue;
 
