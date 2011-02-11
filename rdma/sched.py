@@ -17,6 +17,10 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
     #: Maximum number of outstanding MADs at any time.
     max_outstanding = 4;
 
+    @property
+    def is_async(self):
+        return False;
+
     def __init__(self,umad):
         """*umad* is a :class:`rdma.umad.UMAD` instance which will be used to
         issue the MADs."""

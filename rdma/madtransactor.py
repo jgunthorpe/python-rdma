@@ -59,6 +59,11 @@ class MADTransactor(object):
     #: The end_port this is associated with
     end_port = None;
 
+    @property
+    def is_async(self):
+        """True if this is an async MADTransactor interface."""
+        return False;
+
     def _execute(self,buf,path):
         """Send the fully formed MAD in buf to path and copy the reply
         into buf. Return path of the reply"""
@@ -151,6 +156,16 @@ class MADTransactor(object):
         # Throw a class specific code..
         class_code = (status >> IBA.MAD_STATUS_CLASS_SHIFT) & IBA.MAD_STATUS_CLASS_MASK;
         if class_code != 0:
+            if isinstance(completer,tuple):
+                self.req_fmt = fmt;
+                self.req_path = path;
+                ret = completer[1](self.reply_fmt,class_code);
+                if ret is not None:
+                    ret = completer[0](ret);
+                self.req_fmt = None;
+                self.req_path = None;
+                if ret is not None:
+                    return ret;
             raise rdma.MADClassError(req=fmt,rep=self.reply_fmt,path=path,
                                      status=self.reply_fmt.status,
                                      code=class_code);
@@ -165,7 +180,7 @@ class MADTransactor(object):
                 else:
                     step = 8*self.reply_fmt.attributeOffset;
                     if step < newer.MAD_LENGTH:
-                        raise rdma.MADError(req=fmt,rep_buf=rbuf,path=path,
+                        raise rdma.MADError(req=fmt,rep=self.reply_fmt,path=path,
                                             status=self.reply_fmt.status,
                                             msg="RMPP attribute is too small. Got %u, expected %u"%(
                                                 step,newer.MAD_LENGTH));
@@ -177,7 +192,7 @@ class MADTransactor(object):
                     #print repr(rbuf[start+step*len(rpayload):]);
                     # I wonder why the data2 element makes no sense?
                     if start + step*count > len(rbuf):
-                        raise rdma.MADError(req=fmt,rep_buf=rbuf,path=path,
+                        raise rdma.MADError(req=fmt,rep=self.reply_fmt,path=path,
                                             status=self.reply_fmt.status,
                                             msg="RMPP complete packet was too short.");
                     rpayload = [newer(rbuf[start + step*I:start + step*(I+1)])
@@ -192,7 +207,15 @@ class MADTransactor(object):
             raise rdma.MADError,e,e.exc_info[2]
 
         if completer:
-            return completer(rpayload);
+            self.req_fmt = fmt;
+            self.req_path = path;
+            if isinstance(completer,tuple):
+                ret = completer[0](rpayload);
+            else:
+                ret = completer(rpayload);
+            self.req_fmt = None;
+            self.req_path = None;
+            return ret;
         return rpayload;
 
     def _doMAD(self,fmt,payload,path,attributeModifier,method,completer=None):
@@ -231,13 +254,13 @@ class MADTransactor(object):
         return self._doMAD(IBA.PMFormat(),payload,path,attributeModifier,
                            payload.MAD_PERFORMANCESET);
 
-    def _subn_adm_do(self,payload,path,attributeModifier,method):
+    def _subn_adm_do(self,payload,path,attributeModifier,method,completer=None):
         fmt = IBA.SAFormat();
         if isinstance(payload,IBA.ComponentMask):
             fmt.componentMask = payload.component_mask;
             payload = payload.payload;
         fmt.SMKey = getattr(path,"SMKey",0);
-        return self._doMAD(fmt,payload,path,attributeModifier,method);
+        return self._doMAD(fmt,payload,path,attributeModifier,method,completer);
 
     def SubnAdmGet(self,payload,path,attributeModifier=0):
         return self._subn_adm_do(payload,path,attributeModifier,

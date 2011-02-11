@@ -163,3 +163,39 @@ using parallel MAD scheduling::
    :members:
    :undoc-members:
    :show-inheritance:
+
+:mod:`rdma.satransactor` Automatic SubnGet to SubnAdmGet Conversion
+-------------------------------------------------------------------
+
+IBA provides two ways to get information about objects manages by a SMA - the
+first is a `SubnGet` SMP RPC to the end port, the second is a `SubnAdmGet`
+GMP RPC to the SA. These should return the same information and are generally
+interchangeable.
+
+This class provides an easy way for tools to access the information either
+using `SubnGet` or using `SubnAdmGet` without really affecting the source
+code.  The `SubnGet` is transparently recoded into a `SubnAdmGet` with the
+proper query components set from the path and attribute ID and proper
+unwrapping of the SA reply.
+
+The class can wrapper both synchronous and asynchronous
+:class:`~rdma.madtransactor.MADTransactor` instances. When wrappering a
+synchronous instance the class can also automatically resolve a DR path to a
+LID for use with the SA.
+
+I highly recommend that all tools with the cabability to perform `SubnGet`
+provide an option to use this class to rely on the SA. IBA defines operation
+modes that would deny all `SubnGet` operations without a valid `MKey`.
+
+Example::
+
+	end_port = rdma.get_end_port();
+	path = rdma.path.IBDRPath(end_port);
+	with rdma.satransactor.SATransactor(rdma.get_umad(end_port)) as umad:
+	    pinf = umad.SubnGet(IBA.SMPPortInfo,path);
+	    pinf.printer(sys.stdout);
+
+.. automodule:: rdma.satransactor
+   :members:
+   :undoc-members:
+   :show-inheritance:
