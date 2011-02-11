@@ -194,6 +194,12 @@ def conv_lid(s,multicast=False):
             raise ValueError("%r is not a unicast LID"%(s));
     return lid;
 
+def lid_lmc_range(lid,lmc):
+    """Return all the LIDs described by *lid* and *lmc*. Similar to `range`"""
+    lmc = 1 << lmc;
+    lid = lid & (~(lmc-1))
+    return range(lid,lid + lmc);
+
 class GUID(bytes):
     """Stores a GUID in internal format. In string format a GUID is formatted
     as ``0002:c903:0000:1491``. Externally the class looks like a string
