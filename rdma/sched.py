@@ -21,6 +21,7 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
         """*umad* is a :class:`rdma.umad.UMAD` instance which will be used to
         issue the MADs."""
         rdma.madtransactor.MADTransactor.__init__(self);
+        self.end_port = umad.end_port;
         self._umad = umad;
         self.trace_func = umad.trace_func
         self._keys = {};

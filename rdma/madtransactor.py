@@ -56,6 +56,8 @@ class MADTransactor(object):
     reply_fmt = None;
     #: A function to call for tracing.
     trace_func = None;
+    #: The end_port this is associated with
+    end_port = None;
 
     def _execute(self,buf,path):
         """Send the fully formed MAD in buf to path and copy the reply

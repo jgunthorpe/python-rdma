@@ -122,6 +122,7 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
         self._agent_cache = {};
 
         self._tid = int(os.urandom(4).encode("hex"),16);
+        self.end_port = parent;
 
     def _get_new_TID(self):
         self._tid = (self._tid + 1) % (1 << 32);

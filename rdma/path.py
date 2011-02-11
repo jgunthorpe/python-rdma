@@ -258,14 +258,14 @@ def get_mad_path(mad,ep_addr):
 
     q = IBA.ComponentMask(IBA.SAPathRecord());
     q.reversible = True;
-    q.SGID = mad.parent.gids[0];
+    q.SGID = mad.end_port.gids[0];
     if isinstance(ep_addr,IBA.GID):
         q.DGID = ep_addr;
     else:
         q.DLID = ep_addr;
 
     try:
-        rep = mad.SubnAdmGet(q,mad.parent.sa_path);
+        rep = mad.SubnAdmGet(q,mad.end_port.sa_path);
     except rdma.MADClassError as err:
         if err.code == IBA.MAD_STATUS_SA_NO_RECORDS:
             raise SAPathNotFoundError("Failed getting MAD path record for end port %r."%(ep_addr),
@@ -276,7 +276,7 @@ def get_mad_path(mad,ep_addr):
         err.message("Failed getting MAD path record for end port %r."%(ep_addr));
         raise
 
-    return IBPath(mad.parent,
+    return IBPath(mad.end_port,
                   DGID=rep.DGID,
                   SGID=rep.SGID,
                   DLID=rep.DLID,
