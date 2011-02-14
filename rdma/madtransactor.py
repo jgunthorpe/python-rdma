@@ -16,7 +16,7 @@ def simple_tracer(mt,kind,fmt=None,path=None,ret=None):
             print "debug: RPC %s TIMED OUT to '%s'."%(desc,path);
             return;
         else:
-            print "debug: RPC %s completed to '%s'."%(desc,path);
+            print "debug: RPC %s completed to '%s' len %u."%(desc,path,len(ret[0]));
     if kind == TRACE_UNEXPECTED:
         print "debug: Got unexpected MAD from '%s'."%(ret[1]);
 
