@@ -15,6 +15,7 @@ Contents:
    rdma.rst
    IBA.rst
    mads.rst
+   subnet.rst
 
 Indices and tables
 ==================
