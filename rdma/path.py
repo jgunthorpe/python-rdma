@@ -265,7 +265,7 @@ def get_mad_path(mad,ep_addr):
         q.DLID = ep_addr;
 
     try:
-        rep = mad.SubnAdmGet(q,mad.end_port.sa_path);
+        rep = mad.SubnAdmGet(q);
     except rdma.MADClassError as err:
         if err.code == IBA.MAD_STATUS_SA_NO_RECORDS:
             raise SAPathNotFoundError("Failed getting MAD path record for end port %r."%(ep_addr),

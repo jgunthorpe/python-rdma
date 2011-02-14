@@ -255,6 +255,8 @@ class MADTransactor(object):
                            payload.MAD_PERFORMANCESET);
 
     def _subn_adm_do(self,payload,path,attributeModifier,method,completer=None):
+        if path is None:
+            path = self.end_port.sa_path;
         fmt = IBA.SAFormat();
         if isinstance(payload,IBA.ComponentMask):
             fmt.componentMask = payload.component_mask;
@@ -262,13 +264,13 @@ class MADTransactor(object):
         fmt.SMKey = getattr(path,"SMKey",0);
         return self._doMAD(fmt,payload,path,attributeModifier,method,completer);
 
-    def SubnAdmGet(self,payload,path,attributeModifier=0):
+    def SubnAdmGet(self,payload,path=None,attributeModifier=0):
         return self._subn_adm_do(payload,path,attributeModifier,
                            payload.MAD_SUBNADMGET);
-    def SubnAdmGetTable(self,payload,path,attributeModifier=0):
+    def SubnAdmGetTable(self,payload,path=None,attributeModifier=0):
         return self._subn_adm_do(payload,path,attributeModifier,
                                  payload.MAD_SUBNADMGETTABLE);
-    def SubnAdmSet(self,payload,path,attributeModifier=0):
+    def SubnAdmSet(self,payload,path=None,attributeModifier=0):
         return self._subn_adm_do(payload,path,attributeModifier,
                            payload.MAD_SUBNADMSET);
 

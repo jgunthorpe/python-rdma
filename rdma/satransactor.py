@@ -61,7 +61,7 @@ class SATransactor(rdma.madtransactor.MADTransactor):
             if not first:
                 req.fromPort = ord(I);
             first = False;
-            start_lid = self._parent.SubnAdmGet(req,self.end_port.sa_path).toLID;
+            start_lid = self._parent.SubnAdmGet(req).toLID;
         path._cached_resolved_dlid = start_lid;
         return start_lid;
 
