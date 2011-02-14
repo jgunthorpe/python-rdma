@@ -3,11 +3,19 @@ import collections,inspect,sys,bisect
 import rdma,rdma.madtransactor;
 
 class Context(object):
-    def __init__(self,op,gengen):
+    _parent = None;
+    _exc = None;
+    _done = False;
+
+    def __init__(self,op,gengen,parent=None):
         self._opstack = collections.deque();
         self._op = op;
         self._gengen = gengen;
-        self._exc = None;
+        if gengen:
+            self._children = set();
+        if parent is not None:
+            self._parent = parent;
+            self._parent._children.add(self);
 
 class MADSchedule(rdma.madtransactor.MADTransactor):
     """This class provides a MADTransactor interface suitable for use by
@@ -16,6 +24,11 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
 
     #: Maximum number of outstanding MADs at any time.
     max_outstanding = 4;
+    #: Set to return a result from a coroutine
+    result = None;
+
+    #: :class:`dict` of contexts to a list of coroutines waiting on them
+    _ctx_waiters = None;
 
     @property
     def is_async(self):
@@ -33,6 +46,7 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
         self._mqueue = collections.deque();
         self.max_outstanding = 4;
         self._replyqueue = collections.deque();
+        self._ctx_waiters = collections.defaultdict(list);
 
     def _sendMAD(self,ctx,mad):
         buf = mad[0]._buf;
@@ -48,6 +62,27 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
         rmatch = self._get_reply_match_key(buf);
         assert(rmatch not in self._keys);
         self._keys[rmatch] = itm;
+
+    def _finish_ctx(self,ctx):
+        """Called when ctx is done and won't be called any more. This triggers
+        things yielding on the context."""
+        ctx._done = True;
+        if ctx._parent is not None:
+            ctx._parent._children.remove(ctx);
+            if not ctx._parent._children and ctx._parent._done:
+                self._finish_ctx(ctx._parent);
+
+        if ctx._gengen:
+            for I in ctx._children:
+                if not I._done:
+                    return;
+
+        waits = self._ctx_waiters.get(ctx);
+        if waits is None:
+            return;
+        del self._ctx_waiters[ctx];
+        for I in waits:
+            self._mqueue.appendleft(I);
 
     def _step(self,ctx,result):
         """Advance a context to its next yield statement. If result is None
@@ -66,9 +101,14 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
             except StopIteration:
                 if ctx._opstack:
                     ctx._op = ctx._opstack.pop();
-                    result = True;
+                    if self.result is not None:
+                        result = self.result;
+                        self.result = None;
+                    else:
+                        result = True;
                     continue;
                 else:
+                    self._finish_ctx(ctx);
                     return;
             except:
                 # Flow exceptions up the stack of generators
@@ -78,13 +118,18 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
                     result = True;
                     continue;
                 else:
+                    self._finish_ctx(ctx);
                     raise;
+
+            if isinstance(work,Context):
+                self._ctx_waiters[work].append(ctx);
+                return;
 
             if inspect.isgenerator(work):
                 if ctx._gengen:
                     # Create a new context
                     self._mqueue.append(ctx);
-                    ctx = Context(work,False);
+                    ctx = Context(work,False,ctx);
                 else:
                     ctx._opstack.append(ctx._op);
                     ctx._op = work;
@@ -97,23 +142,32 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
 
     def mqueue(self,works):
         """*works* is a generator returning coroutines. All coroutines
-        can run in parallel."""
+        can run in parallel.
+
+        :returns: An opaque context reference."""
         assert(inspect.isgenerator(works));
-        self._step(Context(works,True),None);
+        ctx = Context(works,True);
+        self._step(ctx,None);
+        return ctx;
 
     def queue(self,work):
-        """*work* is a single coroutine, or *work* is a tuple of coroutines."""
+        """*work* is a single coroutine, or *work* is a tuple of coroutines.
+
+        :returns: An opaque context reference."""
         if isinstance(work,tuple):
             for I in work:
                 self.queue(I);
             return;
         assert(inspect.isgenerator(work));
-        self._step(Context(work,False),None);
+        ctx = Context(work,False);
+        self._step(ctx,None);
+        return ctx;
 
     def run(self,queue=None,mqueue=None):
         """Schedule MADs. Exits once all the work has been completed.
         *queue* and *mqueue* arguments as passed straight to the
         :meth:`queue` and :meth:`mqueue` methods."""
+        self._ctx_waiters.clear();
         self._keys.clear();
         self._replyqueue.clear();
         self._mqueue.clear();

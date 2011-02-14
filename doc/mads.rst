@@ -119,7 +119,7 @@ is returned for the MAD the ``yield`` statement will return that exactly as
 though the synchronous interface to :class:`~rdma.madtransactor.MADTransactor`
 was being used.
 
-While a coroutine is yielded other coroutined can execute until
+While a coroutine is yielded other coroutines can execute until
 :attr:`rdma.sched.MADSchedule.max_outstanding` MADs are issued, at which point
 the scheduler waits for MADs on the network to complete. As coroutines exit
 queued generators are called to produce more coroutines until there is no more
@@ -127,8 +127,10 @@ work to do.
 
 A coroutine may also ``yeild`` another coroutine. In this instance the
 scheduler treats it as a function call and runs the returned coroutine to
-completion before returning from ``yeild``. If the coroutine produces
-an exception then it will pass through the ``yield`` statement as well.
+completion before returning from ``yeild``. If the coroutine produces an
+exception then it will pass through the ``yield`` statement as well. The
+called coroutine can return a result to the parent by setting the
+:attr:`~rdma.sched.MADSchedule.result` attribute before returning.
 
 This example shows how to perform directed route discovery of a network
 using parallel MAD scheduling::
@@ -158,6 +160,29 @@ using parallel MAD scheduling::
         sched = rdma.sched.MADSchedule(umad);
         local_path = rdma.path.IBDRPath(end_port);
         sched.run(get_node_info(sched,local_path));
+
+What can be Yielded
+^^^^^^^^^^^^^^^^^^^
+
+A generator can yield:
+ * A coroutine. The coroutine is scheduled to run as though
+   :meth:`rmda.madschedule.MADSchedule.queue` had been called. The generator
+   does not wait for the coroutine to finish.
+
+A coroutine can yield:
+ * The result of a RPC call function (a tuple describing the MAD to send). The
+   yield result will be the MAD reply.
+ * A coroutine. The yield result will be value of
+   :attr:`~rdma.sched.MADSchedule.result` when the coroutine raises
+   :exc:`StopIteration` or `True` if it is None, once the coroutine exits.
+   Exceptions raised by the coroutine will propagate through the yield as
+   though the yield was a function call.
+ * A generator. This is identical to yielding a coroutine - the generator runs
+   sequentially through its work and blocks at each yield.
+ * The result of :meth:`~rdma.sched.MADSchedule.queue` - yield will return
+   once the thing queued is finished.
+ * The result of :meth:`~rdma.sched.MADSchedule.mqueue` - yield will return
+   once the generator is exhausted and all the coroutines it spawned are finished.
 
 .. automodule:: rdma.sched
    :members:
