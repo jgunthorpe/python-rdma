@@ -76,8 +76,11 @@ def description(value):
     return '';
 
 def dstr(value,quotes = False):
-    """Convert to a display string. This escapes value like `repr` and displays
-    it without extra adornment."""
+    """Convert to a display string. This escapes values like `repr` but
+    returns with no extra adornment like quotes or a starting u. The intent of
+    this function is to provide a safe printable that has undesired values
+    escaped. FIXME: This should not be so agressive with `repr`, that throws
+    away the unicode as well."""
     r = repr(value);
     if isinstance(value,unicode):
         r = r[1:];
