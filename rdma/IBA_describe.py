@@ -62,6 +62,17 @@ def phys_link_state(value):
         return "Phy Test";
     return "?? %u"%(value);
 
+def link_speed(value):
+    """Decode a Port Info linkSpeedActive value into a string."""
+    res = [];
+    if value & IBA.LINK_SPEED_2Gb5:
+        res.append("SDR");
+    if value & IBA.LINK_SPEED_5Gb0:
+        res.append("DDR");
+    if value & IBA.LINK_SPEED_10Gb0:
+        res.append("QDR");
+    return ",".join(res);
+
 def description(value):
     """Decodes a fixed length string from a IBA MAD (such as
     :class:`rdma.IBA.SMPNodeDescription`) These strings are considered to be

@@ -201,7 +201,7 @@ be required there.
 :mod:`rdma.IBA` InfiniBand Architecture (IBA) definitions
 ---------------------------------------------------------
 .. automodule:: rdma.IBA
-   :members: BinFormat,ComponentMask,GID,GUID,ZERO_GID,ZERO_GUID,conv_ep_addr,conv_lid,lid_lmc_range
+   :members: BinFormat,ComponentMask,GID,GUID,ZERO_GID,ZERO_GUID,conv_ep_addr,conv_lid,decode_link_width,lid_lmc_range
    :undoc-members:
    :show-inheritance:
 

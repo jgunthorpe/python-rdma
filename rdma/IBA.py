@@ -55,6 +55,18 @@ LINK_WIDTH_4x = 0x2;
 LINK_WIDTH_8x = 0x4;
 LINK_WIDTH_12x = 0x8;
 
+def decode_link_width(width):
+    """Convert a link with constant into the number of lanes."""
+    if width == LINK_WIDTH_1x:
+        return 1;
+    if width == LINK_WIDTH_4x:
+        return 4;
+    if width == LINK_WIDTH_8x:
+        return 8;
+    if width == LINK_WIDTH_12x:
+        return 12;
+    return 0;
+
 #: PortInfo Link Speed Constants
 LINK_SPEED_2Gb5 = 0x1;
 LINK_SPEED_5Gb0 = 0x2;
