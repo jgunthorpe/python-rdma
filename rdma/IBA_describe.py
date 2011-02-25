@@ -92,6 +92,8 @@ def dstr(value,quotes = False):
     this function is to provide a safe printable that has undesired values
     escaped. FIXME: This should not be so agressive with `repr`, that throws
     away the unicode as well."""
+    if value is None:
+        return "None";
     r = repr(value);
     if isinstance(value,unicode):
         r = r[1:];
