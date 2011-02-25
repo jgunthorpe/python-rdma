@@ -220,6 +220,13 @@ class SATransactor(rdma.madtransactor.MADTransactor):
         """Let us wrapper things with additional members."""
         return getattr(self._parent,name);
 
+    @property
+    def result(self):
+        return self._parent.result;
+    @result.setter
+    def result(self,value):
+        self._parent.result = value;
+
     def __enter__(self):
         return self;
     def __exit__(self,*exc_info):

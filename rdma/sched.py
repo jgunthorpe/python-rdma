@@ -6,6 +6,7 @@ class Context(object):
     _parent = None;
     _exc = None;
     _done = False;
+    _result = None;
 
     def __init__(self,op,gengen,parent=None):
         self._opstack = collections.deque();
@@ -89,6 +90,9 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
         then this ctx is brand new. If ctx is not exhausted then it is put
         onto _mqueue for later"""
         while result is None or len(self._keys) <= self.max_outstanding:
+            if ctx._result is not None:
+                result = ctx._result;
+                ctx._result = None;
             try:
                 exc = ctx._exc
                 if exc is not None:
@@ -102,10 +106,9 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
                 if ctx._opstack:
                     ctx._op = ctx._opstack.pop();
                     if self.result is not None:
-                        result = self.result;
+                        ctx._result = self.result;
                         self.result = None;
-                    else:
-                        result = True;
+                    result = True;
                     continue;
                 else:
                     self._finish_ctx(ctx);
