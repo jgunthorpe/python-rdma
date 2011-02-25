@@ -32,7 +32,7 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
 
     @property
     def is_async(self):
-        return False;
+        return True;
 
     def __init__(self,umad):
         """*umad* is a :class:`rdma.umad.UMAD` instance which will be used to

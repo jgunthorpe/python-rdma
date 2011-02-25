@@ -274,7 +274,21 @@ class MADTransactor(object):
         return self._subn_adm_do(payload,path,attributeModifier,
                            payload.MAD_SUBNADMSET);
 
+    def do_async(self,op):
+        """This runs a simple async work coroutine against a synchronous
+        instance. In this case the coroutine yields its own next result."""
+        assert(self.is_async == False);
+        result = None;
+        while True:
+            try:
+                if result is None:
+                    result = op.next();
+                else:
+                    result = op.send(result);
+            except StopIteration:
+                return;
+
     # TODO ['BMGet', 'BMSet', 'CommMgtGet', 'CommMgtSend', 'CommMgtSet',
     # 'DevMgtGet', 'DevMgtSet', 'SNMPGet',
-    # 'SNMPSend', 'SubnAdmDelete', 'SubnAdmGet', 'SubnAdmGetMulti',
-    # 'SubnAdmGetTable', 'SubnAdmGetTraceTable', 'SubnAdmSet']
+    # 'SNMPSend', 'SubnAdmDelete', 'SubnAdmGetMulti',
+    # 'SubnAdmGetTraceTable', 'SubnAdmSet']

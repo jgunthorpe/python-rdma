@@ -39,8 +39,6 @@ class SATransactor(rdma.madtransactor.MADTransactor):
         if path.drDLID != IBA.LID_PERMISSIVE:
             return path.drDLID;
 
-        # FIXME: What to do in async mode?
-        # FIXME: Use the SA for this!
         try:
             return path._cached_resolved_dlid;
         except AttributeError:
@@ -51,7 +49,23 @@ class SATransactor(rdma.madtransactor.MADTransactor):
             start_lid = self.end_port.lid;
 
         if len(path.drPath) > 1:
-            assert(self._parent.is_async == False);
+            self._parent.do_async(self.prepare_path_lid(path));
+        else:
+            path._cached_resolved_dlid = start_lid;
+        return path._cached_resolved_dlid;
+
+    def prepare_path_lid(self,path):
+        """Coroutine to resolve *path* to a LID. This only does something if
+        *path* is directed route. This must be performed when using directed
+        route paths with asynchronous MAD transactors."""
+        if (not isinstance(path,rdma.path.IBDRPath) or
+            path.drDLID != IBA.LID_PERMISSIVE or
+            getattr(path,"_cached_resolved_dlid",None) is not None):
+            return;
+
+        start_lid = path.DLID;
+        if start_lid == IBA.LID_PERMISSIVE:
+            start_lid = self.end_port.lid;
 
         # Use the SA to resolve the DR path to a LID.
         req = IBA.ComponentMask(IBA.SALinkRecord());
@@ -61,9 +75,9 @@ class SATransactor(rdma.madtransactor.MADTransactor):
             if not first:
                 req.fromPort = ord(I);
             first = False;
-            start_lid = self._parent.SubnAdmGet(req).toLID;
+            rep = yield self._parent.SubnAdmGet(req);
+            start_lid = rep.toLID;
         path._cached_resolved_dlid = start_lid;
-        return start_lid;
 
     def _get_new_TID(self):
         return self._parent._get_new_TID();
@@ -157,7 +171,7 @@ class SATransactor(rdma.madtransactor.MADTransactor):
             req = IBA.ComponentMask(IBA.SAPortInfoRecord());
             req.endportLID = self.get_path_lid(path);
             if (attributeModifier == 0 and
-                getattr(path,"_cached_node_type",None) == None):
+                getattr(path,"_cached_node_type",None) != IBA.NODE_SWITCH):
                 # This can mean 'whatever port' or it can mean 'switch port 0'
                 # If we don't know the node type then do a get table and
                 # figure it out.
