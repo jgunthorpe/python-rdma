@@ -69,12 +69,9 @@ class SATransactor(rdma.madtransactor.MADTransactor):
 
         # Use the SA to resolve the DR path to a LID.
         req = IBA.ComponentMask(IBA.SALinkRecord());
-        first = True;
         for I in path.drPath[1:]:
             req.fromLID = start_lid;
-            if not first:
-                req.fromPort = ord(I);
-            first = False;
+            req.fromPort = ord(I);
             rep = yield self._parent.SubnAdmGet(req);
             start_lid = rep.toLID;
         path._cached_resolved_dlid = start_lid;
