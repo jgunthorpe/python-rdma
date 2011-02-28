@@ -9,9 +9,14 @@ def subnet_ninf_GUID(sched,sbn,node_guid):
     SA for a specific GUID and store it in *sbn*."""
     req = IBA.ComponentMask(IBA.SANodeRecord());
     req.nodeInfo.nodeGUID = node_guid;
-    res = yield sched.SubnAdmGet(req);
-    np = sbn.get_node_ninf(res.nodeInfo,LID=res.LID);
-    np[0].set_desc(res.nodeDescription.nodeString);
+    res = yield sched.SubnAdmGetTable(req);
+
+    # The SM can return multiple records that match a nodeGUID, one for each port
+    # on a CA. When it does this it must set the portGUID and localPortNum correctly
+    # to match the LID in the RID.
+    for I in res:
+        np = sbn.get_node_ninf(I.nodeInfo,LID=I.LID);
+        np[0].set_desc(I.nodeDescription.nodeString);
 
 def subnet_ninf_SA(sched,sbn,node_type=None):
     """Coroutine to fetch all :class:`~rmda.IBA.SMPNodeInfo` records from the
