@@ -63,10 +63,11 @@ def summary2(node):
         node.ninf.deviceID,node.ninf.vendorID,
         IBA_describe.dstr(node.desc));
 
-def go_listing(argv,o,node_type):
-    LibIBOpts.setup(o,address=False,discovery=True);
-    (args,values) = o.parse_args(argv,expected_values=0);
-    lib = LibIBOpts(o,args,values);
+def go_listing(argv,o,node_type,lib=None):
+    if lib is None:
+        LibIBOpts.setup(o,address=False,discovery=True);
+        (args,values) = o.parse_args(argv,expected_values=0);
+        lib = LibIBOpts(o,args,values);
 
     with lib.get_umad_for_target(None) as umad:
         sched = lib.get_sched(umad);
@@ -88,7 +89,10 @@ def go_print_node(argv,o,node_type):
     lib = LibIBOpts(o,args,values,1,(tmpl_node_guid,));
 
     if args.list:
-        return go_listing(argv,o,node_type);
+        return go_listing(argv,o,node_type,lib);
+
+    if len(values) < 1:
+        raise CmdError("Too few arguments");
 
     node_guid = values[0];
     with lib.get_umad_for_target(None) as umad:
