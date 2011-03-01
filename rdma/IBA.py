@@ -257,6 +257,9 @@ class GUID(bytes):
     def __repr__(self):
         return "GUID('%s')"%(self.__str__());
 
+    def __reduce__(self):
+        return (GUID,(bytes.__str__(self),True));
+
 #: All zeros GUID value.
 ZERO_GUID = GUID('\x00\x00\x00\x00\x00\x00\x00\x00',raw=True);
 
@@ -311,6 +314,10 @@ class GID(bytes):
     def guid(self):
         """Return the GUID portion of the GID."""
         return GUID(bytes.__getslice__(self,8,16),raw=True);
+
+    def __reduce__(self):
+        return (GID,(bytes.__str__(self),True));
+
 
 #: All zeros GID value.
 ZERO_GID = GID('\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',raw=True);
