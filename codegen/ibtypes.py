@@ -1,0 +1,441 @@
+#! /usr/bin/python
+
+import optparse
+import re,sys
+
+parser = optparse.OptionParser(usage="%prog [options] file.h")
+parser.add_option('--fmt', type="choice", choices=('pxi','pxd'), default='pxi')
+
+(opt, args) = parser.parse_args()
+if len(args) != 1:
+    parser.error("expected include file argument")
+
+pxi = '''
+%(enums)s
+
+ibv_gid = struct(
+    'ibv_gid',
+    (('raw',tuple),)
+)
+
+ibv_wc = struct(
+    'ibv_wc',
+    (('wr_id',long),
+     ('status',int), #enum
+     ('opcode',int), #enum
+     ('vendor_err',int),
+     ('byte_len',int),
+     ('imm_data',int),
+     ('qp_num',int),
+     ('src_qp',int),
+     ('wc_flags',int),
+     ('pkey_index',int),
+     ('slid',int),
+     ('sl',int),
+     ('dlid_path_bits',int)
+    )
+)
+
+ibv_global_route = struct(
+    'ibv_global_route',
+    (
+     ('dgid',int),
+     ('flow_label',int),
+     ('sgid_index',int),
+     ('hop_limit',int),
+     ('traffic_class',int)
+    )
+)
+
+ibv_ah_attr = struct(
+    'ibv_ah_attr',
+    (
+     ('grh',ibv_global_route),
+     ('dlid',int),
+     ('sl',int),
+     ('src_path_bits',int),
+     ('static_rate',int),
+     ('is_global',int),
+     ('port_num',int)
+    )
+)
+
+ibv_qp_init_attr = struct(
+    'ibv_qp_init_attr',
+    (
+     ('send_cq',None), # needs forward decl
+     ('recv_cq',None),
+     ('srq',None),
+     ('cap',int),
+     ('qp_type',int),
+     ('sq_sig_all',int)
+    )
+)
+
+ibv_qp_cap = struct(
+    'ibv_qp_cap',
+    (
+     ('max_send_wr',int),
+     ('max_recv_wr',int),
+     ('max_send_sge',int),
+     ('max_recv_sge',int),
+     ('max_inline_data',int)
+    )
+)
+
+ibv_qp_attr = struct(
+    'ibv_qp_attr',
+    (
+     ('qp_state',int,IBV_QP_STATE),
+     ('cur_qp_state',int,IBV_QP_CUR_STATE),
+     ('path_mtu',int,IBV_QP_PATH_MTU),
+     ('path_mig_state',int,IBV_QP_PATH_MIG_STATE),
+     ('qkey',int,IBV_QP_QKEY),
+     ('rq_psn',int,IBV_QP_RQ_PSN),
+     ('sq_psn',int,IBV_QP_SQ_PSN),
+     ('dest_qp_num',int,IBV_QP_DEST_QPN),
+     ('qp_access_flags',int,IBV_QP_ACCESS_FLAGS),
+     ('cap',ibv_qp_cap,IBV_QP_CAP),
+     ('ah_attr',ibv_ah_attr,IBV_QP_AV),
+     ('alt_ah_attr',ibv_ah_attr,IBV_QP_ALT_PATH),
+     ('pkey_index',int,IBV_QP_PKEY_INDEX),
+     ('alt_pkey_index',int,IBV_QP_ALT_PATH),
+     ('en_sqd_async_notify',int,IBV_QP_EN_SQD_ASYNC_NOTIFY),
+     ('sq_draining',int),
+     ('max_rd_atomic',int,IBV_QP_MAX_QP_RD_ATOMIC),
+     ('max_dest_rd_atomic',int,IBV_QP_MAX_DEST_RD_ATOMIC),
+     ('min_rnr_timer',int,IBV_QP_MIN_RNR_TIMER),
+     ('port_num',int,IBV_QP_PORT),
+     ('timeout',int,IBV_QP_TIMEOUT),
+     ('retry_cnt',int,IBV_QP_RETRY_CNT),
+     ('rnr_retry',int,IBV_QP_RNR_RETRY),
+     ('alt_port_num',int,IBV_QP_ALT_PATH),
+     ('alt_timeout',int,IBV_QP_ALT_PATH)
+    )
+)
+
+ibv_port_attr = struct(
+    'ibv_port_attr',
+    (
+     ('state',int), #enum
+     ('max_mtu',int), #enum
+     ('active_mtu',int), #enum
+     ('gid_tbl_len',int),
+     ('port_cap_flags',int),
+     ('max_msg_sz',int),
+     ('bad_pkey_cntr',int),
+     ('qkey_viol_cntr',int),
+     ('pkey_tbl_len',int),
+     ('lid',int),
+     ('sm_lid',int),
+     ('lmc',int),
+     ('max_vl_num',int),
+     ('sm_sl',int),
+     ('subnet_timeout',int),
+     ('init_type_reply',int),
+     ('active_width',int),
+     ('active_speed',int),
+     ('phys_state',int)
+    )
+)
+
+ibv_sge = struct(
+    'ibv_sge',
+    (
+     ('addr',int),
+     ('length',int),
+     ('lkey',int)
+    )
+)
+
+ibv_send_wr_wr_rdma = struct(
+    'ibv_send_wr_wr_rdma',
+    (
+     ('remote_addr', long),
+     ('rkey', int)
+    )
+)
+
+ibv_send_wr_wr_atomic = struct(
+    'ibv_send_wr_wr_atomic',
+    (
+     ('remote_addr',long),
+     ('compare_add',long),
+     ('swap',long),
+     ('rkey',int)
+    )
+)
+
+ibv_send_wr_wr_ud = struct(
+    'ibv_send_wr_wr_ud',
+    (
+     ('ah', None),
+     ('remote_qpn', int),
+     ('remote_qkey', int)
+    )
+)
+
+ibv_send_wr_wr = struct(
+    'ibv_send_wr_wr',
+    (
+     ('rdma', ibv_send_wr_wr_rdma),
+     ('atomic', ibv_send_wr_wr_atomic),
+     ('ud',ibv_send_wr_wr_ud)
+    )
+)
+
+ibv_send_wr = struct(
+    'ibv_send_wr',
+    (
+     ('wr_id', long),
+     ('sg_list', None), # ibv_sge or list/tuple of ibv_sge
+     ('opcode', int),
+     ('send_flags', int),
+     ('imm_data', int),
+     ('wr', ibv_send_wr_wr)
+    )
+)
+
+ibv_recv_wr = struct(
+    'ibv_recv_wr',
+    (
+     ('wr_id', long),
+     ('sg_list', None), # ibv_sge or list/tuple of ibv_sge
+    )
+)
+'''
+
+pxd = '''
+cdef extern from 'infiniband/verbs.h':
+
+%(enums)s
+
+    union ibv_gid:
+        int *raw
+
+    struct ibv_global_route:
+        ibv_gid dgid
+        int flow_label
+        int sgid_index
+        int hop_limit
+        int traffic_class
+
+    struct ibv_ah_attr:
+        ibv_global_route grh
+        int dlid
+        int sl
+        int src_path_bits
+        int static_rate
+        int is_global
+        int port_num
+
+    struct ibv_device:
+        char *name
+
+    struct ibv_context:
+        ibv_device *device
+
+    struct ibv_pd:
+        pass
+
+    struct ibv_mr:
+        void *addr
+        size_t length
+        int lkey
+        int rkey
+
+    struct ibv_cq:
+        pass
+
+    struct ibv_comp_channel:
+        pass
+
+    struct ibv_ah:
+        ibv_context *context
+        ibv_pd *pd
+        int handle
+
+    struct ibv_wc:
+        long wr_id
+        int status
+        int opcode
+        int vendor_err
+        int byte_len
+        int imm_data
+        int qp_num
+        int src_qp
+        int wc_flags
+        int pkey_index
+        int slid
+        int sl
+        int dlid_path_bits
+
+    struct ibv_srq:
+        pass
+
+    struct ibv_qp:
+        int qp_num
+        int qp_type
+        int state
+
+    struct ibv_qp_cap:
+        int max_send_wr
+        int max_recv_wr
+        int max_send_sge
+        int max_recv_sge
+        int max_inline_data
+
+    struct ibv_qp_init_attr:
+        void *qp_context
+        ibv_cq *send_cq
+        ibv_cq *recv_cq
+        ibv_srq *srq
+        ibv_qp_cap cap
+        ibv_qp_type qp_type
+        int sq_sig_all
+
+    struct ibv_qp_attr:
+        ibv_qp_state qp_state
+        ibv_qp_state cur_qp_state
+        ibv_mtu path_mtu
+        ibv_mig_state path_mig_state
+        int qkey
+        int rq_psn
+        int sq_psn
+        int dest_qp_num
+        int qp_access_flags
+        ibv_qp_cap cap
+        ibv_ah_attr ah_attr
+        ibv_ah_attr alt_ah_attr
+        int pkey_index
+        int alt_pkey_index
+        int en_sqd_async_notify
+        int sq_draining
+        int max_rd_atomic
+        int max_dest_rd_atomic
+        int min_rnr_timer
+        int port_num
+        int timeout
+        int retry_cnt
+        int rnr_retry
+        int alt_port_num
+        int alt_timeout
+
+    struct ibv_sge:
+        long addr
+        int length
+        int lkey
+
+    struct ibv_send_wr_wr_rdma:
+        long remote_addr
+        int rkey
+
+    struct ibv_send_wr_wr_atomic:
+        long remote_addr
+        long compare_add
+        long swap
+        int rkey
+
+    struct ibv_send_wr_wr_ud:
+        ibv_ah *ah
+        int remote_qpn
+        int remote_qkey
+
+    union ibv_send_wr_wr:
+        ibv_send_wr_wr_rdma rdma
+        ibv_send_wr_wr_atomic atomic
+        ibv_send_wr_wr_ud ud
+
+    struct ibv_send_wr:
+        long wr_id
+        ibv_send_wr *next
+        ibv_sge *sg_list
+        int num_sge
+        int opcode
+        int send_flags
+        int imm_data
+        ibv_send_wr_wr wr
+
+    struct ibv_recv_wr:
+        long wr_id
+        ibv_recv_wr *next
+        ibv_sge *sg_list
+        int num_sge
+
+    struct ibv_port_attr:
+        ibv_port_state state
+        ibv_mtu max_mtu
+        ibv_mtu active_mtu
+        int gid_tbl_len
+        int port_cap_flags
+        int max_msg_sz
+        int bad_pkey_cntr
+        int qkey_viol_cntr
+        int pkey_tbl_len
+        int lid
+        int sm_lid
+        int lmc
+        int max_vl_num
+        int sm_sl
+        int subnet_timeout
+        int init_type_reply
+        int active_width
+        int active_speed
+        int phys_state
+
+    ctypedef int size_t
+
+    ibv_device **ibv_get_device_list(int *n)
+    void ibv_free_device_list(ibv_device **list)
+    ibv_context *ibv_open_device(ibv_device *dev)
+    int ibv_close_device(ibv_context *ctx)
+    int ibv_query_port(ibv_context *ctx, int port_num, ibv_port_attr *attr)
+
+    ibv_pd *ibv_alloc_pd(ibv_context *ctx)
+    int ibv_dealloc_pd(ibv_pd *pd)
+
+    ibv_ah *ibv_create_ah(ibv_pd *pd, ibv_ah_attr *attr)
+    int ibv_destroy_ah(ibv_ah *ah)
+
+    ibv_mr *ibv_reg_mr(ibv_pd *pd, void *addr, size_t length, int access)
+    int ibv_dereg_mr(ibv_mr *mr)
+
+    ibv_comp_channel *ibv_create_comp_channel(ibv_context *ctx)
+    int ibv_destroy_comp_channel(ibv_comp_channel *chan)
+
+    ibv_cq *ibv_create_cq(ibv_context *ctx, int cqe,
+                          void *user_cq_ctx,
+                          ibv_comp_channel *chan,
+                          int comp_vector)
+    int ibv_destroy_cq(ibv_cq *cq)
+    int ibv_poll_cq(ibv_cq *cq, int n, ibv_wc *wc)
+
+    ibv_qp *ibv_create_qp(ibv_pd *pd, ibv_qp_init_attr *init_attr)
+    int ibv_destroy_qp(ibv_qp *qp)
+    int ibv_modify_qp(ibv_qp *qp, ibv_qp_attr *attr, int attr_mask)
+    int ibv_query_qp(ibv_qp *qp, ibv_qp_attr *attr, int attr_mask, ibv_qp_init_attr *init)
+    int ibv_post_send(ibv_qp *qp, ibv_send_wr *wr, ibv_send_wr **bad_wr)
+    int ibv_post_recv(ibv_qp *qp, ibv_recv_wr *wr, ibv_recv_wr **bad_wr)
+'''
+
+f = open(args[0])
+s = f.read()
+comment_pattern = re.compile(r'/\*.*?\*/', re.DOTALL)
+s = comment_pattern.sub('', s)
+
+enum = {}
+for m in re.finditer(r'enum\s+(\w+)\s*{(.*?)}', s, re.DOTALL):
+    name = m.group(1)
+    constants = [c.partition('=')[0].strip() for c in m.group(2).split(',')]
+    enum[name] = tuple(constants)
+
+ekeys = sorted(enum.keys())
+if opt.fmt == 'pxi':
+    print pxi % { 'enums':
+                  '\n\n'.join('\n'.join('%s = c.%s' % (c, c) for c in enum[e])
+                              for e in ekeys) }
+else:
+    sep = '\n' + ' '*8
+    print pxd % { 'enums': '\n\n'.join('    enum %s:%s' % (e,sep) + sep.join(enum[e])
+                                       for e in ekeys) }
+
