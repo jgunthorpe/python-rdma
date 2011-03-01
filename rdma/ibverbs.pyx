@@ -3,10 +3,10 @@ import errno as mod_errno
 from util import struct
 import rdma.devices
 
-class VerbError(Exception):
-    def __init__(self,**kwargs):
-        for k,v in kwargs.iteritems():
-            setattr(self,k,v)
+class WRError(rdma.SysError):
+    def __init__(self,errno,func,msg,bad_index):
+        rdma.SysError.__init__(self,errno,func,msg);
+        self.bad_index = bad_index;
 
 debug = False
 
@@ -38,7 +38,8 @@ cdef extern from 'Python.h':
 include 'libibverbs.pxi'
 
 cdef class ibv_context:
-    """Verbs context handle, this is a context manager."""
+    """Verbs context handle, this is a context manager. Call :func:`rdma.get_verbs` to get
+    an instance of this."""
     cdef c.ibv_context *_ctx
     cdef public object node
     cdef public object port
@@ -49,7 +50,6 @@ cdef class ibv_context:
         cdef c.ibv_device **dev_list
         cdef int i
         cdef int count
-        cdef int e
 
         if typecheck(parent,rdma.devices.RDMADevice):
             self.node = parent
@@ -60,23 +60,22 @@ cdef class ibv_context:
 
         dev_list = c.ibv_get_device_list(&count)
         if dev_list == NULL:
-            raise OSError(errno, "Failed to get device list")
+            raise rdma.SysError(errno,"ibv_get_device_list",
+                                "Failed to get device list")
 
-        for 0 <= i < count:
-            if dev_list[i].name == self.node.name:
-                break
+        try:
+            for 0 <= i < count:
+                if dev_list[i].name == self.node.name:
+                    break
+            else:
+                raise rdma.RDMAError("RDMA verbs device %r not found."%(self.node));
 
-        e = 0;
-        if i == count:
-            e = mod_errno.ENODEV
-        else:
             self._ctx = c.ibv_open_device(dev_list[i])
             if self._ctx == NULL:
-                e = errno
-
-        c.ibv_free_device_list(dev_list)
-        if e != 0:
-            raise OSError(e, None)
+                raise rdma.SysError(errno,"ibv_open_device",
+                                    "Failed to get device list")
+        finally:
+            c.ibv_free_device_list(dev_list)
 
     def __dealloc__(self):
         self.close();
@@ -93,13 +92,16 @@ cdef class ibv_context:
         if self._ctx != NULL:
             e = c.ibv_close_device(self._ctx)
             if e != 0:
-                raise OSError(e, "Failed to close device %s"%self._ctx.device.name)
+                raise rdma.SysError(e,"ibv_close_device",
+                                    "Failed to close device %s"%self._ctx.device.name)
             self._ctx = NULL
 
     def query_port(self, port_id=None):
         """Return a :class:ibv_port_attr: for the *port_id*. If *port_id* is
         none then the port info is returned for the end port this context was
-        created against."""
+        created against.
+
+        :rtype: :class:`rdma.ibverbs.ibv_port_attr`"""
         cdef c.ibv_port_attr cattr
         cdef int e
         if port_id is None:
@@ -107,7 +109,8 @@ cdef class ibv_context:
 
         e = c.ibv_query_port(self._ctx, port_id, &cattr)
         if e != 0:
-            raise OSError(e, "Failed to query port %r"%(port_id))
+            raise rdma.SysError(e,"ibv_query_port",
+                                "Failed to query port %r"%(port_id))
 
         return ibv_port_attr(state = cattr.state,
                              max_mtu = cattr.max_mtu,
@@ -130,6 +133,7 @@ cdef class ibv_context:
                              phys_state = cattr.phys_state)
 
 cdef class ibv_pd:
+    """Protection domain handle, this is a context manager."""
     cdef ibv_context ctx
     cdef c.ibv_pd *_pd
 
@@ -137,7 +141,8 @@ cdef class ibv_pd:
         self.ctx = ctx
         self._pd = c.ibv_alloc_pd(ctx._ctx)
         if self._pd == NULL:
-            raise OSError(errno, "Failed to allocate protection domain")
+            raise rdma.SysError(errno,"ibv_alloc_pd",
+                                "Failed to allocate protection domain")
 
     def __dealloc__(self):
         self.close()
@@ -156,10 +161,12 @@ cdef class ibv_pd:
                 raise rdma.RDMAError("Context closed before owned object");
             rc = c.ibv_dealloc_pd(self._pd)
             if rc != 0:
-                raise OSError(rc, "Failed to deallocate protection domain")
+                raise rdma.SysError(rc,"ibv_dealloc_pd",
+                                    "Failed to deallocate protection domain")
             self._pd = NULL
 
 cdef class ibv_ah:
+    """Address handle, this is a context manager."""
     cdef c.ibv_ah *_ah
 
     def __cinit__(self, ibv_pd pd not None, attr):
@@ -168,7 +175,8 @@ cdef class ibv_ah:
         copy_ah_attr(&cattr, attr)
         self._ah = c.ibv_create_ah(pd._pd, &cattr)
         if self._ah == NULL:
-            raise OSError(errno, "Failed to create address handle")
+            raise rdma.SysError(errno,"ibv_create_ah",
+                                "Failed to create address handle")
 
     def __dealloc__(self):
         self.close()
@@ -185,10 +193,12 @@ cdef class ibv_ah:
         if self._ah != NULL:
             rc = c.ibv_destroy_ah(self._ah)
             if rc != 0:
-                raise OSError(rc, "Failed to destroy address handle")
+                raise rdma.SysError(rc,"ibv_destroy_ah",
+                                    "Failed to destroy address handle")
             self._ah = NULL
 
 cdef class ibv_comp_channel:
+    """Completion channel, this is a context manager."""
     cdef ibv_context ctx
     cdef c.ibv_comp_channel *_chan
 
@@ -196,7 +206,8 @@ cdef class ibv_comp_channel:
         self.ctx = ctx
         self._chan = c.ibv_create_comp_channel(ctx._ctx)
         if self._chan == NULL:
-            raise OSError(errno, "Failed to create completion channel")
+            raise rdma.SysError(errno,"ibv_create_comp_channel",
+                                "Failed to create completion channel")
         self.ctx._chans[self] = 1
 
     def __dealloc__(self):
@@ -216,11 +227,13 @@ cdef class ibv_comp_channel:
                 raise rdma.RDMAError("Context closed before owned object");
             rc = c.ibv_destroy_comp_channel(self._chan)
             if rc != 0:
-                raise OSError(rc, "Failed to destroy completion channel")
+                raise rdma.SysError(rc,"ibv_destroy_comp_channel",
+                                    "Failed to destroy completion channel")
             del self.ctx._chans[self]
             self._chan = NULL
 
 cdef class ibv_cq:
+    """Completion queue, this is a context manager."""
     cdef ibv_context ctx
     cdef c.ibv_cq *_cq
     cdef object _cookie
@@ -236,7 +249,8 @@ cdef class ibv_cq:
         self._cookie = cookie
         self._cq = c.ibv_create_cq(ctx._ctx, nelems, <void*>cookie, c_chan, vec)
         if self._cq == NULL:
-            raise OSError(errno, "Failed to create completion queue")
+            raise rdma.SysError(errno,"ibv_create_cq",
+                                "Failed to create completion queue")
 
     def __dealloc__(self):
         self.close()
@@ -255,10 +269,12 @@ cdef class ibv_cq:
                 raise rdma.RDMAError("Context closed before owned object");
             rc = c.ibv_destroy_cq(self._cq)
             if rc != 0:
-                raise OSError(rc, "Failed to destroy completion queue")
+                raise rdma.SysError(rc,"ibv_destroy_cq",
+                                    "Failed to destroy completion queue")
             self._cq = NULL
 
     def poll(self):
+        """Perform the poll_cq operation, return a list of work requests."""
         cdef c.ibv_wc wc
         cdef int n
         cdef list L
@@ -268,7 +284,7 @@ cdef class ibv_cq:
             if n == 0:
                 break
             elif n < 0:
-                raise OSError(errno, None)
+                raise rdma.SysError(errno,"ibv_poll_cq");
             else:
                 L.append(ibv_wc(wr_id = wc.wr_id,
                                 status = wc.status,
@@ -286,6 +302,7 @@ cdef class ibv_cq:
         return L
 
 cdef class ibv_mr:
+    """Memory registration, this is a context manager."""
     cdef public object pd
     cdef c.ibv_mr *_mr
     cdef object _buf
@@ -322,7 +339,8 @@ cdef class ibv_mr:
         self._buf = buf
         self._mr = c.ibv_reg_mr(pd._pd, addr, length, access)
         if self._mr == NULL:
-            raise OSError(errno, "Failed to register memory region")
+            raise rdma.SysError(errno,"ibv_reg_mr",
+                                "Failed to register memory region")
 
     def __dealloc__(self):
         self.close()
@@ -339,7 +357,8 @@ cdef class ibv_mr:
         if self._mr != NULL:
             rc = c.ibv_dereg_mr(self._mr)
             if rc != 0:
-                raise OSError(errno, "Failed to deregister memory region")
+                raise rdma.SysError(errno,"ibv_dereg_mr",
+                                    "Failed to deregister memory region")
             self._mr = NULL
 
 cdef void copy_ah_attr(c.ibv_ah_attr *cattr, attr):
@@ -366,6 +385,7 @@ cdef void copy_ah_attr(c.ibv_ah_attr *cattr, attr):
     cattr.port_num = attr.port_num
 
 cdef class ibv_qp:
+    """Queue pair, this is a context manager."""
     cdef object pd
     cdef c.ibv_qp *_qp
     cdef c.ibv_qp_cap _cap
@@ -413,7 +433,8 @@ cdef class ibv_qp:
         self.pd = pd
         self._qp = c.ibv_create_qp(pd._pd, &cinit)
         if self._qp == NULL:
-            raise OSError(errno, "Failed to create queue pair")
+            raise rdma.SysError(errno,"ibv_create_qp",
+                                "Failed to create queue pair")
         self._qp_type = cinit.qp_type
         self._cap = cinit.cap
 
@@ -432,7 +453,8 @@ cdef class ibv_qp:
         if self._qp != NULL:
             rc = c.ibv_destroy_qp(self._qp)
             if rc != 0:
-                raise OSError(errno, "Failed to destroy queue pair")
+                raise rdma.SysError(errno,"ibv_destroy_qp",
+                                    "Failed to destroy queue pair")
             self._qp = NULL;
 
     cdef _modify(self,attr,mask):
@@ -487,7 +509,8 @@ cdef class ibv_qp:
 
         rc = c.ibv_modify_qp(self._qp, &cattr, cmask)
         if rc != 0:
-            raise OSError(errno, "Failed to modify qp")
+            raise rdma.SysError(errno,"ibv_modify_qp",
+                                "Failed to modify qp")
 
         if cmask & c.IBV_QP_CAP:
             self._cap = cattr.cap
@@ -593,7 +616,7 @@ cdef class ibv_qp:
                 cbad_wr = cbad_wr.next
                 n += 1
             free(mem)
-            raise VerbError(msg="Failed to post work request(s)",bad_index=n,errno=errno)
+            raise WRError(errno,"ibv_post_send","Failed to post work request(s)",n);
         free(mem)
 
     cdef _post_recv(self, arg):
@@ -642,7 +665,7 @@ cdef class ibv_qp:
                 cbad_wr = cbad_wr.next
                 n += 1
             free(mem)
-            raise VerbError(msg="Failed to post work request(s)",bad_index=n,errno=errno)
+            raise WRError(errno,"ibv_post_recv","Failed to post work request(s)",n);
 
         free(mem)
 
@@ -653,7 +676,8 @@ cdef class ibv_qp:
 
         rc = c.ibv_query_qp(self._qp, &cattr, mask, &cinit)
         if rc != 0:
-            raise OSError(rc, "Failed to query queue pair")
+            raise rdma.SysError(rc,"ibv_query_qp",
+                                "Failed to query queue pair")
 
         attr = ibv_qp_attr(qp_state = cattr.qp_state)
         init = ibv_qp_init_attr()
@@ -667,10 +691,3 @@ cdef class ibv_qp:
 
     def post_recv(self, wrlist):
         self._post_recv(wrlist)
-
-def ibv_query_port(ctx, port_num): return ctx.query_port(port_num)
-def ibv_create_cq(*args): return ibv_cq(*args)
-def ibv_modify_qp(qp, *args): return qp.modify(*args)
-def ibv_query_qp(qp, *args): return qp.query(*args)
-def ibv_post_send(qp, *args): return qp.post_send(*args)
-def ibv_post_recv(qp, *args): return qp.post_recv(*args)

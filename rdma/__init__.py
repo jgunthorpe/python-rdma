@@ -1,7 +1,7 @@
 #!/usr/bin/python
-
 import sys
-import os,os.path;
+import os
+import os.path
 
 class RDMAError(Exception):
     '''General exception class for RDMA related errors.'''
@@ -125,6 +125,18 @@ class MADClassError(MADError):
         MADError.__init__(self,req=req,code=code,
                           msg="RPC %s got class specific error %u"%(
                               req.describe(),code),**kwargs);
+
+class SysError(RDMAError,OSError):
+    '''Thrown when a system call fails. Inclues errno'''
+    def __init__(self,errno,func,msg=None):
+        '''*errno* is the positive errno code, *func* is the system call that
+        failed and msg is more information, if applicable.'''
+        if msg is not None:
+            strerror = "%s - %s (%s)"%(msg,func,os.strerror(errno))
+        else:
+            strerror = "%s (%s)"%(func,os.strerror(errno))
+        OSError.__init__(self,errno,strerror);
+        self.func = func;
 
 def get_end_port(name=None):
     """Return a :class:`rdma.devices.EndPort` for the default end port if name
