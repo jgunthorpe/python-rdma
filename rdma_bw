@@ -1,0 +1,267 @@
+#! /usr/bin/python
+import optparse
+import pickle
+import socket
+import contextlib
+import sys
+from mmap import mmap
+from collections import namedtuple
+from rdma.ibverbs import *
+from rdma.tools import clock_monotonic
+import rdma.path
+
+from libibtool.libibopts import *;
+
+parser = optparse.OptionParser(usage="%prog [options] [hostname]")
+parser.add_option("-C","--Ca",dest="CA",
+                  help="RDMA device to use. Specify a device name or node GUID");
+parser.add_option("-P","--Port",dest="port",
+                  help="RDMA end port to use. Specify a GID, port GUID, DEVICE/PORT or port number.");
+parser.add_option('-p', '--port', default=4444, type="int", dest="ip_port",
+                  help="listen on/connect to port PORT")
+parser.add_option('-6', '--ipv6', action="store_const",
+                  const=socket.AF_INET6, dest="af", default=0,
+                  help="use IPv6")
+parser.add_option('-b', '--bidirectional', default=False, action="store_true",
+                  help="measure bidirectional bandwidth")
+parser.add_option('-d', '--ib-dev', metavar="DEV", dest="CA",
+                  help="use IB device DEV")
+parser.add_option('-i', '--ib-port', type="int", metavar="PORT", dest="port",
+                  help="use port PORT of IB device")
+parser.add_option('-s', '--size', default=64*1024, type="int", metavar="BYTES",
+                  help="exchange messages of size BYTES,(client only)")
+parser.add_option('-t', '--tx-depth', default=100, type="int", help="number of exchanges")
+parser.add_option('-n', '--iters', default=1000, type="int",
+                  help="number of exchanges (client only)")
+parser.add_option("--debug",dest="debug",action="count",default=0,
+                  help="Increase the debug level, each -d increases by 1.")
+(options, args) = parser.parse_args()
+
+lib = LibIBOpts(parser,options,args,1,(str,));
+dev = lib.get_end_port();
+
+infotype = namedtuple('infotype', 'path addr rkey size iters')
+
+def pickle_path(path):
+    """Strip out the end_port reference from the :class:`rdma.path.IBPath` so
+    it can be pickled."""
+    if path.SGID is None:
+        path.SGID = path.end_port.gids[0];
+    return path.copy(end_port=None);
+
+def unpickle_path(path):
+    """Restore the end_port reference to the path by cross referencing the
+    *SGID*."""
+    assert(path.SGID in dev.gids);
+    path.end_port = dev;
+    return path;
+
+class Endpoint(object):
+    ctx = None;
+    pd = None;
+    cq = None;
+    mr = None;
+
+    def __init__(self, opt):
+        self.opt = opt
+        self.ctx = rdma.get_verbs(dev)
+        self.pd = ibv_pd(self.ctx)
+        self.cq = ibv_create_cq(self.ctx)
+
+        cap = ibv_qp_cap(max_send_wr=opt.tx_depth,
+                         max_recv_wr=opt.tx_depth,
+                         max_send_sge=1,
+                         max_recv_sge=1,
+                         max_inline_data=0)
+
+        init = ibv_qp_init_attr(send_cq=self.cq,
+                                recv_cq=self.cq,
+                                srq=None,
+                                cap=cap,
+                                qp_type=IBV_QPT_RC,
+                                sq_sig_all=1)
+        self.qp = ibv_qp(self.pd, init)
+
+        self.mem = mmap(-1, opt.size)
+        self.mr = ibv_mr(self.pd, self.mem,
+                         IBV_ACCESS_LOCAL_WRITE|IBV_ACCESS_REMOTE_WRITE)
+        self.path = rdma.path.IBPath(dev,DGID=self.ctx.port.gids[0],sqpn=self.qp.qp_num);
+        self.peerinfo = None
+
+    def __enter__(self):
+        return self;
+
+    def __exit__(self,*exc_info):
+        return self.close();
+
+    def close(self):
+        if self.qp is not None:
+            self.qp.close();
+        if self.mr is not None:
+            self.mr.close();
+        if self.pd is not None:
+            self.pd.close();
+        if self.cq is not None:
+            self.cq.close();
+        if self.ctx is not None:
+            self.ctx.close();
+
+    def connect(self, peerinfo):
+        self.peerinfo = peerinfo
+        # to INIT
+        attr = ibv_qp_attr(qp_state=IBV_QPS_INIT,
+                           pkey_index=0,
+                           port_num=self.path.end_port.port_id,
+                           qp_access_flags=IBV_ACCESS_REMOTE_WRITE)
+
+        ibv_modify_qp(self.qp, attr, attr.MASK)
+
+        # to RTR
+        ah_attr = ibv_ah_attr(is_global=self.path.has_grh,
+                              dlid=self.path.DLID,
+                              sl=self.path.SL,
+                              src_path_bits=self.path.SLID_bits,
+                              static_rate=self.path.rate,
+                              port_num=self.path.end_port.port_id);
+
+        attr = ibv_qp_attr(qp_state=IBV_QPS_RTR,
+                           path_mtu=self.path.MTU,
+                           dest_qp_num=self.path.dqpn,
+                           rq_psn=0,
+                           max_dest_rd_atomic=1,
+                           min_rnr_timer=12,
+                           ah_attr=ah_attr)
+
+        ibv_modify_qp(self.qp, attr, attr.MASK)
+
+        # to RTS
+        attr = ibv_qp_attr(qp_state=IBV_QPS_RTS,
+                           timeout=14,
+                           retry_cnt=7,
+                           rnr_retry=7,
+                           sq_psn=0,
+                           max_rd_atomic=1)
+	ibv_modify_qp(self.qp, attr, attr.MASK)
+
+    def rdma(self):
+        swr = ibv_send_wr()
+        swr.wr_id = swr
+
+        swr.wr.rdma.remote_addr = self.peerinfo.addr
+        swr.wr.rdma.rkey = self.peerinfo.rkey
+        swr.sg_list = ibv_sge(addr=self.mr.addr,
+                              length=self.mr.length,
+                              lkey=self.mr.lkey)
+        swr.opcode = IBV_WR_RDMA_WRITE
+        swr.send_flags = IBV_SEND_SIGNALED
+
+        depth = min(self.opt.tx_depth, self.opt.iters)
+        n = max(self.opt.tx_depth, self.opt.iters)
+
+        tpost = clock_monotonic()
+        for i in xrange(depth):
+            self.qp.post_send(swr)
+
+        completions = 0
+        posts = depth
+        while completions < n:
+            comp = self.cq.poll()
+            for c in comp:
+                completions += 1
+                if posts < n:
+                    self.qp.post_send(swr)
+                    posts += 1
+
+        tcomp = clock_monotonic()
+
+        rate = self.opt.size*self.opt.iters/1e6/(tcomp-tpost)
+        print "%.1f MB/sec" % rate
+
+def client_mode(hostname, opt):
+    with Endpoint(opt) as end:
+        ret = socket.getaddrinfo(hostname,str(opt.ip_port),opt.af,
+                                 socket.SOCK_STREAM);
+        ret = ret[0];
+        with contextlib.closing(socket.socket(ret[0],ret[1])) as sock:
+            sock.connect(ret[4]);
+
+            sock.send(pickle.dumps(infotype(path=pickle_path(end.path),
+                                            addr=end.mr.addr,
+                                            rkey=end.mr.rkey,
+                                            size=opt.size,
+                                            iters=opt.iters)))
+            buf = sock.recv(1024)
+            peerinfo = pickle.loads(buf)
+
+            end.path = peerinfo.path;
+            end.path.reverse();
+            unpickle_path(end.path);
+
+            print "path %r peer raddr=%x peer rkey=%x"%(end.path,peerinfo.addr,
+                                                        peerinfo.rkey);
+            print "%u iterations of %u is %u bytes"%(opt.iters,opt.size,
+                                                     opt.iters*opt.size);
+
+            end.connect(peerinfo)
+            end.rdma()
+
+            sock.shutdown(socket.SHUT_WR);
+            sock.recv(1024);
+
+def server_mode(opt):
+    ret = socket.getaddrinfo(None,str(opt.ip_port),opt.af,
+                             socket.SOCK_STREAM,0,
+                             socket.AI_PASSIVE);
+    ret = ret[0];
+    with contextlib.closing(socket.socket(ret[0],ret[1])) as sock:
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        sock.bind(ret[4]);
+        sock.listen(1)
+
+        s,addr = sock.accept()
+        with contextlib.closing(s):
+            buf = s.recv(1024)
+            peerinfo = pickle.loads(buf)
+
+            opt.size = peerinfo.size;
+            opt.iters = peerinfo.iters;
+
+            with Endpoint(opt) as end:
+                with rdma.get_umad(end.ctx.port) as umad:
+                    end.path = rdma.path.get_mad_path(umad,peerinfo.path.SGID);
+                    end.path.dqpn = peerinfo.path.sqpn;
+                    end.path.sqpn = end.qp.qp_num;
+
+                s.send(pickle.dumps(infotype(path=pickle_path(end.path),
+                                             addr=end.mr.addr,
+                                             rkey=end.mr.rkey,
+                                             size=None,
+                                             iters=None)))
+
+                print "path %r peer raddr=%x peer rkey=%x"%(end.path,peerinfo.addr,
+                                                            peerinfo.rkey);
+                print "%u iterations of %u is %u bytes"%(opt.iters,opt.size,
+                                                         opt.iters*opt.size);
+
+                end.connect(peerinfo)
+                if opt.bidirectional:
+                    end.rdma()
+
+                s.shutdown(socket.SHUT_WR);
+                s.recv(1024);
+
+try:
+    if len(args) == 1:
+        client_mode(args[0], options)
+    else:
+        server_mode(options)
+    sys.exit(0);
+except rdma.MADError as err:
+    err.dump_detailed(sys.stderr,"E:",level=options.verbosity);
+    if options.verbosity >= 2:
+        raise;
+except rdma.RDMAError as err:
+    print "E:",err;
+    if options.verbosity >= 2:
+        raise;
+sys.exit(100);
