@@ -36,11 +36,11 @@ class LibIBOpts(object):
         self.args = args;
         self.o = o;
         self.end_port = self.get_end_port();
-        self.end_port.sa_path.SMKey = args.smkey;
+        self.end_port.sa_path.SMKey = getattr(args,"smkey",0);
         self.debug = args.debug;
         if self.debug > 1:
             print "debug: Using end port %s %s"%(self.end_port,self.end_port.gids[0]);
-        o.verbosity = max(self.debug,args.verbosity);
+        o.verbosity = max(self.debug,getattr(args,"verbosity",0));
 
         if "discovery" in args.__dict__:
             if args.use_sa and args.discovery is not None and args.discovery != "SA":
@@ -66,22 +66,23 @@ class LibIBOpts(object):
         if o.verbosity >= 2:
             self.format_args = {"format": "dump"};
         else:
-            if (str(o.current_command).find("saquery") != -1 or
-                str(o.current_command).find("ibportstate") != -1):
+            cmd = str(getattr(o,"current_command",""));
+            if (cmd.find("saquery") != -1 or
+                cmd.find("ibportstate") != -1):
                 self.format_args = {"header": False, "colon": False, "format": "dotted",
                                     "name_map": libib_name_map_saquery, "column": 25,
                                     "skip_reserved": False};
-            elif str(o.current_command).find("perfquery") != -1:
+            elif cmd.find("perfquery") != -1:
                 self.format_args = {"header": False, "colon": True, "format": "dotted",
                                     "name_map": libib_name_map_perfquery, "dump_list": True};
 
-            elif str(o.current_command).find("smpquery") != -1:
+            elif cmd.find("smpquery") != -1:
                 self.format_args = {"header": False, "colon": True, "format": "dotted",
                                     "name_map": libib_name_map_smpquery};
             else:
                 self.format_args = {"header": False, "colon": False, "format": "dotted"};
 
-            if args.int_names:
+            if getattr(args,"int_names",True):
                 self.format_args = {"header": False, "colon": False, "format": "dotted"};
 
     def debug_print_path(self,name,path):
@@ -106,7 +107,7 @@ class LibIBOpts(object):
         o.add_option("--int-names",dest="int_names",action="store_true",
                      help="Use internal names for all the fields instead of libib compatible names.");
         o.add_option("--sa",dest="use_sa",action="store_true",
-                     help="Instead of issuing SMPs, use corrisponding record queries to the SA.");
+                     help="Instead of issuing SMPs, use corresponding record queries to the SA.");
 
         if address:
             try:
