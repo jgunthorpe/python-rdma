@@ -104,8 +104,8 @@ class IBPath(Path):
         """Reverse this path in-place according to IBA 13.5.4."""
         self.DLID,self.SLID = self.SLID,self.DLID;
         self.dqpn ,self.sqpn = self.sqpn,self.dqpn;
+        self.DGID,self.SGID = self.SGID,self.DGID;
         if self.has_grh:
-            self.DGID,self.SGID = self.SGID,self.DGID;
             self.hop_limit = 0xff;
         self.drop_cache();
 
