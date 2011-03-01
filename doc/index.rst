@@ -15,6 +15,7 @@ Contents:
    rdma.rst
    IBA.rst
    mads.rst
+   ibverbs.rst
    subnet.rst
    ibtool.rst
 

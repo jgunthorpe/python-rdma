@@ -1,60 +1,7 @@
 # -*- Python -*-
-"""
-Provides Python interface to libibverbs.  All of the symbols retain
-their names, but there are some differences between C and Python use:
-
-- constructors are used to initialize structures.  For example:
-      init = ibv_qp_init_attr(send_cq=cq, recv_cq=cq)
-  all of the parameters are optional, so it is still possible
-  to do this:
-      init = ibv_qp_init_attr()
-      init.send_cq = cq
-      init.recv_cq = cq
-      ...
-      qp = ibv_create_qp(pd, init)
-
-- verbs raise exceptions rather than return error codes
-
-- there are no pointers.  When posting a request to a QP, the sg_list
-  is a tuple of ibv_mr objects.  These are constructed from any
-  Python object supporting the buffer interface and are automatically
-  associated with a memory region.  It is the caller's responsibility
-  to keep a reference to the region until the relevant completion is
-  reaped.
-
-    m = mmap(-1,length)
-    mr1 = ibv_mr(m, IBV_LOCAL_WRITE)
-    mr2 = ibv_mr('foo')
-
-    wr = ibv_send_wr()
-    wr.sg_list=(ibv_sge(addr=mr.addr,length=mr.length,lkey=mr.lkey),
-                ibv_sge(addr=mr2.addr,length=mr2.length,lkey=mr2.key))
-    ...
-    rc = ibv_post_send(
-
-
-
-- can use methods on verb objects, eg:
-      qp.modify(attr, mask)
-  is equivalent to:
-      ibv_modify_qp(qp, attr, mask)
-
-- structure objects maintain the attribute mask by monitoring
-  field assignments made by the constructor and subsequent
-  assignment statements.
-
-       attr = ibv_qp_attr()
-       attr.qp_state        = IBV_QPS_INIT
-       attr.pkey_index      = 0
-       attr.port_num        = port
-       attr.qp_access_flags = IBV_ACCESS_REMOTE_WRITE
-       ibv_modify_qp(qp, attr, attr.MASK)
-
-  Remember to zero out MASK if the attr object is reused
-  for another call.
-"""
 import errno as mod_errno
 from util import struct
+import rdma.devices
 
 class VerbError(Exception):
     def __init__(self,**kwargs):
@@ -91,21 +38,35 @@ cdef extern from 'Python.h':
 include 'libibverbs.pxi'
 
 cdef class ibv_context:
+    """Verbs context handle, this is a context manager."""
     cdef c.ibv_context *_ctx
+    cdef public object node
+    cdef public object port
 
-    def __cinit__(self, name):
+    def __cinit__(self,parent):
+        '''Create a :class:`rdma.uverbs.UVerbs` instance for the associated
+        :class:`rdma.devices.RDMADevice`/:class:`rdma.devices.EndPort`.'''
         cdef c.ibv_device **dev_list
         cdef int i
         cdef int count
         cdef int e
+
+        if typecheck(parent,rdma.devices.RDMADevice):
+            self.node = parent
+            self.port = None
+        else:
+            self.node = parent.parent
+            self.port = parent
 
         dev_list = c.ibv_get_device_list(&count)
         if dev_list == NULL:
             raise OSError(errno, "Failed to get device list")
 
         for 0 <= i < count:
-            if dev_list[i].name == name:
+            if dev_list[i].name == self.node.name:
                 break
+
+        e = 0;
         if i == count:
             e = mod_errno.ENODEV
         else:
@@ -118,18 +79,35 @@ cdef class ibv_context:
             raise OSError(e, None)
 
     def __dealloc__(self):
+        self.close();
+
+    def __enter__(self):
+        return self;
+
+    def __exit__(self,*exc_info):
+        return self.close();
+
+    def close(self):
+        """Free the verbs context handle."""
         cdef int e
         if self._ctx != NULL:
             e = c.ibv_close_device(self._ctx)
             if e != 0:
                 raise OSError(e, "Failed to close device %s"%self._ctx.device.name)
+            self._ctx = NULL
 
-    def query_port(self, port_num):
+    def query_port(self, port_id=None):
+        """Return a :class:ibv_port_attr: for the *port_id*. If *port_id* is
+        none then the port info is returned for the end port this context was
+        created against."""
         cdef c.ibv_port_attr cattr
         cdef int e
-        e = c.ibv_query_port(self._ctx, port_num, &cattr)
+        if port_id is None:
+            port_id = self.port.port_id;
+
+        e = c.ibv_query_port(self._ctx, port_id, &cattr)
         if e != 0:
-            raise OSError(e, "Failed to query port")
+            raise OSError(e, "Failed to query port %r"%(port_id))
 
         return ibv_port_attr(state = cattr.state,
                              max_mtu = cattr.max_mtu,
@@ -152,7 +130,7 @@ cdef class ibv_context:
                              phys_state = cattr.phys_state)
 
 cdef class ibv_pd:
-    cdef object ctx
+    cdef ibv_context ctx
     cdef c.ibv_pd *_pd
 
     def __cinit__(self, ibv_context ctx not None):
@@ -162,10 +140,24 @@ cdef class ibv_pd:
             raise OSError(errno, "Failed to allocate protection domain")
 
     def __dealloc__(self):
+        self.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self,*exc_info):
+        return self.close()
+
+    def close(self):
+        """Free the verbs pd handle."""
         cdef int rc
-        rc = c.ibv_dealloc_pd(self._pd)
-        if rc != 0:
-            raise OSError(rc, "Failed to deallocate protection domain")
+        if self._pd != NULL:
+            if self.ctx._ctx == NULL:
+                raise rdma.RDMAError("Context closed before owned object");
+            rc = c.ibv_dealloc_pd(self._pd)
+            if rc != 0:
+                raise OSError(rc, "Failed to deallocate protection domain")
+            self._pd = NULL
 
 cdef class ibv_ah:
     cdef c.ibv_ah *_ah
@@ -179,14 +171,25 @@ cdef class ibv_ah:
             raise OSError(errno, "Failed to create address handle")
 
     def __dealloc__(self):
+        self.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self,*exc_info):
+        return self.close()
+
+    def close(self):
+        """Free the verbs AH handle."""
         cdef int rc
         if self._ah != NULL:
             rc = c.ibv_destroy_ah(self._ah)
             if rc != 0:
                 raise OSError(rc, "Failed to destroy address handle")
+            self._ah = NULL
 
 cdef class ibv_comp_channel:
-    cdef object ctx
+    cdef ibv_context ctx
     cdef c.ibv_comp_channel *_chan
 
     def __cinit__(self, ibv_context ctx not None):
@@ -197,14 +200,28 @@ cdef class ibv_comp_channel:
         self.ctx._chans[self] = 1
 
     def __dealloc__(self):
+        self.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self,*exc_info):
+        return self.close()
+
+    def close(self):
+        """Free the verbs AH handle."""
         cdef int rc
-        rc = c.ibv_destroy_comp_channel(self._chan)
-        if rc != 0:
-            raise OSError(rc, "Failed to destroy completion channel")
-        del self.ctx._chans[self]
+        if self._chan != NULL:
+            if self.ctx._ctx == NULL:
+                raise rdma.RDMAError("Context closed before owned object");
+            rc = c.ibv_destroy_comp_channel(self._chan)
+            if rc != 0:
+                raise OSError(rc, "Failed to destroy completion channel")
+            del self.ctx._chans[self]
+            self._chan = NULL
 
 cdef class ibv_cq:
-    cdef object ctx
+    cdef ibv_context ctx
     cdef c.ibv_cq *_cq
     cdef object _cookie
 
@@ -222,12 +239,24 @@ cdef class ibv_cq:
             raise OSError(errno, "Failed to create completion queue")
 
     def __dealloc__(self):
+        self.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self,*exc_info):
+        return self.close()
+
+    def close(self):
+        """Free the verbs CQ handle."""
         cdef int rc
-        if self._cq == NULL:
-            return
-        rc = c.ibv_destroy_cq(self._cq)
-        if rc != 0:
-            raise OSError(rc, "Failed to destroy completion queue")
+        if self._cq != NULL:
+            if self.ctx._ctx == NULL:
+                raise rdma.RDMAError("Context closed before owned object");
+            rc = c.ibv_destroy_cq(self._cq)
+            if rc != 0:
+                raise OSError(rc, "Failed to destroy completion queue")
+            self._cq = NULL
 
     def poll(self):
         cdef c.ibv_wc wc
@@ -296,11 +325,22 @@ cdef class ibv_mr:
             raise OSError(errno, "Failed to register memory region")
 
     def __dealloc__(self):
+        self.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self,*exc_info):
+        return self.close()
+
+    def close(self):
+        """Free the verbs MR handle."""
         cdef int rc
         if self._mr != NULL:
             rc = c.ibv_dereg_mr(self._mr)
             if rc != 0:
                 raise OSError(errno, "Failed to deregister memory region")
+            self._mr = NULL
 
 cdef void copy_ah_attr(c.ibv_ah_attr *cattr, attr):
     if not typecheck(attr, ibv_ah_attr):
@@ -378,11 +418,22 @@ cdef class ibv_qp:
         self._cap = cinit.cap
 
     def __dealloc__(self):
+        self.close();
+
+    def __enter__(self):
+        return self;
+
+    def __exit__(self,*exc_info):
+        return self.close();
+
+    def close(self):
+        """Free the verbs QP handle."""
         cdef int rc
         if self._qp != NULL:
             rc = c.ibv_destroy_qp(self._qp)
             if rc != 0:
                 raise OSError(errno, "Failed to destroy queue pair")
+            self._qp = NULL;
 
     cdef _modify(self,attr,mask):
         cdef c.ibv_qp_attr cattr
