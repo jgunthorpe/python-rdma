@@ -384,7 +384,7 @@ def topo_surround_SMP(sched,sbn,node,get_desc=True):
                 sched.queue(node.get_desc(sched,path));
         ninf = node.ninf;
 
-        def do_port(sel):
+        def do_port(sel,path):
             aport = node.get_port(sel);
             if aport.pinf is None:
                 pinf = yield sched.SubnGet(IBA.SMPPortInfo,path,sel);
@@ -398,9 +398,9 @@ def topo_surround_SMP(sched,sbn,node,get_desc=True):
             zport = node.get_port(0);
             if zport.pinf is None:
                 sched.queue(subnet_pinf_SMP(sched,sbn,0,path));
-            sched.mqueue(do_port(sel) for sel in range(1,ninf.numPorts+1));
+            sched.mqueue(do_port(sel,path) for sel in range(1,ninf.numPorts+1));
         else:
-            sched.queue(do_port(node.ports.index(I)));
+            sched.queue(do_port(node.ports.index(I),path));
 
 def load(sched,sbn,stuff):
     """Fill *sbn* with the discovery items in *stuff*. *stuff* may be:
