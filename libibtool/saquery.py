@@ -172,7 +172,7 @@ def do_print(out,s):
         print "\tPortInfo dump:"
         if _format_args.get("name_map") is not None:
             args = copy.copy(_format_args);
-            args["name_map"] = libibopts.libib_name_map_smpquery;
+            args["name_map"] = libib_name_map_smpquery;
             args["colon"] = True;
             args["column"] = 33;
         else:
@@ -186,7 +186,7 @@ def do_print(out,s):
         print "\tSwitchInfo dump:"
         if _format_args.get("name_map") is not None:
             args = copy.copy(_format_args);
-            args["name_map"] = libibopts.libib_name_map_smpquery;
+            args["name_map"] = libib_name_map_smpquery;
             args["colon"] = True;
             args["column"] = 33;
         else:
