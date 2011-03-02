@@ -267,7 +267,7 @@ class _SubnetTopo(object):
         """Coroutine to get the :class:`~rdma.IBA.SMPNodeInfo` and scan all the
         port infos."""
         ninf = yield self.sched.SubnGet(IBA.SMPNodeInfo,path);
-        if ninf.nodeGUID in self.sbn.nodes:
+        if ninf.portGUID in self.sbn.ports:
             # This can only happen if things race and two links connect to
             # the same switch. FIXME: Well, unless the database is partially
             # pre-populated..

@@ -275,7 +275,7 @@ class Subnet(object):
             self.paths[end_port] = path;
         return path;
 
-    def link_end_port(self,port,portIdx=None,portGUID=None,
+    def link_end_port(self,port,portIdx=None,nodeGUID=None,portGUID=None,
                       path=None,LID=None,LMC=0):
         """Use the provided information about *port* to update the database.
 
@@ -308,13 +308,14 @@ class Subnet(object):
         return port;
 
     def search_end_port(self,portIdx=None,portGUID=None,nodeGUID=None,
-                        node=None,path=None,LID=None,LMC=0):
+                        path=None,LID=None,LMC=0):
         """Return a :class:`Port` instance associated with the supplied
         information if it exists or `None`.
 
         Note: For switches *portIdx* must be 0."""
         # Note: This is in order of accuracy, LID matching is only accurate
         # if the subnet is properly configured and LIDs assigned correctly.
+        port = None;
         if path is not None:
             port = getattr(path,"_cached_subnet_end_port",None);
             if port is not None:
@@ -323,13 +324,16 @@ class Subnet(object):
             port = self.ports.get(portGUID);
             if port is not None:
                 return port;
+        node = None;
         if nodeGUID is not None:
             node = self.nodes.get(nodeGUID);
-        if (node is not None and node.ports is not None):
+        if port is not None:
+            node = port.parent;
+        if node is not None:
             if isinstance(node,Switch):
-                return node.ports[0];
-            if portIdx is not None and portIdx < len(node.ports):
-                return node.ports[portIdx];
+                return node.get_port(0);
+            if portIdx is not None:
+                return node.get_port(portIdx);
 
         if (LID is None and path is not None and
             not isinstance(path,rdma.path.IBDRPath)):
@@ -383,18 +387,13 @@ class Subnet(object):
         enough information to link a :class:`Port` to the :class:`Node`.
 
         :rtype: tuple(:class:`Node`, :class:`Port`)"""
-        node = None;
-        nodeGUID = kwargs.get("nodeGUID");
-        if nodeGUID is not None:
-            node = self.nodes.get(nodeGUID);
-            kwargs["node"] = node;
         port = self.search_end_port(**kwargs);
 
-        if node is None and port is not None:
-            node = port.parent;
-        if node is None:
+        if port is None:
             node = type_();
             self.all_nodes.add(node);
+        else:
+            node = port.parent;
         if not isinstance(node,type_):
             if isinstance(node,Node):
                 # This was a temporary node, re-type it appropriately.
@@ -432,6 +431,7 @@ class Subnet(object):
             type_ = Node;
 
         np = self.get_node(type_,portIdx=portIdx,
+                           nodeGUID=ninf.nodeGUID,
                            portGUID=ninf.portGUID,
                            path=path,LID=LID);
         self.nodes[ninf.nodeGUID] = np[0];
