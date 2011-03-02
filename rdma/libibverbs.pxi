@@ -175,11 +175,6 @@ IBV_WR_RDMA_READ = c.IBV_WR_RDMA_READ
 IBV_WR_ATOMIC_CMP_AND_SWP = c.IBV_WR_ATOMIC_CMP_AND_SWP
 IBV_WR_ATOMIC_FETCH_AND_ADD = c.IBV_WR_ATOMIC_FETCH_AND_ADD
 
-gid = struct(
-    'gid',
-    (('raw',tuple),)
-)
-
 wc = struct(
     'wc',
     (('wr_id',long),
@@ -201,7 +196,7 @@ wc = struct(
 global_route = struct(
     'global_route',
     (
-     ('dgid',int),
+     ('dgid',IBA.GID),
      ('flow_label',int),
      ('sgid_index',int),
      ('hop_limit',int),

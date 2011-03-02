@@ -118,20 +118,13 @@ class Endpoint(object):
         self.qp.modify(attr, attr.MASK)
 
         # to RTR
-        ah_attr = ibv.ah_attr(is_global=self.path.has_grh,
-                              dlid=self.path.DLID,
-                              sl=self.path.SL,
-                              src_path_bits=self.path.SLID_bits,
-                              static_rate=self.path.rate,
-                              port_num=self.path.end_port.port_id);
-
         attr = ibv.qp_attr(qp_state=ibv.IBV_QPS_RTR,
                            path_mtu=self.path.MTU,
                            dest_qp_num=self.path.dqpn,
                            rq_psn=0,
                            max_dest_rd_atomic=1,
                            min_rnr_timer=12,
-                           ah_attr=ah_attr)
+                           ah_attr=self.path)
 
         self.qp.modify(attr, attr.MASK)
 

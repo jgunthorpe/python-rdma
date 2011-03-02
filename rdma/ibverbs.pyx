@@ -2,6 +2,8 @@
 import errno as mod_errno
 from util import struct
 import rdma.devices
+import rdma.IBA as IBA;
+import rdma.path;
 
 class WRError(rdma.SysError):
     def __init__(self,errno,func,msg,bad_index):
@@ -210,7 +212,9 @@ cdef class PD:
         return ret;
 
     def ah(self,attr):
-        """Create a new :class:`rdma.ibverbs.AH` for this protection domain."""
+        """Create a new :class:`rdma.ibverbs.AH` for this protection domain.
+        *attr* may be a :class:`rdma.ibverbs.ah_attr` or
+        :class:`rdma.path.IBPath`."""
         ret = AH(self,attr);
         self._children.append(ret);
         return ret;
@@ -427,28 +431,50 @@ cdef class MR:
                                     "Failed to deregister memory region")
             self._mr = NULL
 
-cdef void copy_ah_attr(c.ibv_ah_attr *cattr, attr):
-    if not typecheck(attr, ibv_ah_attr):
-        raise TypeError("attr must be an ah_attr")
+cdef int copy_ah_attr(c.ibv_ah_attr *cattr, attr) except -1:
+    """Fill in an ibv_ah_attr from *attr*. *attr* can be a
+    :class:`rdma.ibverbs.ah_attr` which is copied directly (discouraged) or it
+    can be a :class:`rdma.path.IBPath` which will setup the AH using the
+    forward path parameters."""
+    if typecheck(attr, ah_attr):
+        cattr.is_global = attr.is_global
+        if cattr.is_global:
+            if not typecheck(attr.grh, global_route):
+                raise TypeError("attr.grh must be a global_route")
+            if not typecheck(attr.grh.dgid, IBA.GID):
+                raise TypeError("attr.grh.dgid must be an IBA.GID")
+            for 0 <= i < 16:
+                cattr.grh.dgid.raw[i] = ord(attr.DGID[i]);
+            cattr.grh.flow_label = attr.grh.flow_label
+            cattr.grh.sgid_index = attr.grh.sgid_index
+            cattr.grh.hop_limit = attr.grh.hop_limit
+            cattr.grh.traffic_class = attr.grh.traffic_class
 
-    cattr.is_global = attr.is_global
-    if cattr.is_global:
-        if not typecheck(attr.grh, global_route):
-            raise TypeError("attr.grh must be an global_route")
-        if not typecheck(attr.grh.dgid, gid):
-            raise TypeError("attr.grh.dgid must be an gid")
-        for 0 <= i < 16:
-            cattr.grh.dgid.raw[i] = attr.grh.dgid.raw[i]
-        cattr.grh.flow_label = attr.grh.flow_label
-        cattr.grh.sgid_index = attr.grh.sgid_index
-        cattr.grh.hop_limit = attr.grh.hop_limit
-        cattr.grh.traffic_class = attr.grh.traffic_class
+        cattr.dlid = attr.dlid
+        cattr.sl = attr.sl
+        cattr.src_path_bits = attr.src_path_bits
+        cattr.static_rate = attr.static_rate
+        cattr.port_num = attr.port_num
+    elif typecheck(attr, rdma.path.IBPath):
+        cattr.is_global = attr.has_grh
+        if attr.DGID is not None:
+            for 0 <= i < 16:
+                cattr.grh.dgid.raw[i] = ord(attr.DGID[i]);
+        if cattr.is_global:
+            cattr.grh.sgid_index = attr.SGID_index;
 
-    cattr.dlid = attr.dlid
-    cattr.sl = attr.sl
-    cattr.src_path_bits = attr.src_path_bits
-    cattr.static_rate = attr.static_rate
-    cattr.port_num = attr.port_num
+        cattr.grh.flow_label = attr.flow_label
+        cattr.grh.hop_limit = attr.hop_limit
+        cattr.grh.traffic_class = attr.traffic_class
+
+        cattr.dlid = attr.DLID
+        cattr.sl = attr.SL
+        cattr.src_path_bits = attr.SLID_bits
+        cattr.static_rate = attr.rate
+        cattr.port_num = attr.end_port.port_id
+    else:
+        raise TypeError("attr must be an rdma.ibverbs.ah_attr or rdma.path.IBPath.")
+    return 0;
 
 cdef class QP:
     """Queue pair, this is a context manager."""
@@ -759,6 +785,8 @@ cdef class QP:
         return (attr, init)
 
     def modify(self,attr,mask):
+        """When modifying a QP the value *attr.ah_attr* may be a
+        :class:`rdma.ibverbs.ah_attr` or :class:`rdma.path.IBPath`."""
         self._modify(attr, mask)
 
     def post_send(self, wrlist):

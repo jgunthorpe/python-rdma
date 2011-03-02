@@ -13,11 +13,6 @@ if len(args) != 1:
 pxi = '''
 %(enums)s
 
-gid = struct(
-    'gid',
-    (('raw',tuple),)
-)
-
 wc = struct(
     'wc',
     (('wr_id',long),
@@ -39,7 +34,7 @@ wc = struct(
 global_route = struct(
     'global_route',
     (
-     ('dgid',int),
+     ('dgid',IBA.GID),
      ('flow_label',int),
      ('sgid_index',int),
      ('hop_limit',int),
