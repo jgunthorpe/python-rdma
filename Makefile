@@ -9,6 +9,5 @@ rdma/ibverbs.so: rdma/libibverbs.pxd rdma/libibverbs.pxi rdma/ibverbs.pyx Makefi
 		--library-dirs $(OFA_LIB) \
 		--rpath $(OFA_LIB)
 
-# rdma/libibverbs.pxd
-rdma/libibverbs.pxi: codegen/ibtypes.py $(VERBS_H)
+rdma/libibverbs.pxd rdma/libibverbs.pxi: codegen/ibtypes.py $(VERBS_H)
 	python $< --fmt $(patsubst rdma/libibverbs.%,%,$@) $(VERBS_H) > $@

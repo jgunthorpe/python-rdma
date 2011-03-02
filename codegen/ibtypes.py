@@ -1,7 +1,8 @@
 #! /usr/bin/python
 
 import optparse
-import re,sys
+import re
+import sys
 
 parser = optparse.OptionParser(usage="%prog [options] file.h")
 parser.add_option('--fmt', type="choice", choices=('pxi','pxd'), default='pxi')
@@ -10,10 +11,10 @@ parser.add_option('--fmt', type="choice", choices=('pxi','pxd'), default='pxi')
 if len(args) != 1:
     parser.error("expected include file argument")
 
-pxi = '''
+pxi = """
 %(enums)s
 
-wc = struct(
+wc = util.struct(
     'wc',
     (('wr_id',long),
      ('status',int), #enum
@@ -31,7 +32,7 @@ wc = struct(
     )
 )
 
-global_route = struct(
+global_route = util.struct(
     'global_route',
     (
      ('dgid',IBA.GID),
@@ -42,7 +43,7 @@ global_route = struct(
     )
 )
 
-ah_attr = struct(
+ah_attr = util.struct(
     'ah_attr',
     (
      ('grh',global_route),
@@ -55,7 +56,7 @@ ah_attr = struct(
     )
 )
 
-qp_init_attr = struct(
+qp_init_attr = util.struct(
     'qp_init_attr',
     (
      ('send_cq',None), # needs forward decl
@@ -67,7 +68,7 @@ qp_init_attr = struct(
     )
 )
 
-qp_cap = struct(
+qp_cap = util.struct(
     'qp_cap',
     (
      ('max_send_wr',int),
@@ -78,7 +79,7 @@ qp_cap = struct(
     )
 )
 
-qp_attr = struct(
+qp_attr = util.struct(
     'qp_attr',
     (
      ('qp_state',int,IBV_QP_STATE),
@@ -109,32 +110,72 @@ qp_attr = struct(
     )
 )
 
-port_attr = struct(
+port_attr = collections.namedtuple(
     'port_attr',
-    (
-     ('state',int), #enum
-     ('max_mtu',int), #enum
-     ('active_mtu',int), #enum
-     ('gid_tbl_len',int),
-     ('port_cap_flags',int),
-     ('max_msg_sz',int),
-     ('bad_pkey_cntr',int),
-     ('qkey_viol_cntr',int),
-     ('pkey_tbl_len',int),
-     ('lid',int),
-     ('sm_lid',int),
-     ('lmc',int),
-     ('max_vl_num',int),
-     ('sm_sl',int),
-     ('subnet_timeout',int),
-     ('init_type_reply',int),
-     ('active_width',int),
-     ('active_speed',int),
-     ('phys_state',int)
-    )
-)
+    '''state
+     max_mtu
+     active_mtu
+     gid_tbl_len
+     port_cap_flags
+     max_msg_sz
+     bad_pkey_cntr
+     qkey_viol_cntr
+     pkey_tbl_len
+     lid
+     sm_lid
+     lmc
+     max_vl_num
+     sm_sl
+     subnet_timeout
+     init_type_reply
+     active_width
+     active_speed
+     phys_state''');
 
-sge = struct(
+device_attr = collections.namedtuple(
+    'device_attr',
+    '''fw_ver
+    node_guid
+    sys_image_guid
+    max_mr_size
+    page_size_cap
+    vendor_id
+    vendor_part_id
+    hw_ver
+    max_qp
+    max_qp_wr
+    device_cap_flags
+    max_sge
+    max_sge_rd
+    max_cq
+    max_cqe
+    max_mr
+    max_pd
+    max_qp_rd_atom
+    max_ee_rd_atom
+    max_res_rd_atom
+    max_qp_init_rd_atom
+    max_ee_init_rd_atom
+    atomic_cap
+    max_ee
+    max_rdd
+    max_mw
+    max_raw_ipv6_qp
+    max_raw_ethy_qp
+    max_mcast_grp
+    max_mcast_qp_attach
+    max_total_mcast_qp_attach
+    max_ah
+    max_fmr
+    max_map_per_fmr
+    max_srq
+    max_srq_wr
+    max_srq_sge
+    max_pkeys
+    local_ca_ack_delay
+    phys_port_cnt''');
+
+sge = util.struct(
     'sge',
     (
      ('addr',int),
@@ -143,7 +184,7 @@ sge = struct(
     )
 )
 
-send_wr_wr_rdma = struct(
+send_wr_wr_rdma = util.struct(
     'send_wr_wr_rdma',
     (
      ('remote_addr', long),
@@ -151,7 +192,7 @@ send_wr_wr_rdma = struct(
     )
 )
 
-send_wr_wr_atomic = struct(
+send_wr_wr_atomic = util.struct(
     'send_wr_wr_atomic',
     (
      ('remote_addr',long),
@@ -161,7 +202,7 @@ send_wr_wr_atomic = struct(
     )
 )
 
-send_wr_wr_ud = struct(
+send_wr_wr_ud = util.struct(
     'send_wr_wr_ud',
     (
      ('ah', None),
@@ -170,7 +211,7 @@ send_wr_wr_ud = struct(
     )
 )
 
-send_wr_wr = struct(
+send_wr_wr = util.struct(
     'send_wr_wr',
     (
      ('rdma', send_wr_wr_rdma),
@@ -179,7 +220,7 @@ send_wr_wr = struct(
     )
 )
 
-send_wr = struct(
+send_wr = util.struct(
     'send_wr',
     (
      ('wr_id', long),
@@ -191,16 +232,16 @@ send_wr = struct(
     )
 )
 
-recv_wr = struct(
+recv_wr = util.struct(
     'recv_wr',
     (
      ('wr_id', long),
      ('sg_list', None), # sge or list/tuple of sge
     )
 )
-'''
+"""
 
-pxd = '''
+pxd = """
 cdef extern from 'infiniband/verbs.h':
 
 %(enums)s
@@ -378,6 +419,48 @@ cdef extern from 'infiniband/verbs.h':
         int active_speed
         int phys_state
 
+    struct ibv_device_attr:
+        char fw_ver[64]
+        unsigned long node_guid
+        unsigned long sys_image_guid
+        unsigned long max_mr_size
+        unsigned long page_size_cap
+        unsigned int vendor_id
+        unsigned int vendor_part_id
+        unsigned int hw_ver
+        int max_qp
+        int max_qp_wr
+        int device_cap_flags
+        int max_sge
+        int max_sge_rd
+        int max_cq
+        int max_cqe
+        int max_mr
+        int max_pd
+        int max_qp_rd_atom
+        int max_ee_rd_atom
+        int max_res_rd_atom
+        int max_qp_init_rd_atom
+        int max_ee_init_rd_atom
+        ibv_atomic_cap atomic_cap
+        int max_ee
+        int max_rdd
+        int max_mw
+        int max_raw_ipv6_qp
+        int max_raw_ethy_qp
+        int max_mcast_grp
+        int max_mcast_qp_attach
+        int max_total_mcast_qp_attach
+        int max_ah
+        int max_fmr
+        int max_map_per_fmr
+        int max_srq
+        int max_srq_wr
+        int max_srq_sge
+        unsigned int max_pkeys
+        unsigned int local_ca_ack_delay
+        unsigned int phys_port_cnt
+
     ctypedef int size_t
 
     ibv_device **ibv_get_device_list(int *n)
@@ -385,6 +468,7 @@ cdef extern from 'infiniband/verbs.h':
     ibv_context *ibv_open_device(ibv_device *dev)
     int ibv_close_device(ibv_context *ctx)
     int ibv_query_port(ibv_context *ctx, int port_num, ibv_port_attr *attr)
+    int ibv_query_device(ibv_context *ctx, ibv_device_attr *attr)
 
     ibv_pd *ibv_alloc_pd(ibv_context *ctx)
     int ibv_dealloc_pd(ibv_pd *pd)
@@ -411,7 +495,7 @@ cdef extern from 'infiniband/verbs.h':
     int ibv_query_qp(ibv_qp *qp, ibv_qp_attr *attr, int attr_mask, ibv_qp_init_attr *init)
     int ibv_post_send(ibv_qp *qp, ibv_send_wr *wr, ibv_send_wr **bad_wr)
     int ibv_post_recv(ibv_qp *qp, ibv_recv_wr *wr, ibv_recv_wr **bad_wr)
-'''
+"""
 
 f = open(args[0])
 s = f.read()

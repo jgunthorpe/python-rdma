@@ -22,6 +22,7 @@ class umad_self_test(unittest.TestCase):
 
     def test_basic(self):
         print self.ctx.query_port();
+        print self.ctx.query_device();
         pd = self.ctx.pd();
         cq = self.ctx.cq();
         self.assertEqual(cq.poll(),[]);

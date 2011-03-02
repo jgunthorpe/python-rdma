@@ -103,10 +103,62 @@ cdef class Context:
                                     "Failed to close device %s"%self._ctx.device.name)
             self._ctx = NULL
 
+    def query_device(self):
+        """Return a :class:`rdma.ibverbs.device_attr` for the device.
+
+        :rtype: :class:`rdma.ibverbs.device_attr`"""
+        cdef c.ibv_device_attr dattr
+        cdef int e
+
+        e = c.ibv_query_device(self._ctx, &dattr)
+        if e != 0:
+            raise rdma.SysError(e,"ibv_query_device",
+                                "Failed to query port")
+        return device_attr(fw_ver = dattr.fw_ver,
+                           node_guid = IBA.GUID(struct.pack("=Q",dattr.node_guid),True),
+                           sys_image_guid = IBA.GUID(struct.pack("=Q",dattr.sys_image_guid),True),
+                           max_mr_size = dattr.max_mr_size,
+                           page_size_cap = dattr.page_size_cap,
+                           vendor_id = dattr.vendor_id,
+                           vendor_part_id = dattr.vendor_part_id,
+                           hw_ver = dattr.hw_ver,
+                           max_qp = dattr.max_qp,
+                           max_qp_wr = dattr.max_qp_wr,
+                           device_cap_flags = dattr.device_cap_flags,
+                           max_sge = dattr.max_sge,
+                           max_sge_rd = dattr.max_sge_rd,
+                           max_cq = dattr.max_cq,
+                           max_cqe = dattr.max_cqe,
+                           max_mr = dattr.max_mr,
+                           max_pd = dattr.max_pd,
+                           max_qp_rd_atom = dattr.max_qp_rd_atom,
+                           max_ee_rd_atom = dattr.max_ee_rd_atom,
+                           max_res_rd_atom = dattr.max_res_rd_atom,
+                           max_qp_init_rd_atom = dattr.max_qp_init_rd_atom,
+                           max_ee_init_rd_atom = dattr.max_ee_init_rd_atom,
+                           atomic_cap = dattr.atomic_cap,
+                           max_ee = dattr.max_ee,
+                           max_rdd = dattr.max_rdd,
+                           max_mw = dattr.max_mw,
+                           max_raw_ipv6_qp = dattr.max_raw_ipv6_qp,
+                           max_raw_ethy_qp = dattr.max_raw_ethy_qp,
+                           max_mcast_grp = dattr.max_mcast_grp,
+                           max_mcast_qp_attach = dattr.max_mcast_qp_attach,
+                           max_total_mcast_qp_attach = dattr.max_total_mcast_qp_attach,
+                           max_ah = dattr.max_ah,
+                           max_fmr = dattr.max_fmr,
+                           max_map_per_fmr = dattr.max_map_per_fmr,
+                           max_srq = dattr.max_srq,
+                           max_srq_wr = dattr.max_srq_wr,
+                           max_srq_sge = dattr.max_srq_sge,
+                           max_pkeys = dattr.max_pkeys,
+                           local_ca_ack_delay = dattr.local_ca_ack_delay,
+                           phys_port_cnt = dattr.phys_port_cnt);
+
     def query_port(self, port_id=None):
-        """Return a :class:port_attr: for the *port_id*. If *port_id* is
-        none then the port info is returned for the end port this context was
-        created against.
+        """Return a :class:`rdma.ibverbs.port_attr` for the *port_id*. If
+        *port_id* is none then the port info is returned for the end port this
+        context was created against.
 
         :rtype: :class:`rdma.ibverbs.port_attr`"""
         cdef c.ibv_port_attr cattr
