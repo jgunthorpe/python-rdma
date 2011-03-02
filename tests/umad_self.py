@@ -6,7 +6,6 @@ import sys
 
 class umad_self_test(unittest.TestCase):
     umad = None;
-    tid = 0;
 
     def setUp(self):
         self.end_port = rdma.get_end_port();
