@@ -81,7 +81,7 @@ def get_top_switch(sched,sbn,args,path):
 
 def cmd_ibroute(argv,o):
     """Display switch forwarding tables.
-       Usage: ibroute [TARGET [START_LID [END_LID]]]"""
+       Usage: ibroute TARGET [START_LID [END_LID]]"""
     o.add_option("-a","--all",action="store_true",dest="all",
                  help="Display all ports");
     o.add_option("-n","--no_dests",action="store_true",dest="no_dests",
