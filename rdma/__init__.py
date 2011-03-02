@@ -252,4 +252,4 @@ def get_verbs(port,**kwargs):
     '''Create a :class:`rdma.uverbs.UVerbs` instance for the associated
     :class:`rdma.devices.RDMADevice`/:class:`rdma.devices.EndPort`.'''
     import rdma.ibverbs;
-    return rdma.ibverbs.ibv_context(port,**kwargs);
+    return rdma.ibverbs.Context(port,**kwargs);
