@@ -68,18 +68,18 @@ class Endpoint(object):
         self.pd = self.ctx.pd()
         self.cq = self.ctx.cq()
 
-        cap = ibv.ibv_qp_cap(max_send_wr=opt.tx_depth,
-                             max_recv_wr=opt.tx_depth,
-                             max_send_sge=1,
-                             max_recv_sge=1,
-                             max_inline_data=0)
+        cap = ibv.qp_cap(max_send_wr=opt.tx_depth,
+                         max_recv_wr=opt.tx_depth,
+                         max_send_sge=1,
+                         max_recv_sge=1,
+                         max_inline_data=0)
 
-        init = ibv.ibv_qp_init_attr(send_cq=self.cq,
-                                    recv_cq=self.cq,
-                                    srq=None,
-                                    cap=cap,
-                                    qp_type=ibv.IBV_QPT_RC,
-                                    sq_sig_all=1)
+        init = ibv.qp_init_attr(send_cq=self.cq,
+                                recv_cq=self.cq,
+                                srq=None,
+                                cap=cap,
+                                qp_type=ibv.IBV_QPT_RC,
+                                sq_sig_all=1)
         self.qp = self.pd.qp(init)
 
         self.mem = mmap(-1, opt.size)
@@ -110,47 +110,47 @@ class Endpoint(object):
     def connect(self, peerinfo):
         self.peerinfo = peerinfo
         # to INIT
-        attr = ibv.ibv_qp_attr(qp_state=ibv.IBV_QPS_INIT,
-                               pkey_index=0,
-                               port_num=self.path.end_port.port_id,
-                               qp_access_flags=ibv.IBV_ACCESS_REMOTE_WRITE)
+        attr = ibv.qp_attr(qp_state=ibv.IBV_QPS_INIT,
+                           pkey_index=0,
+                           port_num=self.path.end_port.port_id,
+                           qp_access_flags=ibv.IBV_ACCESS_REMOTE_WRITE)
 
         self.qp.modify(attr, attr.MASK)
 
         # to RTR
-        ah_attr = ibv.ibv_ah_attr(is_global=self.path.has_grh,
-                                  dlid=self.path.DLID,
-                                  sl=self.path.SL,
-                                  src_path_bits=self.path.SLID_bits,
-                                  static_rate=self.path.rate,
-                                  port_num=self.path.end_port.port_id);
+        ah_attr = ibv.ah_attr(is_global=self.path.has_grh,
+                              dlid=self.path.DLID,
+                              sl=self.path.SL,
+                              src_path_bits=self.path.SLID_bits,
+                              static_rate=self.path.rate,
+                              port_num=self.path.end_port.port_id);
 
-        attr = ibv.ibv_qp_attr(qp_state=ibv.IBV_QPS_RTR,
-                               path_mtu=self.path.MTU,
-                               dest_qp_num=self.path.dqpn,
-                               rq_psn=0,
-                               max_dest_rd_atomic=1,
-                               min_rnr_timer=12,
-                               ah_attr=ah_attr)
+        attr = ibv.qp_attr(qp_state=ibv.IBV_QPS_RTR,
+                           path_mtu=self.path.MTU,
+                           dest_qp_num=self.path.dqpn,
+                           rq_psn=0,
+                           max_dest_rd_atomic=1,
+                           min_rnr_timer=12,
+                           ah_attr=ah_attr)
 
         self.qp.modify(attr, attr.MASK)
 
         # to RTS
-        attr = ibv.ibv_qp_attr(qp_state=ibv.IBV_QPS_RTS,
-                               timeout=14,
-                               retry_cnt=7,
-                               rnr_retry=7,
-                               sq_psn=0,
-                               max_rd_atomic=1)
+        attr = ibv.qp_attr(qp_state=ibv.IBV_QPS_RTS,
+                           timeout=14,
+                           retry_cnt=7,
+                           rnr_retry=7,
+                           sq_psn=0,
+                           max_rd_atomic=1)
         self.qp.modify(attr, attr.MASK)
 
     def rdma(self):
-        swr = ibv.ibv_send_wr()
+        swr = ibv.send_wr()
         swr.wr_id = swr
 
         swr.wr.rdma.remote_addr = self.peerinfo.addr
         swr.wr.rdma.rkey = self.peerinfo.rkey
-        swr.sg_list = ibv.ibv_sge(addr=self.mr.addr,
+        swr.sg_list = ibv.sge(addr=self.mr.addr,
                                   length=self.mr.length,
                                   lkey=self.mr.lkey)
         swr.opcode = ibv.IBV_WR_RDMA_WRITE

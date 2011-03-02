@@ -13,13 +13,13 @@ if len(args) != 1:
 pxi = '''
 %(enums)s
 
-ibv_gid = struct(
-    'ibv_gid',
+gid = struct(
+    'gid',
     (('raw',tuple),)
 )
 
-ibv_wc = struct(
-    'ibv_wc',
+wc = struct(
+    'wc',
     (('wr_id',long),
      ('status',int), #enum
      ('opcode',int), #enum
@@ -36,8 +36,8 @@ ibv_wc = struct(
     )
 )
 
-ibv_global_route = struct(
-    'ibv_global_route',
+global_route = struct(
+    'global_route',
     (
      ('dgid',int),
      ('flow_label',int),
@@ -47,10 +47,10 @@ ibv_global_route = struct(
     )
 )
 
-ibv_ah_attr = struct(
-    'ibv_ah_attr',
+ah_attr = struct(
+    'ah_attr',
     (
-     ('grh',ibv_global_route),
+     ('grh',global_route),
      ('dlid',int),
      ('sl',int),
      ('src_path_bits',int),
@@ -60,8 +60,8 @@ ibv_ah_attr = struct(
     )
 )
 
-ibv_qp_init_attr = struct(
-    'ibv_qp_init_attr',
+qp_init_attr = struct(
+    'qp_init_attr',
     (
      ('send_cq',None), # needs forward decl
      ('recv_cq',None),
@@ -72,8 +72,8 @@ ibv_qp_init_attr = struct(
     )
 )
 
-ibv_qp_cap = struct(
-    'ibv_qp_cap',
+qp_cap = struct(
+    'qp_cap',
     (
      ('max_send_wr',int),
      ('max_recv_wr',int),
@@ -83,8 +83,8 @@ ibv_qp_cap = struct(
     )
 )
 
-ibv_qp_attr = struct(
-    'ibv_qp_attr',
+qp_attr = struct(
+    'qp_attr',
     (
      ('qp_state',int,IBV_QP_STATE),
      ('cur_qp_state',int,IBV_QP_CUR_STATE),
@@ -95,9 +95,9 @@ ibv_qp_attr = struct(
      ('sq_psn',int,IBV_QP_SQ_PSN),
      ('dest_qp_num',int,IBV_QP_DEST_QPN),
      ('qp_access_flags',int,IBV_QP_ACCESS_FLAGS),
-     ('cap',ibv_qp_cap,IBV_QP_CAP),
-     ('ah_attr',ibv_ah_attr,IBV_QP_AV),
-     ('alt_ah_attr',ibv_ah_attr,IBV_QP_ALT_PATH),
+     ('cap',qp_cap,IBV_QP_CAP),
+     ('ah_attr',ah_attr,IBV_QP_AV),
+     ('alt_ah_attr',ah_attr,IBV_QP_ALT_PATH),
      ('pkey_index',int,IBV_QP_PKEY_INDEX),
      ('alt_pkey_index',int,IBV_QP_ALT_PATH),
      ('en_sqd_async_notify',int,IBV_QP_EN_SQD_ASYNC_NOTIFY),
@@ -114,8 +114,8 @@ ibv_qp_attr = struct(
     )
 )
 
-ibv_port_attr = struct(
-    'ibv_port_attr',
+port_attr = struct(
+    'port_attr',
     (
      ('state',int), #enum
      ('max_mtu',int), #enum
@@ -139,8 +139,8 @@ ibv_port_attr = struct(
     )
 )
 
-ibv_sge = struct(
-    'ibv_sge',
+sge = struct(
+    'sge',
     (
      ('addr',int),
      ('length',int),
@@ -148,16 +148,16 @@ ibv_sge = struct(
     )
 )
 
-ibv_send_wr_wr_rdma = struct(
-    'ibv_send_wr_wr_rdma',
+send_wr_wr_rdma = struct(
+    'send_wr_wr_rdma',
     (
      ('remote_addr', long),
      ('rkey', int)
     )
 )
 
-ibv_send_wr_wr_atomic = struct(
-    'ibv_send_wr_wr_atomic',
+send_wr_wr_atomic = struct(
+    'send_wr_wr_atomic',
     (
      ('remote_addr',long),
      ('compare_add',long),
@@ -166,8 +166,8 @@ ibv_send_wr_wr_atomic = struct(
     )
 )
 
-ibv_send_wr_wr_ud = struct(
-    'ibv_send_wr_wr_ud',
+send_wr_wr_ud = struct(
+    'send_wr_wr_ud',
     (
      ('ah', None),
      ('remote_qpn', int),
@@ -175,32 +175,32 @@ ibv_send_wr_wr_ud = struct(
     )
 )
 
-ibv_send_wr_wr = struct(
-    'ibv_send_wr_wr',
+send_wr_wr = struct(
+    'send_wr_wr',
     (
-     ('rdma', ibv_send_wr_wr_rdma),
-     ('atomic', ibv_send_wr_wr_atomic),
-     ('ud',ibv_send_wr_wr_ud)
+     ('rdma', send_wr_wr_rdma),
+     ('atomic', send_wr_wr_atomic),
+     ('ud',send_wr_wr_ud)
     )
 )
 
-ibv_send_wr = struct(
-    'ibv_send_wr',
+send_wr = struct(
+    'send_wr',
     (
      ('wr_id', long),
-     ('sg_list', None), # ibv_sge or list/tuple of ibv_sge
+     ('sg_list', None), # sge or list/tuple of sge
      ('opcode', int),
      ('send_flags', int),
      ('imm_data', int),
-     ('wr', ibv_send_wr_wr)
+     ('wr', send_wr_wr)
     )
 )
 
-ibv_recv_wr = struct(
-    'ibv_recv_wr',
+recv_wr = struct(
+    'recv_wr',
     (
      ('wr_id', long),
-     ('sg_list', None), # ibv_sge or list/tuple of ibv_sge
+     ('sg_list', None), # sge or list/tuple of sge
     )
 )
 '''
