@@ -1,6 +1,28 @@
 Verbs Interface
 ===============
 
+verbs objects provide a wrapper around the OFA verbs interface from
+`libibverbs`. The wrapper puts the verbs interface into an OOP methodology
+and generally exposes most functionality to Python.
+
+A basic example for getting a verbs instance and a protection domain is::
+
+ import rdma
+ import rdma.ibverbs as ibv
+
+ end_port = rdma.get_end_port()
+ with rdma.get_verbs(end_port) as ctx:
+     pd = ctx.pd();
+
+Verbs objects that have an underlying kernel allocation are all context
+managers and have a :meth:`close` method, but the objects also keep track of
+their own children. Ie closing a :class:`rdma.ibverbs.Context` will close all
+:class:`rdma.ibverbs.PD` and :class:`rdma.ibverbs.CQ` objects created by it.
+This makes resource clean up quite straightforward in most cases.
+
+Notes
+-----
+
 Provides Python interface to libibverbs.  All of the symbols retain their
 names, but there are some differences between C and Python use:
 
