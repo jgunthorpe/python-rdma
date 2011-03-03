@@ -42,31 +42,18 @@ dev = lib.get_end_port();
 
 infotype = namedtuple('infotype', 'path addr rkey size iters')
 
-def pickle_path(path):
-    """Strip out the end_port reference from the :class:`rdma.path.IBPath` so
-    it can be pickled."""
-    if path.SGID is None:
-        path.SGID = path.end_port.gids[0];
-    return path.copy(end_port=None);
-
-def unpickle_path(path):
-    """Restore the end_port reference to the path by cross referencing the
-    *SGID*."""
-    assert(path.SGID in dev.gids);
-    path.end_port = dev;
-    return path;
-
 class Endpoint(object):
     ctx = None;
     pd = None;
     cq = None;
     mr = None;
+    peerinfo = None;
 
     def __init__(self, opt):
         self.opt = opt
         self.ctx = rdma.get_verbs(dev)
-        self.pd = self.ctx.pd()
         self.cq = self.ctx.cq()
+        self.pd = self.ctx.pd()
 
         cap = ibv.qp_cap(max_send_wr=opt.tx_depth,
                          max_recv_wr=opt.tx_depth,
@@ -85,9 +72,6 @@ class Endpoint(object):
         self.mem = mmap(-1, opt.size)
         self.mr = self.pd.mr(self.mem,
                              ibv.IBV_ACCESS_LOCAL_WRITE|ibv.IBV_ACCESS_REMOTE_WRITE)
-        self.path = rdma.path.IBPath(dev,DGID=self.ctx.port.gids[0],
-                                     sqpn=self.qp.qp_num);
-        self.peerinfo = None
 
     def __enter__(self):
         return self;
@@ -96,46 +80,14 @@ class Endpoint(object):
         return self.close();
 
     def close(self):
-        if self.qp is not None:
-            self.qp.close();
-        if self.mr is not None:
-            self.mr.close();
-        if self.pd is not None:
-            self.pd.close();
-        if self.cq is not None:
-            self.cq.close();
         if self.ctx is not None:
             self.ctx.close();
 
     def connect(self, peerinfo):
         self.peerinfo = peerinfo
-        # to INIT
-        attr = ibv.qp_attr(qp_state=ibv.IBV_QPS_INIT,
-                           pkey_index=0,
-                           port_num=self.path.end_port.port_id,
-                           qp_access_flags=ibv.IBV_ACCESS_REMOTE_WRITE)
-
-        self.qp.modify(attr, attr.MASK)
-
-        # to RTR
-        attr = ibv.qp_attr(qp_state=ibv.IBV_QPS_RTR,
-                           path_mtu=self.path.MTU,
-                           dest_qp_num=self.path.dqpn,
-                           rq_psn=0,
-                           max_dest_rd_atomic=1,
-                           min_rnr_timer=12,
-                           ah_attr=self.path)
-
-        self.qp.modify(attr, attr.MASK)
-
-        # to RTS
-        attr = ibv.qp_attr(qp_state=ibv.IBV_QPS_RTS,
-                           timeout=14,
-                           retry_cnt=7,
-                           rnr_retry=7,
-                           sq_psn=0,
-                           max_rd_atomic=1)
-        self.qp.modify(attr, attr.MASK)
+        self.qp.modify_to_init(self.path,ibv.IBV_ACCESS_REMOTE_WRITE);
+        self.qp.modify_to_rtr(self.path);
+        self.qp.modify_to_rts(self.path);
 
     def rdma(self):
         swr = ibv.send_wr()
@@ -144,8 +96,8 @@ class Endpoint(object):
         swr.wr.rdma.remote_addr = self.peerinfo.addr
         swr.wr.rdma.rkey = self.peerinfo.rkey
         swr.sg_list = ibv.sge(addr=self.mr.addr,
-                                  length=self.mr.length,
-                                  lkey=self.mr.lkey)
+                              length=self.mr.length,
+                              lkey=self.mr.lkey)
         swr.opcode = ibv.IBV_WR_RDMA_WRITE
         swr.send_flags = ibv.IBV_SEND_SIGNALED
 
@@ -179,7 +131,11 @@ def client_mode(hostname, opt):
         with contextlib.closing(socket.socket(ret[0],ret[1])) as sock:
             sock.connect(ret[4]);
 
-            sock.send(pickle.dumps(infotype(path=pickle_path(end.path),
+            path = rdma.path.IBPath(dev,SGID=end.ctx.port.gids[0]);
+            rdma.path.fill_path(end.qp,path,max_rd_atomic=0);
+            path.reverse();
+
+            sock.send(pickle.dumps(infotype(path=path,
                                             addr=end.mr.addr,
                                             rkey=end.mr.rkey,
                                             size=opt.size,
@@ -189,10 +145,10 @@ def client_mode(hostname, opt):
 
             end.path = peerinfo.path;
             end.path.reverse();
-            unpickle_path(end.path);
+            end.path.end_port = end.ctx.port;
 
-            print "path %r peer raddr=%x peer rkey=%x"%(end.path,peerinfo.addr,
-                                                        peerinfo.rkey);
+            print "path to peer %r\nMR peer raddr=%x peer rkey=%x"%(
+                end.path,peerinfo.addr,peerinfo.rkey);
             print "%u iterations of %u is %u bytes"%(opt.iters,opt.size,
                                                      opt.iters*opt.size);
 
@@ -222,18 +178,19 @@ def server_mode(opt):
 
             with Endpoint(opt) as end:
                 with rdma.get_umad(end.ctx.port) as umad:
-                    end.path = rdma.path.get_mad_path(umad,peerinfo.path.SGID);
-                    end.path.dqpn = peerinfo.path.sqpn;
-                    end.path.sqpn = end.qp.qp_num;
+                    end.path = peerinfo.path;
+                    end.path.end_port = end.ctx.port;
+                    rdma.path.fill_path(end.qp,end.path);
+                    rdma.path.resolve_path(umad,end.path);
 
-                s.send(pickle.dumps(infotype(path=pickle_path(end.path),
+                s.send(pickle.dumps(infotype(path=end.path,
                                              addr=end.mr.addr,
                                              rkey=end.mr.rkey,
                                              size=None,
                                              iters=None)))
 
-                print "path %r peer raddr=%x peer rkey=%x"%(end.path,peerinfo.addr,
-                                                            peerinfo.rkey);
+                print "path to peer %r\nMR peer raddr=%x peer rkey=%x"%(
+                    end.path,peerinfo.addr,peerinfo.rkey);
                 print "%u iterations of %u is %u bytes"%(opt.iters,opt.size,
                                                          opt.iters*opt.size);
 
@@ -251,11 +208,11 @@ try:
         server_mode(options)
     sys.exit(0);
 except rdma.MADError as err:
-    err.dump_detailed(sys.stderr,"E:",level=options.verbosity);
-    if options.verbosity >= 2:
+    err.dump_detailed(sys.stderr,"E:",level=options.debug);
+    if options.debug >= 2:
         raise;
 except rdma.RDMAError as err:
     print "E:",err;
-    if options.verbosity >= 2:
+    if options.debug >= 2:
         raise;
 sys.exit(100);

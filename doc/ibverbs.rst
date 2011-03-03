@@ -20,6 +20,81 @@ their own children. Ie closing a :class:`rdma.ibverbs.Context` will close all
 :class:`rdma.ibverbs.PD` and :class:`rdma.ibverbs.CQ` objects created by it.
 This makes resource clean up quite straightforward in most cases.
 
+:class:`rdma.path.IBPath` and Verbs
+-----------------------------------
+
+The raw verbs interface for creating QPs and their associated connetions is
+simplified to rely on the standard :class:`~rdma.path.IBPath` structure which
+should be filled in with all the necessary parameters. The wrapper QP modify
+methods :meth:`~rdma.ibverbs.QP.modify_to_init`,
+:meth:`~rdma.ibverbs.QP.modify_to_rtr`, and
+:meth:`~rdma.ibverbs.QP.modify_to_rts` can setup a QP without additional
+information.
+
+:class:`~rdma.path.IBPath` structures can also be used any place where an
+:class:`~rdma.ibverbs.ah_attr` could be used, including for creating
+:class:`~rdma.ibverbs.AH` instances and with :meth:`~rdma.ibverbs.QP.modify`.
+
+As for MADs the are additional RC/RD specific fields in the
+:class:`~rdma.path.IBPath` structure. These must be filled in as part of the
+connection setup process.
+
+The QP related path parameters are:
+
+================  ==========================
+Path Attribute    Usage
+================  ==========================
+min_rnr_timer     qp_attr.min_rnr_timer
+packet_life_time  qp_attr.timeout
+dack_resp_time    qp_attr.timeout
+sack_resp_time
+dqpsn             qp_attr.dest_qp_num
+sqpsn
+drdatomic         qp_attr.max_dest_rd_atomic
+srdatomic         qp_attr.max_rd_atomic
+================  ==========================
+
+The library has built in support for correctly establishing IB connections
+without using a CM. Side A would do this::
+
+  qp = pd.qp(...);
+  path = rdma.path.IBPath(end_port,SGID=end_port.gids[0]);
+  rdma.path.fill_path(qp,path);
+  path.reverse();
+  send_to_side_b(pickle.pickle(path));
+  path = pickle.unpickle(recv_from_side_b());
+  path.reverse();
+  path.end_port = end_port;
+
+  qp.modify_to_init(self.path,ibv.IBV_ACCESS_REMOTE_WRITE);
+  qp.modify_to_rtr(self.path);
+  qp.modify_to_rts(self.path);
+
+  # Synchronize transition to RTS
+  send_to_side_b(True);
+  recv_from_side_b();
+
+Side B would do this::
+
+  qp = pd.qp(...);
+  path = pickle.unpickle(recv_from_side_a());
+  path.end_port = end_port;
+  rdma.path.fill_path(qp,path);
+  with rdma.get_umad(path.end_port) as umad:
+     rdma.path.resolve_path(umad,path);
+  send_to_sid_a(pickle.pickle(path));
+
+  qp.modify_to_init(self.path,ibv.IBV_ACCESS_REMOTE_WRITE);
+  qp.modify_to_rtr(self.path);
+  qp.modify_to_rts(self.path);
+
+  # Synchronize transition to RTS
+  recv_from_side_a();
+  send_to_side_a(True);
+
+:func:`rdma.path.fill_path` sets up most of the the QP related path parameters
+and :func:`rdma.path.resolve_path` gets the path record(s) from the SA.
+
 Notes
 -----
 

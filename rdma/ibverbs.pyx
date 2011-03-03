@@ -1,6 +1,8 @@
 # -*- Python -*-
+import collections
 import errno as mod_errno
-from util import struct
+import util;
+import struct;
 import rdma.devices
 import rdma.IBA as IBA;
 import rdma.path;
@@ -840,6 +842,51 @@ cdef class QP:
         """When modifying a QP the value *attr.ah_attr* may be a
         :class:`rdma.ibverbs.ah_attr` or :class:`rdma.path.IBPath`."""
         self._modify(attr, mask)
+
+    def modify_to_init(self,path,qp_access_flags=None):
+        """Modify the QP to the INIT state."""
+        if self._qp_type == c.IBV_QPT_UD:
+            attr = qp_attr(qp_state=c.IBV_QPS_INIT,
+                           pkey_index=path.pkey_index,
+                           port_num=path.end_port.port_id,
+                           qkey=path.qkey);
+        else:
+            if qp_access_flags is None:
+                raise TypeError("qp_access_flags must be an integer");
+            attr = qp_attr(qp_state=c.IBV_QPS_INIT,
+                           pkey_index=path.pkey_index,
+                           port_num=path.end_port.port_id,
+                           qp_access_flags=qp_access_flags);
+        self._modify(attr,attr.MASK)
+
+    def modify_to_rtr(self,path):
+        """Modify the QP to the RTR state."""
+        if self._qp_type == c.IBV_QPT_UD:
+            attr = qp_attr(qp_state=c.IBV_QPS_RTR);
+        else:
+            attr = qp_attr(qp_state=c.IBV_QPS_RTR,
+                           path_mtu=path.MTU,
+                           dest_qp_num=path.dqpn,
+                           rq_psn=path.dqpsn,
+                           max_dest_rd_atomic=path.drdatomic,
+                           # Hmm, where does this come from?
+                           min_rnr_timer=path.min_rnr_timer,
+                           ah_attr=path)
+        self._modify(attr,attr.MASK)
+
+    def modify_to_rts(self,path):
+        """Modify the QP to the RTS state."""
+        if self._qp_type == c.IBV_QPT_UD:
+            attr = qp_attr(qp_state=c.IBV_QPS_RTS,
+                           sq_psn=sq_psn);
+        else:
+            attr = qp_attr(qp_state=c.IBV_QPS_RTS,
+                           timeout=rdma.IBA.to_timer(path.qp_timeout),
+                           retry_cnt=path.retries,
+                           rnr_retry=7,
+                           sq_psn=path.sqpsn,
+                           max_rd_atomic=path.srdatomic);
+        self._modify(attr,attr.MASK)
 
     def post_send(self, wrlist):
         self._post_send(wrlist)
