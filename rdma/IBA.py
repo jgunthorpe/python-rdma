@@ -212,6 +212,13 @@ def lid_lmc_range(lid,lmc):
     lid = lid & (~(lmc-1))
     return range(lid,lid + lmc);
 
+def to_timer(sec):
+    """Take a timeout value in float seconds and convert it into the IBA format
+    that satisfies `sec <= 4.096 us * 2**ret`"""
+    import math;
+    v = sec/4.096E-6;
+    return math.ceil(math.log(v,2));
+
 class GUID(bytes):
     """Stores a GUID in internal format. In string format a GUID is formatted
     as ``0002:c903:0000:1491``. Externally the class looks like a string
