@@ -184,6 +184,18 @@ class IBPath(Path):
         self.SLID = value | self.end_port.lid;
 
     @property
+    def DLID_bits(self):
+        """Cache and return the LMC portion of the
+        :attr:`DLID`. Assignment updates the :attr:`DLID` using the value from
+        :attr:`rdma.devices.EndPort.lid`."""
+        # FIXME: Don't think more than this is actually necessary, the mask in
+        # done in the kernel, drivers and HW as well. Kept as a placeholder.
+        return self.DLID & 0xFF;
+    @DLID_bits.setter
+    def DLID_bits(self,value):
+        self.DLID = value | self.end_port.lid;
+
+    @property
     def packet_life_time(self):
         """The packet lifetime value for this path. The lifetime value for the
         path is the expected uni-directional transit time.  If a value has not
