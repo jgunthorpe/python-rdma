@@ -236,7 +236,7 @@ cdef extern from 'infiniband/verbs.h':
         pass
 
     struct ibv_comp_channel:
-        pass
+        int fd
 
     struct ibv_ah:
         ibv_context *context
@@ -440,6 +440,9 @@ cdef extern from 'infiniband/verbs.h':
                           int comp_vector)
     int ibv_destroy_cq(ibv_cq *cq)
     int ibv_poll_cq(ibv_cq *cq, int n, ibv_wc *wc)
+    int ibv_req_notify_cq(ibv_cq *cq, int solicited_only)
+    int ibv_get_cq_event(ibv_comp_channel *chan,ibv_cq **,void **cq_context)
+    void ibv_ack_cq_events(ibv_cq *cq,unsigned int nevents)
 
     ibv_qp *ibv_create_qp(ibv_pd *pd, ibv_qp_init_attr *init_attr)
     int ibv_destroy_qp(ibv_qp *qp)

@@ -345,42 +345,8 @@ sge = util.struct(
     )
 )
 
-send_wr_wr_rdma = util.struct(
-    'send_wr_wr_rdma',
-    (
-     ('remote_addr', long),
-     ('rkey', int)
-    )
-)
-
-send_wr_wr_atomic = util.struct(
-    'send_wr_wr_atomic',
-    (
-     ('remote_addr',long),
-     ('compare_add',long),
-     ('swap',long),
-     ('rkey',int)
-    )
-)
-
-send_wr_wr_ud = util.struct(
-    'send_wr_wr_ud',
-    (
-     ('ah', None),
-     ('remote_qpn', int),
-     ('remote_qkey', int)
-    )
-)
-
-send_wr_wr = util.struct(
-    'send_wr_wr',
-    (
-     ('rdma', send_wr_wr_rdma),
-     ('atomic', send_wr_wr_atomic),
-     ('ud',send_wr_wr_ud)
-    )
-)
-
+# Refer to verbs documentation to see which fields are valid for which
+# operation
 send_wr = util.struct(
     'send_wr',
     (
@@ -389,7 +355,21 @@ send_wr = util.struct(
      ('opcode', int),
      ('send_flags', int),
      ('imm_data', int),
-     ('wr', send_wr_wr)
+
+     # WR_RDMA*
+     ('remote_addr', long),
+     ('rkey', int),
+
+     # WR_ATOMIC_*
+     # + remote_addr
+     ('compare_add',long),
+     ('swap',long),
+     ('rkey',int),
+
+     # UD WR_SEND
+     ('ah', None),
+     ('remote_qpn', int),
+     ('remote_qkey', int)
     )
 )
 

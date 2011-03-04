@@ -54,21 +54,7 @@ class Endpoint(object):
         self.ctx = rdma.get_verbs(dev)
         self.cq = self.ctx.cq()
         self.pd = self.ctx.pd()
-
-        cap = ibv.qp_cap(max_send_wr=opt.tx_depth,
-                         max_recv_wr=opt.tx_depth,
-                         max_send_sge=1,
-                         max_recv_sge=1,
-                         max_inline_data=0)
-
-        init = ibv.qp_init_attr(send_cq=self.cq,
-                                recv_cq=self.cq,
-                                srq=None,
-                                cap=cap,
-                                qp_type=ibv.IBV_QPT_RC,
-                                sq_sig_all=1)
-        self.qp = self.pd.qp(init)
-
+        self.qp = self.pd.qp(ibv.IBV_QPT_RC,opt.tx_depth,self.cq,opt.tx_depth,self.cq);
         self.mem = mmap(-1, opt.size)
         self.mr = self.pd.mr(self.mem,
                              ibv.IBV_ACCESS_LOCAL_WRITE|ibv.IBV_ACCESS_REMOTE_WRITE)
@@ -90,19 +76,17 @@ class Endpoint(object):
         self.qp.modify_to_rts(self.path);
 
     def rdma(self):
-        swr = ibv.send_wr()
-        swr.wr_id = swr
+        swr = ibv.send_wr(wr_id=0,
+                          remote_addr=self.peerinfo.addr,
+                          rkey=self.peerinfo.rkey,
+                          sg_list=ibv.sge(addr=self.mr.addr,
+                                          length=self.mr.length,
+                                          lkey=self.mr.lkey),
+                          opcode=ibv.IBV_WR_RDMA_WRITE,
+                          send_flags=ibv.IBV_SEND_SIGNALED)
 
-        swr.wr.rdma.remote_addr = self.peerinfo.addr
-        swr.wr.rdma.rkey = self.peerinfo.rkey
-        swr.sg_list = ibv.sge(addr=self.mr.addr,
-                              length=self.mr.length,
-                              lkey=self.mr.lkey)
-        swr.opcode = ibv.IBV_WR_RDMA_WRITE
-        swr.send_flags = ibv.IBV_SEND_SIGNALED
-
-        depth = min(self.opt.tx_depth, self.opt.iters)
-        n = max(self.opt.tx_depth, self.opt.iters)
+        n = self.opt.iters
+        depth = min(self.opt.tx_depth, n, self.qp.max_send_wr)
 
         tpost = clock_monotonic()
         for i in xrange(depth):
@@ -131,7 +115,7 @@ def client_mode(hostname, opt):
         with contextlib.closing(socket.socket(ret[0],ret[1])) as sock:
             sock.connect(ret[4]);
 
-            path = rdma.path.IBPath(dev,SGID=end.ctx.port.gids[0]);
+            path = rdma.path.IBPath(dev,SGID=end.ctx.end_port.gids[0]);
             rdma.path.fill_path(end.qp,path,max_rd_atomic=0);
             path.reverse();
 
@@ -145,7 +129,7 @@ def client_mode(hostname, opt):
 
             end.path = peerinfo.path;
             end.path.reverse();
-            end.path.end_port = end.ctx.port;
+            end.path.end_port = end.ctx.end_port;
 
             print "path to peer %r\nMR peer raddr=%x peer rkey=%x"%(
                 end.path,peerinfo.addr,peerinfo.rkey);
@@ -177,9 +161,9 @@ def server_mode(opt):
             opt.iters = peerinfo.iters;
 
             with Endpoint(opt) as end:
-                with rdma.get_umad(end.ctx.port) as umad:
+                with rdma.get_umad(end.ctx.end_port) as umad:
                     end.path = peerinfo.path;
-                    end.path.end_port = end.ctx.port;
+                    end.path.end_port = end.ctx.end_port;
                     rdma.path.fill_path(end.qp,end.path);
                     rdma.path.resolve_path(umad,end.path);
 

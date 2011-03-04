@@ -1,4 +1,5 @@
 # -*- Python -*-
+import select
 import collections
 import errno as mod_errno
 import util;
@@ -46,7 +47,7 @@ cdef class Context:
     an instance of this."""
     cdef c.ibv_context *_ctx
     cdef public object node
-    cdef public object port
+    cdef public object end_port
     cdef list _children
 
     def __cinit__(self,parent):
@@ -58,10 +59,10 @@ cdef class Context:
 
         if typecheck(parent,rdma.devices.RDMADevice):
             self.node = parent
-            self.port = None
+            self.end_port = None
         else:
             self.node = parent.parent
-            self.port = parent
+            self.end_port = parent
 
         dev_list = c.ibv_get_device_list(&count)
         if dev_list == NULL:
@@ -166,7 +167,7 @@ cdef class Context:
         cdef c.ibv_port_attr cattr
         cdef int e
         if port_id is None:
-            port_id = self.port.port_id;
+            port_id = self.end_port.port_id;
 
         e = c.ibv_query_port(self._ctx, port_id, &cattr)
         if e != 0:
@@ -199,9 +200,9 @@ cdef class Context:
         self._children.append(ret);
         return ret;
 
-    def cq(self,**kwargs):
+    def cq(self,nelems=100,cc=None,vec=0):
         """Create a new :class:`rdma.ibverbs.CQ` for this context."""
-        ret = CQ(self,**kwargs);
+        ret = CQ(self,nelems,cc,vec);
         self._children.append(ret);
         return ret;
 
@@ -253,8 +254,38 @@ cdef class PD:
             self._pd = NULL
             self._context = None;
 
-    def qp(self,init):
-        """Create a new :class:`rdma.ibverbs.QP` for this protection domain."""
+    def qp_raw(self,init):
+        """Create a new :class:`rdma.ibverbs.QP` for this protection
+        domain. *init* is a :class:`rdma.ibverbs.qp_init_attr`."""
+        ret = QP(self,init);
+        self._children.append(ret);
+        return ret;
+
+    def qp(self,
+           qp_type,
+           max_send_wr,
+           send_cq,
+           max_recv_wr,
+           recv_cq,
+           srq=None,
+           sq_sig_all=1,
+           max_send_sge=1,
+           max_recv_sge=1,
+           max_inline_data=0):
+        """Create a new :class:`rdma.ibverbs.QP` for this protection domain.
+        This version expresses the QP creation attributes as keyword
+        arguments."""
+        cap = qp_cap(max_send_wr=max_send_wr,
+                     max_recv_wr=max_recv_wr,
+                     max_send_sge=max_send_sge,
+                     max_recv_sge=max_recv_sge,
+                     max_inline_data=max_inline_data)
+        init = qp_init_attr(send_cq=send_cq,
+                            recv_cq=recv_cq,
+                            srq=srq,
+                            cap=cap,
+                            qp_type=qp_type,
+                            sq_sig_all=sq_sig_all)
         ret = QP(self,init);
         self._children.append(ret);
         return ret;
@@ -305,6 +336,8 @@ cdef class AH:
                                     "Failed to destroy address handle")
             self._ah = NULL
 
+cdef class CQ
+
 cdef class CompChannel:
     """Completion channel, this is a context manager."""
     cdef Context _context
@@ -330,6 +363,42 @@ cdef class CompChannel:
     def __exit__(self,*exc_info):
         return self.close()
 
+    def fileno(self):
+        """Return the FD associated with this completion channel."""
+        return self._chan.fd;
+
+    def register_poll(self,poll):
+        """Add the FD associated with this object to :class:`select.poll`
+        object *poll*."""
+        poll.register(self._chan.fd,select.POLLIN);
+
+    def check_poll(self,pevent,solicited_only=False):
+        """Returns a :class:`rdma.ibverbs.CQ` that got at least one completion
+        event, or `None`. This updates the comp channel and keeps track of
+        received events, and appropriately calls ibv_ack_cq_events
+        internally. The CQ is re-armed via
+        :meth:`rdma.ibverbs.CQ.req_notify_cq`"""
+        cdef c.ibv_cq *_cq
+        cdef void *p_cq
+        cdef CQ cq
+        cdef int rc
+
+        if pevent[0] != self._chan.fd:
+            return None;
+        if pevent[1] & select.POLLIN == 0:
+            return None;
+
+        if c.ibv_get_cq_event(self._chan,&_cq,&p_cq) != 0:
+            raise rdma.RDMAError("ibv_get_cq_event failed");
+        cq = <object>p_cq;
+
+        cq.comp_events = cq.comp_events + 1;
+        if cq.comp_events >= (1<<30):
+            c.ibv_ack_cq_events(_cq,cq.comp_events);
+            cq.comp_events = 0;
+        cq.req_notify_cq(solicited_only);
+        return cq;
+
     def close(self):
         """Free the verbs completion channel handle."""
         cdef int rc
@@ -347,13 +416,14 @@ cdef class CQ:
     """Completion queue, this is a context manager."""
     cdef Context _context
     cdef c.ibv_cq *_cq
-    cdef object _cookie
+    cdef CompChannel _chan
+    cdef public int comp_events
 
     property ctx:
         def __get__(self):
             return self._context;
 
-    def __cinit__(self, Context ctx not None, int nelems=100, cookie=None,
+    def __cinit__(self, Context ctx not None, int nelems=100,
                   CompChannel chan or None=None, int vec=0):
         cdef c.ibv_comp_channel *c_chan
         if chan is None:
@@ -361,8 +431,9 @@ cdef class CQ:
         else:
             c_chan = chan._chan
         self._context = ctx
-        self._cookie = cookie
-        self._cq = c.ibv_create_cq(ctx._ctx, nelems, <void*>cookie, c_chan, vec)
+        self._chan = chan;
+        self.comp_events = 0;
+        self._cq = c.ibv_create_cq(ctx._ctx, nelems, <void*>self, c_chan, vec)
         if self._cq == NULL:
             raise rdma.SysError(errno,"ibv_create_cq",
                                 "Failed to create completion queue")
@@ -382,12 +453,24 @@ cdef class CQ:
         if self._cq != NULL:
             if self._context._ctx == NULL:
                 raise rdma.RDMAError("Context closed before owned object");
+            if self.comp_events != 0:
+                c.ibv_ack_cq_events(self._cq,self.comp_events);
+                self.comp_events = 0;
             rc = c.ibv_destroy_cq(self._cq)
             if rc != 0:
                 raise rdma.SysError(rc,"ibv_destroy_cq",
                                     "Failed to destroy completion queue")
             self._cq = NULL
             self._context = None;
+            self._chan = None;
+
+    def req_notify_cq(self,solicited_only=False):
+        """Request event notification for CQEs added to the CQ."""
+        cdef int rc
+        rc = c.ibv_req_notify_cq(self._cq,solicited_only);
+        if rc != 0:
+            raise rdma.SysError(rc,"ibv_req_notify_cq",
+                                "Failed to request notification");
 
     def poll(self):
         """Perform the poll_cq operation, return a list of work requests."""
@@ -554,6 +637,18 @@ cdef class QP:
     property state:
         def __get__(self):
             return self._qp.state
+    property max_send_wr:
+        def __get__(self):
+            return self._cap.max_send_wr;
+    property max_send_sge:
+        def __get__(self):
+            return self._cap.max_send_sge;
+    property max_recv_wr:
+        def __get__(self):
+            return self._cap.max_recv_wr;
+    property max_recv_sge:
+        def __get__(self):
+            return self._cap.max_recv_sge;
 
     def __cinit__(self,
                   PD pd not None,
@@ -670,9 +765,10 @@ cdef class QP:
         if cmask & c.IBV_QP_CAP:
             self._cap = cattr.cap
 
-    cdef post_check(self, arg, wrtype, max_sge):
+    cdef post_check(self, arg, wrtype, max_sge, int *numsge):
         cdef list wrlist
         cdef int i, n
+        cdef int sgec
 
         if isinstance(arg, wrtype):
             wrlist = [arg]
@@ -681,133 +777,142 @@ cdef class QP:
         else:
             raise TypeError("Expecting a work request or a list/tuple of work requests")
 
+        sgec = 0
         for wr in wrlist:
             if not typecheck(wr, wrtype):
                 raise TypeError("Work request must be of type %s" % wrtype.__name__)
             if typecheck(wr.sg_list, sge):
-                sglist = [wr.sg_list]
+                sgec = sgec + 1;
             elif isinstance(wr.sg_list, list) or isinstance(wr.sg_list, tuple):
                 sglist = wr.sg_list
-            n = len(sglist)
-            if n > max_sge:
-                raise TypeError("Too many scatter/gather entries in work request")
-            for 0 <= i < n:
-                if not typecheck(sglist[i], sge):
-                    raise TypeError("sg_list entries must be of type ibv_sge")
+                n = len(sglist)
+                sgec = sgec + n;
+                if n > max_sge:
+                    raise TypeError("Too many scatter/gather entries in work request")
+                for 0 <= i < n:
+                    if not typecheck(sglist[i], sge):
+                        raise TypeError("sg_list entries must be of type ibv_sge")
+            elif wr.sg_list is not None:
+                raise TypeError("sg_list entries must be of type ibv_sge or a list")
+        numsge[0] = sgec
         return wrlist
 
     cdef _post_send(self, arg):
         cdef list sglist, wrlist
-        cdef char *mem, *p
+        cdef unsigned char *mem
         cdef c.ibv_send_wr dummy_wr, *cwr, *cbad_wr
         cdef c.ibv_sge dummy_sge, *csge
         cdef c.ibv_ah dummy_ah, *cah
-        cdef int i, j, n, rc, sgsize, wrsize
+        cdef int i, j, n, rc,
+        cdef int wr_id
         cdef AH ah
+        cdef int num_sge
 
-        wrlist = self.post_check(arg, send_wr, self._cap.max_send_wr)
+        wrlist = self.post_check(arg, send_wr, self._cap.max_send_sge, &num_sge)
 
         n = len(wrlist)
-        sgsize = sizeof(dummy_sge) * self._cap.max_send_wr
-        wrsize = (sizeof(dummy_wr) + sgsize + sizeof(dummy_ah))
-
-        mem = <char *>calloc(1,wrsize*n);
+        mem = <unsigned char *>calloc(1,sizeof(dummy_wr)*n + sizeof(dummy_sge)*num_sge);
         if mem == NULL:
             raise MemoryError()
-
+        cwr = <c.ibv_send_wr *>(mem);
+        csge = <c.ibv_sge *>(cwr + n);
         for 0 <= i < n:
             wr = wrlist[i]
-            p = mem + wrsize * i
-            cwr = <c.ibv_send_wr *>(p)
-            cwr.wr_id = <uintptr_t>wr.wr_id
+            wr_id = wr.wr_id;
+            cwr.wr_id = <uintptr_t>wr_id
             if i == n - 1:
                 cwr.next = NULL
             else:
-                cwr.next = <c.ibv_send_wr *>(p + wrsize)
-            cwr.sg_list = <c.ibv_sge *>(p + sizeof(dummy_wr))
+                cwr.next = cwr + 1
+
+            cwr.sg_list = csge
             if typecheck(wr.sg_list, list) or typecheck(wr.sg_list, tuple):
-                sglist = wr.sg_list
-            else:
-                sglist = [wr.sg_list]
-            cwr.num_sge = len(sglist)
-            csge = &cwr.sg_list[0]
-            for 0 <= j < cwr.num_sge:
-                sge = sglist[j]
-                csge.addr = sge.addr
-                csge.length = sge.length
-                csge.lkey = sge.lkey
+                cwr.num_sge = len(sglist)
+                for 0 <= j < cwr.num_sge:
+                    sge = wr.sg_list[j]
+                    csge.addr = sge.addr
+                    csge.length = sge.length
+                    csge.lkey = sge.lkey
+                    csge += 1
+            elif wr.sg_list is not None:
+                cwr.num_sge = 1
+                csge.addr = wr.sg_list.addr
+                csge.length = wr.sg_list.length
+                csge.lkey = wr.sg_list.lkey
                 csge += 1
 
             cwr.opcode = wr.opcode
             if (cwr.opcode == c.IBV_WR_RDMA_WRITE or
                 cwr.opcode == c.IBV_WR_RDMA_WRITE_WITH_IMM or
                 cwr.opcode == c.IBV_WR_RDMA_READ):
-                cwr.wr.rdma.remote_addr = wr.wr.rdma.remote_addr
-                cwr.wr.rdma.rkey = wr.wr.rdma.rkey
+                cwr.wr.rdma.remote_addr = wr.remote_addr
+                cwr.wr.rdma.rkey = wr.rkey
             elif (cwr.opcode == c.IBV_WR_ATOMIC_FETCH_AND_ADD or
                   cwr.opcode == c.IBV_WR_ATOMIC_CMP_AND_SWP):
-                cwr.wr.atomic.remote_addr = wr.wr.atomic.remote_addr
-                cwr.wr.atomic.compare_add = wr.wr.atomic.compare_add
-                cwr.wr.atomic.swap = wr.wr.atomic.swap
-                cwr.wr.atomic.rkey = wr.wr.atomic.rkey
+                cwr.wr.atomic.remote_addr = wr.remote_addr
+                cwr.wr.atomic.compare_add = wr.compare_add
+                cwr.wr.atomic.swap = wr.swap
+                cwr.wr.atomic.rkey = wr.rkey
             elif self._qp_type == c.IBV_QPT_UD:
-                # FIXME: check type of wr.wr.ud.ah
-                cwr.wr.ud.ah = <c.ibv_ah *>(p + sizeof(dummy_wr) + sgsize)
-                ah = wr.wr.ud.ah
-                cwr.wr.ud.ah.context = ah._ah.context
-                cwr.wr.ud.ah.pd = ah._ah.pd
-                cwr.wr.ud.ah.handle = ah._ah.handle
-
-                cwr.wr.ud.remote_qpn = wr.wr.ud.remote_qpn
-                cwr.wr.ud.remote_qkey = wr.wr.ud.remote_qkey
+                if not typecheck(wr.ah,AH):
+                    free(mem)
+                    raise TypeError("AH must be a AH")
+                ah = wr.ah;
+                cwr.wr.ud.ah = ah._ah
+                cwr.wr.ud.remote_qpn = wr.remote_qpn
+                cwr.wr.ud.remote_qkey = wr.remote_qkey
 
             cwr.send_flags = wr.send_flags
             cwr.imm_data = wr.imm_data
 
         rc = c.ibv_post_send(self._qp, <c.ibv_send_wr *>mem, &cbad_wr)
         if rc != 0:
-            n = 0
-            while cbad_wr != NULL:
-                cbad_wr = cbad_wr.next
-                n += 1
+            cwr = <c.ibv_send_wr *>(mem);
+            for 0 <= i < n:
+                if cwr == cbad_wr:
+                    break;
             free(mem)
-            raise WRError(errno,"ibv_post_send","Failed to post work request(s)",n);
+            raise WRError(rc,"ibv_post_recv","Failed to post work request",n);
         free(mem)
 
     cdef _post_recv(self, arg):
         cdef list wrlist
-        cdef char *mem, *p
+        cdef unsigned char *mem
         cdef c.ibv_recv_wr dummy_wr, *cwr, *cbad_wr
         cdef c.ibv_sge dummy_sge, *csge
-        cdef int i, j, n, rc, wrsize
+        cdef int i, j, n, rc
+        cdef int wr_id
+        cdef int num_sge
 
-        wrlist = self.post_check(arg, recv_wr, self._cap.max_recv_wr)
+        wrlist = self.post_check(arg, recv_wr, self._cap.max_recv_sge, &num_sge)
+
         n = len(wrlist)
-        wrsize = (sizeof(dummy_wr) +
-                  sizeof(dummy_sge) * self._cap.max_recv_wr)
-
-        mem = <char *>calloc(1,wrsize*n);
+        mem = <unsigned char *>calloc(1,sizeof(dummy_wr)*n + sizeof(dummy_sge)*num_sge);
         if mem == NULL:
             raise MemoryError()
-
+        cwr = <c.ibv_recv_wr *>(mem);
+        csge = <c.ibv_sge *>(cwr + n);
         for 0 <= i < n:
             wr = wrlist[i]
-            p = mem + wrsize * i
-            cwr = <c.ibv_recv_wr *>(p)
-            cwr.wr_id = <uintptr_t>wr.wr_id
+            wr_id = wr.wr_id;
+            cwr.wr_id = <uintptr_t>wr_id
             if i == n - 1:
                 cwr.next = NULL
             else:
-                cwr.next = <c.ibv_recv_wr *>(p + wrsize)
-            cwr.sg_list = <c.ibv_sge *>(p + sizeof(dummy_wr))
+                cwr.next = cwr + 1
+
+            cwr.sg_list = csge
             if typecheck(wr.sg_list, list) or typecheck(wr.sg_list, tuple):
-                sglist = wr.sg_list
-            else:
-                sglist = [wr.sg_list]
-            cwr.num_sge = len(sglist)
-            csge = &cwr.sg_list[0]
-            for 0 <= j < cwr.num_sge:
-                sge = sglist[j]
+                cwr.num_sge = len(sglist)
+                for 0 <= j < cwr.num_sge:
+                    sge = wr.sg_list[j]
+                    csge.addr = sge.addr
+                    csge.length = sge.length
+                    csge.lkey = sge.lkey
+                    csge += 1
+            elif wr.sg_list is not None:
+                cwr.num_sge = 1
+                sge = wr.sg_list;
                 csge.addr = sge.addr
                 csge.length = sge.length
                 csge.lkey = sge.lkey
@@ -815,12 +920,12 @@ cdef class QP:
 
         rc = c.ibv_post_recv(self._qp, <c.ibv_recv_wr *>mem, &cbad_wr)
         if rc != 0:
-            n = 0
-            while cbad_wr != NULL:
-                cbad_wr = cbad_wr.next
-                n += 1
+            cwr = <c.ibv_recv_wr *>(mem);
+            for 0 <= i < n:
+                if cwr == cbad_wr:
+                    break;
             free(mem)
-            raise WRError(errno,"ibv_post_recv","Failed to post work request(s)",n);
+            raise WRError(rc,"ibv_post_recv","Failed to post work request",n);
 
         free(mem)
 
@@ -878,7 +983,7 @@ cdef class QP:
         """Modify the QP to the RTS state."""
         if self._qp_type == c.IBV_QPT_UD:
             attr = qp_attr(qp_state=c.IBV_QPS_RTS,
-                           sq_psn=sq_psn);
+                           sq_psn=path.sqpsn);
         else:
             attr = qp_attr(qp_state=c.IBV_QPS_RTS,
                            timeout=rdma.IBA.to_timer(path.qp_timeout),
