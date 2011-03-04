@@ -286,6 +286,29 @@ class SAPathNotFoundError(rdma.MADClassError):
         rdma.MADClassError._copy_init(self,err);
         self.message(fmt);
 
+class LazyIBPath(IBPath):
+    """Similar to :class:`rdma.path.IBPath` but the unpack of the actual data
+    deferred until necessary since most of the time we do not care."""
+    def __getattribute__(self,name):
+        if name[0] != '_':
+            # I wonder if this is evil? We switch out class to the
+            # parent the first time someone requests an attribute.
+            cls = self.__class__
+            object.__setattr__(self,"__class__",rdma.path.IBPath);
+            cls._unpack_rcv(self);
+        return object.__getattribute__(self,name);
+
+    def __repr__(self):
+        cls = self.__class__
+        object.__setattr__(self,"__class__",rdma.path.IBPath);
+        cls._unpack_rcv(self);
+        return rdma.path.IBPath.__repr__(self);
+    def __str__(self):
+        cls = self.__class__
+        object.__setattr__(self,"__class__",rdma.path.IBPath);
+        cls._unpack_rcv(self);
+        return rdma.path.IBPath.__repr__(self);
+
 def get_mad_path(mad,ep_addr):
     """Query the SA and return a path for *ep_addr* (:func:rdma.IBA.conv_ep_addr is
     called automatically).

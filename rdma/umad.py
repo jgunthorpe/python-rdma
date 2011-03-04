@@ -9,26 +9,9 @@ from socket import htons as cpu_to_be16;
 
 SYS_INFINIBAND_MAD = "/sys/class/infiniband_mad/";
 
-class LazyIBPath(rdma.path.IBPath):
+class LazyIBPath(rdma.path.LazyIBPath):
     """Similar to :class:`rdma.path.IBPath` but the unpack of the UMAD AH is
     deferred until necessary since most of the time we do not care."""
-    def __getattribute__(self,name):
-        if name[0] != '_':
-            # I wonder if this is evil? We switch out class to the
-            # parent the first time someone requests an attribute.
-            object.__setattr__(self,"__class__",rdma.path.IBPath);
-            LazyIBPath._unpack_rcv(self);
-        return object.__getattribute__(self,name);
-
-    def __repr__(self):
-        object.__setattr__(self,"__class__",rdma.path.IBPath);
-        LazyIBPath._unpack_rcv(self);
-        return rdma.path.IBPath.__repr__(self);
-    def __str__(self):
-        object.__setattr__(self,"__class__",rdma.path.IBPath);
-        LazyIBPath._unpack_rcv(self);
-        return rdma.path.IBPath.__repr__(self);
-
     @staticmethod
     def _unpack_rcv(self):
         """Switch a UMAD AH back into an IBPath. Note this is only
