@@ -409,6 +409,6 @@ def fill_path(qp,path,max_rd_atomic=255):
     # Maximum number of RD atomics responder resources the HCA can allocate
     path.drdatomic = min(path.drdatomic,devinfo.max_qp_rd_atom,max_rd_atomic);
     if path.sqpsn == 0:
-        path.sqpsn = int(os.urandom(4).encode("hex"),16);
+        path.sqpsn = int(os.urandom(3).encode("hex"),16);
     if path.dqpsn == 0:
-        path.dqpsn = int(os.urandom(4).encode("hex"),16);
+        path.dqpsn = int(os.urandom(3).encode("hex"),16);
