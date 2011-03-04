@@ -102,8 +102,6 @@ class BufferPool(object):
     def copy_from(self,buf_idx,offset=0,length=0xFFFFFFF):
         """Return a copy of buffer *buf_idx*."""
         length = min(length,self.size - offset)
-        print buf_idx,length,offset,buf_idx*self.size + offset,\
-                                   buf_idx*self.size + length
         return bytearray(self._mem[buf_idx*self.size + offset:
                                    buf_idx*self.size + offset + length]);
 
@@ -119,8 +117,8 @@ class VMAD(rdma.madtransactor.MADTransactor):
     _allocated_ctx = False;
 
     def __init__(self,parent,path,depth=16):
-        """*path* is used to set the PKey and QKey for all MADs send through this
-        interface."""
+        """*path* is used to set the PKey and QKey for all MADs send through
+        this interface."""
         rdma.madtransactor.MADTransactor.__init__(self);
         self._tid = int(os.urandom(8).encode("hex"),16);
 
@@ -162,12 +160,6 @@ class VMAD(rdma.madtransactor.MADTransactor):
             if not self._pool._buffers:
                 self._cq_sleep(None);
 
-        try:
-            ah = path._cached_verbs_ah;
-        except AttributeError:
-            ah = self._pd.ah(path);
-            path._cached_verbs_ah = ah;
-
         buf_idx = self._pool._buffers.pop();
         size = self._pool.size;
         self._pool._mem[buf_idx*size:buf_idx*size + len(buf)] = buf;
@@ -176,7 +168,7 @@ class VMAD(rdma.madtransactor.MADTransactor):
                          sg_list=self._pool.make_sge(buf_idx,len(buf)),
                          opcode=ibv.IBV_WR_SEND,
                          send_flags=ibv.IBV_SEND_SIGNALED,
-                         ah=ah,
+                         ah=self._pd.ah(path),
                          remote_qpn=path.dqpn,
                          remote_qkey=path.qkey);
         self._qp.post_send(wr);
@@ -230,7 +222,6 @@ class VMAD(rdma.madtransactor.MADTransactor):
                     path._cached_verbs_grh = self._pool.copy_from(wc.wr_id,0,40);
                     path.__class__ = LazyIBPath;
 
-                print repr(path)
                 self._pool.finish_wcs(self._qp,(wc,));
                 return (buf,path);
 

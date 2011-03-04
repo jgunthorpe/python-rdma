@@ -42,6 +42,14 @@ cdef extern from 'Python.h':
 
 include 'libibverbs.pxi'
 
+cdef class Context
+cdef class PD
+cdef class AH
+cdef class CompChannel
+cdef class CQ
+cdef class MR
+cdef class QP
+
 cdef class Context:
     """Verbs context handle, this is a context manager. Call :func:`rdma.get_verbs` to get
     an instance of this."""
@@ -217,6 +225,7 @@ cdef class PD:
     cdef Context _context
     cdef c.ibv_pd *_pd
     cdef list _children
+    cdef object _path_ah # FIXME: should be str
 
     property ctx:
         def __get__(self):
@@ -229,6 +238,7 @@ cdef class PD:
             raise rdma.SysError(errno,"ibv_alloc_pd",
                                 "Failed to allocate protection domain")
         self._children = list();
+        self._path_ah = "_cached_pd%x_ah"%(id(self));
 
     def __dealloc__(self):
         self.close()
@@ -299,9 +309,23 @@ cdef class PD:
     def ah(self,attr):
         """Create a new :class:`rdma.ibverbs.AH` for this protection domain.
         *attr* may be a :class:`rdma.ibverbs.ah_attr` or
-        :class:`rdma.path.IBPath`."""
-        ret = AH(self,attr);
-        self._children.append(ret);
+        :class:`rdma.path.IBPath`. When used with a :class:`~rdma.path.IBPath`
+        this function will cache the AH in the
+        `IBPath`. :meth:`rdma.path.Path.drop_cache` must be called to release
+        all references to the AH."""
+        cdef AH ret
+        if isinstance(attr,rdma.path.IBPath):
+            # We cache the AH in the  onto the AH in the path
+            # FIXME: should be getattr but the 3 argument version won't compile
+            ret = attr.__dict__.get(self._path_ah);
+            if ret is None or ret._ah == NULL:
+                ret = AH(self,attr);
+                setattr(attr,self._path_ah,ret);
+                self._children.append(ret);
+            return ret;
+        else:
+            ret = AH(self,attr);
+            self._children.append(ret);
         return ret;
 
 cdef class AH:
@@ -335,8 +359,6 @@ cdef class AH:
                 raise rdma.SysError(rc,"ibv_destroy_ah",
                                     "Failed to destroy address handle")
             self._ah = NULL
-
-cdef class CQ
 
 cdef class CompChannel:
     """Completion channel, this is a context manager."""
