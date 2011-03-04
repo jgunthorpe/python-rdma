@@ -75,6 +75,17 @@ which will select the appropriate implementation for the platform.
    :undoc-members:
    :show-inheritance:
 
+:mod:`rdma.vmad` Verbs MAD Interface
+----------------------------------------
+
+The verbs MAD interface can be used to send MADs to QPN 1, which is useful
+for SA communication.
+
+.. automodule:: rdma.vmad
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 :mod:`rdma.sched` Parallel MAD Scheduler
 ----------------------------------------
 

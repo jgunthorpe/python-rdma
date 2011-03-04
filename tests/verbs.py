@@ -1,7 +1,9 @@
 #!/usr/bin/python
 import unittest;
 import mmap;
+import sys;
 import rdma;
+import rdma.vmad;
 import rdma.IBA as IBA;
 import rdma.ibverbs as ibv;
 
@@ -10,7 +12,7 @@ class umad_self_test(unittest.TestCase):
     tid = 0;
 
     def setUp(self):
-        self.end_port = rdma.get_end_port();
+        self.end_port = rdma.get_end_port("mlx4_0/2");
         self.ctx = rdma.get_verbs(self.end_port);
         self.umad = rdma.get_umad(self.end_port);
 
@@ -34,3 +36,20 @@ class umad_self_test(unittest.TestCase):
         self.assertRaises(TypeError,pd.ah,None);
         print pd.ah(self.end_port.sa_path);
 
+
+    def test_vmad(self):
+        #ret = self.umad.SubnAdmGet(IBA.MADClassPortInfo);
+        #ret.printer(sys.stdout);
+
+        with rdma.vmad.VMAD(self.ctx,self.end_port.sa_path) as vmad:
+            ret = vmad.SubnAdmGet(IBA.MADClassPortInfo);
+            print repr(vmad.reply_path);
+            ret.printer(sys.stdout);
+
+            # Try sending with a GRH
+            path = self.end_port.sa_path.copy();
+            rdma.path.resolve_path(self.umad,path,True);
+            path.has_grh = True;
+            ret = vmad.SubnAdmGet(IBA.MADClassPortInfo,path);
+            print repr(vmad.reply_path);
+            ret.printer(sys.stdout);
