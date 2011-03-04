@@ -4,9 +4,20 @@ import collections
 import errno as mod_errno
 import util;
 import struct;
+import weakref;
 import rdma.devices
 import rdma.IBA as IBA;
 import rdma.path;
+
+class _my_weakset(weakref.WeakKeyDictionary):
+    def add(self,v):
+        self[v] = None;
+    def pop(self):
+        return weakref.WeakKeyDictionary.popitem(self)[0];
+try:
+    WeakSet = weakref.WeakSet
+except AttributeError:
+    WeakSet = _my_weakset
 
 class WRError(rdma.SysError):
     def __init__(self,errno,func,msg,bad_index):
@@ -56,7 +67,9 @@ cdef class Context:
     cdef c.ibv_context *_ctx
     cdef public object node
     cdef public object end_port
-    cdef list _children
+    cdef object _children_pd
+    cdef object _children_cq
+    cdef object _children_cc
 
     def __cinit__(self,parent):
         '''Create a :class:`rdma.uverbs.UVerbs` instance for the associated
@@ -91,22 +104,31 @@ cdef class Context:
         finally:
             c.ibv_free_device_list(dev_list)
 
-        self._children = list();
+        self._children_pd = WeakSet();
+        self._children_cq = WeakSet();
+        self._children_cc = WeakSet();
 
     def __dealloc__(self):
-        self.close();
+        self._close();
 
     def __enter__(self):
         return self;
 
     def __exit__(self,*exc_info):
-        return self.close();
+        self._close();
 
     def close(self):
         """Free the verbs context handle and all resources allocated by it."""
+        self._close();
+
+    cdef _close(self):
         cdef int e
-        while self._children:
-            self._children.pop().close();
+        while self._children_pd:
+            self._children_pd.pop().close();
+        while self._children_cq:
+            self._children_cq.pop().close();
+        while self._children_cc:
+            self._children_cc.pop().close();
         if self._ctx != NULL:
             e = c.ibv_close_device(self._ctx)
             if e != 0:
@@ -205,26 +227,29 @@ cdef class Context:
     def pd(self):
         """Create a new :class:`rdma.ibverbs.PD` for this context."""
         ret = PD(self);
-        self._children.append(ret);
+        self._children_pd.add(ret);
         return ret;
 
     def cq(self,nelems=100,cc=None,vec=0):
         """Create a new :class:`rdma.ibverbs.CQ` for this context."""
         ret = CQ(self,nelems,cc,vec);
-        self._children.append(ret);
+        self._children_cq.add(ret);
         return ret;
 
     def comp_channel(self):
         """Create a new :class:`rdma.ibverbs.CompChannel` for this context."""
         ret = CompChannel(self);
-        self._children.append(ret);
+        self._children_cc.add(ret);
         return ret;
 
 cdef class PD:
     """Protection domain handle, this is a context manager."""
+    cdef object __weakref__
     cdef Context _context
     cdef c.ibv_pd *_pd
-    cdef list _children
+    cdef object _children_qp
+    cdef object _children_mr
+    cdef object _children_ah
     cdef object _path_ah # FIXME: should be str
 
     property ctx:
@@ -237,23 +262,32 @@ cdef class PD:
         if self._pd == NULL:
             raise rdma.SysError(errno,"ibv_alloc_pd",
                                 "Failed to allocate protection domain")
-        self._children = list();
+        self._children_qp = WeakSet();
+        self._children_mr = WeakSet();
+        self._children_ah = WeakSet();
         self._path_ah = "_cached_pd%x_ah"%(id(self));
 
     def __dealloc__(self):
-        self.close()
+        self._close();
 
     def __enter__(self):
         return self
 
     def __exit__(self,*exc_info):
-        return self.close()
+        self._close();
 
     def close(self):
         """Free the verbs pd handle."""
+        self._close();
+
+    cdef _close(self):
         cdef int rc
-        while self._children:
-            self._children.pop().close();
+        while self._children_ah:
+            self._children_ah.pop().close();
+        while self._children_qp:
+            self._children_qp.pop().close();
+        while self._children_mr:
+            self._children_mr.pop().close();
         if self._pd != NULL:
             if self._context._ctx == NULL:
                 raise rdma.RDMAError("Context closed before owned object");
@@ -268,7 +302,7 @@ cdef class PD:
         """Create a new :class:`rdma.ibverbs.QP` for this protection
         domain. *init* is a :class:`rdma.ibverbs.qp_init_attr`."""
         ret = QP(self,init);
-        self._children.append(ret);
+        self._children_qp.add(ret);
         return ret;
 
     def qp(self,
@@ -297,13 +331,13 @@ cdef class PD:
                             qp_type=qp_type,
                             sq_sig_all=sq_sig_all)
         ret = QP(self,init);
-        self._children.append(ret);
+        self._children_qp.add(ret);
         return ret;
 
     def mr(self,buf,access=0):
         """Create a new :class:`rdma.ibverbs.MR` for this protection domain."""
         ret = MR(self,buf,access);
-        self._children.append(ret);
+        self._children_mr.add(ret);
         return ret;
 
     def ah(self,attr):
@@ -321,15 +355,16 @@ cdef class PD:
             if ret is None or ret._ah == NULL:
                 ret = AH(self,attr);
                 setattr(attr,self._path_ah,ret);
-                self._children.append(ret);
+                self._children_ah.add(ret);
             return ret;
         else:
             ret = AH(self,attr);
-            self._children.append(ret);
+            self._children_ah.add(ret);
         return ret;
 
 cdef class AH:
     """Address handle, this is a context manager."""
+    cdef object __weakref__
     cdef c.ibv_ah *_ah
 
     def __cinit__(self, PD pd not None, attr):
@@ -342,16 +377,19 @@ cdef class AH:
                                 "Failed to create address handle")
 
     def __dealloc__(self):
-        self.close()
+        self._close();
 
     def __enter__(self):
         return self
 
     def __exit__(self,*exc_info):
-        return self.close()
+        self._close();
 
     def close(self):
         """Free the verbs AH handle."""
+        self._close();
+
+    cdef _close(self):
         cdef int rc
         if self._ah != NULL:
             rc = c.ibv_destroy_ah(self._ah)
@@ -362,6 +400,7 @@ cdef class AH:
 
 cdef class CompChannel:
     """Completion channel, this is a context manager."""
+    cdef object __weakref__
     cdef Context _context
     cdef c.ibv_comp_channel *_chan
 
@@ -377,13 +416,29 @@ cdef class CompChannel:
                                 "Failed to create completion channel")
 
     def __dealloc__(self):
-        self.close()
+        self._close();
 
     def __enter__(self):
         return self
 
     def __exit__(self,*exc_info):
-        return self.close()
+        self._close();
+
+    def close(self):
+        """Free the verbs completion channel handle."""
+        self._close();
+
+    cdef _close(self):
+        cdef int rc
+        if self._chan != NULL:
+            if self._context._ctx == NULL:
+                raise rdma.RDMAError("Context closed before owned object");
+            rc = c.ibv_destroy_comp_channel(self._chan)
+            if rc != 0:
+                raise rdma.SysError(rc,"ibv_destroy_comp_channel",
+                                    "Failed to destroy completion channel")
+            self._chan = NULL
+            self._context = None;
 
     def fileno(self):
         """Return the FD associated with this completion channel."""
@@ -421,21 +476,9 @@ cdef class CompChannel:
         cq.req_notify_cq(solicited_only);
         return cq;
 
-    def close(self):
-        """Free the verbs completion channel handle."""
-        cdef int rc
-        if self._chan != NULL:
-            if self._context._ctx == NULL:
-                raise rdma.RDMAError("Context closed before owned object");
-            rc = c.ibv_destroy_comp_channel(self._chan)
-            if rc != 0:
-                raise rdma.SysError(rc,"ibv_destroy_comp_channel",
-                                    "Failed to destroy completion channel")
-            self._chan = NULL
-            self._context = None;
-
 cdef class CQ:
     """Completion queue, this is a context manager."""
+    cdef object __weakref__
     cdef Context _context
     cdef c.ibv_cq *_cq
     cdef CompChannel _chan
@@ -461,16 +504,19 @@ cdef class CQ:
                                 "Failed to create completion queue")
 
     def __dealloc__(self):
-        self.close()
+        self._close();
 
     def __enter__(self):
         return self
 
     def __exit__(self,*exc_info):
-        return self.close()
+        self._close();
 
     def close(self):
         """Free the verbs CQ handle."""
+        self._close();
+
+    cdef _close(self):
         cdef int rc
         if self._cq != NULL:
             if self._context._ctx == NULL:
@@ -524,6 +570,7 @@ cdef class CQ:
 
 cdef class MR:
     """Memory registration, this is a context manager."""
+    cdef object __weakref__
     cdef PD _pd
     cdef c.ibv_mr *_mr
     cdef object _buf
@@ -572,16 +619,19 @@ cdef class MR:
                                 "Failed to register memory region")
 
     def __dealloc__(self):
-        self.close()
+        self._close();
 
     def __enter__(self):
         return self
 
     def __exit__(self,*exc_info):
-        return self.close()
+        self._close();
 
     def close(self):
         """Free the verbs MR handle."""
+        self._close();
+
+    cdef _close(self):
         cdef int rc
         if self._mr != NULL:
             rc = c.ibv_dereg_mr(self._mr)
@@ -590,7 +640,7 @@ cdef class MR:
                                     "Failed to deregister memory region")
             self._mr = NULL
 
-cdef int copy_ah_attr(c.ibv_ah_attr *cattr, attr) except -1:
+cdef copy_ah_attr(c.ibv_ah_attr *cattr, attr):
     """Fill in an ibv_ah_attr from *attr*. *attr* can be a
     :class:`rdma.ibverbs.ah_attr` which is copied directly (discouraged) or it
     can be a :class:`rdma.path.IBPath` which will setup the AH using the
@@ -633,11 +683,13 @@ cdef int copy_ah_attr(c.ibv_ah_attr *cattr, attr) except -1:
         cattr.port_num = attr.end_port.port_id
     else:
         raise TypeError("attr must be an rdma.ibverbs.ah_attr or rdma.path.IBPath.")
-    return 0;
 
 cdef class QP:
     """Queue pair, this is a context manager."""
+    cdef object __weakref__
     cdef PD _pd
+    cdef CQ _scq
+    cdef CQ _rcq
     cdef c.ibv_qp *_qp
     cdef c.ibv_qp_cap _cap
     cdef int _qp_type
@@ -687,11 +739,11 @@ cdef class QP:
         if init.srq is not None:
             raise TypeError("srq not supported")
 
-        scq = init.send_cq
-        rcq = init.recv_cq
+        self._scq = init.send_cq
+        self._rcq = init.recv_cq
 
-        cinit.send_cq = scq._cq
-        cinit.recv_cq = rcq._cq
+        cinit.send_cq = self._scq._cq
+        cinit.recv_cq = self._rcq._cq
         cinit.srq = NULL
         cinit.cap.max_send_wr = init.cap.max_send_wr
         cinit.cap.max_recv_wr = init.cap.max_recv_wr
@@ -710,16 +762,19 @@ cdef class QP:
         self._cap = cinit.cap
 
     def __dealloc__(self):
-        self.close();
+        self._close();
 
     def __enter__(self):
         return self;
 
     def __exit__(self,*exc_info):
-        return self.close();
+        self._close();
 
     def close(self):
         """Free the verbs QP handle."""
+        self._close();
+
+    cdef _close(self):
         cdef int rc
         if self._qp != NULL:
             rc = c.ibv_destroy_qp(self._qp)
@@ -728,6 +783,8 @@ cdef class QP:
                                     "Failed to destroy queue pair")
             self._qp = NULL;
             self._pd = None;
+            self._scq = None;
+            self._rcq = None;
 
     cdef _modify(self,attr,mask):
         cdef c.ibv_qp_attr cattr
