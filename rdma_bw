@@ -4,6 +4,7 @@ import pickle
 import socket
 import contextlib
 import sys
+import select
 from mmap import mmap
 from collections import namedtuple
 import rdma.ibverbs as ibv;
@@ -52,7 +53,11 @@ class Endpoint(object):
     def __init__(self, opt):
         self.opt = opt
         self.ctx = rdma.get_verbs(dev)
-        self.cq = self.ctx.cq()
+        self.cc = self.ctx.comp_channel();
+        self.poll = select.poll();
+        self.cc.register_poll(self.poll);
+        self.cq = self.ctx.cq(2*opt.tx_depth,self.cc)
+        self.cq.req_notify_cq();
         self.pd = self.ctx.pd()
         self.qp = self.pd.qp(ibv.IBV_QPT_RC,opt.tx_depth,self.cq,opt.tx_depth,self.cq);
         self.mem = mmap(-1, opt.size)
@@ -96,11 +101,17 @@ class Endpoint(object):
         posts = depth
         while completions < n:
             comp = self.cq.poll()
-            for c in comp:
-                completions += 1
-                if posts < n:
-                    self.qp.post_send(swr)
-                    posts += 1
+            if not comp:
+                ret = self.poll.poll();
+                if ret is not None:
+                    for I in ret:
+                        self.cc.check_poll(ret);
+            else:
+                for c in comp:
+                    completions += 1
+                    if posts < n:
+                        self.qp.post_send(swr)
+                        posts += 1
 
         tcomp = clock_monotonic()
 
