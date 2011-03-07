@@ -6,6 +6,7 @@ import rdma;
 import rdma.vmad;
 import rdma.IBA as IBA;
 import rdma.ibverbs as ibv;
+import rdma.satransactor
 
 class umad_self_test(unittest.TestCase):
     umad = None;
@@ -38,18 +39,32 @@ class umad_self_test(unittest.TestCase):
 
 
     def test_vmad(self):
-        #ret = self.umad.SubnAdmGet(IBA.MADClassPortInfo);
-        #ret.printer(sys.stdout);
-
         with rdma.vmad.VMAD(self.ctx,self.end_port.sa_path) as vmad:
             ret = vmad.SubnAdmGet(IBA.MADClassPortInfo);
             print repr(vmad.reply_path);
             ret.printer(sys.stdout);
 
-            # Try sending with a GRH
+            # Try sending to the SA with a GRH
             path = self.end_port.sa_path.copy();
-            rdma.path.resolve_path(self.umad,path,True);
+            rdma.path.resolve_path(vmad,path,True);
             path.has_grh = True;
+            path.hop_limit = 255;
             ret = vmad.SubnAdmGet(IBA.MADClassPortInfo,path);
-            print repr(vmad.reply_path);
-            ret.printer(sys.stdout);
+            print "SA reply path grh",repr(vmad.reply_path);
+
+            # Get a LID path to our immediate peer
+            drpath = rdma.path.IBDRPath(self.end_port,
+                                        drPath="\0%c"%(self.end_port.port_id));
+            smad = rdma.satransactor.SATransactor(vmad);
+            peer_path = rdma.path.get_mad_path(vmad,smad.get_path_lid(drpath),
+                                               dqpn=1,
+                                               qkey=IBA.IB_DEFAULT_QP1_QKEY)
+            print "Got peer path",repr(peer_path)
+
+            # Try some GMPs to the peer
+            ret = vmad.PerformanceGet(IBA.MADClassPortInfo,peer_path);
+            print "Got peer reply path",repr(vmad.reply_path);
+            ret = vmad.PerformanceGet(IBA.MADClassPortInfo,
+                                      peer_path.copy(has_grh=True,
+                                                     hop_limit=255));
+            print "Got peer reply path grh",repr(vmad.reply_path);

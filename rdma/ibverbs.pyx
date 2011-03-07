@@ -9,23 +9,6 @@ import rdma.devices
 import rdma.IBA as IBA;
 import rdma.path;
 
-class _my_weakset(weakref.WeakKeyDictionary):
-    def add(self,v):
-        self[v] = None;
-    def pop(self):
-        return weakref.WeakKeyDictionary.popitem(self)[0];
-try:
-    WeakSet = weakref.WeakSet
-except AttributeError:
-    WeakSet = _my_weakset
-
-class WRError(rdma.SysError):
-    def __init__(self,errno,func,msg,bad_index):
-        rdma.SysError.__init__(self,errno,func,msg);
-        self.bad_index = bad_index;
-
-debug = False
-
 cimport libibverbs as c
 
 cdef extern from 'types.h':
@@ -46,12 +29,18 @@ cdef extern from 'stdint.h':
 
 cdef extern from 'Python.h':
     ctypedef int Py_ssize_t
+    object PyBytes_FromStringAndSize(char *str, Py_ssize_t len)
     int PyObject_AsReadBuffer(object o, void **buffer, Py_ssize_t *len)
     int PyObject_AsWriteBuffer(object o, void **buffer, Py_ssize_t *len)
     void Py_INCREF(object o)
     void Py_DECREF(object o)
 
+cdef extern from 'arpa/inet.h':
+    unsigned int ntohl(unsigned int v)
+
 include 'libibverbs.pxi'
+
+debug = False
 
 cdef class Context
 cdef class PD
@@ -60,6 +49,74 @@ cdef class CompChannel
 cdef class CQ
 cdef class MR
 cdef class QP
+
+class _my_weakset(weakref.WeakKeyDictionary):
+    def add(self,v):
+        self[v] = None;
+    def pop(self):
+        return weakref.WeakKeyDictionary.popitem(self)[0];
+WeakSet = weakref.__dict__.get("WeakSet",_my_weakset)
+
+class WRError(rdma.SysError):
+    """Raised when an error occurs posting work requests. :attr:`bad_index`
+    is the index into the work request list what failed to post."""
+    def __init__(self,errno,func,msg,bad_index):
+        rdma.SysError.__init__(self,errno,func,msg);
+        self.bad_index = bad_index;
+
+def wc_status_str(status):
+    """Convert a :attr:`rdma.ibverbs.wc.status` value into a string."""
+    return c.ibv_wc_status_str(status);
+
+class WCError(rdma.RDMAError):
+    """Raised when a WC is completed with error."""
+    def __init__(self,wc,msg=None):
+        if msg is not None:
+            s = "Got error on a CQ - op=%u (%d %s vend=0x%x)"%(
+                wc.opcode,wc.stats,c.ibv_wc_status_str(wc.status),
+                wc.evndor_err);
+        else:
+            s = "%s - op=%u (%d %s vend=0x%x)"%(msg,
+                wc.opcode,wc.stats,c.ibv_wc_status_str(wc.status),
+                wc.evndor_err);
+        rdma.RDMAError.__init__(self,s);
+        self.wc = wc;
+
+    #wc_status_str = staticmethod(wc_status_str)
+
+def WCPath(end_port,wc,buf=None,off=0,**kwargs):
+    """Create a :class:`rdma.path.IBPath` from a work completion. *buf* should
+    be the receive buffer when this is used with a UD QP, the first 40 bytes
+    of that buffer could be a GRH. *off* is the offset into *buf*. *kwargs*
+    are applied to :class:`rdma.path.IBPath`"""
+    cdef c.ibv_grh *grh
+    cdef void *tmp
+    cdef Py_ssize_t length
+    cdef int flow_class
+    cdef object path
+
+    path = rdma.path.IBPath(end_port,sqpn=wc.src_qp,
+                            dqpn=wc.qp_num,
+                            pkey_index=wc.pkey_index,
+                            SLID=wc.slid,
+                            SL=wc.sl,
+                            DLID_bits=wc.dlid_path_bits,
+                            **kwargs);
+    if wc.wc_flags & IBV_WC_GRH and buf is not None:
+        path.has_grh = True
+        flow_class = off;
+        if PyObject_AsReadBuffer(buf, <const_void_ptr_ptr>&tmp, &length) != 0:
+            raise TypeError("Expected buffer")
+        if length - flow_class < 40:
+            raise TypeError("buf must be at least 40 bytes long")
+        grh = <c.ibv_grh *>(<char *>tmp + flow_class)
+        path.DGID = IBA.GID(PyBytes_FromStringAndSize(<char *>grh.dgid.raw,16),True);
+        path.SGID = IBA.GID(PyBytes_FromStringAndSize(<char *>grh.sgid.raw,16),True);
+        path.hop_limit = grh.hop_limit
+        flow_class = ntohl(grh.version_tclass_flow)
+        path.traffic_class = (flow_class >> 20) & 0xFF
+        path.flow_label = flow_class & 0xFFFFF
+    return path;
 
 cdef class Context:
     """Verbs context handle, this is a context manager. Call :func:`rdma.get_verbs` to get

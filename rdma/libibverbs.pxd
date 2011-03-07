@@ -199,7 +199,7 @@ cdef extern from 'infiniband/verbs.h':
         IBV_WR_ATOMIC_FETCH_AND_ADD
 
     union ibv_gid:
-        int *raw
+        char raw[16]
 
     struct ibv_global_route:
         ibv_gid dgid
@@ -207,6 +207,14 @@ cdef extern from 'infiniband/verbs.h':
         int sgid_index
         int hop_limit
         int traffic_class
+
+    struct ibv_grh:
+        unsigned int version_tclass_flow
+        unsigned int paylen
+        unsigned int next_hdr
+        unsigned int hop_limit
+        ibv_gid sgid
+        ibv_gid dgid
 
     struct ibv_ah_attr:
         ibv_global_route grh
@@ -450,4 +458,5 @@ cdef extern from 'infiniband/verbs.h':
     int ibv_query_qp(ibv_qp *qp, ibv_qp_attr *attr, int attr_mask, ibv_qp_init_attr *init)
     int ibv_post_send(ibv_qp *qp, ibv_send_wr *wr, ibv_send_wr **bad_wr)
     int ibv_post_recv(ibv_qp *qp, ibv_recv_wr *wr, ibv_recv_wr **bad_wr)
+    char *ibv_wc_status_str(int status)
 

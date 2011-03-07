@@ -9,30 +9,6 @@ import rdma.devices;
 import rdma.IBA as IBA;
 import rdma.ibverbs as ibv;
 
-class LazyIBPath(rdma.path.LazyIBPath):
-    """Similar to :class:`rdma.path.IBPath` but the unpack of the verbs WC is
-    deferred until necessary since most of the time we do not care."""
-    @staticmethod
-    def _unpack_rcv(self):
-        """Switch a verbs GRH back into an IBPath.
-
-        Our convention is that the path describes the packet headers as they
-        existed on the wire, so this untwiddles things."""
-        grh = IBA.HdrGRH(self._cached_verbs_grh);
-        self.has_grh = True;
-        self.traffic_class = grh.TClass;
-        self.flow_label = grh.flowLabel;
-        self.hop_limit = grh.hopLmt;
-        self.SGID = grh.SGID;
-        self.DGID = grh.DGID;
-
-class MyMMap(mmap.mmap):
-    def __setslice__(self,i,j,thing):
-        """Can't assign a bytearray to a mmap, how lame. Fix it.."""
-        if isinstance(thing,bytearray):
-            thing = bytes(thing);
-        mmap.mmap.__setslice__(self,i,j,thing);
-
 class BufferPool(object):
     """Hold onto a block of fixed size buffers and provide some helpers for
     using them as send and recv buffers with a QP."""
@@ -50,7 +26,7 @@ class BufferPool(object):
         *size* bytes."""
         self.count = count;
         self.size = size;
-        self._mem = MyMMap(-1,count*size);
+        self._mem = mmap.mmap(-1,count*size);
         self._mr = pd.mr(self._mem,ibv.IBV_ACCESS_LOCAL_WRITE |
                          ibv.IBV_ACCESS_LOCAL_WRITE);
         self._buffers = collections.deque(xrange(count),count);
@@ -82,7 +58,7 @@ class BufferPool(object):
             if wc is None:
                 continue;
             if wc.status != ibv.IBV_WC_SUCCESS:
-                raise rdma.RDMAError("error!");
+                raise ibv.WCError(wc);
             if wc.opcode & ibv.IBV_WC_RECV:
                 if wc.wr_id != self.NO_WR_ID:
                     self._buffers.append(wc.wr_id);
@@ -117,7 +93,7 @@ class VMAD(rdma.madtransactor.MADTransactor):
     _allocated_ctx = False;
 
     def __init__(self,parent,path,depth=16):
-        """*path* is used to set the PKey and QKey for all MADs send through
+        """*path* is used to set the PKey and QKey for all MADs sent through
         this interface."""
         rdma.madtransactor.MADTransactor.__init__(self);
         self._tid = int(os.urandom(8).encode("hex"),16);
@@ -151,6 +127,7 @@ class VMAD(rdma.madtransactor.MADTransactor):
         self._qp.modify_to_rtr(path);
         self._qp.modify_to_rts(path);
         self.qkey = path.qkey;
+        self.pkey = path.pkey;
 
     def sendto(self,buf,path):
         '''Send a MAD packet. *buf* is the raw MAD to send, starting with the first
@@ -160,9 +137,15 @@ class VMAD(rdma.madtransactor.MADTransactor):
             if not self._pool._buffers:
                 self._cq_sleep(None);
 
+        if path.qkey != self.qkey or path.pkey != self.pkey:
+            raise rdma.RDMAError("Destination %r does not match the qkey or pkey of this VMAD instance."%(path));
+
         buf_idx = self._pool._buffers.pop();
         size = self._pool.size;
-        self._pool._mem[buf_idx*size:buf_idx*size + len(buf)] = buf;
+        if isinstance(buf,bytearray):
+            self._pool._mem[buf_idx*size:buf_idx*size + len(buf)] = bytes(buf);
+        else:
+            self._pool._mem[buf_idx*size:buf_idx*size + len(buf)] = buf;
 
         wr = ibv.send_wr(wr_id=buf_idx,
                          sg_list=self._pool.make_sge(buf_idx,len(buf)),
@@ -211,19 +194,11 @@ class VMAD(rdma.madtransactor.MADTransactor):
             if self._recvs:
                 wc = self._recvs.pop();
                 buf = self._pool.copy_from(wc.wr_id,40,wc.byte_len);
-                path = rdma.path.IBPath(self.end_port,sqpn=wc.src_qp,
-                                        dqpn=wc.qp_num,
-                                        pkey_index=wc.pkey_index,
-                                        SLID=wc.slid,
-                                        SL=wc.sl,
-                                        qkey=self.qkey,
-                                        DLID_bits=wc.dlid_path_bits);
-                if wc.wc_flags & ibv.IBV_WC_GRH:
-                    path._cached_verbs_grh = self._pool.copy_from(wc.wr_id,0,40);
-                    path.__class__ = LazyIBPath;
-
                 self._pool.finish_wcs(self._qp,(wc,));
-                return (buf,path);
+                return (buf,ibv.WCPath(self.end_port,wc,
+                                       self._pool._mem,
+                                       wc.wr_id*self._pool.size,
+                                       qkey=self.qkey));
 
             self._cq_drain();
             if not self._recvs:

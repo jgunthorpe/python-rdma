@@ -107,7 +107,9 @@ class Endpoint(object):
                     for I in ret:
                         self.cc.check_poll(I);
             else:
-                for c in comp:
+                for wc in comp:
+                    if wc.status != ibv.IBV_WC_SUCCESS:
+                        raise ibv.WCError(wc);
                     completions += 1
                     if posts < n:
                         self.qp.post_send(swr)
