@@ -88,7 +88,11 @@ def WCPath(end_port,wc,buf=None,off=0,**kwargs):
     """Create a :class:`rdma.path.IBPath` from a work completion. *buf* should
     be the receive buffer when this is used with a UD QP, the first 40 bytes
     of that buffer could be a GRH. *off* is the offset into *buf*. *kwargs*
-    are applied to :class:`rdma.path.IBPath`"""
+    are applied to :class:`rdma.path.IBPath`
+
+    Note: wc.pkey_index is not used, if the WC is associated witha GSI QP
+    (unlikely) then the caller can pass `pkey_index=wc.pkey_index` as an
+    argument."""
     cdef c.ibv_grh *grh
     cdef void *tmp
     cdef Py_ssize_t length
@@ -97,7 +101,6 @@ def WCPath(end_port,wc,buf=None,off=0,**kwargs):
 
     path = rdma.path.IBPath(end_port,sqpn=wc.src_qp,
                             dqpn=wc.qp_num,
-                            pkey_index=wc.pkey_index,
                             SLID=wc.slid,
                             SL=wc.sl,
                             DLID_bits=wc.dlid_path_bits,
@@ -1124,6 +1127,7 @@ cdef class QP:
             attr = qp_attr(qp_state=c.IBV_QPS_RTS,
                            timeout=rdma.IBA.to_timer(path.qp_timeout),
                            retry_cnt=path.retries,
+                           # FIXME
                            rnr_retry=7,
                            sq_psn=path.sqpsn,
                            max_rd_atomic=path.srdatomic);

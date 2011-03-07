@@ -198,6 +198,7 @@ class VMAD(rdma.madtransactor.MADTransactor):
                 return (buf,ibv.WCPath(self.end_port,wc,
                                        self._pool._mem,
                                        wc.wr_id*self._pool.size,
+                                       pkey=self.pkey,
                                        qkey=self.qkey));
 
             self._cq_drain();
