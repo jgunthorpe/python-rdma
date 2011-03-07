@@ -543,7 +543,7 @@ class Subnet(object):
         done = set();
         todo.append(start);
         while todo:
-            cur = todo.pop();
+            cur = todo.popleft();
             if cur in done:
                 continue;
 
