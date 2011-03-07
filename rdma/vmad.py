@@ -186,7 +186,7 @@ class VMAD(rdma.madtransactor.MADTransactor):
             if ret is None:
                 return None;
             for I in ret:
-                if self._cc.check_poll(ret) is not None:
+                if self._cc.check_poll(I) is not None:
                     return True;
 
     def _cq_drain(self):

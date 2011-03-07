@@ -105,7 +105,7 @@ class Endpoint(object):
                 ret = self.poll.poll();
                 if ret is not None:
                     for I in ret:
-                        self.cc.check_poll(ret);
+                        self.cc.check_poll(I);
             else:
                 for c in comp:
                     completions += 1
@@ -139,6 +139,7 @@ def client_mode(hostname, opt):
             peerinfo = pickle.loads(buf)
 
             end.path = peerinfo.path;
+            # FIXME: This eats hop_limit
             end.path.reverse();
             end.path.end_port = end.ctx.end_port;
 
