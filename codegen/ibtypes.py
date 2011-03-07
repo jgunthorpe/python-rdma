@@ -1,5 +1,7 @@
 #! /usr/bin/python
 
+# FIXME: look at using ctypes here.
+
 import optparse
 import re
 import sys

@@ -1,5 +1,5 @@
 #!/usr/bin/python
-'''This module provides a list of IB devices scrapped from sysfs'''
+'''This module provides a list of IB devices pulled from from sysfs'''
 from __future__ import with_statement;
 
 import rdma;
