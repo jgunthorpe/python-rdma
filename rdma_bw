@@ -84,9 +84,7 @@ class Endpoint(object):
         swr = ibv.send_wr(wr_id=0,
                           remote_addr=self.peerinfo.addr,
                           rkey=self.peerinfo.rkey,
-                          sg_list=ibv.sge(addr=self.mr.addr,
-                                          length=self.mr.length,
-                                          lkey=self.mr.lkey),
+                          sg_list=self.mr.sge(),
                           opcode=ibv.IBV_WR_RDMA_WRITE,
                           send_flags=ibv.IBV_SEND_SIGNALED)
 

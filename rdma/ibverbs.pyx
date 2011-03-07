@@ -70,7 +70,7 @@ def wc_status_str(status):
 
 class WCError(rdma.RDMAError):
     """Raised when a WC is completed with error."""
-    def __init__(self,wc,msg=None):
+    def __init__(self,wc,msg=None,qp=None):
         if msg is not None:
             s = "Got error on a CQ - op=%u (%d %s vend=0x%x)"%(
                 wc.opcode,wc.stats,c.ibv_wc_status_str(wc.status),
@@ -81,8 +81,8 @@ class WCError(rdma.RDMAError):
                 wc.evndor_err);
         rdma.RDMAError.__init__(self,s);
         self.wc = wc;
-
-    #wc_status_str = staticmethod(wc_status_str)
+        if qp is not None:
+            self.qp = qp
 
 def WCPath(end_port,wc,buf=None,off=0,**kwargs):
     """Create a :class:`rdma.path.IBPath` from a work completion. *buf* should
@@ -666,10 +666,12 @@ cdef class MR:
 
         if access & (c.IBV_ACCESS_LOCAL_WRITE | c.IBV_ACCESS_REMOTE_WRITE) != 0:
             rc = PyObject_AsWriteBuffer(buf, &addr, &length)
+            if rc != 0:
+                raise TypeError("Expected mutable buffer")
         else:
             rc = PyObject_AsReadBuffer(buf, <const_void_ptr_ptr>&addr, &length)
-        if rc != 0:
-            raise TypeError("Expected buffer")
+            if rc != 0:
+                raise TypeError("Expected buffer")
 
         self._pd = pd
         self._buf = buf
@@ -699,6 +701,26 @@ cdef class MR:
                 raise rdma.SysError(errno,"ibv_dereg_mr",
                                     "Failed to deregister memory region")
             self._mr = NULL
+
+    def sge(self,length=-1,off=0):
+        """Create a :class:`rdma.ibv.sge` referring to *length* bytes of this MR
+        starting at *off*. If *length* is -1 (default) then the entire MR from *off*
+        to the end is used."""
+        cdef int _length
+        cdef int _off
+
+        _length = length
+        _off = off
+        if _off < 0:
+            raise ValueError("off %r cannot be negative"%off);
+        if _length == -1:
+            _length = self._mr.length - _off;
+        if _length + _off > self._mr.length:
+            raise ValueError("Length is too long %u > %u"%(_length + _off,
+                                                           self._mr.length));
+        return sge(addr=<uintptr_t>(self._mr.addr + _off),
+                   lkey=self._mr.lkey,
+                   length=_length);
 
 cdef copy_ah_attr(c.ibv_ah_attr *cattr, attr):
     """Fill in an ibv_ah_attr from *attr*. *attr* can be a
@@ -1134,7 +1156,11 @@ cdef class QP:
         self._modify(attr,attr.MASK)
 
     def post_send(self, wrlist):
+        """*wrlist* may be a single :class:`rdma.ibverbs.send_wr` or
+        a list of them."""
         self._post_send(wrlist)
 
     def post_recv(self, wrlist):
+        """*wrlist* may be a single :class:`rdma.ibverbs.recv_wr` or
+        a list of them."""
         self._post_recv(wrlist)

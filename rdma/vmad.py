@@ -72,8 +72,7 @@ class BufferPool(object):
 
     def make_sge(self,buf_idx,buf_len):
         """Return a :class:`rdma.ibverbs.SGE` for *buf_idx*."""
-        return ibv.sge(length=buf_len,lkey=self._mr.lkey,
-                       addr=self._mr.addr + buf_idx*self.size);
+        return self._mr.sge(buf_len,buf_idx*self.size);
 
     def copy_from(self,buf_idx,offset=0,length=0xFFFFFFF):
         """Return a copy of buffer *buf_idx*."""
