@@ -321,7 +321,7 @@ class LazyIBPath(IBPath):
         cls._unpack_rcv(self);
         return rdma.path.IBPath.__repr__(self);
 
-def get_mad_path(mad,ep_addr):
+def get_mad_path(mad,ep_addr,**kwargs):
     """Query the SA and return a path for *ep_addr* (:func:rdma.IBA.conv_ep_addr is
     called automatically).
 
@@ -335,9 +335,9 @@ def get_mad_path(mad,ep_addr):
     :raises rdma.MADError: If the RPC failed in some way."""
     ep_addr = IBA.conv_ep_addr(ep_addr);
     if isinstance(ep_addr,IBA.GID):
-        path = IBPath(mad.end_port,DGID=ep_addr);
+        path = IBPath(mad.end_port,DGID=ep_addr,**kwargs);
     else:
-        path = IBPath(mad.end_port,DLID=ep_addr);
+        path = IBPath(mad.end_port,DLID=ep_addr,**kwargs);
     return resolve_path(mad,path,True);
 
 def resolve_path(mad,path,reversible=False,properties=None):
