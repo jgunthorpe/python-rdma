@@ -89,6 +89,8 @@ def cmd_perfquery(argv,o):
             nr.LID = path.DLID;
             nr = umad.SubnAdmGet(nr);
             cnts.portSelect = nr.nodeInfo.localPortNum;
+            if nr.nodeInfo.nodeType == IBA.NODE_SWITCH and cnts.portSelect == 0:
+                cnts.portSelect = 1;
 
         accumulate = args.loop;
         if cnts.portSelect == 0xFF:
