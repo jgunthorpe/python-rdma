@@ -194,6 +194,8 @@ Specific commands:
   in this document.
 * `saquery` forgot how to do --node-name-map
 * `saquery` options that have an associated Selector don't set the selector.
+* `saquery` is joined by `query` which can issue any Get type query for any
+  supported attribute with any query content.
 * `ibnetdiscover` prints the listing in a BFS order, not randomly.
 * `ibfindnodesusing` only fetches subnet information actually used during
   output and supports more ways to specify the source switch.

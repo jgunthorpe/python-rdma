@@ -81,6 +81,7 @@ commands = {
     "smpdump": ("libibtool.inquiry",),
     "decode_mad": ("libibtool.inquiry",),
     "ibportstate": ("libibtool.inquiry",),
+    "query": ("libibtool.inquiry",),
 
     "ibhosts": ("libibtool.discovery",),
     "ibprintca": ("libibtool.discovery",),

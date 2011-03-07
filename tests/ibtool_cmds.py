@@ -100,6 +100,7 @@ class ibtool_cmds_test(unittest.TestCase):
             except rdma.MADError as err:
                 if err.status != IBA.MAD_STATUS_UNSUP_METHOD_ATTR_COMBO:
                     raise;
+        self.cmd("query","PerformanceGet","MADClassPortInfo");
 
     def test_with_link_exc(self):
         self.assertEquals(self.end_port.state,IBA.PORT_STATE_ACTIVE);

@@ -4,6 +4,7 @@ import copy
 import rdma;
 import rdma.IBA as IBA;
 import rdma.IBA_describe as IBA_describe;
+import rdma.madtransactor;
 from libibtool import *;
 from libibtool.libibopts import *;
 
@@ -145,7 +146,90 @@ def cmd_ibaddr(argv,o):
         if args.lid:
             print "LID start %u end %u"%(pinf.LID,pinf.LID + (1 << pinf.LMC)-1),
         print
-    return True;
+    return lib.done();
+
+methods = set(('SubnGet','PerformanceGet','SubnAdmGet','SubnAdmGetTable',
+               'BMGet','CommMgtGet','DevMgtGet','SNMPGet'));
+methods.intersection_update(dir(rdma.madtransactor.MADTransactor));
+
+def is_valid_attribute(attr):
+    if (getattr(attr,"MAD_LENGTH",None) is None or
+        getattr(attr,"MAD_ATTRIBUTE_ID",None) is None):
+        return False;
+    for I in methods:
+        if getattr(attr,"MAD_%s"%(I.upper()),None) is not None:
+            return True;
+    return False;
+
+def tmpl_method(v):
+    if v not in methods:
+        raise CmdError("Invalid method %r"%(v));
+    return v;
+
+def tmpl_attribute(v):
+    attr = getattr(rdma.IBA,v,None);
+    if attr is None:
+        raise CmdError("Invalid attribute %r"%(v));
+    if not is_valid_attribute(attr):
+        raise CmdError("Invalid attribute %r"%(v));
+    return attr;
+
+def cmd_query_help(o,cmd,usage):
+    """Generate the help text by merging in information from OPS."""
+    def get_attrs():
+        for k,v in rdma.IBA.__dict__.iteritems():
+            if is_valid_attribute(v):
+                yield k;
+
+    return (usage + "\n    Valid METHOD:\n    " + "\n    ".join("   %s"%(I) for I in sorted(methods)) +
+            "\n    Valid ATTRIBUTE:\n    " + "\n    ".join("   %s"%(I) for I in sorted(get_attrs())))
+
+def cmd_query(argv,o):
+    """Issue any GET type query for any known attribute
+       Usage: %prog query METHOD ATTRIBUTE [TARGET]
+
+       Eg:
+          %prog query PerformanceGet PMPortCounters -f portSelect=1
+          %prog query SubnAdmGet SAPathRecord -f SGID=fe80::0002:c903:0000:1491 -f DGID=fe80::0002:c903:0000:1492
+          """
+    import libibtool.saquery;
+
+    o.add_option("-a","--attribute-id",action="store",dest="attribute_id",
+                 default=0,type=int,
+                 help="Set the attribute ID field in the request MAD");
+    o.add_option("-f","--field",action="append",dest="fields",
+                 default=[],
+                 help="Set the given field in the request MAD.");
+    LibIBOpts.setup(o);
+    (args,values) = o.parse_args(argv);
+    lib = LibIBOpts(o,args,values,3,(tmpl_method,tmpl_attribute,tmpl_target));
+
+    if len(values) == 2:
+        values.append('');
+    if len(values) < 3:
+        raise CmdError("Too few arguments");
+
+    with lib.get_umad_for_target(values[2],
+                                 gmp=(values[0] != "SubnGet")) as umad:
+        meth = getattr(umad,values[0]);
+        req = values[1]();
+        if values[0].startswith("SubnAdm"):
+            req = IBA.ComponentMask(req);
+        for I in args.fields:
+            try:
+                n,v = I.split("=");
+            except ValueError:
+                raise CmdError("Field %r does not have exactly 1 equals."%(I))
+            libibtool.saquery.set_mad_attr(req,n,v);
+        ret = meth(req,lib.path,args.attribute_id);
+        if isinstance(ret,list):
+            out = libibtool.saquery.Indentor(sys.stdout);
+            for num,I in enumerate(ret):
+                print "Reply structure #%u"%(num);
+                I.printer(out,**lib.format_args);
+        else:
+            ret.printer(sys.stdout,**lib.format_args);
+    return lib.done();
 
 def cmd_sminfo(argv,o):
     """Display the SASMInfo record for a subnet manager.
@@ -194,8 +278,7 @@ def cmd_sminfo(argv,o):
             sinf = umad.SubnSet(sinf,path,amod);
             print "sminfo: sm lid %u sm guid %s, activity count %u priority %u state %u"%(
                 smlid,sinf.GUID,sinf.actCount,sinf.priority,sinf.SMState);
-
-    return True;
+    return lib.done();
 
 def cmd_smpdump(argv,o):
     """Display an arbitrary SMP record
@@ -236,7 +319,7 @@ def cmd_smpdump(argv,o):
             if (I+1) % 8 != 0:
                 print;
             print "SMP status: 0x%04x"%(umad.reply_fmt.status | (umad.reply_fmt.D << 15))
-    return True;
+    return lib.done();
 
 def cmd_ibportstate(argv,o):
     """Manipulate the SMPPortInfo of a port

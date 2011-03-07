@@ -115,6 +115,33 @@ OPS = {"ClassPortInfo": ("CPI",IBA.MADClassPortInfo),
        "VLArbitrationTableRecord": ("VLAR",IBA.SAVLArbitrationTableRecord,arg_vlarb),
        };
 
+def set_mad_attr(attr,name,v):
+    arg = getattr(attr,name,None);
+    if arg is None:
+        raise CmdError("%r is not a valid attribute for %r"%(name,attr));
+    try:
+        if isinstance(arg,int) or isinstance(arg,long):
+            v = int(v,0);
+        elif isinstance(arg,IBA.GID):
+            v = IBA.GID(v);
+        elif isinstance(arg,IBA.GUID):
+            v = IBA.GUID(v);
+        elif isinstance(arg,bytearray):
+            v = v.decode("string_escape");
+            if len(v) > len(arg):
+                raise CmdError("String %r is too long, can only be up to %u"%(
+                    v,len(arg)));
+            if len(v) < len(arg):
+                v = v + bytearray(len(arg) - len(v));
+        elif isinstance(arg,list):
+            raise CmdError("Lists currently cannot be set.");
+        else:
+            raise CmdError("Internal Error, I don't know what %s %r is."%(
+                type(arg),arg));
+    except ValueError as err:
+        raise CmdError("String %r did not parse: %s"%(v,err));
+    setattr(attr,name,v);
+
 def tmpl_op(s):
     s = s.lower();
     res = None;
@@ -380,29 +407,7 @@ def cmd_saquery(argv,o):
         if n not in query.COMPONENT_MASK:
             raise CmdError("Cannot set member %s on %s. Try one of %s"%(
                 n,query.__class__.__name__,", ".join(query.COMPONENT_MASK.iterkeys())));
-        arg = eval("query_cm.%s"%(n));
-        try:
-            if isinstance(arg,int) or isinstance(arg,long):
-                v = int(v,0);
-            elif isinstance(arg,IBA.GID):
-                v = IBA.GID(v);
-            elif isinstance(arg,IBA.GUID):
-                v = IBA.GUID(v);
-            elif isinstance(arg,bytearray):
-                v = v.decode("string_escape");
-                if len(v) > len(arg):
-                    raise CmdError("String %r is too long, can only be up to %u"%(
-                        v,len(arg)));
-                if len(v) < len(arg):
-                    v = v + bytearray(len(arg) - len(v));
-            elif isinstance(arg,list):
-                raise CmdError("Lists currently cannot be set.");
-            else:
-                raise CmdError("Internal Error, I don't know what %s %r is."%(
-                    type(arg),arg));
-        except ValueError as err:
-            raise CmdError("String %r did not parse: %s"%(v,err));
-        exec "query_cm.%s = v"%(n);
+        set_mad_attr(query_cm,n,v);
 
     # Diagnostic output to show what the query argument is.
     if o.verbosity >= 1:
