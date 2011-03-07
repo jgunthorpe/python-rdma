@@ -73,6 +73,63 @@ def link_speed(value):
         res.append("QDR");
     return ",".join(res);
 
+def link_width(width):
+    """Convert a link with constant into an integer number of lanes."""
+    if width == IBA.LINK_WIDTH_1x:
+        return 1;
+    if width == IBA.LINK_WIDTH_4x:
+        return 4;
+    if width == IBA.LINK_WIDTH_8x:
+        return 8;
+    if width == IBA.LINK_WIDTH_12x:
+        return 12;
+    return 0;
+
+def rate(value):
+    """Return the rate (eg a :attr:`rdma.IBA.SAPathRecord.rate`) *value*
+    as an integer bits/sec."""
+    if value == IBA.PR_RATE_2Gb5:
+        return 2500000000;
+    if value == IBA.PR_RATE_5Gb0:
+        return 500000000;
+    if value == IBA.PR_RATE_10Gb0:
+        return 1000000000;
+    if value == IBA.PR_RATE_20Gb0:
+        return 2000000000;
+    if value == IBA.PR_RATE_30Gb0:
+        return 3000000000;
+    if value == IBA.PR_RATE_40Gb0:
+        return 4000000000;
+    if value == IBA.PR_RATE_60Gb0:
+        return 6000000000;
+    if value == IBA.PR_RATE_80Gb0:
+        return 8000000000;
+    if value == IBA.PR_RATE_120Gb0:
+        return 12000000000;
+    return 2499999999; # ???
+
+def to_rate(value):
+    """Convert a rate in integer bits/sec to an IBA rate (eg a
+    :attr:`rdma.IBA.SAPathRecord.rate`). The lowest matching rate constant
+    is returned."""
+    if value >= 12000000000:
+        return IBA.PR_RATE_120Gb0
+    if value >= 8000000000:
+        return IBA.PR_RATE_80Gb0
+    if value >= 6000000000:
+        return IBA.PR_RATE_60Gb0
+    if value >= 4000000000:
+        return IBA.PR_RATE_40Gb0
+    if value >= 3000000000:
+        return IBA.PR_RATE_30Gb0
+    if value >= 2000000000:
+        return IBA.PR_RATE_20Gb0
+    if value >= 1000000000:
+        return IBA.PR_RATE_10Gb0
+    if value >= 500000000:
+        return IBA.PR_RATE_5Gb0
+    return IBA.PR_RATE_2Gb5
+
 def description(value):
     """Decodes a fixed length string from a IBA MAD (such as
     :class:`rdma.IBA.SMPNodeDescription`) These strings are considered to be
