@@ -57,7 +57,7 @@ class Endpoint(object):
         self.poll = select.poll();
         self.cc.register_poll(self.poll);
         self.cq = self.ctx.cq(2*opt.tx_depth,self.cc)
-        self.cq.req_notify_cq();
+        self.cq.req_notify();
         self.pd = self.ctx.pd()
         self.qp = self.pd.qp(ibv.IBV_QPT_RC,opt.tx_depth,self.cq,opt.tx_depth,self.cq);
         self.mem = mmap(-1, opt.size)

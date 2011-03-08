@@ -108,7 +108,7 @@ class VMAD(rdma.madtransactor.MADTransactor):
         self._poll = select.poll();
         self._cc.register_poll(self._poll);
         self._cq = self._ctx.cq(2*depth,self._cc);
-        self._cq.req_notify_cq();
+        self._cq.req_notify();
 
         self._pd = self._ctx.pd();
         self._pool = BufferPool(self._pd,2*depth,256+40);

@@ -199,7 +199,7 @@ cdef extern from 'infiniband/verbs.h':
         IBV_WR_ATOMIC_FETCH_AND_ADD
 
     union ibv_gid:
-        char raw[16]
+        char *raw
 
     struct ibv_global_route:
         ibv_gid dgid
@@ -265,6 +265,15 @@ cdef extern from 'infiniband/verbs.h':
         int slid
         int sl
         int dlid_path_bits
+
+    struct ibv_srq_attr:
+        unsigned int max_wr
+        unsigned int max_sge
+        unsigned int srq_limit
+
+    struct ibv_srq_init_attr:
+        void *srq_context
+        ibv_srq_attr attr
 
     struct ibv_srq:
         pass
@@ -421,8 +430,6 @@ cdef extern from 'infiniband/verbs.h':
         unsigned int local_ca_ack_delay
         unsigned int phys_port_cnt
 
-    ctypedef int size_t
-
     ibv_device **ibv_get_device_list(int *n)
     void ibv_free_device_list(ibv_device **list)
     ibv_context *ibv_open_device(ibv_device *dev)
@@ -436,7 +443,7 @@ cdef extern from 'infiniband/verbs.h':
     ibv_ah *ibv_create_ah(ibv_pd *pd, ibv_ah_attr *attr)
     int ibv_destroy_ah(ibv_ah *ah)
 
-    ibv_mr *ibv_reg_mr(ibv_pd *pd, void *addr, size_t length, int access)
+    ibv_mr *ibv_reg_mr(ibv_pd *pd, void *addr, int length, int access)
     int ibv_dereg_mr(ibv_mr *mr)
 
     ibv_comp_channel *ibv_create_comp_channel(ibv_context *ctx)
@@ -451,6 +458,7 @@ cdef extern from 'infiniband/verbs.h':
     int ibv_req_notify_cq(ibv_cq *cq, int solicited_only)
     int ibv_get_cq_event(ibv_comp_channel *chan,ibv_cq **,void **cq_context)
     void ibv_ack_cq_events(ibv_cq *cq,unsigned int nevents)
+    int ibv_resize_cq(ibv_cq *cq, int cqe)
 
     ibv_qp *ibv_create_qp(ibv_pd *pd, ibv_qp_init_attr *init_attr)
     int ibv_destroy_qp(ibv_qp *qp)
@@ -458,5 +466,14 @@ cdef extern from 'infiniband/verbs.h':
     int ibv_query_qp(ibv_qp *qp, ibv_qp_attr *attr, int attr_mask, ibv_qp_init_attr *init)
     int ibv_post_send(ibv_qp *qp, ibv_send_wr *wr, ibv_send_wr **bad_wr)
     int ibv_post_recv(ibv_qp *qp, ibv_recv_wr *wr, ibv_recv_wr **bad_wr)
+    int ibv_attach_mcast(ibv_qp *qp, ibv_gid *gid, unsigned int lid)
+    int ibv_detach_mcast(ibv_qp *qp, ibv_gid *gid, unsigned int lid)
+
+    ibv_srq *ibv_create_srq(ibv_pd *pd,ibv_srq_init_attr *srq_init_attr)
+    int ibv_destroy_srq(ibv_srq *srq)
+    int ibv_modify_srq(ibv_srq *srq,ibv_srq_attr *srq_attr,int srq_attr_mask)
+    int ibv_query_srq(ibv_srq *srq,ibv_srq_attr *srq_attr)
+    int ibv_post_srq_recv(ibv_srq *qp, ibv_recv_wr *wr, ibv_recv_wr **bad_wr)
+
     char *ibv_wc_status_str(int status)
 

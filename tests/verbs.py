@@ -2,6 +2,7 @@
 import unittest;
 import mmap;
 import sys;
+import errno;
 import rdma;
 import rdma.vmad;
 import rdma.IBA as IBA;
@@ -27,16 +28,29 @@ class umad_self_test(unittest.TestCase):
         print self.ctx.query_port();
         print self.ctx.query_device();
         pd = self.ctx.pd();
-        cq = self.ctx.cq();
+        cq = self.ctx.cq(100);
+        try:
+            cq.resize(200);
+        except rdma.SysError as e:
+            if e.errno != errno.ENOSYS:
+                raise;
         self.assertEqual(cq.poll(),[]);
         comp = self.ctx.comp_channel();
         buf = mmap.mmap(-1,4096);
-        # qp
+        qp = pd.qp(ibv.IBV_QPT_UD,100,cq,100,cq);
+        print qp.query(0xFFFF);
+        mpath = rdma.path.IBPath(self.ctx.end_port,DLID=0xC000,
+                                 DGID=IBA.GID("ff02::1"));
+        qp.attach_mcast(mpath);
+        qp.detach_mcast(mpath);
         mr = pd.mr(buf,ibv.IBV_ACCESS_LOCAL_WRITE|ibv.IBV_ACCESS_REMOTE_WRITE);
         print "MR",mr.addr,mr.length,mr.lkey,mr.rkey
         self.assertRaises(TypeError,pd.ah,None);
         print pd.ah(self.end_port.sa_path);
 
+        srq = pd.srq();
+        print srq.query();
+        srq.modify(100);
 
     def test_vmad(self):
         with rdma.vmad.VMAD(self.ctx,self.end_port.sa_path) as vmad:

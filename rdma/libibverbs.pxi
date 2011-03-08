@@ -271,6 +271,10 @@ qp_attr = util.struct(
     )
 )
 
+srq_attr = collections.namedtuple(
+    'srq_attr',
+    'max_wr max_sge srq_limit')
+
 port_attr = collections.namedtuple(
     'port_attr',
     '''state
