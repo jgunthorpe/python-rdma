@@ -294,6 +294,33 @@ SGEs are constructed through the MR::
      sge = mr.sge();
      sge = mr.sge(length=128,off=10);
 
+A tool is provided for managing a finite pool of fixed size buffers. This construct
+is very useful for applications using the SEND verb::
+
+   pool = rdma.vtools.BufferPool(pd,count=100,size=1024);
+   pool.post_recvs(qp,50);
+
+   buf_idx = pool.pop();
+   pool.copy_to("Hello message!",buf_idx);
+   qp.post_send(ibv.send_wr(wr_id=buf_idx,
+		            sg_list=pool.make_sge(buf_idx,pool.size),
+                            opcode=ibv.IBV_WR_SEND,
+                            send_flags=ibv.IBV_SEND_SIGNALED,
+                            ah=pd.ah(path),
+                            remote_qpn=path.dqpn,
+                            remote_qkey=path.qkey);
+
+
+:mod:`rdma.vtools` module
+=========================
+
+:mod:`rdma.vtools` provides various support functions to make verbs
+programming easier.
+
+.. automodule:: rdma.vtools
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 :mod:`rdma.ibverbs` module
 ==========================
