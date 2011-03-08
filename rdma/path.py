@@ -129,17 +129,21 @@ class IBPath(Path):
     #: Source issuable RD atomic
     srdatomic = 255;
 
-    def reverse(self):
-        """Reverse this path in-place according to IBA 13.5.4."""
+    def reverse(self,for_reply=True):
+        """Reverse this path in-place according to IBA 13.5.4. If *for_reply*
+        is `True` then the reversed path will be usable as a MAD reply,
+        otherwise it is simply reversed (the only difference is that reply paths
+        have the hop_limit set to 255). Returns `self`"""
         self.DLID,self.SLID = self.SLID,self.DLID;
         self.dqpn ,self.sqpn = self.sqpn,self.dqpn;
         self.DGID,self.SGID = self.SGID,self.DGID;
-        if self.has_grh:
+        if self.has_grh and for_reply:
             self.hop_limit = 0xff;
         self.dack_resp_time,self.sack_resp_time = self.sack_resp_time,self.dack_resp_time;
         self.dqpsn,self.sqpsn = self.sqpsn,self.dqpsn;
         self.drdatomic,self.srdatomic = self.srdatomic,self.drdatomic
         self.drop_cache();
+        return self
 
     @property
     def SGID_index(self):

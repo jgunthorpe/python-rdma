@@ -1,7 +1,7 @@
 Verbs Interface
 ===============
 
-:module:`rdma.ibverbs` implements a set of python extension objects and
+:mod:`rdma.ibverbs` implements a set of python extension objects and
 functions that provide a wrapper around the OFA verbs interface from
 `libibverbs`. The wrapper puts the verbs interface into an OOP methodology and
 generally exposes most functionality to Python.
@@ -190,10 +190,10 @@ socket). Side A would do this::
   qp = pd.qp(ibv.IBV_QPT_RC,...);
   path = rdma.path.IBPath(end_port,SGID=end_port.gids[0]);
   rdma.path.fill_path(qp,path);
-  path.reverse();
+  path.reverse(for_reply=False);
   send_to_side_b(pickle.pickle(path));
   path = pickle.unpickle(recv_from_side_b());
-  path.reverse();
+  path.reverse(for_reply=False);
   path.end_port = end_port;
 
   qp.modify_to_init(self.path,ibv.IBV_ACCESS_REMOTE_WRITE);

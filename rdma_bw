@@ -130,7 +130,7 @@ def client_mode(hostname, opt):
 
             path = rdma.path.IBPath(dev,SGID=end.ctx.end_port.gids[0]);
             rdma.path.fill_path(end.qp,path,max_rd_atomic=0);
-            path.reverse();
+            path.reverse(for_reply=False);
 
             sock.send(pickle.dumps(infotype(path=path,
                                             addr=end.mr.addr,
@@ -141,8 +141,7 @@ def client_mode(hostname, opt):
             peerinfo = pickle.loads(buf)
 
             end.path = peerinfo.path;
-            # FIXME: This eats hop_limit
-            end.path.reverse();
+            end.path.reverse(for_reply=False);
             end.path.end_port = end.ctx.end_port;
 
             print "path to peer %r\nMR peer raddr=%x peer rkey=%x"%(
@@ -151,6 +150,9 @@ def client_mode(hostname, opt):
                                                      opt.iters*opt.size);
 
             end.connect(peerinfo)
+            # Synchronize the transition to RTS
+            sock.send("Ready");
+            sock.recv(1024);
             end.rdma()
 
             sock.shutdown(socket.SHUT_WR);
@@ -195,6 +197,9 @@ def server_mode(opt):
                                                          opt.iters*opt.size);
 
                 end.connect(peerinfo)
+                # Synchronize the transition to RTS
+                s.send("ready");
+                s.recv(1024);
                 if opt.bidirectional:
                     end.rdma()
 
