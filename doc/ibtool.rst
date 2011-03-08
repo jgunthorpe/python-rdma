@@ -142,6 +142,8 @@ Discovery:
   unconfigured subnet. LID primarily uses LID routed SMP packets, except for a
   few DR SMPs to determine the connectivity. SA exclusively uses record data
   from the SA.
+* By default discovery is done using LID mode, unless the connected end port
+  is not active, then DR is used.
 * Discovery data is stored in memory and re-used during the tool run,
   redundant queries are not issued.
 * Everything is built on the parallel MAD scheduler

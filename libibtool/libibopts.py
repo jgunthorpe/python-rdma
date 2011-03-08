@@ -43,6 +43,8 @@ class LibIBOpts(object):
         o.verbosity = max(self.debug,getattr(args,"verbosity",0));
 
         if "discovery" in args.__dict__:
+            if args.discovery is None and self.end_port.state != IBA.PORT_STATE_ACTIVE:
+                args.discovery = "DR";
             if args.use_sa and args.discovery is not None and args.discovery != "SA":
                 raise CmdError("Can't combine --sa with discovery mode %r"%(args.discovery));
             if args.use_sa:
@@ -279,6 +281,8 @@ class LibIBOpts(object):
         import rdma.discovery;
         sbn = rdma.subnet.Subnet();
         if stuff is not None:
+            if self.o.verbosity >= 1:
+                print "D: Performing discovery using mode %r"%(self.args.discovery);
             sbn.lid_routed = self.args.discovery != "DR";
             rdma.discovery.load(sched,sbn,stuff);
         self.sbn = sbn;
