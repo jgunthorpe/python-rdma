@@ -2,7 +2,7 @@
 import select
 import collections
 import errno as mod_errno
-import util;
+import rdma.tools as tools;
 import struct;
 import weakref;
 import rdma.devices

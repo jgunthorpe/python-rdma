@@ -16,7 +16,7 @@ if len(args) != 1:
 pxi = """
 %(enums)s
 
-wc = util.struct(
+wc = tools.struct(
     'wc',
     (('wr_id',long),
      ('status',int), #enum
@@ -34,7 +34,7 @@ wc = util.struct(
     )
 )
 
-global_route = util.struct(
+global_route = tools.struct(
     'global_route',
     (
      ('dgid',IBA.GID),
@@ -45,7 +45,7 @@ global_route = util.struct(
     )
 )
 
-ah_attr = util.struct(
+ah_attr = tools.struct(
     'ah_attr',
     (
      ('grh',global_route),
@@ -58,7 +58,7 @@ ah_attr = util.struct(
     )
 )
 
-qp_init_attr = util.struct(
+qp_init_attr = tools.struct(
     'qp_init_attr',
     (
      ('send_cq',None), # needs forward decl
@@ -70,7 +70,7 @@ qp_init_attr = util.struct(
     )
 )
 
-qp_cap = util.struct(
+qp_cap = tools.struct(
     'qp_cap',
     (
      ('max_send_wr',int),
@@ -81,7 +81,7 @@ qp_cap = util.struct(
     )
 )
 
-qp_attr = util.struct(
+qp_attr = tools.struct(
     'qp_attr',
     (
      ('qp_state',int,IBV_QP_STATE),
@@ -181,7 +181,7 @@ device_attr = collections.namedtuple(
     local_ca_ack_delay
     phys_port_cnt''');
 
-sge = util.struct(
+sge = tools.struct(
     'sge',
     (
      ('addr',int),
@@ -192,7 +192,7 @@ sge = util.struct(
 
 # Refer to verbs documentation to see which fields are valid for which
 # operation
-send_wr = util.struct(
+send_wr = tools.struct(
     'send_wr',
     (
      ('wr_id', long),
@@ -218,7 +218,7 @@ send_wr = util.struct(
     )
 )
 
-recv_wr = util.struct(
+recv_wr = tools.struct(
     'recv_wr',
     (
      ('wr_id', long),
