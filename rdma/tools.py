@@ -77,8 +77,8 @@ class _timespec(ctypes.Structure):
 clock_gettime = None;
 
 def clock_monotonic():
-    """Return the value of CLOCK_MONOTONIC. Replace me if python ever
-    gets this in the standard library. Only works on Linux."""
+    """Return the value of CLOCK_MONOTONIC as float seconds. Replace me if
+    Python ever gets this in the standard library. Only works on Linux."""
     global clock_gettime;
     if clock_gettime is None:
         librt = ctypes.CDLL('librt.so.1', use_errno=True);

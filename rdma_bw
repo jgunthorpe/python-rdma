@@ -4,12 +4,12 @@ import pickle
 import socket
 import contextlib
 import sys
-import select
 from mmap import mmap
 from collections import namedtuple
 import rdma.ibverbs as ibv;
 from rdma.tools import clock_monotonic
 import rdma.path
+import rdma.vtools
 
 from libibtool.libibopts import *;
 
@@ -54,10 +54,8 @@ class Endpoint(object):
         self.opt = opt
         self.ctx = rdma.get_verbs(dev)
         self.cc = self.ctx.comp_channel();
-        self.poll = select.poll();
-        self.cc.register_poll(self.poll);
         self.cq = self.ctx.cq(2*opt.tx_depth,self.cc)
-        self.cq.req_notify();
+        self.poller = rdma.vtools.CQPoller(self.cq,self.cc);
         self.pd = self.ctx.pd()
         self.qp = self.pd.qp(ibv.IBV_QPT_RC,opt.tx_depth,self.cq,opt.tx_depth,self.cq);
         self.mem = mmap(-1, opt.size)
@@ -97,21 +95,18 @@ class Endpoint(object):
 
         completions = 0
         posts = depth
-        while completions < n:
-            comp = self.cq.poll()
-            if not comp:
-                ret = self.poll.poll();
-                if ret is not None:
-                    for I in ret:
-                        self.cc.check_poll(I);
-            else:
-                for wc in comp:
-                    if wc.status != ibv.IBV_WC_SUCCESS:
-                        raise ibv.WCError(wc);
-                    completions += 1
-                    if posts < n:
-                        self.qp.post_send(swr)
-                        posts += 1
+        for wc in self.poller.iterwc(timeout=1):
+            if wc.status != ibv.IBV_WC_SUCCESS:
+                raise ibv.WCError(wc);
+            completions += 1
+            if posts < n:
+                self.qp.post_send(swr)
+                posts += 1
+                self.poller.wakeat = rdma.tools.clock_monotonic() + 1;
+            if completions == n:
+                break;
+        else:
+            raise rdma.RDMError("CQ timed out");
 
         tcomp = clock_monotonic()
 

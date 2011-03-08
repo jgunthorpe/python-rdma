@@ -2,6 +2,8 @@ from __future__ import with_statement;
 
 import collections;
 import mmap;
+import select;
+import rdma.tools;
 import rdma.ibverbs as ibv;
 
 class BufferPool(object):
@@ -105,3 +107,85 @@ class BufferPool(object):
         else:
             self._mem[buf_idx*self.size + offset:
                       buf_idx*self.size + offset + length] = buf;
+
+class CQPoller(object):
+    """Simple wrapper for a :class:`rdma.ibverbs.CQ` and
+    :class:`rdma.ibverbs.CompChannel` to provide a blocking API for getting
+    work completions."""
+    _cq = None
+    _cc = None
+    _poll = None
+
+    #: `True` if iteration was stopped due to a timeout
+    timedout = False
+    #: Value of :func:`rdma.tools.clock_monotonic` to stop iterating. This can
+    #: be altered while iterating.
+    wakeat = None
+
+    def __init__(self,cq,cc=None):
+        """*cq* is the completion queue to read work completions from. *cc* if
+        not `None` is the completion channel to sleep
+        on. :meth:`rdma.ibverbs.CQ.req_notify` is called for the CQ."""
+        self._cq = cq;
+        if cc is not None:
+            self._cc = cc;
+            self._poll = select.poll();
+            cc.register_poll(self._poll);
+            cq.req_notify();
+
+    def __iter__(self):
+        return self.iterwc(self);
+
+    def sleep(self,wakeat):
+        """Go to sleep until the cq gets a completion. *wakeat* is the
+        value of :func:`rdma.tools.clock_monotonic` after which the function
+        returns `None`. Returns `True` if the completion channel triggered.
+
+        If no completion channel is in use this just returns `True`."""
+        if self._poll is None:
+            if wakeat is not None:
+                timeout = wakeat - rdma.tools.clock_monotonic();
+                if timeout <= 0:
+                    return None;
+            return True;
+        while True:
+            if wakeat is None:
+                ret = self._poll.poll(0);
+            else:
+                timeout = wakeat - rdma.tools.clock_monotonic();
+                if timeout <= 0:
+                    return None;
+                ret = self._poll.poll(timeout*1000);
+            if ret is None:
+                return None;
+            for I in ret:
+                if self._cc.check_poll(I) is not None:
+                    return True;
+
+    def iterwc(self,count=None,timeout=None,wakeat=None):
+        """Generator that returns work completions from the CQ. If not `None`
+        at most *count* wcs will be returned. *timeout* is the number of
+        seconds this function can run for, and *wakeat* is the value of
+        :func:`rdma.tools.clock_monotonic` after which iteration stops.
+
+        :rtype: :class:`rdma.ibverbs.wc`"""
+        self.timedout = False;
+        self.wakeat = wakeat;
+        if timeout is not None:
+            self.wakeat = rdma.tools.clock_monotonic() + timeout;
+        limit = -1;
+        if count is not None:
+            limit = count;
+        while True:
+            if limit == 0:
+                return
+            ret = self._cq.poll(1);
+            while not ret:
+                if self.sleep(self.wakeat) is None:
+                    self.timedout = True;
+                    return
+                ret = self._cq.poll(1);
+            for I in ret:
+                yield I;
+                if limit > 0:
+                    limit = limit - 1;

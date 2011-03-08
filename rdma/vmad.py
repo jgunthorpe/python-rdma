@@ -2,7 +2,6 @@ from __future__ import with_statement;
 
 import collections;
 import os;
-import select;
 import rdma;
 import rdma.devices;
 import rdma.IBA as IBA;
@@ -35,10 +34,8 @@ class VMAD(rdma.madtransactor.MADTransactor):
         self.end_port = self._ctx.end_port;
 
         self._cc = self._ctx.comp_channel();
-        self._poll = select.poll();
-        self._cc.register_poll(self._poll);
         self._cq = self._ctx.cq(2*depth,self._cc);
-        self._cq.req_notify();
+        self._poller = rdma.vtools.CQPoller(self._cq,self._cc);
 
         self._pd = self._ctx.pd();
         self._pool = rdma.vtools.BufferPool(self._pd,2*depth,256+40);
@@ -81,28 +78,10 @@ class VMAD(rdma.madtransactor.MADTransactor):
                          remote_qkey=path.qkey);
         self._qp.post_send(wr);
 
-    def _cq_sleep(self,wakeat):
-        """Go to sleep until we get a completion."""
-        while True:
-            if wakeat is None:
-                ret = self._poll.poll(0);
-            else:
-                timeout = wakeat - rdma.tools.clock_monotonic();
-                if timeout <= 0:
-                    return None;
-                ret = self._poll.poll(timeout*1000);
-            if ret is None:
-                return None;
-            for I in ret:
-                if self._cc.check_poll(I) is not None:
-                    return True;
-
     def _cq_drain(self):
         """Empty the CQ and return and send buffers back to the pool. receive
         buffers are queued onto :attr:`_recvs` for later retrieval."""
         wcs = self._cq.poll();
-        if not wcs:
-            return;
         for I,wc in enumerate(wcs):
             if wc.opcode == ibv.IBV_WC_RECV and wc.status == ibv.IBV_WC_SUCCESS:
                 wcs[I] = None;
@@ -128,7 +107,7 @@ class VMAD(rdma.madtransactor.MADTransactor):
 
             self._cq_drain();
             if not self._recvs:
-                if not self._cq_sleep(wakeat):
+                if not self._poller.sleep(wakeat):
                     return None;
 
     def _execute(self,buf,path,sendOnly = False):

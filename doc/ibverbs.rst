@@ -274,6 +274,15 @@ for. The basic idea is that :meth:`rdma.ibverbs.CompChannel.check_poll` takes
 care of all the details and returns the CQ that has available work
 completions.
 
+Using :mod:`rdma.vtools` the above example can be further simplified::
+
+	cc = ctx.comp_channel();
+	cq = ctx.cq(2*depth,cc)
+	poller = rdma.vtools.CQPoller(cq,cc);
+
+	for wc in poller.iterwc(timeout=1):
+	    print wc
+
 Memory
 ^^^^^^
 
