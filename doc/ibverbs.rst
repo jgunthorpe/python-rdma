@@ -132,9 +132,7 @@ multiple. The single case is::
      qp = pd.qp(ibv.IBV_QPT_UD,depth,cq,depth,cq)
      path.sqpn = qp.qp_num;
      # Post receive work requests to qp here
-     qp.modify_to_init(path);
-     qp.modify_to_rtr(path);
-     qp.modify_to_rts(path);
+     qp.establish(path);
 
      qp.post_send(ibv.send_wr(opcode=ibv.IBV_WR_SEND,
 			      send_flags=ibv.IBV_SEND_SIGNALED,
@@ -196,9 +194,7 @@ socket). Side A would do this::
   path.reverse(for_reply=False);
   path.end_port = end_port;
 
-  qp.modify_to_init(self.path,ibv.IBV_ACCESS_REMOTE_WRITE);
-  qp.modify_to_rtr(self.path);
-  qp.modify_to_rts(self.path);
+  qp.establish(self.path,ibv.IBV_ACCESS_REMOTE_WRITE);
 
   # Synchronize transition to RTS
   send_to_side_b(True);
@@ -214,9 +210,7 @@ Side B would do this::
      rdma.path.resolve_path(umad,path);
   send_to_sid_a(pickle.pickle(path));
 
-  qp.modify_to_init(self.path,ibv.IBV_ACCESS_REMOTE_WRITE);
-  qp.modify_to_rtr(self.path);
-  qp.modify_to_rts(self.path);
+  qp.establish(self.path,ibv.IBV_ACCESS_REMOTE_WRITE);
 
   # Synchronize transition to RTS
   recv_from_side_a();

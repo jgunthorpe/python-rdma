@@ -1429,3 +1429,11 @@ cdef class QP:
                            sq_psn=path.sqpsn,
                            max_rd_atomic=path.srdatomic);
         self.modify(attr,attr.MASK)
+
+    def establish(self,path,int qp_access_flags=0):
+        """Perform :meth:`modify_to_init`, :meth:`modify_to_rtr` and
+        :meth`modify_to_rts`.  This function is most useful for UD QPs which
+        do not require any external sequencing."""
+        self.modify_to_init(path,qp_access_flags);
+        self.modify_to_rtr(path);
+        self.modify_to_rts(path);

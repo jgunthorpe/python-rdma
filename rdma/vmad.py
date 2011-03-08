@@ -49,9 +49,7 @@ class VMAD(rdma.madtransactor.MADTransactor):
             self._pool._buffers.pop();
 
         path = path.copy(sqpn=self._qp.qp_num,sqpsn=self._tid&0xFFFFFF);
-        self._qp.modify_to_init(path);
-        self._qp.modify_to_rtr(path);
-        self._qp.modify_to_rts(path);
+        self._qp.establish(path);
         self.qkey = path.qkey;
         self.pkey = path.pkey;
 

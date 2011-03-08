@@ -74,9 +74,7 @@ class Endpoint(object):
 
     def connect(self, peerinfo):
         self.peerinfo = peerinfo
-        self.qp.modify_to_init(self.path,ibv.IBV_ACCESS_REMOTE_WRITE);
-        self.qp.modify_to_rtr(self.path);
-        self.qp.modify_to_rts(self.path);
+        self.qp.establish(self.path,ibv.IBV_ACCESS_REMOTE_WRITE);
 
     def rdma(self):
         swr = ibv.send_wr(wr_id=0,
