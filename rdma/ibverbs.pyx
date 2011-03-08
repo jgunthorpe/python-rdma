@@ -719,13 +719,13 @@ cdef class CQ:
             raise rdma.SysError(rc,"ibv_resize_cq",
                                 "Failed to resize the CQ");
 
-    def poll(self):
+    def poll(self,int limit=-1):
         """Perform the poll_cq operation, return a list of work requests."""
         cdef c.ibv_wc lwc
         cdef int n
         cdef list L
         L = []
-        while True:
+        while limit != 0:
             n = c.ibv_poll_cq(self._cq, 1, &lwc)
             if n == 0:
                 break
@@ -745,6 +745,8 @@ cdef class CQ:
                             slid = lwc.slid,
                             sl = lwc.sl,
                             dlid_path_bits = lwc.dlid_path_bits))
+                if limit > 0:
+                    limit = limit - 1;
         return L
 
 cdef class SRQ:
@@ -877,7 +879,9 @@ cdef class SRQ:
                     csge.length = sge.length
                     csge.lkey = sge.lkey
                     csge += 1
+                cwr = cwr + 1;
 
+            cwr = <c.ibv_recv_wr *>(mem);
             rc = c.ibv_post_srq_recv(self._srq, <c.ibv_recv_wr *>mem, &cbad_wr)
             if rc != 0:
                 cwr = <c.ibv_recv_wr *>(mem);
@@ -1213,7 +1217,6 @@ cdef class QP:
                     cwr.wr.atomic.rkey = wr.rkey
                 elif self._qp_type == c.IBV_QPT_UD:
                     if not typecheck(wr.ah,AH):
-                        free(mem)
                         raise TypeError("AH must be a AH")
                     ah = wr.ah;
                     cwr.wr.ud.ah = ah._ah
@@ -1222,6 +1225,7 @@ cdef class QP:
 
                 cwr.send_flags = wr.send_flags
                 cwr.imm_data = wr.imm_data
+                cwr = cwr + 1;
 
             rc = c.ibv_post_send(self._qp, <c.ibv_send_wr *>mem, &cbad_wr)
             if rc != 0:
@@ -1229,7 +1233,7 @@ cdef class QP:
                 for 0 <= i < n:
                     if cwr+i == cbad_wr:
                         break;
-                raise WRError(rc,"ibv_post_recv","Failed to post work request",n);
+                raise WRError(rc,"ibv_post_send","Failed to post work request",n);
         finally:
             free(mem)
 
@@ -1279,6 +1283,7 @@ cdef class QP:
                     csge.length = sge.length
                     csge.lkey = sge.lkey
                     csge += 1
+                cwr = cwr + 1;
 
             rc = c.ibv_post_recv(self._qp, <c.ibv_recv_wr *>mem, &cbad_wr)
             if rc != 0:
