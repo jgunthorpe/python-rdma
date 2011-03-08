@@ -52,6 +52,7 @@ cdef class CompChannel
 cdef class CQ
 cdef class MR
 cdef class QP
+cdef class SRQ
 
 class _my_weakset(weakref.WeakKeyDictionary):
     def add(self,v):
@@ -169,14 +170,14 @@ cdef _post_check(object arg, object wrtype, int max_sge, int *numsge):
 class WCError(rdma.RDMAError):
     """Raised when a WC is completed with error."""
     def __init__(self,wc,msg=None,qp=None):
-        if msg is not None:
+        if msg is None:
             s = "Got error on a CQ - op=%u (%d %s vend=0x%x)"%(
-                wc.opcode,wc.stats,c.ibv_wc_status_str(wc.status),
-                wc.evndor_err);
+                wc.opcode,wc.status,c.ibv_wc_status_str(wc.status),
+                wc.vendor_err);
         else:
             s = "%s - op=%u (%d %s vend=0x%x)"%(msg,
-                wc.opcode,wc.stats,c.ibv_wc_status_str(wc.status),
-                wc.evndor_err);
+                wc.opcode,wc.status,c.ibv_wc_status_str(wc.status),
+                wc.vendor_err);
         rdma.RDMAError.__init__(self,s);
         self.wc = wc;
         if qp is not None:
@@ -751,6 +752,7 @@ cdef class SRQ:
     cdef object __weakref__
     cdef PD _pd
     cdef c.ibv_srq *_srq
+    cdef int _max_sge
 
     property pd:
         def __get__(self):
@@ -767,6 +769,7 @@ cdef class SRQ:
         self._pd = pd
         attr.attr.max_wr = max_wr;
         attr.attr.max_sge = max_sge;
+        self._max_sge = max_sge
         self._srq = c.ibv_create_srq(pd._pd,&attr);
         if self._srq == NULL:
             raise rdma.SysError(errno,"ibv_create_srq",
@@ -823,6 +826,7 @@ cdef class SRQ:
             raise rdma.SysError(errno,"ibv_query_srq",
                                 "Failed to query a SRQ")
 
+        self._max_sge = cattr.max_sge;
         return srq_attr(max_wr=cattr.max_wr,
                         max_sge=cattr.max_sge,
                         srq_limit=cattr.srq_limit);
@@ -839,7 +843,7 @@ cdef class SRQ:
         cdef int num_sge
 
         # NOTE: A copy of this is in QP.post_recv
-        wrlist = _post_check(arg, recv_wr, self._cap.max_recv_sge, &num_sge)
+        wrlist = _post_check(arg, recv_wr, self._max_sge, &num_sge)
 
         n = len(wrlist)
         mem = <unsigned char *>calloc(1,sizeof(dummy_wr)*n + sizeof(dummy_sge)*num_sge);
@@ -984,6 +988,7 @@ cdef class QP:
     cdef PD _pd
     cdef CQ _scq
     cdef CQ _rcq
+    cdef SRQ _srq
     cdef c.ibv_qp *_qp
     cdef c.ibv_qp_cap _cap
     cdef int _qp_type
@@ -1032,15 +1037,17 @@ cdef class QP:
             raise TypeError("recv_cq must be a cq")
         if not typecheck(init.cap, qp_cap):
             raise TypeError("cap must be a qp_cap")
-        if init.srq is not None:
-            raise TypeError("srq not supported")
+        if init.srq is not None and not typecheck(init.srq, SRQ):
+            raise TypeError("srq must be a SRQ")
 
         self._scq = init.send_cq
         self._rcq = init.recv_cq
 
         cinit.send_cq = self._scq._cq
         cinit.recv_cq = self._rcq._cq
-        cinit.srq = NULL
+        if init.srq is not None:
+            self._srq = init.srq
+            cinit.srq = self._srq._srq
         cinit.cap.max_send_wr = init.cap.max_send_wr
         cinit.cap.max_recv_wr = init.cap.max_recv_wr
         cinit.cap.max_send_sge = init.cap.max_send_sge
@@ -1081,6 +1088,7 @@ cdef class QP:
             self._pd = None;
             self._scq = None;
             self._rcq = None;
+            self._srq = None;
 
     def modify(self,attr,int mask):
         """When modifying a QP the value *attr.ah_attr* may be a
@@ -1385,6 +1393,12 @@ cdef class QP:
         """Modify the QP to the RTR state."""
         if self._qp_type == c.IBV_QPT_UD:
             attr = qp_attr(qp_state=c.IBV_QPS_RTR);
+        elif self._qp_type == c.IBV_QPT_UC:
+            attr = qp_attr(qp_state=c.IBV_QPS_RTR,
+                           path_mtu=path.MTU,
+                           dest_qp_num=path.dqpn,
+                           rq_psn=path.dqpsn,
+                           ah_attr=path)
         else:
             attr = qp_attr(qp_state=c.IBV_QPS_RTR,
                            path_mtu=path.MTU,
@@ -1398,7 +1412,7 @@ cdef class QP:
 
     def modify_to_rts(self,path):
         """Modify the QP to the RTS state."""
-        if self._qp_type == c.IBV_QPT_UD:
+        if self._qp_type == c.IBV_QPT_UD or self._qp_type == c.IBV_QPT_UC:
             attr = qp_attr(qp_state=c.IBV_QPS_RTS,
                            sq_psn=path.sqpsn);
         else:
