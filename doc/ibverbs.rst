@@ -277,6 +277,10 @@ Using :mod:`rdma.vtools` the above example can be further simplified::
 	for wc in poller.iterwc(timeout=1):
 	    print wc
 
+:class:`~rdma.vtools.CQPoller` also monitors for asynchronous events and will
+call :meth:`rdma.ibverbs.Context.handle_async_event` which will produce exceptions
+for failure conditions and update the end port cache as necessary.
+
 Memory
 ^^^^^^
 

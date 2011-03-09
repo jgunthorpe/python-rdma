@@ -230,6 +230,7 @@ cdef extern from 'infiniband/verbs.h':
 
     struct ibv_context:
         ibv_device *device
+        int async_fd
 
     struct ibv_pd:
         pass
@@ -241,7 +242,7 @@ cdef extern from 'infiniband/verbs.h':
         int rkey
 
     struct ibv_cq:
-        pass
+        void *cq_context
 
     struct ibv_comp_channel:
         int fd
@@ -276,9 +277,10 @@ cdef extern from 'infiniband/verbs.h':
         ibv_srq_attr attr
 
     struct ibv_srq:
-        pass
+        void *srq_context
 
     struct ibv_qp:
+        void *qp_context
         int qp_num
         int qp_type
         int state
@@ -430,6 +432,16 @@ cdef extern from 'infiniband/verbs.h':
         unsigned int local_ca_ack_delay
         unsigned int phys_port_cnt
 
+    union ibv_async_event_element:
+        ibv_cq *cq
+        ibv_qp *qp
+        ibv_srq *srq
+        int port_num
+
+    struct ibv_async_event:
+        ibv_async_event_element element
+        int event_type
+
     ibv_device **ibv_get_device_list(int *n)
     void ibv_free_device_list(ibv_device **list)
     ibv_context *ibv_open_device(ibv_device *dev)
@@ -474,6 +486,9 @@ cdef extern from 'infiniband/verbs.h':
     int ibv_modify_srq(ibv_srq *srq,ibv_srq_attr *srq_attr,int srq_attr_mask)
     int ibv_query_srq(ibv_srq *srq,ibv_srq_attr *srq_attr)
     int ibv_post_srq_recv(ibv_srq *qp, ibv_recv_wr *wr, ibv_recv_wr **bad_wr)
+
+    int ibv_get_async_event(ibv_context *context,ibv_async_event *event)
+    void ibv_ack_async_event(ibv_async_event *event)
 
     char *ibv_wc_status_str(int status)
 

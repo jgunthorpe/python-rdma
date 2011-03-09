@@ -49,6 +49,13 @@ class SysFSCache(object):
             self._cache[name] = s;
             return s;
 
+    def _drop(self,names):
+        for I in names:
+            try:
+                del self._cache[I]
+            except KeyError:
+                pass;
+
 class DemandList(collections.Iterable):
     """Present an ordered list interface with a non-integer index for
     a set of values that are demand created. The list indexes must be known
@@ -99,6 +106,12 @@ class DemandList(collections.Iterable):
             if self[I] == value:
                 return I;
         raise ValueError("DemandList.index(x): x not in list");
+
+    def clear(self):
+        """Drop the cache"""
+        self._data.clear();
+        for I in self._okeys:
+            self._data[I] = None;
 
     def __repr__(self):
         return "{%s}"%(", ".join("%r: %r"%(k,self[k]) for k in self._okeys));
@@ -193,6 +206,37 @@ class EndPort(SysFSCache):
                                                 pkey_index=pkey_idx,
                                                 packet_life_time=self.subnet_timeout);
         return self._cached_sa_path;
+
+    def lid_change(self):
+        """Called if the port's LID has changed. Generally from
+        :meth:`rdma.ibverbs.Context.handle_async_event`."""
+        self._drop(("lid","lid_mask_count"));
+        self.sm_change()
+
+    def sm_change(self):
+        """Called if the port's SM has changed. Generally from
+        :meth:`rdma.ibverbs.Context.handle_async_event`."""
+        self._drop(("sm_lid","sm_sl"))
+        try:
+            path = self._cached_sa_path
+
+            # Interesting choice here, we update the existing path so
+            # that retries will use the new address, but this also means
+            # that debug prints after here will show the new address..
+            path.drop_cache();
+            path.DLID = self.sm_lid
+            path.SL = self.sm_sl
+            path.SLID = self.lid
+        except AttributeError:
+            pass;
+
+    def pkey_change(self):
+        """Called if the port's pkey list has changed. Generally from
+        :meth:`rdma.ibverbs.Context.handle_async_event`."""
+        self.pkeys.clear();
+        self.sm_change();
+        # Hmm, we could keep WeakRefs for all of the Paths associated
+        # with this end port and fix them up too..
 
     def __str__(self):
         return "%s/%u"%(self.parent,self.port_id);

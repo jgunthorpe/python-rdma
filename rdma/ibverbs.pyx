@@ -5,6 +5,7 @@ import errno as mod_errno
 import rdma.tools as tools;
 import struct;
 import weakref;
+import sys
 import rdma.devices
 import rdma.IBA as IBA;
 import rdma.path;
@@ -53,6 +54,22 @@ cdef class CQ
 cdef class MR
 cdef class QP
 cdef class SRQ
+
+cdef CQ get_cq(c.ibv_cq *v):
+    """Go from a C struct ibv_cq to a CQ object."""
+    if v == NULL:
+        return None
+    return <CQ>v.cq_context
+cdef SRQ get_srq(c.ibv_srq *v):
+    """Go from a C struct ibv_srq to a SRQ object."""
+    if v == NULL:
+        return None
+    return <SRQ>v.srq_context
+cdef QP get_qp(c.ibv_qp *v):
+    """Go from a C struct ibv_qp to a QP object."""
+    if v == NULL:
+        return None
+    return <QP>v.qp_context
 
 class _my_weakset(weakref.WeakKeyDictionary):
     def add(self,v):
@@ -171,17 +188,29 @@ class WCError(rdma.RDMAError):
     """Raised when a WC is completed with error."""
     def __init__(self,wc,msg=None,qp=None):
         if msg is None:
-            s = "Got error on a CQ - op=%u (%d %s vend=0x%x)"%(
-                wc.opcode,wc.status,c.ibv_wc_status_str(wc.status),
-                wc.vendor_err);
-        else:
-            s = "%s - op=%u (%d %s vend=0x%x)"%(msg,
-                wc.opcode,wc.status,c.ibv_wc_status_str(wc.status),
-                wc.vendor_err);
+            msg = "Error work completion";
+        s = "%s - op=%s (%d %s vend=0x%x)"%(
+            msg,
+            IBA.const_str("IBV_WC_",wc.opcode,True,
+                             sys.modules["rdma.ibverbs"]),
+            wc.status,c.ibv_wc_status_str(wc.status),
+            wc.vendor_err);
         rdma.RDMAError.__init__(self,s);
         self.wc = wc;
         if qp is not None:
             self.qp = qp
+
+class AsyncError(rdma.RDMAError):
+    """Raised when an asynchronous error event is received."""
+    def __init__(self,event,msg=None):
+        if msg is None:
+            msg = "Asynchronous error event"
+        s = "%s - %s for %r"%(
+            msg,IBA.const_str("IBV_EVENT_",event[0],True,
+                             sys.modules["rdma.ibverbs"]),
+            event[1]);
+        rdma.RDMAError.__init__(self,s);
+        self.event = event
 
 def WCPath(end_port,wc,buf=None,int off=0,**kwargs):
     """Create a :class:`rdma.path.IBPath` from a work completion. *buf* should
@@ -400,6 +429,100 @@ cdef class Context:
         ret = CompChannel(self);
         self._children_cc.add(ret);
         return ret;
+
+    def get_async_event(self):
+        """Get a single async event for this context. The return result is a
+        :class:`namedtuple` of `(event_type,obj` where *obj* will be the
+        :class:`rdma.ibverbs.CQ`, :class:`rdma.ibverbs.QP`,
+        :class:`rdma.ibverbs.SRQ`, :class:`rdma.devices.EndPort` or
+        :class:`rdma.devices.RDMADevice` associated with the event."""
+        cdef c.ibv_async_event event
+        cdef int rc
+
+        rc = c.ibv_get_async_event(self._ctx,&event)
+        if rc != 0:
+            if rc == mod_errno.EAGAIN:
+                return None;
+            raise rdma.SysError(rc,"ibv_get_async_event",
+                                "Failed to get an asynchronous event");
+
+        if event.event_type == c.IBV_EVENT_DEVICE_FATAL:
+            ret = async_event(event.event_type,self.node);
+        elif (event.event_type == c.IBV_EVENT_PORT_ACTIVE or
+              event.event_type == c.IBV_EVENT_PORT_ERR or
+              event.event_type == c.IBV_EVENT_LID_CHANGE or
+              event.event_type == c.IBV_EVENT_PKEY_CHANGE or
+              event.event_type == c.IBV_EVENT_SM_CHANGE or
+              event.event_type == c.IBV_EVENT_CLIENT_REREGISTER):
+            ret = async_event(event.event_type,
+                              self.node.end_ports[event.element.port_num]);
+        elif (event.event_type == c.IBV_EVENT_SRQ_ERR or
+              event.event_type == c.IBV_EVENT_SRQ_LIMIT_REACHED):
+            ret = async_event(event.event_type,
+                              get_srq(event.element.srq));
+        elif event.event_type == c.IBV_EVENT_CQ_ERR:
+             ret = async_event(event.event_type,
+                               get_cq(event.element.cq));
+        elif (event.event_type == c.IBV_EVENT_QP_FATAL or
+              event.event_type == c.IBV_EVENT_QP_REQ_ERR or
+              event.event_type == c.IBV_EVENT_QP_ACCESS_ERR or
+              event.event_type == c.IBV_EVENT_COMM_EST or
+              event.event_type == c.IBV_EVENT_SQ_DRAINED or
+              event.event_type == c.IBV_EVENT_PATH_MIG or
+              event.event_type == c.IBV_EVENT_PATH_MIG_ERR or
+              event.event_type == c.IBV_EVENT_QP_LAST_WQE_REACHED):
+            ret = async_event(event.event_type,
+                              get_qp(event.element.qp));
+        else:
+            # Hmm. We don't know what member of the enum to decode, so we can't
+            # really do anything.
+            ret = async_event(event.event_type,None);
+        c.ibv_ack_async_event(&event)
+        return ret
+
+    def handle_async_event(self,event):
+        """This provides a generic handler for async events. Depending
+        on the event it will:
+          - Raise a :class:`rdma.ibverbs.AsyncError` exception
+          - Reload cached information in the end port
+          """
+        cdef int ty
+        ty = event[0]
+
+        if ty == c.IBV_EVENT_DEVICE_FATAL:
+            raise AsyncError(event);
+        if ty == c.IBV_EVENT_LID_CHANGE:
+            event[1].lid_change();
+        if ty == c.IBV_EVENT_PKEY_CHANGE:
+            event[1].pkey_change();
+        if ty == c.IBV_EVENT_SM_CHANGE:
+            event[1].sm_change();
+        if ty == c.IBV_EVENT_SRQ_ERR:
+            raise AsyncError(event);
+        if ty == c.IBV_EVENT_CQ_ERR:
+            raise AsyncError(event);
+        if ty == c.IBV_EVENT_QP_FATAL:
+            raise AsyncError(event);
+        if ty == c.IBV_EVENT_QP_REQ_ERR:
+            raise AsyncError(event);
+        if ty == c.IBV_EVENT_QP_ACCESS_ERR:
+            raise AsyncError(event);
+        if ty == c.IBV_EVENT_PATH_MIG_ERR:
+            raise AsyncError(event);
+
+    def register_poll(self,poll):
+        """Add the async event FD associated with this object to
+        :class:`select.poll` object *poll*."""
+        poll.register(self._ctx.async_fd,select.POLLIN);
+
+    def check_poll(self,pevent):
+        """Return `True` if *pevent* indicates that :meth:`get_async_event`
+        will return data."""
+        if pevent[0] != self._ctx.async_fd:
+            return False;
+        if pevent[1] & select.POLLIN == 0:
+            return False;
+        return True;
 
 cdef class PD:
     """Protection domain handle, this is a context manager."""
@@ -638,7 +761,7 @@ cdef class CompChannel:
 
         if c.ibv_get_cq_event(self._chan,&_cq,&p_cq) != 0:
             raise rdma.RDMAError("ibv_get_cq_event failed");
-        cq = <object>p_cq;
+        cq = <CQ>p_cq;
 
         cq.comp_events = cq.comp_events + 1;
         if cq.comp_events >= (1<<30):
@@ -769,6 +892,7 @@ cdef class SRQ:
 
         memset(&attr,0,sizeof(attr));
         self._pd = pd
+        attr.srq_context = <void *>self;
         attr.attr.max_wr = max_wr;
         attr.attr.max_sge = max_sge;
         self._max_sge = max_sge
@@ -1059,6 +1183,7 @@ cdef class QP:
         cinit.cap.max_inline_data = init.cap.max_inline_data
         cinit.qp_type = init.qp_type
         cinit.sq_sig_all = init.sq_sig_all
+        cinit.qp_context = <void *>self
 
         self._pd = pd
         self._qp = c.ibv_create_qp(pd._pd, &cinit)

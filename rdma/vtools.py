@@ -122,15 +122,19 @@ class CQPoller(object):
     #: be altered while iterating.
     wakeat = None
 
-    def __init__(self,cq,cc=None):
+    def __init__(self,cq,cc=None,async_events=True):
         """*cq* is the completion queue to read work completions from. *cc* if
         not `None` is the completion channel to sleep
-        on. :meth:`rdma.ibverbs.CQ.req_notify` is called for the CQ."""
+        on. :meth:`rdma.ibverbs.CQ.req_notify` is called for the CQ.
+        If *async_events* is `True` then the async event queue will be monitored
+        while sleeping."""
         self._cq = cq;
         if cc is not None:
             self._cc = cc;
             self._poll = select.poll();
             cc.register_poll(self._poll);
+            self._ctx = cq.ctx
+            self._ctx.register_poll(self._poll);
             cq.req_notify();
 
     def __iter__(self):
@@ -161,6 +165,9 @@ class CQPoller(object):
             for I in ret:
                 if self._cc.check_poll(I) is not None:
                     return True;
+                if self._ctx.check_poll(I):
+                    ev = self._ctx.get_async_event()
+                    self._ctx.handle_async_event(ev);
 
     def iterwc(self,count=None,timeout=None,wakeat=None):
         """Generator that returns work completions from the CQ. If not `None`

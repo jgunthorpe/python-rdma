@@ -271,6 +271,10 @@ qp_attr = tools.struct(
     )
 )
 
+async_event = collections.namedtuple(
+     'async_event_port',
+     'event_type obj');
+
 srq_attr = collections.namedtuple(
     'srq_attr',
     'max_wr max_sge srq_limit')
