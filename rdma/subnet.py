@@ -267,6 +267,9 @@ class Subnet(object):
             if path is not None:
                 return path;
 
+        if (end_port.LID is None or end_port.LID == 0 or
+            end_port.LID >= IBA.LID_MULTICAST):
+            raise rdma.RDMAError("Cannot setup a LID routed path to end port %s"%(end_port.portGUID));
         path = rdma.path.IBPath(sched.end_port,SLID=sched.end_port.lid,
                                 DLID=end_port.LID,
                                 dqpn=0,sqpn=0,qkey=IBA.IB_DEFAULT_QP0_QKEY);

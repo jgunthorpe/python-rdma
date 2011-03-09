@@ -236,13 +236,14 @@ class _SubnetTopo(object):
 
         if self.lid_route and isinstance(path,rdma.path.IBDRPath):
             # The first pinf we get for the path transforms it into a LID path
-            path.SLID = path.end_port.lid;
-            path.DLID = pinf.LID;
-            path.__class__ = rdma.path.IBPath;
-            tmp = path._cached_subnet_end_port;
-            path.drop_cache();
-            path._cached_subnet_end_port = tmp;
-            delattr(path,"drPath");
+            if (pinf.LID != 0 and pinf.LID < IBA.LID_MULTICAST):
+                path.SLID = path.end_port.lid;
+                path.DLID = pinf.LID;
+                path.__class__ = rdma.path.IBPath;
+                tmp = path._cached_subnet_end_port;
+                path.drop_cache();
+                path._cached_subnet_end_port = tmp;
+                delattr(path,"drPath");
 
         if pinf.portState == IBA.PORT_STATE_DOWN or aport in self.sbn.topology:
             return;
