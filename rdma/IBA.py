@@ -410,10 +410,9 @@ class ComponentMask(object):
             self._parent._touch("%s.%s"%(self._name,name));
             return setattr(self._obj,name,value);
 
-def const_str(prefix,value,with_int=False):
+def const_str(prefix,value,with_int=False,me=sys.modules[__name__]):
     """Generalized constant integer to string that uses introspection
     to figure it out."""
-    me = sys.modules[__name__];
     for k,v in me.__dict__.iteritems():
         if k.startswith(prefix):
             try:
