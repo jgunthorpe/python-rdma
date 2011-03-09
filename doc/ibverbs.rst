@@ -309,14 +309,7 @@ is very useful for applications using the SEND verb::
 
    buf_idx = pool.pop();
    pool.copy_to("Hello message!",buf_idx);
-   qp.post_send(ibv.send_wr(wr_id=buf_idx,
-		            sg_list=pool.make_sge(buf_idx,pool.size),
-                            opcode=ibv.IBV_WR_SEND,
-                            send_flags=ibv.IBV_SEND_SIGNALED,
-                            ah=pd.ah(path),
-                            remote_qpn=path.dqpn,
-                            remote_qkey=path.qkey);
-
+   qp.post_send(pool.make_send_wr(buf_idx,pool.size,path));
 
 :mod:`rdma.vtools` module
 =========================

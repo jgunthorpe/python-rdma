@@ -66,15 +66,7 @@ class VMAD(rdma.madtransactor.MADTransactor):
 
         buf_idx = self._pool.pop();
         self._pool.copy_to(buf,buf_idx);
-
-        wr = ibv.send_wr(wr_id=buf_idx,
-                         sg_list=self._pool.make_sge(buf_idx,len(buf)),
-                         opcode=ibv.IBV_WR_SEND,
-                         send_flags=ibv.IBV_SEND_SIGNALED,
-                         ah=self._pd.ah(path),
-                         remote_qpn=path.dqpn,
-                         remote_qkey=path.qkey);
-        self._qp.post_send(wr);
+        self._qp.post_send(self._pool.make_send_wr(buf_idx,len(buf),path));
 
     def _cq_drain(self):
         """Empty the CQ and return and send buffers back to the pool. receive

@@ -83,6 +83,24 @@ class BufferPool(object):
                     self._buffers.append(wc.wr_id);
         self.post_recvs(qp,new_recvs);
 
+    def make_send_wr(self,buf_idx,buf_len,path=None):
+        """Return a :class:`rdma.ibverbs.send_wr` for *buf_idx* and path.
+        If *path* is `None` then the wr does not contain path information
+        (eg for connected QPs)"""
+        if path is not None:
+            return ibv.send_wr(wr_id=buf_idx,
+                               sg_list=self.make_sge(buf_idx,buf_len),
+                               opcode=ibv.IBV_WR_SEND,
+                               send_flags=ibv.IBV_SEND_SIGNALED,
+                               ah=self._mr.pd.ah(path),
+                               remote_qpn=path.dqpn,
+                               remote_qkey=path.qkey);
+        else:
+            return ibv.send_wr(wr_id=buf_idx,
+                               sg_list=self.make_sge(buf_idx,buf_len),
+                               opcode=ibv.IBV_WR_SEND,
+                               send_flags=ibv.IBV_SEND_SIGNALED);
+
     def make_sge(self,buf_idx,buf_len):
         """Return a :class:`rdma.ibverbs.SGE` for *buf_idx*."""
         return self._mr.sge(buf_len,buf_idx*self.size);
