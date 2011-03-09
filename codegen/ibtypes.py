@@ -241,10 +241,10 @@ cdef extern from 'infiniband/verbs.h':
 
     struct ibv_global_route:
         ibv_gid dgid
-        int flow_label
-        int sgid_index
-        int hop_limit
-        int traffic_class
+        unsigned int flow_label
+        unsigned int sgid_index
+        unsigned int hop_limit
+        unsigned int traffic_class
 
     struct ibv_grh:
         unsigned int version_tclass_flow
@@ -256,31 +256,34 @@ cdef extern from 'infiniband/verbs.h':
 
     struct ibv_ah_attr:
         ibv_global_route grh
-        int dlid
-        int sl
-        int src_path_bits
-        int static_rate
-        int is_global
-        int port_num
+        unsigned int dlid
+        unsigned int sl
+        unsigned int src_path_bits
+        unsigned int static_rate
+        unsigned int is_global
+        unsigned int port_num
 
     struct ibv_device:
         char *name
 
     struct ibv_context:
         ibv_device *device
-        int async_fd
+        unsigned int async_fd
+        unsigned int cmd_fd
 
     struct ibv_pd:
-        pass
+        unsigned int handle
 
     struct ibv_mr:
         void *addr
         size_t length
-        int lkey
-        int rkey
+        unsigned int lkey
+        unsigned int rkey
+        unsigned int handle
 
     struct ibv_cq:
         void *cq_context
+        unsigned int handle
 
     struct ibv_comp_channel:
         int fd
@@ -288,27 +291,28 @@ cdef extern from 'infiniband/verbs.h':
     struct ibv_ah:
         ibv_context *context
         ibv_pd *pd
-        int handle
+        unsigned int handle
 
     struct ibv_wc:
-        long wr_id
-        int status
-        int opcode
-        int vendor_err
-        int byte_len
-        int imm_data
-        int qp_num
-        int src_qp
-        int wc_flags
-        int pkey_index
-        int slid
-        int sl
-        int dlid_path_bits
+        unsigned long wr_id
+        unsigned int status
+        unsigned int opcode
+        unsigned int vendor_err
+        unsigned int byte_len
+        unsigned int imm_data
+        unsigned int qp_num
+        unsigned int src_qp
+        unsigned int wc_flags
+        unsigned int pkey_index
+        unsigned int slid
+        unsigned int sl
+        unsigned int dlid_path_bits
 
     struct ibv_srq_attr:
         unsigned int max_wr
         unsigned int max_sge
         unsigned int srq_limit
+        unsigned int handle
 
     struct ibv_srq_init_attr:
         void *srq_context
@@ -316,19 +320,21 @@ cdef extern from 'infiniband/verbs.h':
 
     struct ibv_srq:
         void *srq_context
+        unsigned int handle
 
     struct ibv_qp:
         void *qp_context
-        int qp_num
-        int qp_type
-        int state
+        unsigned int qp_num
+        unsigned int qp_type
+        unsigned int state
+        unsigned int handle
 
     struct ibv_qp_cap:
-        int max_send_wr
-        int max_recv_wr
-        int max_send_sge
-        int max_recv_sge
-        int max_inline_data
+        unsigned int max_send_wr
+        unsigned int max_recv_wr
+        unsigned int max_send_sge
+        unsigned int max_recv_sge
+        unsigned int max_inline_data
 
     struct ibv_qp_init_attr:
         void *qp_context
@@ -337,54 +343,54 @@ cdef extern from 'infiniband/verbs.h':
         ibv_srq *srq
         ibv_qp_cap cap
         ibv_qp_type qp_type
-        int sq_sig_all
+        unsigned int sq_sig_all
 
     struct ibv_qp_attr:
         ibv_qp_state qp_state
         ibv_qp_state cur_qp_state
         ibv_mtu path_mtu
         ibv_mig_state path_mig_state
-        int qkey
-        int rq_psn
-        int sq_psn
-        int dest_qp_num
-        int qp_access_flags
+        unsigned int qkey
+        unsigned int rq_psn
+        unsigned int sq_psn
+        unsigned int dest_qp_num
+        unsigned int qp_access_flags
         ibv_qp_cap cap
         ibv_ah_attr ah_attr
         ibv_ah_attr alt_ah_attr
-        int pkey_index
-        int alt_pkey_index
-        int en_sqd_async_notify
-        int sq_draining
-        int max_rd_atomic
-        int max_dest_rd_atomic
-        int min_rnr_timer
-        int port_num
-        int timeout
-        int retry_cnt
-        int rnr_retry
-        int alt_port_num
-        int alt_timeout
+        unsigned int pkey_index
+        unsigned int alt_pkey_index
+        unsigned int en_sqd_async_notify
+        unsigned int sq_draining
+        unsigned int max_rd_atomic
+        unsigned int max_dest_rd_atomic
+        unsigned int min_rnr_timer
+        unsigned int port_num
+        unsigned int timeout
+        unsigned int retry_cnt
+        unsigned int rnr_retry
+        unsigned int alt_port_num
+        unsigned int alt_timeout
 
     struct ibv_sge:
-        long addr
-        int length
-        int lkey
+        unsigned long addr
+        unsigned int length
+        unsigned int lkey
 
     struct ibv_send_wr_wr_rdma:
-        long remote_addr
-        int rkey
+        unsigned long remote_addr
+        unsigned int rkey
 
     struct ibv_send_wr_wr_atomic:
-        long remote_addr
-        long compare_add
-        long swap
-        int rkey
+        unsigned long remote_addr
+        unsigned long compare_add
+        unsigned long swap
+        unsigned int rkey
 
     struct ibv_send_wr_wr_ud:
         ibv_ah *ah
-        int remote_qpn
-        int remote_qkey
+        unsigned int remote_qpn
+        unsigned int remote_qkey
 
     union ibv_send_wr_wr:
         ibv_send_wr_wr_rdma rdma
@@ -392,41 +398,41 @@ cdef extern from 'infiniband/verbs.h':
         ibv_send_wr_wr_ud ud
 
     struct ibv_send_wr:
-        long wr_id
+        unsigned long wr_id
         ibv_send_wr *next
         ibv_sge *sg_list
-        int num_sge
-        int opcode
-        int send_flags
-        int imm_data
+        unsigned int num_sge
+        unsigned int opcode
+        unsigned int send_flags
+        unsigned int imm_data
         ibv_send_wr_wr wr
 
     struct ibv_recv_wr:
-        long wr_id
+        unsigned long wr_id
         ibv_recv_wr *next
         ibv_sge *sg_list
-        int num_sge
+        unsigned int num_sge
 
     struct ibv_port_attr:
         ibv_port_state state
         ibv_mtu max_mtu
         ibv_mtu active_mtu
-        int gid_tbl_len
-        int port_cap_flags
-        int max_msg_sz
-        int bad_pkey_cntr
-        int qkey_viol_cntr
-        int pkey_tbl_len
-        int lid
-        int sm_lid
-        int lmc
-        int max_vl_num
-        int sm_sl
-        int subnet_timeout
-        int init_type_reply
-        int active_width
-        int active_speed
-        int phys_state
+        unsigned int gid_tbl_len
+        unsigned int port_cap_flags
+        unsigned int max_msg_sz
+        unsigned int bad_pkey_cntr
+        unsigned int qkey_viol_cntr
+        unsigned int pkey_tbl_len
+        unsigned int lid
+        unsigned int sm_lid
+        unsigned int lmc
+        unsigned int max_vl_num
+        unsigned int sm_sl
+        unsigned int subnet_timeout
+        unsigned int init_type_reply
+        unsigned int active_width
+        unsigned int active_speed
+        unsigned int phys_state
 
     struct ibv_device_attr:
         char fw_ver[64]
@@ -437,35 +443,35 @@ cdef extern from 'infiniband/verbs.h':
         unsigned int vendor_id
         unsigned int vendor_part_id
         unsigned int hw_ver
-        int max_qp
-        int max_qp_wr
-        int device_cap_flags
-        int max_sge
-        int max_sge_rd
-        int max_cq
-        int max_cqe
-        int max_mr
-        int max_pd
-        int max_qp_rd_atom
-        int max_ee_rd_atom
-        int max_res_rd_atom
-        int max_qp_init_rd_atom
-        int max_ee_init_rd_atom
+        unsigned int max_qp
+        unsigned int max_qp_wr
+        unsigned int device_cap_flags
+        unsigned int max_sge
+        unsigned int max_sge_rd
+        unsigned int max_cq
+        unsigned int max_cqe
+        unsigned int max_mr
+        unsigned int max_pd
+        unsigned int max_qp_rd_atom
+        unsigned int max_ee_rd_atom
+        unsigned int max_res_rd_atom
+        unsigned int max_qp_init_rd_atom
+        unsigned int max_ee_init_rd_atom
         ibv_atomic_cap atomic_cap
-        int max_ee
-        int max_rdd
-        int max_mw
-        int max_raw_ipv6_qp
-        int max_raw_ethy_qp
-        int max_mcast_grp
-        int max_mcast_qp_attach
-        int max_total_mcast_qp_attach
-        int max_ah
-        int max_fmr
-        int max_map_per_fmr
-        int max_srq
-        int max_srq_wr
-        int max_srq_sge
+        unsigned int max_ee
+        unsigned int max_rdd
+        unsigned int max_mw
+        unsigned int max_raw_ipv6_qp
+        unsigned int max_raw_ethy_qp
+        unsigned int max_mcast_grp
+        unsigned int max_mcast_qp_attach
+        unsigned int max_total_mcast_qp_attach
+        unsigned int max_ah
+        unsigned int max_fmr
+        unsigned int max_map_per_fmr
+        unsigned int max_srq
+        unsigned int max_srq_wr
+        unsigned int max_srq_sge
         unsigned int max_pkeys
         unsigned int local_ca_ack_delay
         unsigned int phys_port_cnt
@@ -474,17 +480,17 @@ cdef extern from 'infiniband/verbs.h':
         ibv_cq *cq
         ibv_qp *qp
         ibv_srq *srq
-        int port_num
+        unsigned int port_num
 
     struct ibv_async_event:
         ibv_async_event_element element
-        int event_type
+        unsigned int event_type
 
     ibv_device **ibv_get_device_list(int *n)
     void ibv_free_device_list(ibv_device **list)
     ibv_context *ibv_open_device(ibv_device *dev)
     int ibv_close_device(ibv_context *ctx)
-    int ibv_query_port(ibv_context *ctx, int port_num, ibv_port_attr *attr)
+    int ibv_query_port(ibv_context *ctx, unsigned int port_num, ibv_port_attr *attr)
     int ibv_query_device(ibv_context *ctx, ibv_device_attr *attr)
 
     ibv_pd *ibv_alloc_pd(ibv_context *ctx)
@@ -493,27 +499,28 @@ cdef extern from 'infiniband/verbs.h':
     ibv_ah *ibv_create_ah(ibv_pd *pd, ibv_ah_attr *attr)
     int ibv_destroy_ah(ibv_ah *ah)
 
-    ibv_mr *ibv_reg_mr(ibv_pd *pd, void *addr, int length, int access)
+    ibv_mr *ibv_reg_mr(ibv_pd *pd, void *addr, unsigned int length,
+                       unsigned int access)
     int ibv_dereg_mr(ibv_mr *mr)
 
     ibv_comp_channel *ibv_create_comp_channel(ibv_context *ctx)
     int ibv_destroy_comp_channel(ibv_comp_channel *chan)
 
-    ibv_cq *ibv_create_cq(ibv_context *ctx, int cqe,
+    ibv_cq *ibv_create_cq(ibv_context *ctx, unsigned int cqe,
                           void *user_cq_ctx,
                           ibv_comp_channel *chan,
-                          int comp_vector)
+                          unsigned int comp_vector)
     int ibv_destroy_cq(ibv_cq *cq)
-    int ibv_poll_cq(ibv_cq *cq, int n, ibv_wc *wc)
-    int ibv_req_notify_cq(ibv_cq *cq, int solicited_only)
+    int ibv_poll_cq(ibv_cq *cq, unsigned int n, ibv_wc *wc)
+    int ibv_req_notify_cq(ibv_cq *cq, unsigned int solicited_only)
     int ibv_get_cq_event(ibv_comp_channel *chan,ibv_cq **,void **cq_context)
     void ibv_ack_cq_events(ibv_cq *cq,unsigned int nevents)
-    int ibv_resize_cq(ibv_cq *cq, int cqe)
+    int ibv_resize_cq(ibv_cq *cq, unsigned int cqe)
 
     ibv_qp *ibv_create_qp(ibv_pd *pd, ibv_qp_init_attr *init_attr)
     int ibv_destroy_qp(ibv_qp *qp)
-    int ibv_modify_qp(ibv_qp *qp, ibv_qp_attr *attr, int attr_mask)
-    int ibv_query_qp(ibv_qp *qp, ibv_qp_attr *attr, int attr_mask, ibv_qp_init_attr *init)
+    int ibv_modify_qp(ibv_qp *qp, ibv_qp_attr *attr, unsigned int attr_mask)
+    int ibv_query_qp(ibv_qp *qp, ibv_qp_attr *attr, unsigned int attr_mask, ibv_qp_init_attr *init)
     int ibv_post_send(ibv_qp *qp, ibv_send_wr *wr, ibv_send_wr **bad_wr)
     int ibv_post_recv(ibv_qp *qp, ibv_recv_wr *wr, ibv_recv_wr **bad_wr)
     int ibv_attach_mcast(ibv_qp *qp, ibv_gid *gid, unsigned int lid)
@@ -528,7 +535,7 @@ cdef extern from 'infiniband/verbs.h':
     int ibv_get_async_event(ibv_context *context,ibv_async_event *event)
     void ibv_ack_async_event(ibv_async_event *event)
 
-    char *ibv_wc_status_str(int status)
+    char *ibv_wc_status_str(unsigned int status)
 """
 
 f = open(args[0])

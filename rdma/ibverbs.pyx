@@ -220,10 +220,10 @@ class WCError(rdma.RDMAError):
 
         if cq is not None:
             self.cq = cq;
-            info.append("cq=%s"%(cq));
+            info.append(str(cq));
         if qp is not None:
             self.qp = qp;
-            info.append("qp=%s"%(qp));
+            info.append(str(qp));
             self.srq = qp._srq
         if is_rq is not None:
             self.is_rq = is_rq;
@@ -234,7 +234,7 @@ class WCError(rdma.RDMAError):
         if obj is not None and typecheck(obj,SRQ):
             self.srq = obj;
         if self.srq is not None:
-            info.append("srq=%s"%(self.srq));
+            info.append(str(self.srq));
 
         s = "%s - %d %s (%s)"%(msg,wc.status,c.ibv_wc_status_str(wc.status),
                                " ".join(info));
@@ -574,6 +574,11 @@ cdef class Context:
             return False;
         return True;
 
+    def __str__(self):
+        return "context:%s"%(self.node)
+    def __repr__(self):
+        return "Context('%s',fd=%u)"%(self.node,self._ctx.cmd_fd)
+
 cdef class PD:
     """Protection domain handle, this is a context manager."""
     cdef object __weakref__
@@ -715,6 +720,11 @@ cdef class PD:
             self._children_ah.add(ret);
         return ret;
 
+    def __str__(self):
+        return "pd:%X:%s"%(self._pd.handle,self.ctx.node);
+    def __repr__(self):
+        return "PD(%r,0x%x)"%(self._context,self._pd.handle);
+
 cdef class AH:
     """Address handle, this is a context manager."""
     cdef object __weakref__
@@ -751,6 +761,11 @@ cdef class AH:
                 raise rdma.SysError(rc,"ibv_destroy_ah",
                                     "Failed to destroy address handle")
             self._ah = NULL
+
+    def __str__(self):
+        return "ah:%X"%(self._ah.handle)
+    def __repr__(self):
+        return "AH(0x%x)"%(self._ah.handle);
 
 cdef class CompChannel:
     """Completion channel, this is a context manager."""
@@ -829,6 +844,11 @@ cdef class CompChannel:
             cq.comp_events = 0;
         cq.req_notify(solicited_only);
         return cq;
+
+    def __str__(self):
+        return "comp_channel:%u:%s"%(self._chan.fd,self.ctx.node);
+    def __repr__(self):
+        return "CompChannel(%r,%u)"%(self._context,self._chan.fd);
 
 cdef class CQ:
     """Completion queue, this is a context manager."""
@@ -931,6 +951,11 @@ cdef class CQ:
                 if limit > 0:
                     limit = limit - 1;
         return L
+
+    def __str__(self):
+        return "cq:%X:%s"%(self._cq.handle,self.ctx.node);
+    def __repr__(self):
+        return "CQ(%r,0x%x)"%(self._context,self._cq.handle);
 
 cdef class SRQ:
     """Shared Receive queue, this is a context manager."""
@@ -1076,6 +1101,11 @@ cdef class SRQ:
         finally:
             free(mem)
 
+    def __str__(self):
+        return "srq:%X:%s"%(self._srq.handle,self._pd);
+    def __repr__(self):
+        return "SRQ(%r,0x%x)"%(self._pd,self._srq.handle);
+
 cdef class MR:
     """Memory registration, this is a context manager."""
     cdef object __weakref__
@@ -1169,6 +1199,13 @@ cdef class MR:
         return sge(addr=<uintptr_t>(self._mr.addr + _off),
                    lkey=self._mr.lkey,
                    length=_length);
+
+    def __str__(self):
+        return "mr:%X:%s"%(self._mr.handle,self._pd);
+    def __repr__(self):
+        return "MR(%r,0x%x,0x%x,%u,lkey=0x%x,rkey=0x%x)"%(
+            self._pd,self._mr.handle,self.addr,self.length,
+            self.lkey,self.rkey);
 
 cdef class QP:
     """Queue pair, this is a context manager."""
@@ -1622,3 +1659,11 @@ cdef class QP:
         self.modify_to_init(path,qp_access_flags);
         self.modify_to_rtr(path);
         self.modify_to_rts(path);
+
+    def __str__(self):
+        return "qp:%u:%s"%(self._qp.qp_num,self._pd);
+    def __repr__(self):
+        return "QP(%r,0x%x,%u,qp_type=%s)"%(
+            self._pd,self._qp.handle,self._qp.qp_num,
+            IBA.const_str("IBV_QPT_",self._qp.qp_type,True,
+                          sys.modules["rdma.ibverbs"]));

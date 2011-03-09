@@ -30,7 +30,9 @@ class umad_self_test(unittest.TestCase):
         print self.ctx.query_port();
         print self.ctx.query_device();
         pd = self.ctx.pd();
+        print pd,repr(pd)
         cq = self.ctx.cq(100);
+        print cq,repr(cq)
         try:
             cq.resize(200);
         except rdma.SysError as e:
@@ -38,19 +40,24 @@ class umad_self_test(unittest.TestCase):
                 raise;
         self.assertEqual(cq.poll(),[]);
         comp = self.ctx.comp_channel();
-        buf = mmap.mmap(-1,4096);
+        print comp,repr(comp)
         qp = pd.qp(ibv.IBV_QPT_UD,100,cq,100,cq);
+        print qp,repr(qp)
         print qp.query(0xFFFF);
         mpath = rdma.path.IBPath(self.ctx.end_port,DLID=0xC000,
                                  DGID=IBA.GID("ff02::1"));
         qp.attach_mcast(mpath);
         qp.detach_mcast(mpath);
+        buf = mmap.mmap(-1,4096);
         mr = pd.mr(buf,ibv.IBV_ACCESS_LOCAL_WRITE|ibv.IBV_ACCESS_REMOTE_WRITE);
+        print mr,repr(mr)
         print "MR",mr.addr,mr.length,mr.lkey,mr.rkey
         self.assertRaises(TypeError,pd.ah,None);
-        print pd.ah(self.end_port.sa_path);
+        ah = pd.ah(self.end_port.sa_path);
+        print ah,repr(ah)
 
         srq = pd.srq();
+        print srq,repr(srq)
         print srq.query();
         srq.modify(100);
 
