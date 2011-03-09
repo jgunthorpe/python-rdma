@@ -186,7 +186,7 @@ without using a CM by exchanging information over a side channel (eg a TCP
 socket). Side A would do this::
 
   qp = pd.qp(ibv.IBV_QPT_RC,...);
-  path = rdma.path.IBPath(end_port,SGID=end_port.gids[0]);
+  path = rdma.path.IBPath(end_port,SGID=end_port.default_gid);
   rdma.path.fill_path(qp,path);
   path.reverse(for_reply=False);
   send_to_side_b(pickle.pickle(path));

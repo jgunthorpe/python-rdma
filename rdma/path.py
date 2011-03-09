@@ -369,7 +369,7 @@ def resolve_path(mad,path,reversible=False,properties=None):
     if path.SGID is not None:
         q.SGID = path.SGID;
     else:
-        q.SGID = mad.end_port.gids[0];
+        q.SGID = mad.end_port.default_gid;
 
     if path.DGID is not None:
         q.DGID = path.DGID;

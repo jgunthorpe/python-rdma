@@ -335,6 +335,10 @@ cdef class Context:
         self._children_cq = WeakSet();
         self._children_cc = WeakSet();
 
+        if self.end_port is not None:
+            # Fetch the subnet_timeout from verbs
+            self.query_port()
+
     def __dealloc__(self):
         self._close();
 
@@ -430,6 +434,9 @@ cdef class Context:
         if e != 0:
             raise rdma.SysError(e,"ibv_query_port",
                                 "Failed to query port %r"%(port_id))
+
+        # Update the end_port's subnet timeout..
+        self.node.end_ports[port_id]._cached_subnet_timeout = cattr.subnet_timeout;
 
         return port_attr(state = cattr.state,
                          max_mtu = cattr.max_mtu,
@@ -546,6 +553,7 @@ cdef class Context:
         if ty == c.IBV_EVENT_PKEY_CHANGE:
             event[1].pkey_change();
         if ty == c.IBV_EVENT_SM_CHANGE:
+            self.query_port(event[1].port_id);
             event[1].sm_change();
         if ty == c.IBV_EVENT_SRQ_ERR:
             raise AsyncError(event);

@@ -131,6 +131,12 @@ class EndPort(SysFSCache):
     '''A RDMA end port. An end port can issue RDMA operations, has a port GID,
     LID, etc. For an IB switch this will be port 0, for a \*CA it will be port
     1 or higher.'''
+    port_id = None
+    # :class:`rdma.devices.DemandList` of all pkeys
+    pkeys = None
+    # :class:`rdma.devices.DemandList` of all gids
+    gids = None
+
     def __init__(self,parent,port_id):
         """*parent* is the owning :class:`RDMADevice` and port_id is the port
         ID number, 0 for switches and > 1 for \*CAs"""
@@ -173,9 +179,20 @@ class EndPort(SysFSCache):
     @property
     def cap_mask(self): return self._cached_sysfs("cap_mask",_conv_hex);
 
-    # FIXME This must come from verbs :(
     @property
-    def subnet_timeout(self): return 18;
+    def default_gid(self):
+        # FIXME: This should look for a GID with a non-link-local prefix.
+        return self.gids[0];
+
+    @property
+    def subnet_timeout(self):
+        try:
+            # This is only available through verbs so for now we have
+            # verbs set it when it gets it..
+            return self._cached_subnet_timeout;
+        except AttributeError:
+            # Otherwise use the default
+            return 18;
 
     def pkey_index(self,pkey):
         """Return the ``pkey index`` for pkey value *pkey*."""
@@ -227,6 +244,7 @@ class EndPort(SysFSCache):
             path.DLID = self.sm_lid
             path.SL = self.sm_sl
             path.SLID = self.lid
+            path.packet_life_time = self.subnet_timeout
         except AttributeError:
             pass;
 

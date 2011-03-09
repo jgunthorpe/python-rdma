@@ -110,7 +110,7 @@ def cmd_ibstatus(argv,o):
 \tsm lid:\t\t %u
 \tstate:\t\t %u: %s
 \tphys state:\t %u: %s
-\trate:\t\t %s\n"""%(I.parent.name,I.port_id,I.gids[0],I.lid,I.sm_lid,
+\trate:\t\t %s\n"""%(I.parent.name,I.port_id,I.default_gid,I.lid,I.sm_lid,
              I.state,IBA_describe.link_state(I.state).upper(),
              I.phys_state,IBA_describe.phys_link_state(I.phys_state),I.rate);
     return True;

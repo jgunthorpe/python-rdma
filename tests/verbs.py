@@ -70,7 +70,7 @@ class umad_self_test(unittest.TestCase):
         pool.post_recvs(srq,depth);
 
         path_a = rdma.path.IBPath(self.end_port,qkey=999,
-                                  DGID=self.end_port.gids[0]);
+                                  DGID=self.end_port.default_gid);
         with rdma.vmad.VMAD(self.ctx,self.end_port.sa_path) as vmad:
             rdma.path.resolve_path(vmad,path_a,reversible=True);
         qp_a = pd.qp(qp_type,depth,cq,depth,cq,srq=srq);

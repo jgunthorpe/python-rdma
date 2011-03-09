@@ -28,8 +28,8 @@ class get_end_port_test(unittest.TestCase):
         self.assertEquals(rdma.get_end_port("%s/%s"%(dev.name,ep.port_id)),ep);
         self.assertEquals(rdma.get_end_port(ep.port_guid),ep)
         self.assertEquals(rdma.get_end_port("%s"%(ep.port_guid)),ep)
-        self.assertEquals(rdma.get_end_port(ep.gids[0]),ep)
-        self.assertEquals(rdma.get_end_port("%s"%(ep.gids[0])),ep)
+        self.assertEquals(rdma.get_end_port(ep.default_gid),ep)
+        self.assertEquals(rdma.get_end_port("%s"%(ep.default_gid)),ep)
 
     def test_fail(self):
         """Test valid get_end_port calls that fail.""";

@@ -121,7 +121,7 @@ def client_mode(hostname, opt):
                 print "Connecting to %r %r"%(ret[4][0],ret[4][1]);
             sock.connect(ret[4]);
 
-            path = rdma.path.IBPath(dev,SGID=end.ctx.end_port.gids[0]);
+            path = rdma.path.IBPath(dev,SGID=end.ctx.end_port.default_gid);
             rdma.path.fill_path(end.qp,path,max_rd_atomic=0);
             path.reverse(for_reply=False);
 

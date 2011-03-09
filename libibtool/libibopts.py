@@ -39,7 +39,7 @@ class LibIBOpts(object):
         self.end_port.sa_path.SMKey = getattr(args,"smkey",0);
         self.debug = args.debug;
         if self.debug > 1:
-            print "debug: Using end port %s %s"%(self.end_port,self.end_port.gids[0]);
+            print "debug: Using end port %s %s"%(self.end_port,self.end_port.default_gid);
         o.verbosity = max(self.debug,getattr(args,"verbosity",0));
 
         if "discovery" in args.__dict__:
@@ -207,7 +207,7 @@ class LibIBOpts(object):
                 umad.end_port,
                 SLID=self.end_port.lid,
                 DLID=self.end_port.lid,
-                DGID=self.end_port.gids[0],
+                DGID=self.end_port.default_gid,
                 qkey = IBA.IB_DEFAULT_QP1_QKEY,
                 dqpn = 1,
                 sqpn = 1);
