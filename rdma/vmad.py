@@ -84,14 +84,15 @@ class VMAD(rdma.madtransactor.MADTransactor):
         is returned.
 
         :returns: tuple(buf,path)'''
+        pool = self._pool
         while True:
             if self._recvs:
                 wc = self._recvs.pop();
-                buf = self._pool.copy_from(wc.wr_id,40,wc.byte_len);
-                self._pool.finish_wcs(self._qp,wc);
+                buf = pool.copy_from(wc.wr_id,40,wc.byte_len);
+                pool.finish_wcs(self._qp,wc);
                 return (buf,ibv.WCPath(self.end_port,wc,
-                                       self._pool._mem,
-                                       wc.wr_id*self._pool.size,
+                                       pool._mem,
+                                       (wc.wr_id & pool.BUF_IDX_MASK)*pool.size,
                                        pkey=self.pkey,
                                        qkey=self.qkey));
 

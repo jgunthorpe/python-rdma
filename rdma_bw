@@ -95,7 +95,7 @@ class Endpoint(object):
         posts = depth
         for wc in self.poller.iterwc(timeout=1):
             if wc.status != ibv.IBV_WC_SUCCESS:
-                raise ibv.WCError(wc);
+                raise ibv.WCError(wc,self.cq,obj=self.qp);
             completions += 1
             if posts < n:
                 self.qp.post_send(swr)

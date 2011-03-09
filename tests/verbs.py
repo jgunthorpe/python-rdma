@@ -168,9 +168,9 @@ class umad_self_test(unittest.TestCase):
             for wc in poller.iterwc(count=1,timeout=0.5):
                 if wc.status != ibv.IBV_WC_SUCCESS:
                     if wc.qp_num == qp_b.qp_num:
-                        print "Expect SEND WC error",ibv.WCError(wc)
+                        print "Expect SEND WC error",ibv.WCError(wc,poller._cq)
                     else:
-                        print "Expect RECV WC error",ibv.WCError(wc)
+                        print "Expect RECV WC error",ibv.WCError(wc,poller._cq)
                     self.assertRaises(ibv.WCError,pool.finish_wcs,srq,wc);
                 else:
                     pool.finish_wcs(srq,wc);
@@ -202,9 +202,9 @@ class umad_self_test(unittest.TestCase):
             for wc in poller.iterwc(count=6,timeout=1):
                 if wc.status != ibv.IBV_WC_SUCCESS:
                     if wc.qp_num == qp_b.qp_num:
-                        print "Expect SEND WC error",ibv.WCError(wc)
+                        print "Expect SEND WC error",ibv.WCError(wc,poller._cq)
                     else:
-                        print "Expect RECV WC error",ibv.WCError(wc)
+                        print "Expect RECV WC error",ibv.WCError(wc,poller._cq)
                     self.assertRaises(ibv.WCError,pool.finish_wcs,srq,wc);
                 else:
                     pool.finish_wcs(srq,wc);

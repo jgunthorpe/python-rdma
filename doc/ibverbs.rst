@@ -233,7 +233,7 @@ a way for the catcher to determine the failed QP::
  wcs = cq.poll():
  for wc in wcs:
      if wc.status != ibv.IBV_WC_SUCCESS:
-         raise ibv.WCError(wc,qp=qp);
+         raise ibv.WCError(wc,cq);
 
 Depending on the situation QP errors may not be recoverable so the whole QP
 should be torn down.

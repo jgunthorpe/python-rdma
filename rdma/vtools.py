@@ -2,6 +2,7 @@ from __future__ import with_statement;
 
 import collections;
 import mmap;
+import math
 import select;
 import rdma.tools;
 import rdma.ibverbs as ibv;
@@ -13,8 +14,12 @@ class BufferPool(object):
     This can be used to provide send buffers for a QP, as well as receive
     buffers for a QP or a SRQ. Generally the *qp* argument to methods of this
     class can be a :class:`rdma.ibverbs.QP` or :class:`rdma.ibverbs.SRQ`."""
-    #: Constant value to set wr_id to when it is not being used.
+    #: Constant value to set *wr_id* to when it is not being used.
     NO_WR_ID = 0xFFFFFFFF;
+    #: Constant value to or into *wr_id* to indicate it was posted as a recv
+    RECV_FLAG = 0;
+    #: Mask to convert a *wr_id* back into a *buf_idx*
+    BUF_IDX_MASK = 0;
     _mr = None;
     _mem = None;
     #: `deque` of buffer indexes
@@ -33,6 +38,8 @@ class BufferPool(object):
         self._mr = pd.mr(self._mem,ibv.IBV_ACCESS_LOCAL_WRITE |
                          ibv.IBV_ACCESS_LOCAL_WRITE);
         self._buffers = collections.deque(xrange(count),count);
+        self.RECV_FLAG = 1 << (int(math.log(count,2))+1)
+        self.BUF_ID_MASK = self.RECV_FLAG-1
 
     def close(self):
         """Close held objects"""
@@ -56,36 +63,43 @@ class BufferPool(object):
         wr = [];
         for I in range(count):
             buf_idx = self._buffers.pop();
-            wr.append(ibv.recv_wr(wr_id=buf_idx,
+            wr.append(ibv.recv_wr(wr_id=buf_idx | self.RECV_FLAG,
                                   sg_list=self.make_sge(buf_idx,self.size)));
         qp.post_recv(wr);
 
     def finish_wcs(self,qp,wcs):
         """Process work completion list *wcs* to recover buffers attached to
         completed work and re-post recv buffers to qp. Every work request with
-        an attached buffer must have a signaled completion to recover the buffer.
+        an attached buffer must have a signaled completion to recover the
+        buffer.
 
         *wcs* may be a single wc.
 
         :raises rdma.ibverbs.WCError: For WC's marked as error."""
         new_recvs = 0;
+        err = None;
         if isinstance(wcs,ibv.wc):
             wcs = (wcs,);
         for wc in wcs:
             if wc is None:
                 continue;
-            if wc.status != ibv.IBV_WC_SUCCESS:
-                raise ibv.WCError(wc);
-            if wc.opcode & ibv.IBV_WC_RECV:
-                if wc.wr_id != self.NO_WR_ID:
-                    self._buffers.append(wc.wr_id);
-                new_recvs = new_recvs + 1;
-            if (wc.opcode == ibv.IBV_WC_SEND or
-                wc.opcode == ibv.IBV_WC_RDMA_WRITE or
-                wc.opcode == ibv.IBV_WC_RDMA_READ):
-                if wc.wr_id != self.NO_WR_ID:
-                    self._buffers.append(wc.wr_id);
+
+            # Note, we cannot rely on the opcode here to determine
+            # RQ/SQ for the buffer, so it is encoded in the wr_id.
+            if wc.wr_id != self.NO_WR_ID:
+                self._buffers.append(wc.wr_id & self.BUF_ID_MASK);
+                if wc.wr_id & self.RECV_FLAG:
+                    new_recvs = new_recvs + 1;
+
+            if wc.status != ibv.IBV_WC_SUCCESS and err is None:
+                err = wc;
         self.post_recvs(qp,new_recvs);
+
+        if err is not None:
+            rq = None
+            if wc.wr_id != self.NO_WR_ID:
+                rq = wc.wr_id & self.RECV_FLAG;
+            raise ibv.WCError(err,None,obj=qp,is_rq=rq);
 
     def make_send_wr(self,buf_idx,buf_len,path=None):
         """Return a :class:`rdma.ibverbs.send_wr` for *buf_idx* and path.
@@ -110,9 +124,10 @@ class BufferPool(object):
         return self._mr.sge(buf_len,buf_idx*self.size);
 
     def copy_from(self,buf_idx,offset=0,length=0xFFFFFFFF):
-        """Return a copy of buffer *buf_idx*.
+        """Return a copy of buffer *buf_idx*. *buf_idx* may be a *wr_id*.
 
         :rtype: :class:`bytearray`"""
+        buf_idx = buf_idx & self.BUF_ID_MASK;
         length = min(length,self.size - offset)
         return bytearray(self._mem[buf_idx*self.size + offset:
                                    buf_idx*self.size + offset + length]);

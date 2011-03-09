@@ -185,26 +185,65 @@ cdef _post_check(object arg, object wrtype, int max_sge, int *numsge):
     return wrlist
 
 class WCError(rdma.RDMAError):
-    """Raised when a WC is completed with error."""
-    def __init__(self,wc,msg=None,qp=None):
-        if msg is None:
-            msg = "Error work completion";
-        s = "%s - op=%s (%d %s vend=0x%x)"%(
-            msg,
-            IBA.const_str("IBV_WC_",wc.opcode,True,
-                             sys.modules["rdma.ibverbs"]),
-            wc.status,c.ibv_wc_status_str(wc.status),
-            wc.vendor_err);
+    """Raised when a WC is completed with error. Note: Not all adaptors
+    support returning the `opcode` and `qp_num` in an error WC. For those that
+    do the values are decoded."""
+    is_rq = None
+    cq = None
+    qp = None
+    srq = None
+
+    def __init__(self,wc,cq,char * msg="Error work completion",
+                 obj=None,is_rq=None):
+        """*wc* is the error wc, *msg* is an additional descriptive message,
+        *cq* is the CQ the error WC was received on and *obj* is a
+        :class:`rdma.ibverbs.SRQ` or :class:`rdma.ibverbs.QP` if one is
+        known. *is_rq* is `True` if the WC is known to apply to the receive of
+        the QP, and `False` if the WC is known the apply to the send queue of
+        the QP. `None` if unknown"""
+        cdef QP qp
+
+        if obj is not None:
+            if typecheck(obj,QP):
+                qp = obj
+            else:
+                qp = obj.pd.from_qp_num(wc.qp_num)
+        elif cq is not None:
+            qp = cq.ctx.from_qp_num(wc.qp_num)
+        else:
+            qp = None
+            sqp = None
+
+        info = ["op=%s"%(IBA.const_str("IBV_WC_",wc.opcode,True,
+                                       sys.modules["rdma.ibverbs"])),
+                "vend=0x%x"%(wc.vendor_err)];
+
+        if cq is not None:
+            self.cq = cq;
+            info.append("cq=%s"%(cq));
+        if qp is not None:
+            self.qp = qp;
+            info.append("qp=%s"%(qp));
+            self.srq = qp._srq
+        if is_rq is not None:
+            self.is_rq = is_rq;
+            if is_rq:
+                info.append("RQ");
+            else:
+                info.append("SQ");
+        if obj is not None and typecheck(obj,SRQ):
+            self.srq = obj;
+        if self.srq is not None:
+            info.append("srq=%s"%(self.srq));
+
+        s = "%s - %d %s (%s)"%(msg,wc.status,c.ibv_wc_status_str(wc.status),
+                               " ".join(info));
         rdma.RDMAError.__init__(self,s);
         self.wc = wc;
-        if qp is not None:
-            self.qp = qp
 
 class AsyncError(rdma.RDMAError):
     """Raised when an asynchronous error event is received."""
-    def __init__(self,event,msg=None):
-        if msg is None:
-            msg = "Asynchronous error event"
+    def __init__(self,event,char *msg="Asynchronous error event"):
         s = "%s - %s for %r"%(
             msg,IBA.const_str("IBV_EVENT_",event[0],True,
                              sys.modules["rdma.ibverbs"]),
@@ -412,6 +451,17 @@ cdef class Context:
                          active_speed = cattr.active_speed,
                          phys_state = cattr.phys_state)
 
+    def from_qp_num(self,int num):
+        """Return a :class:`rdma.ibverbs.QP` for the qp number *num* or `None`
+        if one was not found."""
+        cdef PD pd
+        for I in self._children_pd:
+            pd = I
+            ret = pd.from_qp_num(num)
+            if ret is not None:
+                return ret;
+        return None;
+
     def pd(self):
         """Create a new :class:`rdma.ibverbs.PD` for this context."""
         ret = PD(self);
@@ -583,6 +633,16 @@ cdef class PD:
                                     "Failed to deallocate protection domain")
             self._pd = NULL
             self._context = None;
+
+    def from_qp_num(self,int num):
+        """Return a :class:`rdma.ibverbs.QP` for the qp number *num* or `None`
+        if one was not found."""
+        cdef QP qp
+        for I in self._children_qp:
+            qp = I;
+            if qp._qp.qp_num == num:
+                return qp;
+        return None;
 
     def qp_raw(self,init):
         """Create a new :class:`rdma.ibverbs.QP` for this protection
