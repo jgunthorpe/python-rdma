@@ -88,7 +88,7 @@ class VMAD(rdma.madtransactor.MADTransactor):
             if self._recvs:
                 wc = self._recvs.pop();
                 buf = self._pool.copy_from(wc.wr_id,40,wc.byte_len);
-                self._pool.finish_wcs(self._qp,(wc,));
+                self._pool.finish_wcs(self._qp,wc);
                 return (buf,ibv.WCPath(self.end_port,wc,
                                        self._pool._mem,
                                        wc.wr_id*self._pool.size,

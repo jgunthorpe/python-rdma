@@ -65,8 +65,12 @@ class BufferPool(object):
         completed work and re-post recv buffers to qp. Every work request with
         an attached buffer must have a signaled completion to recover the buffer.
 
+        *wcs* may be a single wc.
+
         :raises rdma.ibverbs.WCError: For WC's marked as error."""
         new_recvs = 0;
+        if isinstance(wcs,ibv.wc):
+            wcs = (wcs,);
         for wc in wcs:
             if wc is None:
                 continue;
