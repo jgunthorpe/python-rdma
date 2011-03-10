@@ -116,8 +116,10 @@ OPS = {"ClassPortInfo": ("CPI",IBA.MADClassPortInfo),
        };
 
 def set_mad_attr(attr,name,v):
-    arg = getattr(attr,name,None);
-    if arg is None:
+    try:
+        # Need to use eval because name could have dots in it.
+        arg = eval("attr.%s"%(name))
+    except AttributeError:
         raise CmdError("%r is not a valid attribute for %r"%(name,attr));
     try:
         if isinstance(arg,int) or isinstance(arg,long):
@@ -140,7 +142,7 @@ def set_mad_attr(attr,name,v):
                 type(arg),arg));
     except ValueError as err:
         raise CmdError("String %r did not parse: %s"%(v,err));
-    setattr(attr,name,v);
+    exec "attr.%s = v"%(name)
 
 def tmpl_op(s):
     s = s.lower();
