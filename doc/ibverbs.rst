@@ -163,16 +163,22 @@ in work requests.
 UD response path
 ^^^^^^^^^^^^^^^^
 
-Constructing the reply path from a UD WC is very straightforward::
+Constructing the reply path and generating a send WR from a UD WC is very
+straightforward::
 
  wcs = cq.poll():
  for wc in wcs:
-     request_path = ibv.WCPath(self.end_port,wc,
-                               buf,0,
-                               pkey=qp_pkey,
-                               qkey=qp_qkey);
-     reply_path = request_path.reverse();
-     ah = pd.ah(reply_path);
+     path = ibv.WCPath(self.end_port,wc,
+                       buf,0,
+                       pkey=qp_pkey,
+                       qkey=qp_qkey);
+     path.reverse();
+     ah = pd.ah(path);
+     wr = ibv.send_wr(opcode=ibv.IBV_WR_SEND,
+		      ah=ah,
+		      remote_qpn=path.dpqn,
+		      remote_qkey=path.qkey,
+                      ...);
 
 `buf,0` is the buffer and offset of the memory posted in the recv
 request. Remember that on UD QPs the first 40 bytes of the receive buffer are
