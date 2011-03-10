@@ -78,8 +78,10 @@ which will select the appropriate implementation for the platform.
 :mod:`rdma.vmad` Verbs MAD Interface
 ----------------------------------------
 
-The verbs MAD interface can be used to send MADs to QPN 1, which is useful
-for SA communication.
+The verbs MAD interface can be used to send GMP MADs (eg to QPN 1), which is
+useful for SA communication. This class creates a UD QP using verbs and uses
+that to send all GMPs. This means the the source QPN of the GMP will not be 1,
+which is a configuration supported by IBA.
 
 .. automodule:: rdma.vmad
    :members:

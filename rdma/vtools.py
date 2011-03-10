@@ -16,21 +16,21 @@ class BufferPool(object):
     class can be a :class:`rdma.ibverbs.QP` or :class:`rdma.ibverbs.SRQ`."""
     #: Constant value to set *wr_id* to when it is not being used.
     NO_WR_ID = 0xFFFFFFFF;
-    #: Constant value to or into *wr_id* to indicate it was posted as a recv
+    #: Constant value to or into *wr_id* to indicate it was posted as a recv.
     RECV_FLAG = 0;
-    #: Mask to convert a *wr_id* back into a *buf_idx*
+    #: Mask to convert a *wr_id* back into a *buf_idx*.
     BUF_IDX_MASK = 0;
     _mr = None;
     _mem = None;
-    #: `deque` of buffer indexes
+    #: `deque` of buffer indexes.
     _buffers = None;
-    #: Size of the buffers
+    #: Size of a single buffer.
     size = 0;
-    #: Number of buffers
+    #: Number of buffers.
     count = 0;
 
     def __init__(self,pd,count,size):
-        """Create a :class:`rdma.ibverbs.MR` in *pd* with *count* buffers of
+        """A :class:`rdma.ibverbs.MR` is created in *pd* with *count* buffers of
         *size* bytes."""
         self.count = count;
         self.size = size;

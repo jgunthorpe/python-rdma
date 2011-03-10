@@ -1,7 +1,7 @@
 Verbs Interface
 ===============
 
-:mod:`rdma.ibverbs` implements a set of python extension objects and
+:mod:`rdma.ibverbs` implements a set of Python extension objects and
 functions that provide a wrapper around the OFA verbs interface from
 `libibverbs`. The wrapper puts the verbs interface into an OOP methodology and
 generally exposes most functionality to Python.
@@ -35,7 +35,7 @@ There are effecient wraper functions that create
 :class:`~rdma.ibverbs.qp_attr`, :class:`~rdma.ibverbs.ah_attr` and
 :class:`~rdma.ibverbs.sge` objects with a reduced number of arguments.
 
-Errors from verbs are raised as a :class:`rdma.SysError` which includes
+Errors from verbs are raised as a :exc:`rdma.SysError` which includes
 the `libibverb` function that failed and the associated errno.
 
 .. note::
@@ -178,8 +178,8 @@ Constructing the reply path from a UD WC is very straightforward::
 request. Remember that on UD QPs the first 40 bytes of the receive buffer are
 reserved for a GRH, which is accessed by :func:`rdma.ibverbs.WCPath`.
 
-No CM RC QP Setup
-^^^^^^^^^^^^^^^^^
+No CM QP Setup
+^^^^^^^^^^^^^^
 
 The library has built in support for correctly establishing IB connections
 without using a CM by exchanging information over a side channel (eg a TCP
@@ -223,10 +223,13 @@ This procedure implements the same process and information exchange that the
 normal IB CM would do, including negotiating responder resources and having
 the capability to setup asymmetric paths (unimplemented today).
 
+Any QP type is supported by this basic procedure, the extra information
+exchanged is simply not used.
+
 WC Error handling
 ^^^^^^^^^^^^^^^^^
 
-The class :class:`rdma.ibverbs.WCError` is an exception that can be thrown
+The class :exc:`rdma.ibverbs.WCError` is an exception that can be thrown
 when a WC error is detected. It formats the information in the WC and provides
 a way for the catcher to determine the failed QP::
 
@@ -268,7 +271,7 @@ for. The basic idea is that :meth:`rdma.ibverbs.CompChannel.check_poll` takes
 care of all the details and returns the CQ that has available work
 completions.
 
-Using :mod:`rdma.vtools` the above example can be further simplified::
+Using :class:`~rdma.vtools.CQPoller` the above example can be further simplified::
 
 	cc = ctx.comp_channel();
 	cq = ctx.cq(2*depth,cc)
@@ -286,8 +289,8 @@ Memory
 
 Memory registrations are made explicit, as with verbs everything that is passed
 into a work request must have an associated memory registration. A MR object
-can be created for anything that supports the python buffer protocol, and
-writable MRs require a mutable python buffer. Some useful examples::
+can be created for anything that supports the Python buffer protocol, and
+writable MRs require a mutable Python buffer. Some useful examples::
 
  s = "Hello";
  mr = pd.mr(s,ibv.IBV_ACCESS_REMOTE_READ);
@@ -312,7 +315,7 @@ is very useful for applications using the SEND verb::
    qp.post_send(pool.make_send_wr(buf_idx,pool.size,path));
 
 :mod:`rdma.vtools` module
-=========================
+-------------------------
 
 :mod:`rdma.vtools` provides various support functions to make verbs
 programming easier.
@@ -323,12 +326,17 @@ programming easier.
    :show-inheritance:
 
 :mod:`rdma.ibverbs` module
-==========================
+--------------------------
 
 .. note::
-   Unfortuntely sphinx does not do a very good job auto documenting extension
+   Unfortuntely Sphinx does not do a very good job auto documenting extension
    modules, and all the function arguments are stripped out. Until this is
    resolved the documentation after this point is incomplete.
+
+The :mod:`rdma.ibverbs` module wrappers all of the functions in `libibverbs`
+that are not duplicated elsewhere in the library, for instance, device
+discovery uses the :mod:`rdma.devices` module, not the functions from
+`libibverbs`.
 
 .. automodule:: rdma.ibverbs
    :members:

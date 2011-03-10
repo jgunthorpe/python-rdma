@@ -540,9 +540,8 @@ cdef class Context:
     def handle_async_event(self,event):
         """This provides a generic handler for async events. Depending
         on the event it will:
-          - Raise a :class:`rdma.ibverbs.AsyncError` exception
-          - Reload cached information in the end port
-          """
+        - Raise a :exc:`rdma.ibverbs.AsyncError` exception
+        - Reload cached information in the end port"""
         cdef int ty
         ty = event[0]
 

@@ -28,6 +28,10 @@ def _conv_int_desc(s):
         raise ValueError("%r is not a valid major:minor"%(s));
     return int(t[0]);
 
+def _conv_unicode(s):
+    "A unicode string"
+    return s.decode("utf-8");
+
 class SysFSCache(object):
     '''Cache queries from sysfs attributes. This class is used to make
     the sysfs parsing demand load.'''
@@ -131,10 +135,11 @@ class EndPort(SysFSCache):
     '''A RDMA end port. An end port can issue RDMA operations, has a port GID,
     LID, etc. For an IB switch this will be port 0, for a \*CA it will be port
     1 or higher.'''
+    #: Port number
     port_id = None
-    # :class:`rdma.devices.DemandList` of all pkeys
+    #: :class:`rdma.devices.DemandList` of all pkeys
     pkeys = None
-    # :class:`rdma.devices.DemandList` of all gids
+    #: :class:`rdma.devices.DemandList` of all gids
     gids = None
 
     def __init__(self,parent,port_id):
@@ -165,9 +170,13 @@ class EndPort(SysFSCache):
     @property
     def lmc(self): return self._cached_sysfs("lid_mask_count",int);
     @property
-    def phys_state(self): return self._cached_sysfs("phys_state",_conv_int_desc);
+    def phys_state(self):
+        """The port physical state, one of `IBA.PHYS_PORT_STATE_\*`"""
+        return self._cached_sysfs("phys_state",_conv_int_desc);
     @property
-    def state(self): return self._cached_sysfs("state",_conv_int_desc);
+    def state(self):
+        """The port state, one of `IBA.PORT_STATE_\*`"""
+        return self._cached_sysfs("state",_conv_int_desc);
     @property
     def sm_lid(self): return self._cached_sysfs("sm_lid",_conv_hex);
     @property
@@ -175,12 +184,16 @@ class EndPort(SysFSCache):
     @property
     def port_guid(self): return self._cached_sysfs("gids/0",_conv_gid2guid);
     @property
-    def rate(self): return self._cached_sysfs("rate");
+    def rate(self):
+        """A string describing the speed of the port. eg '10 Gb/sec (4X)'."""
+        return self._cached_sysfs("rate");
     @property
+    # FIXME: Not sure what this is ?
     def cap_mask(self): return self._cached_sysfs("cap_mask",_conv_hex);
 
     @property
     def default_gid(self):
+        """The default GID for this end port."""
         # FIXME: This should look for a GID with a non-link-local prefix.
         return self.gids[0];
 
@@ -270,6 +283,13 @@ class RDMADevice(SysFSCache):
     """A RDMA device. A device has at least one end port. The main significance of
     a RDMA device in the API is to indicate that multiple end ports can
     share a single protection domain."""
+    #: :class:`rdma.devices.DemandList` of all end ports
+    end_ports = None
+    #: Device's name
+    name = None
+    #: Number of physical ports
+    phys_port_count = 0
+
     def __init__(self,name):
         """*name* is the kernel's name for this device in sysfs."""
         SysFSCache.__init__(self,SYS_INFINIBAND + name + "/");
@@ -296,21 +316,31 @@ class RDMADevice(SysFSCache):
             yield dir_ + I;
 
     @property
-    def node_type(self): return self._cached_sysfs("node_type",_conv_int_desc);
+    def node_type(self):
+        """The node type, one of `IBA.NODE_\*`."""
+        return self._cached_sysfs("node_type",_conv_int_desc);
     @property
     def node_guid(self): return self._cached_sysfs("node_guid",IBA.GUID);
     @property
-    def node_desc(self): return self._cached_sysfs("node_desc");
+    def node_desc(self): return self._cached_sysfs("node_desc",_conv_unicode);
     @property
-    def fw_ver(self): return self._cached_sysfs("fw_ver");
+    def fw_ver(self):
+        "Device firmware version string."
+        return self._cached_sysfs("fw_ver");
     @property
     def sys_image_guid(self): return self._cached_sysfs("sys_image_guid",IBA.GUID);
     @property
-    def board_id(self): return self._cached_sysfs("board_id");
+    def board_id(self):
+        "Device board ID string."
+        return self._cached_sysfs("board_id");
     @property
-    def hw_ver(self): return self._cached_sysfs("hw_rev");
+    def hw_ver(self):
+        "Device hardware version string."
+        return self._cached_sysfs("hw_rev");
     @property
-    def hca_type(self): return self._cached_sysfs("hca_type");
+    def hca_type(self):
+        "HCA type string."
+        return self._cached_sysfs("hca_type");
 
     def __str__(self):
         return self.name;

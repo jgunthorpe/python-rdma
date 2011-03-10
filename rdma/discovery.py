@@ -404,14 +404,15 @@ def topo_surround_SMP(sched,sbn,node,get_desc=True):
             sched.queue(do_port(node.ports.index(I),path));
 
 def load(sched,sbn,stuff):
-    """Fill *sbn* with the discovery items in *stuff*. *stuff* may be:
+    """Fill *sbn* with the discovery items in *stuff*. *stuff* may be a list
+       of strings where each string is one of:
 
-        * `all_LIDs` fill in *sbn.lids* completely.
-        * `all_NodeInfo` may be followed by a space and then a node type number.
-        * `all_PortInfo`
-        * `all_NodeDescription` may be followed by a space and then a node type number.
-        * `all_SwitchInfo`
-        * `all_topology`
+       * `all_LIDs` fill in *sbn.lids* completely.
+       * `all_NodeInfo` may be followed by a space and then a node type number.
+       * `all_PortInfo`
+       * `all_NodeDescription` may be followed by a space and then a node type number.
+       * `all_SwitchInfo`
+       * `all_topology`
        """
     if not isinstance(stuff,set):
         stuff = set(stuff);

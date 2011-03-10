@@ -38,6 +38,12 @@ Usage guidelines:
 * :exc:`rdma.MADTimeoutError` is thrown when a MAD RPC call times out.
 * :exc:`rdma.MADClassError` is thrown when a MAD RPC call errors out with
   a class specific error.
+* :exc:`rdma.SysError`
+* :exc:`rdma.path.SAPathNotFoundError` when a path cannot be resolved due to the
+  SA reporting it was not found.
+* :exc:`rdma.ibverbs.WRError` when a verbs work request fails to post.
+* :exc:`rdma.ibverbs.WCError` when a verbs work completion indicates an error.
+* :exc:`rdma.ibverbs.AsyncError` when a error case verbs async event is received.
 
 Python's exception processing is somewhat limited in how it deals with
 complicated layering, for instance if a RPC is performed to resolve a path the

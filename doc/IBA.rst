@@ -192,8 +192,8 @@ be required there.
    :members:
    :undoc-members:
 
-:mod:`rdma.IBA_describe` Convert values descriptive strings
------------------------------------------------------------
+:mod:`rdma.IBA_describe` Convert values to descriptive strings
+--------------------------------------------------------------
 .. automodule:: rdma.IBA_describe
    :members:
    :undoc-members:

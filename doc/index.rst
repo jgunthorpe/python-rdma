@@ -12,6 +12,7 @@ Contents:
    :maxdepth: 3
    :numbered:
 
+   intro.rst
    rdma.rst
    IBA.rst
    mads.rst

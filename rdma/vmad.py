@@ -11,8 +11,8 @@ import rdma.vtools;
 
 class VMAD(rdma.madtransactor.MADTransactor):
     '''Provide a UMAD style interface that runs on ibverbs. This can be
-    used with QPN=1 traffic.'''
-    #: :class:`rdma.devices.EndPort` this is associated with
+    used with GMP (eg QPN=1) traffic.'''
+    #: :class:`rdma.devices.EndPort` this is associated with.
     end_port = None;
 
     _pd = None;

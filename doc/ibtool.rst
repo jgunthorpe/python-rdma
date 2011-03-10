@@ -1,3 +1,5 @@
+.. _ibtool:
+
 The ``ibtool`` Program
 **********************
 
@@ -64,7 +66,7 @@ the value ``0,`` is the local end port, ``0,1`` is the thing connected to port
 
 The formats for each type are unambiguous, so the prorgam simply determines
 the correct entry automatically, legacy options specifying the type are
-supported and the command fails if the provided argumen does not match.
+supported and the command fails if the provided argument does not match.
 
 When a directed route or LID is specified it is used as-is for sending SMPs.
 If a GMP is required then the address is resolved to a full path using the SA.
@@ -75,7 +77,7 @@ a series of :class:`rdma.IBA.SALinkRecord` RPCs.
 Error Handling
 ==============
 
-The tool relies on python-rdma's exception system for end user error
+The tool relies on `python-rdma`'s exception system for end user error
 reporting. This system provides a great level of detail for most user visible
 errors. The -v option is used to increase the error diagnostic output,
 up to including packet dumps for failing MADs.
@@ -126,14 +128,14 @@ Compared to the libib versions:
 
 * All commands support the `--sa` option which causes SMPs to be converted
   into SA record queries and sent to the SA. (see
-  :class:`rdma.satransacator.SATransactor`) In `--sa` mode no SMPs are
+  :class:`rdma.satransactor.SATransactor`) In `--sa` mode no SMPs are
   issued. Some commands have `SubnAdmGetTable` support when in `--sa` mode
   which makes them run faster. (Be warned, opensm has various bugs in its
   \*Record support)
 
 Discovery:
 
-* All the discovery shell scripts are native python and integrate properly with
+* All the discovery shell scripts are native Python and integrate properly with
   the command line system and support all the standard common options.
 * The builtin discovery engine supports `--sa` which will rely entirely on SA
   Record queries for the data.
@@ -154,9 +156,9 @@ Discovery:
 
 Specific commands:
 
-* sminfo gets the LID using a `SMPPortInfo` RPC when using directed route.
-* sminfo's has a --sminfo_smkey argument that is used for `SubnSet()` and `SubnGet()`
-  RPCs. `SubnSet()` can send a 0 attribute modifier.
+* `sminfo` gets the LID using a `SMPPortInfo` RPC when using directed route.
+* `sminfo`'s has a `--sminfo_smkey` argument that is used for `SubnSet()` and
+  `SubnGet()` RPCs. `SubnSet()` can send a 0 attribute modifier.
 * `ibroute` uses the parallel MAD scheduler, displays LIDs in decimal and
   displays escaped node descriptions that are treated as UTF-8
 * `ibroute` -M does not skip the last multicast LID.
@@ -165,19 +167,19 @@ Specific commands:
   duplicative work and are much faster.
 * `ibhosts`, `ibswitches`, `ibrouters` and `ibnodes` display their output
   sorted by nodeGUID.
-* smpquery sl2vl on a CA shows the CA port number not 0.
-* perfquery supports directed route as an argument. The DR path is resolved
+* `smpquery` sl2vl on a CA shows the CA port number not 0.
+* `perfquery` supports directed route as an argument. The DR path is resolved
   to a LID path via a `SMPNodeInfo` RPC and a PR lookup to the SA
-* perfquery uses the SA to get the `NodeInfo` (if needed) rather than using a
+* `perfquery` uses the SA to get the `NodeInfo` (if needed) rather than using a
   SMP. It also uses the parallel MAD scheduler when looping over ports.
-* 'perfquery -l' works like 'perfquery -a -l' instead of trying to request
+* `perfquery -l` works like `perfquery -a -l` instead of trying to request
   port 0 and often failing.
-* perfquery gives a failure message if it is asked to loop over ports on
+* `perfquery` gives a failure message if it is asked to loop over ports on
   a CA (which can't be done by simple port select)
-* perfquery uses the `SMPNodeInfo.localPortNum` for the target as the default
+* `perfquery` uses the `SMPNodeInfo.localPortNum` for the target as the default
   port number is none is given - this 'does the right thing' for CA ports
   and returns a result instead of an error for switch ports.
-* perfquery will also handle `PMPortFlowCtlCounters`, `PMPortFlowCtlCounters`,
+* `perfquery` will also handle `PMPortFlowCtlCounters`, `PMPortFlowCtlCounters`,
   `PMPortVLXmitFlowCtlUpdateErrors`, `PMPortVLXmitWaitCounters`,
   and `PMSwPortVLCongestion`
 * `smpdump` has a `--decode` option to pretty print the MAD
@@ -189,15 +191,45 @@ Specific commands:
 
     saquery NR nodeInfo.portGUID=0017:77ff:feb6:2ca4
 
-  This is done using python dynamic introspection and codegen of the component
+  This is done using Python dynamic introspection and codegen of the component
   mask layout.
-* The inconsistent names from saquery are less inconsistent but don't match
-  100% what saquery produces.  The --int-names option uses the names described
-  in this document.
+* The inconsistent names from `saquery` are less inconsistent but don't match
+  100% what `saquery` produces.  The `--int-names` option uses the names
+  described in this document.
 * `saquery` forgot how to do --node-name-map
 * `saquery` options that have an associated Selector don't set the selector.
 * `saquery` is joined by `query` which can issue any Get type query for any
   supported attribute with any query content.
+* The command `query` is added which can issue any RPC, with any packet
+  content entirely using the symolic names in this document. This is done
+  with Python introspection. Eg::
+
+   $ ibtool query SubnAdmGet MADClassPortInfo -d
+   debug: GMP Path 8 -> 8 SL=0 PKey=65535 DQPN=1
+   debug: RPC MAD_METHOD_GET(1) SAFormat(3.2) MADClassPortInfo(1) completed to 'Path 8 -> 8 SL=0 PKey=65535 DQPN=1' len 256.
+   BaseVersion......................1
+   ClassVersion.....................2
+   CapabilityMask...................0x2602
+   CapabilityMask2..................0x0000000
+   RespTimeValue....................16
+   RedirectGID......................::
+   RedirectTC.......................0x00
+   RedirectSL.......................0
+   RedirectFL.......................0
+   RedirectLID......................0
+   RedirectPKey.....................0x0000
+   RedirectQP.......................0x000001
+   RedirectQKey.....................0x80010000
+   TrapGID..........................::
+   TrapTC...........................0
+   TrapSL...........................0
+   TrapFL...........................0
+   TrapLID..........................0
+   TrapPKey.........................0x0000
+   TrapHL...........................0
+   TrapQP...........................0x000000
+   TrapQKey.........................0x80010000
+
 * `ibnetdiscover` prints the listing in a BFS order, not randomly.
 * `ibfindnodesusing` only fetches subnet information actually used during
   output and supports more ways to specify the source switch.
