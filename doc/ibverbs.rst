@@ -27,11 +27,11 @@ focusing on the :class:`rdma.ibverbs.Context` and :class:`rdma.ibverbs.PD`
 is sufficient due to the built in resource clean up.
 
 The IB verbs structures (eg ibv_qp_attr) are mapped into Python objects, (eg
-:class:`rdma.ibverbs.ibv_qp_attr`). As Python objects they work similary to the C
+:class:`rdma.ibverbs.ibv_qp_attr`). As Python objects they work similarly to the C
 syntax with structure member assignment, but they can also be initialized with
 a keyword argument list to the constructor. This can save a considerable number of lines.
 
-There are effecient wraper functions that create
+There are efficient wrapper functions that create
 :class:`~rdma.ibverbs.qp_attr`, :class:`~rdma.ibverbs.ah_attr` and
 :class:`~rdma.ibverbs.sge` objects with a reduced number of arguments.
 
@@ -329,7 +329,7 @@ programming easier.
 --------------------------
 
 .. note::
-   Unfortuntely Sphinx does not do a very good job auto documenting extension
+   Unfortunately Sphinx does not do a very good job auto documenting extension
    modules, and all the function arguments are stripped out. Until this is
    resolved the documentation after this point is incomplete.
 

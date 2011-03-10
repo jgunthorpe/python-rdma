@@ -93,7 +93,7 @@ member of a `*Format` object. Here is the `dump` pretty print output for a
 Notice that the use of :class:`~rdma.IBA.SAPathRecord` for the payload is
 automatically deduced based on the value of `attributeID`. The printer shows
 the decimal byte offset and raw hex bytes in the left columns and shows a decode
-of the attribute names corrisponding to that byte position in the right hand
+of the attribute names corresponding to that byte position in the right hand
 area.
 
 The pretty printer is invoked by calling the :meth:`~rdma.binstruct.BinStruct.printer`

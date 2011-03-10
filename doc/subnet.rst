@@ -8,7 +8,7 @@ sometimes store a :class:`~rdma.IBA.SMPPortInfo` without first having a
 
 The design is careful to separate the notion of an `end port` compared
 to an `arbitrary port`. Only switches can have `arbitrary ports`! Most
-functions work with and return `end ports` which will always corrispond
+functions work with and return `end ports` which will always correspond
 to switch port 0.
 
 

@@ -92,7 +92,7 @@ which is a configuration supported by IBA.
 ----------------------------------------
 
 :class:`~rdma.sched.MADSchedule` is a parallel MAD scheduling system built
-using Python coroutines as the schedualing element. It provides for very
+using Python coroutines as the scheduling element. It provides for very
 simplified programming of parallel MAD operations.
 
 A simple use of the class to fetch :class:`rdma.IBA.SMPNodeInfo` for a list of
@@ -138,9 +138,9 @@ the scheduler waits for MADs on the network to complete. As coroutines exit
 queued generators are called to produce more coroutines until there is no more
 work to do.
 
-A coroutine may also ``yeild`` another coroutine. In this instance the
+A coroutine may also ``yield`` another coroutine. In this instance the
 scheduler treats it as a function call and runs the returned coroutine to
-completion before returning from ``yeild``. If the coroutine produces an
+completion before returning from ``yield``. If the coroutine produces an
 exception then it will pass through the ``yield`` statement as well. The
 called coroutine can return a result to the parent by setting the
 :attr:`~rdma.sched.MADSchedule.result` attribute before returning.

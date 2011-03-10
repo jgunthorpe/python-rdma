@@ -25,7 +25,7 @@ End Port to Use
 ---------------
 
 Most tools require an end port to operate on. The libib mechanism involves
-specifying the device name and port number with two seperate arugments. This
+specifying the device name and port number with two separate arguments. This
 is still supported but the port argument now accepts a full end port
 specifier:
 
@@ -64,7 +64,7 @@ The directed route (DR) path option allows specifying a directed route path,
 the value ``0,`` is the local end port, ``0,1`` is the thing connected to port
 1 of the local end port, etc.
 
-The formats for each type are unambiguous, so the prorgam simply determines
+The formats for each type are unambiguous, so the program simply determines
 the correct entry automatically, legacy options specifying the type are
 supported and the command fails if the provided argument does not match.
 
@@ -108,12 +108,12 @@ Compared to the libib versions:
   lower case and when zero justified the number of zeros used is correct for
   the width of the type.
 * The output of some commands is subtly different, ie commands that used to
-  print inconsistent output (hex LIDs, hex GUIDs, etc) print in cannonical
+  print inconsistent output (hex LIDs, hex GUIDs, etc) print in canonical
   format
 * Path record queries are always done for LID target end ports when using GMP,
   the correct SL to use is never assumed.
 * A broader range of input is accepted for most arguments (ie GIDs, GUIDs, DR
-  paths, etc) and the input argument type is unambigously determined by
+  paths, etc) and the input argument type is unambiguously determined by
   format.
 * Debug output is quite different and dramatically better.
 * Error output is different and dramatically better. More -v's provide more
@@ -201,7 +201,7 @@ Specific commands:
 * `saquery` is joined by `query` which can issue any Get type query for any
   supported attribute with any query content.
 * The command `query` is added which can issue any RPC, with any packet
-  content entirely using the symolic names in this document. This is done
+  content entirely using the symbolic names in this document. This is done
   with Python introspection. Eg::
 
    $ ibtool query SubnAdmGet MADClassPortInfo -d
