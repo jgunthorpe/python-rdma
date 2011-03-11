@@ -42,6 +42,7 @@ cdef extern from 'Python.h':
 cdef extern from 'arpa/inet.h':
     unsigned int ntohl(unsigned int v)
 
+include 'libibverbs_enums.pxi'
 include 'libibverbs.pxi'
 
 debug = False
