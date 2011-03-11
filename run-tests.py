@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+# Copyright 2011 Obsidian Research Corp. GLPv2, see COPYING.
 import unittest,os,os.path,fnmatch
 import tests
 
@@ -15,5 +16,5 @@ for I in fns:
     __import__("tests." + I);
 suite = unittest.TestSuite(unittest.defaultTestLoader.loadTestsFromNames(fns,module));
 
-if __name__ == "__main__":                   
+if __name__ == "__main__":
     unittest.main(defaultTest="testAll");

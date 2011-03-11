@@ -1,4 +1,4 @@
-#!/usr/bin/python
+# Copyright 2011 Obsidian Research Corp. GLPv2, see COPYING.
 import unittest
 import os.path
 import sys

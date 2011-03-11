@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/usr/bin/env python
+# Copyright 2011 Obsidian Research Corp. GLPv2, see COPYING.
 # ./mkstructs.py -x iba_transport.xml -x iba_12.xml -x iba_13_4.xml -x iba_13_6.xml -x iba_14.xml -x iba_15.xml -x iba_16_1.xml -x iba_16_3.xml -x iba_16_4.xml  -o ../rdma/IBA_struct.py -t ../tests/iba_struct.py -r ../doc/iba_struct.inc
 '''This script converts the XML descriptions of IB structures into python
    classes and associated codegen'''

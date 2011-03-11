@@ -1,3 +1,4 @@
+# Copyright 2011 Obsidian Research Corp. GLPv2, see COPYING.
 # Describe various IBA constants as strings
 import rdma.IBA as IBA;
 import rdma.binstruct;

@@ -1,4 +1,6 @@
 <?xml version='1.0' encoding='UTF-8' ?>
+<!-- Copyright 2011 Obsidian Research Corp.
+     This file is under a BSD license. See COPYING -->
 <makestructs type="IBA Transport Packets" output="iba_transport.h">
   <struct name="HdrLRH" bytes="8" desc="Local Route Header" sect="7.7">
     <mb bits="4" off="0[0]">VL</mb>

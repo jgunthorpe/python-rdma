@@ -1,4 +1,5 @@
 # -*- Python -*-
+# Copyright 2011 Obsidian Research Corp. GLPv2, see COPYING.
 wc = tools.struct(
     'wc',
     (('wr_id',long),

@@ -1,7 +1,4 @@
-.. python-rdma documentation master file, created by
-   sphinx-quickstart on Thu Jan 27 10:08:02 2011.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+.. Copyright 2011 Obsidian Research Corp. GLPv2, see COPYING.
 
 Welcome to python-rdma's documentation!
 =======================================

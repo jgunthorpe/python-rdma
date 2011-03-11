@@ -1,3 +1,5 @@
+.. Copyright 2011 Obsidian Research Corp. GLPv2, see COPYING.
+
 .. _ibtool:
 
 The ``ibtool`` Program

@@ -1,3 +1,5 @@
+.. Copyright 2011 Obsidian Research Corp. GLPv2, see COPYING.
+
 Software License
 ================
 
@@ -25,7 +27,7 @@ simple permissive BSD license:
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
 
-The rest of the package is distributed under the term of the GNU General
+The rest of the package is distributed under the terms of the GNU General
 Public License V2:
 
  | GNU GENERAL PUBLIC LICENSE

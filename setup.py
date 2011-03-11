@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+# Copyright 2011 Obsidian Research Corp. GLPv2, see COPYING.
 import sys
 import re
 import os.path

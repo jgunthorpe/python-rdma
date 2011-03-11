@@ -1,4 +1,4 @@
-#!/usr/bin/python
+# Copyright 2011 Obsidian Research Corp. GLPv2, see COPYING.
 import os;
 import rdma;
 import rdma.IBA as IBA;

@@ -1,3 +1,4 @@
+# Copyright 2011 Obsidian Research Corp. GLPv2, see COPYING.
 # Fairly simple status/inquery commands
 import sys
 import copy

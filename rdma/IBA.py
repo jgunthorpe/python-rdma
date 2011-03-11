@@ -1,4 +1,4 @@
-#!/usr/bin/python
+# Copyright 2011 Obsidian Research Corp. GLPv2, see COPYING.
 
 # NOTE: The docstrings for this module are specially processed in the
 # documentation take some care when editing.

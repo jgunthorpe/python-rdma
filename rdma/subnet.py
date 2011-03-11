@@ -1,3 +1,4 @@
+# Copyright 2011 Obsidian Research Corp. GLPv2, see COPYING.
 import collections;
 import rdma;
 import rdma.path;

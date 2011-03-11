@@ -1,4 +1,5 @@
 # -*- Python -*-
+# Copyright 2011 Obsidian Research Corp. GLPv2, see COPYING.
 import select
 import collections
 import errno as mod_errno
