@@ -259,9 +259,9 @@ channel is::
         poll = select.poll();
         cc.register_poll(poll);
         cq = ctx.cq(2*depth,cc)
-        cq.req_notify_cq();
 
         def get_wcs():
+	    cq.req_notify();
             while True:
                 ret = poll.poll();
                 for I in ret:
@@ -281,7 +281,7 @@ Using :class:`~rdma.vtools.CQPoller` the above example can be further simplified
 
 	cc = ctx.comp_channel();
 	cq = ctx.cq(2*depth,cc)
-	poller = rdma.vtools.CQPoller(cq,cc);
+	poller = rdma.vtools.CQPoller(cq);
 
 	for wc in poller.iterwc(timeout=1):
 	    print wc

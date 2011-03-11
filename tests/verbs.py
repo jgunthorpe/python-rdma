@@ -64,7 +64,7 @@ class umad_self_test(unittest.TestCase):
     def _get_loop(self,pd,qp_type,depth=16):
         cc = self.ctx.comp_channel()
         cq = self.ctx.cq(2*depth,cc);
-        poller = rdma.vtools.CQPoller(cq,cc);
+        poller = rdma.vtools.CQPoller(cq);
         srq = pd.srq(depth)
         pool = rdma.vtools.BufferPool(pd,2*depth,256+40);
         pool.post_recvs(srq,depth);

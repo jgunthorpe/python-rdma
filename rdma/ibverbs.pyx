@@ -825,11 +825,11 @@ cdef class CompChannel:
         object *poll*."""
         poll.register(self._chan.fd,select.POLLIN);
 
-    def check_poll(self,pevent,int solicited_only=False):
+    def check_poll(self,pevent):
         """Returns a :class:`rdma.ibverbs.CQ` that got at least one completion
         event, or `None`. This updates the comp channel and keeps track of
         received events, and appropriately calls ibv_ack_cq_events
-        internally. The CQ is re-armed via
+        internally. After this call the CQ must be re-armed via
         :meth:`rdma.ibverbs.CQ.req_notify`"""
         cdef c.ibv_cq *_cq
         cdef void *p_cq
@@ -849,7 +849,6 @@ cdef class CompChannel:
         if cq.comp_events >= (1<<30):
             c.ibv_ack_cq_events(_cq,cq.comp_events);
             cq.comp_events = 0;
-        cq.req_notify(solicited_only);
         return cq;
 
     def __str__(self):
@@ -868,6 +867,10 @@ cdef class CQ:
     property ctx:
         def __get__(self):
             return self._context;
+
+    property comp_chan:
+        def __get__(self):
+            return self._chan;
 
     def __cinit__(self, Context ctx not None, int nelems=100,
                   CompChannel chan or None=None, int vec=0):

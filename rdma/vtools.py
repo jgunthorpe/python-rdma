@@ -159,20 +159,23 @@ class CQPoller(object):
     #: be altered while iterating.
     wakeat = None
 
-    def __init__(self,cq,cc=None,async_events=True):
-        """*cq* is the completion queue to read work completions from. *cc* if
-        not `None` is the completion channel to sleep
-        on. :meth:`rdma.ibverbs.CQ.req_notify` is called for the CQ.
-        If *async_events* is `True` then the async event queue will be monitored
-        while sleeping."""
+    def __init__(self,cq,async_events=True,solicited_only=False):
+        """*cq* is the completion queue to read work completions from.
+        If the *cq* does not have a completion channel then this will
+        spin loop on *cq* otherwise it sleeps on the completion channel.
+
+        If *async_events* is `True` then the async event queue will be
+        monitored while sleeping."""
         self._cq = cq;
+        self._solicited_only = solicited_only
+        cc = cq.comp_chan;
         if cc is not None:
             self._cc = cc;
             self._poll = select.poll();
             cc.register_poll(self._poll);
             self._ctx = cq.ctx
-            self._ctx.register_poll(self._poll);
-            cq.req_notify();
+            if async_events:
+                self._ctx.register_poll(self._poll);
 
     def __iter__(self):
         return self.iterwc(self);
@@ -182,7 +185,12 @@ class CQPoller(object):
         value of :func:`rdma.tools.clock_monotonic` after which the function
         returns `None`. Returns `True` if the completion channel triggered.
 
-        If no completion channel is in use this just returns `True`."""
+        If no completion channel is in use this just returns `True`.
+
+        Note: It is necessary to call :meth:`rdma.ibverbs.CQ.req_notify`
+        on the CQ, then poll the CQ before calling :meth:`sleep`. Otherwise
+        the edge triggered nature of the completion channels can cause
+        deadlock."""
         if self._poll is None:
             if wakeat is not None:
                 timeout = wakeat - rdma.tools.clock_monotonic();
@@ -225,10 +233,11 @@ class CQPoller(object):
                 return
             ret = self._cq.poll(1);
             while not ret:
-                if self.sleep(self.wakeat) is None:
+                self._cq.req_notify(self._solicited_only);
+                ret = self._cq.poll(1);
+                if not ret and self.sleep(self.wakeat) is None:
                     self.timedout = True;
                     return
-                ret = self._cq.poll(1);
             for I in ret:
                 yield I;
                 if limit > 0:

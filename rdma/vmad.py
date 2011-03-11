@@ -35,7 +35,7 @@ class VMAD(rdma.madtransactor.MADTransactor):
 
         self._cc = self._ctx.comp_channel();
         self._cq = self._ctx.cq(2*depth,self._cc);
-        self._poller = rdma.vtools.CQPoller(self._cq,self._cc);
+        self._poller = rdma.vtools.CQPoller(self._cq);
 
         self._pd = self._ctx.pd();
         self._pool = rdma.vtools.BufferPool(self._pd,2*depth,256+40);
@@ -96,6 +96,7 @@ class VMAD(rdma.madtransactor.MADTransactor):
                                        pkey=self.pkey,
                                        qkey=self.qkey));
 
+            self._cq.req_notify();
             self._cq_drain();
             if not self._recvs:
                 if not self._poller.sleep(wakeat):
