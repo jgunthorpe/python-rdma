@@ -20,6 +20,7 @@ Contents:
    subnet.rst
    ibverbs.rst
    ibtool.rst
+   license.rst
 
 Indices and tables
 ==================
