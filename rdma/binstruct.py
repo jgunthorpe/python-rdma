@@ -54,11 +54,11 @@ class BinStruct(object):
         return
     @abc.abstractmethod
     def unpack_from(self,buf,offset=0):
-        """Overriden in derived classes. Expand the :class:`bytes` *buf*
+        """Overridden in derived classes. Expand the :class:`bytes` *buf*
         starting at *offset* into this instance."""
         pass
     @abc.abstractmethod
     def pack_into(self,buf,offset=0):
-        """Overriden in derived classes. Compact this instance into the
+        """Overridden in derived classes. Compact this instance into the
         :class:`bytearray` *buf* starting at *offset*."""
         pass

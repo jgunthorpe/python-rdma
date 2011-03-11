@@ -206,14 +206,10 @@ class IBPath(Path):
         been provided then the port's
         :attr:`rdma.devices.EndPort.subnet_timeout` is used. To convert
         to seconds use 4.096 uS * 2**(packet_life_time)"""
-        try:
-            return Path.__getattr__(self,"packet_life_time");
-        except AttributeError:
-            return self.end_port.subnet_timeout;
+        return self.__dict__.get("packet_life_time",self.end_port.subnet_timeout);
     @packet_life_time.setter
     def packet_life_time(self,value):
         self.__dict__["packet_life_time"] = value;
-        return value;
 
     @property
     def mad_timeout(self):

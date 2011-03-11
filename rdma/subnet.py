@@ -458,7 +458,7 @@ class Subnet(object):
 
         if portIdx is not None:
             if portIdx == 0:
-                # A portIdx of 0 unambigously refers to a switch end port, but callers
+                # A portIdx of 0 unambiguously refers to a switch end port, but callers
                 # should not rely on this..
                 node,port = self.get_node(Switch,portIdx=portIdx,**kwargs);
             else:
