@@ -13,6 +13,7 @@ Contents:
    :numbered:
 
    intro.rst
+   installing.rst
    rdma.rst
    IBA.rst
    mads.rst

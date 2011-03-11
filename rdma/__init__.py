@@ -74,7 +74,7 @@ class MADError(RDMAError):
         line is displayed. If *level* is 1 then all summary information
         is shown. If *level* is 2 then request and reply packets are dumped.
 
-        If the :esc:`MADError` includes a captured exception then
+        If the :exc:`MADError` includes a captured exception then
         dump_detailed will re-throw it after printing our information."""
         if F is None:
             F = sys.stderr;

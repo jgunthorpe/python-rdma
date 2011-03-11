@@ -36,7 +36,7 @@ has significant pre-existing knowledge of the InfiniBand Architecture (IBA)
 and OFA RDMA Verbs programming and principles.
 
 Comparison to the OFA C API
-===========================
+---------------------------
 
 For reference the `python-rdma` module covers the same areas as the following
 OFA code:
