@@ -147,7 +147,7 @@ def dstr(value,quotes = False):
     """Convert to a display string. This escapes values like `repr` but
     returns with no extra adornment like quotes or a starting u. The intent of
     this function is to provide a safe printable that has undesired values
-    escaped. FIXME: This should not be so agressive with `repr`, that throws
+    escaped. FIXME: This should not be so aggressive with `repr`, that throws
     away the unicode as well."""
     if value is None:
         return "None";
