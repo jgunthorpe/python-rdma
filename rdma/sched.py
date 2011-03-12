@@ -7,6 +7,8 @@ class Context(object):
     _exc = None;
     _done = False;
     _result = None;
+    _work = None;
+    _retries = 0;
 
     def __init__(self,op,gengen,parent=None):
         self._opstack = collections.deque();
@@ -31,6 +33,8 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
     #: :class:`dict` of contexts to a list of coroutines waiting on them
     _ctx_waiters = None;
 
+    Work = collections.namedtuple("Work","buf fmt path newer completer");
+
     @property
     def is_async(self):
         return True;
@@ -49,15 +53,16 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
         self._replyqueue = collections.deque();
         self._ctx_waiters = collections.defaultdict(list);
 
-    def _sendMAD(self,ctx,mad):
-        buf = mad[0]._buf;
-
-        rep = self._umad._execute(buf,mad[1],sendOnly=True);
+    def _sendMAD(self,ctx,work):
+        buf = work.buf;
+        path = work.path;
+        rep = self._umad._execute(buf,path,sendOnly=True);
         if rep:
             self._replyqueue.append(rep);
 
-        itm = [mad[1].mad_timeout + rdma.tools.clock_monotonic(),
-               ctx,mad,mad[1].retries];
+        itm = (path.mad_timeout + rdma.tools.clock_monotonic(),ctx);
+        ctx._work = work;
+        ctx._retries = path.retries;
         bisect.insort(self._timeouts,itm);
 
         rmatch = self._get_reply_match_key(buf);
@@ -210,7 +215,11 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
                 del self._keys[rmatch];
                 self._timeouts.remove(res);
                 try:
-                    payload = self._completeMAD(ret,*res[2]);
+                    work = res[1]._work
+                    payload = self._completeMAD(ret,work.fmt,
+                                                work.path,
+                                                work.newer,
+                                                work.completer);
                 except:
                     res[1]._exc = sys.exc_info();
                     payload = True;
@@ -218,40 +227,42 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
             else:
                 if self.trace_func is not None:
                     self.trace_func(self,rdma.madtransactor.TRACE_UNEXPECTED,
-                                    ret=res);
+                                    ret=ret);
 
     def _do_timeout(self,res):
         """The timeout list entry res has timed out - either error it
         or issue a retry"""
-        if res[3] == 0:
+        ctx = res[1]
+        work = ctx._work;
+        if ctx._retries == 0:
             # Pass the timeout back into MADTransactor and capture the
             # result
-            rmatch = self._get_reply_match_key(res[2][0]._buf);
+            rmatch = self._get_reply_match_key(work.buf);
             del self._keys[rmatch];
             try:
-                self._completeMAD(None,*res[2]);
+                self._completeMAD(None,work.fmt,work.path,
+                                  work.newer,work.completer);
             except:
-                res[1]._exc = sys.exc_info();
-                self._step(res[1],True);
+                ctx._exc = sys.exc_info();
+                self._step(ctx,True);
             else:
                 assert(False);
             return
-        res[3] = res[3] - 1;
+        ctx._retries = ctx._retries - 1;
 
         # Resend
-        mad = res[2];
-        rep = self._umad._execute(mad[0]._buf,mad[1],sendOnly=True);
+        rep = self._umad._execute(work.buf,work.path,sendOnly=True);
         if rep:
             self._replyqueue.append(rep);
-        res[0] = mad[1].mad_timeout + rdma.tools.clock_monotonic();
+        res = (mad[1].mad_timeout + rdma.tools.clock_monotonic(),ctx);
         bisect.insort(self._timeouts,res);
 
     # Implement the MADTransactor interface. This is the asynchronous use model,
     # where the RPC functions return the work to do, not the result.
     def _doMAD(self,fmt,payload,path,attributeModifier,method,completer=None):
-        self._prepareMAD(fmt,payload,attributeModifier,method,path);
+        buf = self._prepareMAD(fmt,payload,attributeModifier,method,path);
         newer = payload if isinstance(payload,type) else payload.__class__;
-        return (fmt,path,newer,completer);
+        return self.Work(buf,fmt,path,newer,completer);
 
     def _get_new_TID(self):
         return self._umad._get_new_TID();

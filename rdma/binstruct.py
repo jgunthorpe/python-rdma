@@ -18,7 +18,7 @@ def unpack_array8(buf,offset,mlen,count,inp):
 class BinStruct(object):
     '''Base class for all binary structure objects (MADs, etc)'''
     __metaclass__ = abc.ABCMeta;
-    __slots__ = ('_buf');
+    __slots__ = ();
 
     def __init__(self,buf = None,offset = 0):
         """*buf* is either an instance of :class:`BinStruct` or a :class:`bytes`
@@ -27,13 +27,13 @@ class BinStruct(object):
         all attributes are set to 0."""
         if buf is not None:
             if isinstance(buf,BinStruct):
-                buf = buf._buf;
+                buf = bytearray(buf.MAD_LENGTH);
+                s.pack_into(buf);
             if isinstance(buf,bytearray):
                 self.unpack_from(bytes(buf),offset);
             else:
                 self.unpack_from(buf,offset);
         else:
-            self._buf = None;
             self.zero();
 
     def printer(self,F,offset=0,header=True,format="dump",**kwargs):

@@ -108,11 +108,12 @@ class MADTransactor(object):
         # inputs.
         if not isinstance(payload,type):
             payload.pack_into(fmt.data);
-        fmt._buf = bytearray(fmt.MAD_LENGTH);
-        fmt.pack_into(fmt._buf);
+        buf = bytearray(fmt.MAD_LENGTH);
+        fmt.pack_into(buf);
 
         if self.trace_func is not None:
             self.trace_func(self,TRACE_SEND,fmt=fmt,path=path);
+        return buf
 
     def _completeMAD(self,ret,fmt,path,newer,completer):
         if self.trace_func is not None:
@@ -151,7 +152,7 @@ class MADTransactor(object):
         status = self.reply_fmt.status;
         if status & 0x1F != 0:
             raise rdma.MADError(req=fmt,rep=self.reply_fmt,path=path,
-                                status=self.reply_fmt.status);
+                                rep_buf=rbuf,status=self.reply_fmt.status);
 
         # Throw a class specific code..
         class_code = (status >> IBA.MAD_STATUS_CLASS_SHIFT) & IBA.MAD_STATUS_CLASS_MASK;
@@ -168,7 +169,7 @@ class MADTransactor(object):
                     return ret;
             raise rdma.MADClassError(req=fmt,rep=self.reply_fmt,path=path,
                                      status=self.reply_fmt.status,
-                                     code=class_code);
+                                     rep_buf=rbuf,code=class_code);
 
         try:
             if rmpp:
@@ -223,8 +224,8 @@ class MADTransactor(object):
         caller must always return _doMAD(). If for some reason there is some
         post-processing work to do then a completer function must be specified
         to do it."""
-        self._prepareMAD(fmt,payload,attributeModifier,method,path);
-        ret = self._execute(fmt._buf,path);
+        buf = self._prepareMAD(fmt,payload,attributeModifier,method,path);
+        ret = self._execute(buf,path);
         newer = payload if isinstance(payload,type) else payload.__class__;
         return self._completeMAD(ret,fmt,path,newer,completer);
 

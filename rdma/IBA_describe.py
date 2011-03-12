@@ -190,15 +190,9 @@ def struct_dump(F,s,offset=0,name_prefix=''):
     """Pretty print the structure *s*. *F* is the output file, *offset* is
     added to all printed offsets and name_prefix is used to prefix names
     when descending."""
-    buf = None;
-    if isinstance(s._buf,bytes):
-        buf = s._buf;
-    if isinstance(s._buf,bytearray):
-        buf = bytes(s._buf);
-    if buf is None:
-        buf = bytearray(s.MAD_LENGTH);
-        s.pack_into(buf);
-        buf = bytes(buf);
+    buf = bytearray(s.MAD_LENGTH);
+    s.pack_into(buf);
+    buf = bytes(buf);
 
     idx = 0;
     off = 0;

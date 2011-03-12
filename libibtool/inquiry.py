@@ -298,8 +298,9 @@ def cmd_smpdump(argv,o):
     with lib.get_umad_for_target(values[0]) as umad:
         path = lib.path;
         class Dummy(rdma.binstruct.BinStruct):
+            buf = None
             def unpack_from(self,buf,offset=0):
-                self._buf = buf[offset:];
+                self.buf = buf[offset:];
                 pass;
             def pack_into(self,buf,offset=0):
                 pass;
@@ -311,8 +312,8 @@ def cmd_smpdump(argv,o):
         if args.decode:
             umad.reply_fmt.printer(sys.stdout);
         else:
-            assert(len(res._buf) % 4 == 0);
-            ret = res._buf.encode("hex");
+            assert(len(res.buf) % 4 == 0);
+            ret = res.buf.encode("hex");
             for I in range(len(ret)/4):
                 print ret[I*4:I*4+4],
                 if (I+1) % 8 == 0:

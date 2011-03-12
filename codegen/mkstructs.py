@@ -402,8 +402,7 @@ class Struct(object):
             self.funcs.append(x);
 
         pack = ["def pack_into(self,buffer,offset=0):"];
-        unpack = ["def unpack_from(self,buffer,offset=0):",
-                  "    self._buf = buffer[offset:offset+%u];"%(self.size)];
+        unpack = ["def unpack_from(self,buffer,offset=0):"];
         fmts = self.structFormat(self.mbGroup,"self.");
         if fmts:
             self.genFormats(fmts,pack,unpack);

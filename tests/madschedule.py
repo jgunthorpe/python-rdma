@@ -96,6 +96,5 @@ class madschedule_test(unittest.TestCase):
             sched.run(self.get_node_info(sched,self.local_path));
         except rdma.MADError as err:
             print err
-            err.req._buf = bytes(err.req._buf);
             err.req.printer(sys.stdout);
             raise;
