@@ -9,6 +9,11 @@ until necessary and then cache the results. This means that none of the
 objects and properties track runtime changes to the sysfs files.
 Depending on the application this is either OK or disastrous.
 
+When using verbs, the integerated
+:meth:`rdma.ibverbs.Context.handle_async_event` method will update the
+:class:`rdma.devices.EndPort` in response to async events from the kernel
+indicating that the cached data is out of date.
+
 The :class:`rdma.devices.RDMADevice` and :class:`rdma.devices.EndPort` contain
 properties that return the various IBA defined quantities.
 
