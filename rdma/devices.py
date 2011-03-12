@@ -85,8 +85,8 @@ class DemandList(collections.Iterable):
         integer indexes. So we are returning values not keys."""
         for I in self._okeys:
             yield self[I];
-    def valuesiter(self): return self.__iter__();
-    def keysiter(self): return self._okeys.__iter__();
+    def itervalues(self): return self.__iter__();
+    def iterkeys(self): return self._okeys.__iter__();
 
     def first(self):
         """Return the first element of the list"""
