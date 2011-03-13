@@ -155,6 +155,13 @@ Discovery:
 * No chassis grouping functions are implemented
 * Since no commands rely on frail text parsing, all node descriptions are
   supported in all tools, including putting " and other characters in them.
+* All discovery commands support caching the result through the `--cache`
+  option. The cache file is stored as a Python pickle and can be loaded
+  by things other than `ibtool`. Use something like::
+
+     --cache ~/.ibtools.cache-$A
+
+  (FIXME support a config file or environment var or something for this)
 
 Specific commands:
 

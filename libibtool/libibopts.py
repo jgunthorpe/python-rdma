@@ -1,6 +1,8 @@
 # Copyright 2011 Obsidian Research Corp. GLPv2, see COPYING.
 from __future__ import with_statement;
 import optparse;
+import os;
+import sys;
 import rdma;
 import rdma.path;
 import rdma.IBA as IBA;
@@ -32,6 +34,7 @@ class LibIBOpts(object):
     """Emulate the commandline parsing of legacy tools."""
     debug = 0;
     sbn = None;
+    sbn_loaded = None;
 
     def __init__(self,o,args,values=None,max_values=0,template=None):
         self.args = args;
@@ -133,6 +136,11 @@ class LibIBOpts(object):
                          metavar="{LID|DR|SA}",
                          default=None,choices=("LID","DR","SA"),
                          help="Method to use for discovering the subnet");
+            o.add_option("--refresh-cache",action="store_true",dest="drop_cache",
+                         help="Don't load data from the discovery cache.");
+            o.add_option("--cache",action="store",dest="cache",
+                         default=None,
+                         help="File to save/restore cached discovery data.");
 
     def get_path(self,umad,desc,smp=False):
         """Return a :class:`rdma.path.IBPath` for the destination description desc."""
@@ -273,6 +281,27 @@ class LibIBOpts(object):
             return dev.end_ports.first();
         return rdma.get_end_port("%s/%s"%(dev.name,self.args.port));
 
+    @property
+    def cache_fn(self):
+        """Return the cache filename. This does a template substitution,
+        where:
+        - $C and ${CA} are the device name.
+        - $P and ${PORT} are the port id.
+        - $A is $C-$P.
+        """
+        from string import Template
+        if self.args.cache is None:
+            ret = None
+        else:
+            ret = Template(self.args.cache).safe_substitute(
+                C=str(self.end_port.parent),
+                CA=str(self.end_port.parent),
+                P=str(self.end_port.port_id),
+                PORT=str(self.end_port.port_id),
+                A="%s-%s"%(str(self.end_port.parent),self.end_port.port_id));
+        self.__dict__["cache_fn"] = ret;
+        return ret;
+
     def get_subnet(self,sched=None,stuff=None):
         """Return a :class:`rdma.subnet.Subnet` instance. Depending
         on command line options the instance may be preloaded with
@@ -280,7 +309,28 @@ class LibIBOpts(object):
         topology discovery is completed before returning."""
         import rdma.subnet;
         import rdma.discovery;
-        sbn = rdma.subnet.Subnet();
+        try:
+            import cPickle as pickle
+        except ImportError:
+            import pickle;
+
+        fn = self.cache_fn;
+        if not self.args.drop_cache and fn is not None and os.path.exists(fn):
+            with open(fn,"rb") as F:
+                if self.o.verbosity >= 1:
+                    print "D: Loading discovery cache from %r"%(fn);
+                try:
+                    sbn = pickle.load(F);
+                    self.sbn_loaded = set(sbn.loaded)
+                except:
+                    e = sys.exc_info()[1]
+                    raise CmdError("The file %r is not a valid cache file, could not unpickle - %s: %s"%(
+                        fn,type(e).__name__,e));
+            if not isinstance(sbn,rdma.subnet.Subnet):
+                raise CmdError("The file %r is not a valid cache file, wrong object returned: %r"%(fn,sbn));
+        else:
+            sbn = rdma.subnet.Subnet();
+
         if stuff is not None:
             if self.o.verbosity >= 1:
                 print "D: Performing discovery using mode %r"%(self.args.discovery);
@@ -290,8 +340,22 @@ class LibIBOpts(object):
         return sbn;
 
     def done(self):
-        if self.o.verbosity >= 1 and self.sbn is not None:
+        if self.sbn is None:
+            return True;
+
+        try:
+            import cPickle as pickle
+        except ImportError:
+            import pickle;
+        if self.o.verbosity >= 1:
             print "D: Discovered: %r"%(", ".join(sorted(self.sbn.loaded)))
+        fn = self.cache_fn;
+        if fn is not None and self.sbn_loaded != self.sbn.loaded:
+            fn_tmp = fn + ".new";
+            with open(fn_tmp,"wb") as F:
+                print "D: Saving discovery cache to %r"%(fn);
+                pickle.dump(self.sbn,F,-1);
+            os.rename(fn_tmp,fn);
         return True;
 
 # libib has all sorts of interesting ideas what to name the fields. We don't, ours
