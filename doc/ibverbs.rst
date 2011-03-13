@@ -234,6 +234,12 @@ the capability to setup asymmetric paths (unimplemented today).
 Any QP type is supported by this basic procedure, the extra information
 exchanged is simply not used.
 
+.. note::
+   Pickle is only used as an easy example here. Real cases should do something
+   else as unpickling untrusted data is dangerous. The
+   :class:`~rdma.path.Path` object has a :meth:`~rdma.path.Path.__reduce__`
+   method which can be used to implement a protocol appropriate encoding.
+
 WC Error handling
 ^^^^^^^^^^^^^^^^^
 

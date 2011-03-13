@@ -228,6 +228,8 @@ class Subnet(object):
 
     To support the discovery module and caching the :attr:`loaded` attribute
     contains a listing of what discovery actions have been performed.
+
+    This class can be efficiently pickled.
     """
     #: :class:`dict` of nodeGUID to :class:`Node` objects
     nodes = None;
@@ -555,3 +557,26 @@ class Subnet(object):
             todo.extend(self.iterpeers(cur));
             yield cur;
 
+    def __getstate__(self):
+        return (self.all_nodes,self.topology,self.loaded,self.lid_routed);
+
+    def __setstate__(self,v):
+        self.all_nodes = v[0];
+        self.topology = v[1]
+        self.loaded = v[2]
+        self.lid_routed = v[3];
+        self.nodes = dict((I.ninf.nodeGUID,I) for I in self.all_nodes
+                          if I.ninf is not None)
+        self.ports = {}
+        max_lid = max(I.LID for I in self.iterend_ports())
+        self.lids = [None]*max_lid;
+        for I in self.iterend_ports():
+            if I.portGUID is not None:
+                self.ports[I.portGUID] = I;
+            if I.pinf is not None:
+                self.set_max_lid(I.pinf.LID + (1<<I.pinf.LMC)-1);
+                for J in IBA.lid_lmc_range(I.pinf.LID,I.pinf.LMC):
+                    self.lids[J] = I;
+            elif I.LID is not None:
+                self.set_max_lid(I.LID);
+                self.lids[I.LID] = I;

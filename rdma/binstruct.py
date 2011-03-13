@@ -16,7 +16,10 @@ def unpack_array8(buf,offset,mlen,count,inp):
     return
 
 class BinStruct(object):
-    '''Base class for all binary structure objects (MADs, etc)'''
+    '''Base class for all binary structure objects (MADs, etc). When pickled
+    this class re-packs the structure and stores it as a `bytes` value. This
+    reduces the storage overhead from pickling and allows the library to
+    upgrade to different internal storage methods in future.'''
     __metaclass__ = abc.ABCMeta;
     __slots__ = ();
 
@@ -46,6 +49,13 @@ class BinStruct(object):
         if format == "dotted":
             return rdma.IBA_describe.struct_dotted(F,self,**kwargs);
         return rdma.IBA_describe.struct_dump(F,self,offset=offset,**kwargs);
+
+    def __reduce__(self):
+        """When pickling, store in packed format. This gives us greater
+        flexability across versions of the library and takes less space."""
+        buf = bytearray(self.MAD_LENGTH);
+        self.pack_into(buf);
+        return (self.__class__,(bytes(buf),));
 
     # 'pure virtual' functions
     def zero(self):
