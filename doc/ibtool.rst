@@ -166,12 +166,12 @@ Discovery:
 Specific commands:
 
 * `sminfo` gets the LID using a `SMPPortInfo` RPC when using directed route.
-* `sminfo`'s has a `--sminfo_smkey` argument that is used for `SubnSet()` and
+* `sminfo` has a `--sminfo_smkey` argument that is used for `SubnSet()` and
   `SubnGet()` RPCs. `SubnSet()` can send a 0 attribute modifier.
 * `ibroute` uses the parallel MAD scheduler, displays LIDs in decimal and
   displays escaped node descriptions that are treated as UTF-8
 * `ibroute` -M does not skip the last multicast LID.
-* `ibroute` forgot how to limit by LID ranges
+* `ibroute` forgot how to limit by LID ranges (FIXME)
 * `dump_lfts.sh` and `dump_mfts.sh` are internal commands that don't do
   duplicative work and are much faster.
 * `ibhosts`, `ibswitches`, `ibrouters` and `ibnodes` display their output
@@ -184,9 +184,10 @@ Specific commands:
 * `perfquery -l` works like `perfquery -a -l` instead of trying to request
   port 0 and often failing.
 * `perfquery` gives a failure message if it is asked to loop over ports on
-  a CA (which can't be done by simple port select)
+  a CA (which can't be done by simple port select) (FIXME: We could ask the SM
+  how to reach the other ports)
 * `perfquery` uses the `SMPNodeInfo.localPortNum` for the target as the default
-  port number is none is given - this 'does the right thing' for CA ports
+  port number if none is given - this 'does the right thing' for CA ports
   and returns a result instead of an error for switch ports.
 * `perfquery` will also handle `PMPortFlowCtlCounters`, `PMPortFlowCtlCounters`,
   `PMPortVLXmitFlowCtlUpdateErrors`, `PMPortVLXmitWaitCounters`,
@@ -205,10 +206,9 @@ Specific commands:
 * The inconsistent names from `saquery` are less inconsistent but don't match
   100% what `saquery` produces.  The `--int-names` option uses the names
   described in this document.
-* `saquery` forgot how to do --node-name-map
+* `saquery` forgot how to do --node-name-map (FIXME)
 * `saquery` options that have an associated Selector don't set the selector.
-* `saquery` is joined by `query` which can issue any Get type query for any
-  supported attribute with any query content.
+  (FIXME)
 * The command `query` is added which can issue any RPC, with any packet
   content entirely using the symbolic names in this document. This is done
   with Python introspection. Eg::
@@ -248,4 +248,5 @@ Specific commands:
   the information instead of having to load a full topology.
 * `ibprintca/rt/switch` displays the complete node stanza, instead of just a
   truncated version.
-* `ibportstate` can work with CA ports if --sa is used
+* `ibportstate` can work with CA ports if --sa is used (FIXME: Just do
+   the --sa action for all CA ports..)
