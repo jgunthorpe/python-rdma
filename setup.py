@@ -2,6 +2,7 @@
 # Copyright 2011 Obsidian Research Corp. GLPv2, see COPYING.
 import sys
 import re
+import imp
 import os.path
 from distutils import log
 from distutils.core import setup
@@ -160,8 +161,10 @@ class sphinx_build(Command):
             finally:
                 sys.path = opath;
 
+version = imp.load_source('__tmp__','rdma/__init__.py').__version__;
+
 setup(name='rdma',
-      version='0.1',
+      version=version,
       description='RDMA functionality for python',
       ext_modules=[ibverbs_module],
       packages=['rdma','libibtool'],
