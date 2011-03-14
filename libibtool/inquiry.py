@@ -11,7 +11,7 @@ from libibtool.libibopts import *;
 
 def cmd_ibv_devices(argv,o):
     """Display the RDMA devices in the system.
-       Usage: %prog ibv_devices"""
+       Usage: %prog"""
     (args,values) = o.parse_args(argv,expected_values = 0);
 
     print "    %-16s\t    node GUID"%("device");
@@ -22,7 +22,7 @@ def cmd_ibv_devices(argv,o):
 
 def cmd_ibstat(argv,o):
     """Display the RDMA end ports in the system.
-       Usage: %prog ibstat [-lsp] [DEVICE [PORT]]"""
+       Usage: %prog [-lsp] [DEVICE [PORT]]"""
     o.add_option("-l","--list_of_cas",action="store_true",dest="list_cas",
                  help="List all IB devices names");
     o.add_option("-s","--short",action="store_true",dest="short",
@@ -94,7 +94,7 @@ def cmd_ibstat(argv,o):
 
 def cmd_ibstatus(argv,o):
     """Display the RDMA end ports in the system.
-       Usage: %prog ibstatus [DEVICE[/PORT]]"""
+       Usage: %prog [DEVICE[/PORT]]"""
     (args,values) = o.parse_args(argv);
 
     if len(values) == 0:
@@ -118,7 +118,7 @@ def cmd_ibstatus(argv,o):
 
 def cmd_ibaddr(argv,o):
     """Display the GID and LID addresses for end ports.
-       Usage: %prog ibaddr [-glL] [TARGET]"""
+       Usage: %prog [-glL] [TARGET]"""
     o.add_option("-l","--lid_show",action="store_true",dest="lid",
                  help="Show LID information");
     o.add_option("-L","--Lid_show",action="store_true",dest="lid",
@@ -187,11 +187,11 @@ def cmd_query_help(o,cmd,usage):
 
 def cmd_query(argv,o):
     """Issue any GET type query for any known attribute
-       Usage: %prog query METHOD ATTRIBUTE [TARGET]
+       Usage: %prog METHOD ATTRIBUTE [TARGET]
 
        Eg:
-          %prog query PerformanceGet PMPortCounters -f portSelect=1
-          %prog query SubnAdmGet SAPathRecord -f SGID=fe80::0002:c903:0000:1491 -f DGID=fe80::0002:c903:0000:1492
+          %prog PerformanceGet PMPortCounters -f portSelect=1
+          %prog SubnAdmGet SAPathRecord -f SGID=fe80::0002:c903:0000:1491 -f DGID=fe80::0002:c903:0000:1492
           """
     import libibtool.saquery;
 
@@ -234,7 +234,7 @@ def cmd_query(argv,o):
 
 def cmd_sminfo(argv,o):
     """Display the SASMInfo record for a subnet manager.
-       Usage: %prog sminfo [TARGET [ATTR_MOD]]
+       Usage: %prog [TARGET [ATTR_MOD]]
 
        This command includes the ability to send a SubnSet(SASMInfo)
        packet formed with a given priority, state, SMKey and Attribute
@@ -283,7 +283,7 @@ def cmd_sminfo(argv,o):
 
 def cmd_smpdump(argv,o):
     """Display an arbitrary SMP record
-       Usage: %prog smpdump TARGET ATTR [ATTR_MOD]
+       Usage: %prog TARGET ATTR [ATTR_MOD]
 
        ATTR is the attribute ID and ATTR_MOD is an optional modifier."""
     o.add_option("-p","--decode",action="store_true",dest="decode",
@@ -325,7 +325,7 @@ def cmd_smpdump(argv,o):
 
 def cmd_ibportstate(argv,o):
     """Manipulate the SMPPortInfo of a port
-       Usage: %prog ibportstate TARGET PORTNUM OP [OP_ARG]
+       Usage: %prog TARGET PORTNUM OP [OP_ARG]
 
        OP is one of enable, disable, reset, speed, width, query."""
     LibIBOpts.setup(o);
@@ -392,7 +392,7 @@ def cmd_ibportstate(argv,o):
 
 def cmd_decode_mad(argv,o):
     """Accept on stdin a hex dump of a MAD and pretty print it.
-       Usage: decode-mad [-v]
+       Usage: %prog [-v]
 
        All spaces and newlines are removed from the input text, the
        result must be a single string of hex digits."""

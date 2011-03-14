@@ -1,5 +1,7 @@
 # Copyright 2011 Obsidian Research Corp. GLPv2, see COPYING.
 from __future__ import with_statement;
+import os;
+import sys;
 import optparse;
 import inspect;
 
@@ -17,6 +19,7 @@ class MyOptParse(optparse.OptionParser):
                                        formatter=MyHelpFormatter());
 
         self.current_command = cmd;
+        self.prog = "%s %s"%(os.path.basename(sys.argv[0]),cmd.__name__[4:]);
 
     def parse_args(self,args,values = None,expected_values=-1):
         (args,values) = optparse.OptionParser.parse_args(self,args,values);
@@ -26,8 +29,7 @@ class MyOptParse(optparse.OptionParser):
                 len(values),expected_values));
         return (args,values);
 
-    def format_help(self, formatter=None):
-        """Defer computing the help text until it is actually asked for."""
+    def get_usage(self):
         usage = inspect.getdoc(self.current_command);
         docer = None;
         try:
@@ -36,6 +38,9 @@ class MyOptParse(optparse.OptionParser):
             pass;
         if docer is not None:
             usage = docer(self,self.current_command,usage);
-        self.set_usage(usage);
 
+        return self.formatter.format_usage(self.expand_prog_name(usage));
+
+    def format_help(self, formatter=None):
+        """Defer computing the help text until it is actually asked for."""
         return optparse.OptionParser.format_help(self,formatter);

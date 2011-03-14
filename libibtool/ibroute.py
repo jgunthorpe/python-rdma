@@ -82,7 +82,7 @@ def get_top_switch(sched,sbn,args,path):
 
 def cmd_ibroute(argv,o):
     """Display switch forwarding tables.
-       Usage: ibroute TARGET [START_LID [END_LID]]"""
+       Usage: %prog TARGET [START_LID [END_LID]]"""
     o.add_option("-a","--all",action="store_true",dest="all",
                  help="Display all ports");
     o.add_option("-n","--no_dests",action="store_true",dest="no_dests",
@@ -145,7 +145,7 @@ def get_switch_incr(sched,sbn,switch,args):
 
 def cmd_dump_lfts(argv,o):
     """Display switch forwarding tables from all switches.
-       Usage: dump_lfts"""
+       Usage: %prog"""
     LibIBOpts.setup(o,address=False,discovery=True);
     o.add_option("-a","--all",action="store_true",dest="all",
                  help="Display all ports");
@@ -170,7 +170,7 @@ def cmd_dump_lfts(argv,o):
 
 def cmd_dump_mfts(argv,o):
     """Display switch multicast forwarding tables from all switches.
-       Usage: dump_mfts"""
+       Usage: %prog"""
     LibIBOpts.setup(o,address=False,discovery=True);
     o.add_option("-a","--all",action="store_true",dest="all",
                  help="Display all ports");
@@ -193,7 +193,7 @@ def cmd_dump_mfts(argv,o):
 
 def cmd_ibfindnodesusing(argv,o):
     """Display the LFT forwarding tables relative to a single link.
-       Usage: ibfindnodesusing TARGET PORT
+       Usage: %prog TARGET PORT
 
        Use -v to display GUID and LID information for the routed end ports."""
     LibIBOpts.setup(o,address=True,discovery=True);

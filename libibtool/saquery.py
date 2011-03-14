@@ -291,7 +291,7 @@ def cmd_saquery_help(o,cmd,usage):
 
 def cmd_saquery(argv,o):
     """Issue a SubnAdmGetTable() request to the SA for an attribute
-       Usage: %prog saquery [OPTIONS] [ITEM] [ARG] [MEMBER=VALUE]*
+       Usage: %prog [OPTIONS] [ITEM] [ARG] [MEMBER=VALUE]*
 
        This command performs a search at the SA for ITEM things that match
        the pattern. Each SA search is specified by setting matching parameters

@@ -123,37 +123,37 @@ def go_print_node(argv,o,node_type):
 
 def cmd_ibhosts(argv,o):
     """Display all CA nodes.
-       Usage: ibhosts"""
+       Usage: %prog"""
     return go_listing(argv,o,IBA.NODE_CA);
 
 def cmd_ibprintca(argv,o):
     """Display a CA node.
-       Usage: ibprintca [-l] [NODE_GUID]"""
+       Usage: %prog [-l] [NODE_GUID]"""
     return go_print_node(argv,o,IBA.NODE_CA);
 
 def cmd_ibswitches(argv,o):
     """Display all switch nodes.
-       Usage: ibswitches"""
+       Usage: %prog"""
     return go_listing(argv,o,IBA.NODE_SWITCH);
 
 def cmd_ibprintswitch(argv,o):
     """Display a switch node.
-       Usage: ibprintswitch [-l] [NODE_GUID]"""
+       Usage: %prog [-l] [NODE_GUID]"""
     return go_print_node(argv,o,IBA.NODE_SWITCH);
 
 def cmd_ibrouters(argv,o):
     """Display all router nodes.
-       Usage: ibrouters"""
+       Usage: %prog"""
     return go_listing(argv,o,IBA.NODE_ROUTER);
 
 def cmd_ibprintrt(argv,o):
     """Display a router node.
-       Usage: ibhprintrt [-l] [NODE_GUID]"""
+       Usage: %prog [-l] [NODE_GUID]"""
     return go_print_node(argv,o,IBA.NODE_ROUTER);
 
 def cmd_ibnodes(argv,o):
     """Display all CA or switch nodes.
-       Usage: ibrouters"""
+       Usage: %prog"""
     LibIBOpts.setup(o,address=False,discovery=True);
     (args,values) = o.parse_args(argv,expected_values=0);
     lib = LibIBOpts(o,args,values);
@@ -230,7 +230,7 @@ def print_ibnetdiscover_topology(sbn,root):
 
 def cmd_ibnetdiscover(argv,o):
     """Display the topology of the subnet.
-       Usage: ibnetdiscover"""
+       Usage: %prog"""
     o.add_option("-l","--list",action="store_true",dest="list",
                  help="Show a summary listing of all nodes");
     o.add_option("-H","--Hca_list",action="store_true",dest="cas",

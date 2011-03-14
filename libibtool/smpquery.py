@@ -149,7 +149,7 @@ def cmd_smpquery_help(o,cmd,usage):
 
 def cmd_smpquery(argv,o):
     """Display a SMP record
-       Usage: %prog smpdump OP TARGET [ATTR_MOD]
+       Usage: %prog OP TARGET [ATTR_MOD]
 
        Supported OP:
        """

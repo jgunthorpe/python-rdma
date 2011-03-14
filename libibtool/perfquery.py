@@ -16,7 +16,7 @@ def do_print(res,path):
 
 def cmd_perfquery(argv,o):
     """Display the performance manager values for a port
-       Usage: %prog perfquery [TARGET [PORT [RESET]]]"""
+       Usage: %prog [TARGET [PORT [RESET]]]"""
 
     o.add_option("-x","--extended",action="store_const",dest="kind",
                  const=IBA.PMPortCountersExt,

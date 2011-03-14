@@ -173,7 +173,7 @@ def server_mode(opt,dev):
 
 def cmd_rdma_bw(argv,o):
     """Perform a RDMA bandwidth test over a RC QP.
-       Usage: %prog rdam_bw [SERVER]
+       Usage: %prog [SERVER]
 
        If SERVER is not specified then a server instance is started. A
        connection is made using TCP/IP sockets between the client and server
