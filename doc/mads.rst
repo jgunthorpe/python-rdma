@@ -231,7 +231,7 @@ Example::
 
 	end_port = rdma.get_end_port();
 	path = rdma.path.IBDRPath(end_port);
-	with rdma.satransactor.SATransactor(rdma.get_umad(end_port)) as umad:
+	with rdma.satransactor.SATransactor(rdma.get_gmp_mad(end_port)) as umad:
 	    pinf = umad.SubnGet(IBA.SMPPortInfo,path);
 	    pinf.printer(sys.stdout);
 

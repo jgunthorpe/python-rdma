@@ -18,13 +18,10 @@ class umad_self_test(unittest.TestCase):
     def setUp(self):
         self.end_port = rdma.get_end_port();
         self.ctx = rdma.get_verbs(self.end_port);
-        self.umad = rdma.get_umad(self.end_port);
 
     def tearDown(self):
         self.ctx.close();
         self.ctx = None;
-        self.umad.close();
-        self.umad = None;
 
     def test_basic(self):
         print self.ctx.query_port();
@@ -71,7 +68,7 @@ class umad_self_test(unittest.TestCase):
 
         path_a = rdma.path.IBPath(self.end_port,qkey=999,
                                   DGID=self.end_port.default_gid);
-        with rdma.vmad.VMAD(self.ctx,self.end_port.sa_path) as vmad:
+        with rdma.get_gmp_mad(self.end_port,verbs=self.ctx) as vmad:
             rdma.path.resolve_path(vmad,path_a,reversible=True);
         qp_a = pd.qp(qp_type,depth,cq,depth,cq,srq=srq);
         rdma.path.fill_path(qp_a,path_a,max_rd_atomic=0);

@@ -144,7 +144,7 @@ def server_mode(opt,dev):
             opt.iters = peerinfo.iters;
 
             with Endpoint(opt,dev) as end:
-                with rdma.get_umad(end.ctx.end_port) as umad:
+                with rdma.get_gmp_mad(end.ctx.end_port,verbs=end.ctx) as umad:
                     end.path = peerinfo.path;
                     end.path.end_port = end.ctx.end_port;
                     rdma.path.fill_path(end.qp,end.path);

@@ -126,7 +126,7 @@ cases, for communication with a single end port, and for communication with
 multiple. The single case is::
 
  path = IBPath(end_port,dpqn=1,qkey=IBA.IB_DEFAULT_QP1_QKEY,DGID=...);
- with rdma.get_umad(path.end_port) as umad:
+ with rdma.get_gmp_mad(path.end_port,verbs=ctx) as umad:
      rdma.path.resolve_path(umad,path,reversible=True);
  with ctx.pd() as pd:
      depth = 16;
@@ -151,7 +151,7 @@ The case for multiple destinations is very similar, however all destinations
 must share the same PKey and QKey. For instance, assuming there is a list of
 DGIDs::
 
- with rdma.get_umad(path.end_port) as umad:
+ with rdma.get_gmp_mad(path.end_port) as umad:
      paths = [rdma.path.resolve_path(umad,IBPath(end_port,DGID=I,
                                                  qkey=IBA.IB_DEFAULT_QP1_QKEY),
                                      reversible=True,
@@ -214,7 +214,7 @@ Side B would do this::
   path = pickle.unpickle(recv_from_side_a());
   path.end_port = end_port;
   rdma.path.fill_path(qp,path);
-  with rdma.get_umad(path.end_port) as umad:
+  with rdma.get_gmp_mad(path.end_port) as umad:
      rdma.path.resolve_path(umad,path);
   send_to_sid_a(pickle.pickle(path));
 

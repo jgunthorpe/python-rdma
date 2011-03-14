@@ -242,11 +242,31 @@ def get_devices(refresh=False):
         lambda x:x);
     return _cached_devices;
 
-def get_umad(port,**kwargs):
+def get_umad(port,path=None,**kwargs):
     '''Create a :class:`rdma.umad.UMAD` instance for the associated
-    :class:`rdma.devices.EndPort`.'''
+    :class:`rdma.devices.EndPort`. UMAD instances can issue SMPs and GMPs.
+    If only GMP is required then use :func:`get_gmp_mad`.'''
     import rdma.umad;
     return rdma.umad.UMAD(port,**kwargs);
+
+def get_gmp_mad(port,path=None,verbs=None,**kwargs):
+    '''Return a subclass instace of :class:`rdma.madtransactor.MADTransactor`
+    for the associated :class:`rdma.devices.EndPort`. If a verbs instance is already
+    open then it should be passed in as verbs'''
+    import rdma.vmad;
+    if path is None:
+        path = port.sa_path;
+
+    if verbs is None:
+        try:
+            verbs = get_verbs(port);
+        except (ImportError, RDMAError):
+            return rdma.umad.UMAD(port,path,**kwargs);
+        ret = rdma.vmad.VMAD(verbs,path);
+        ret._allocated_cts = True;
+        return ret;
+
+    return rdma.vmad.VMAD(verbs,path);
 
 def get_verbs(port,**kwargs):
     '''Create a :class:`rdma.uverbs.UVerbs` instance for the associated
