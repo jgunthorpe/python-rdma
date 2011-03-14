@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # Copyright 2011 Obsidian Research Corp. GLPv2, see COPYING.
 import optparse
 import pickle
@@ -11,36 +10,8 @@ import rdma.ibverbs as ibv;
 from rdma.tools import clock_monotonic
 import rdma.path
 import rdma.vtools
-
+from libibtool import *;
 from libibtool.libibopts import *;
-
-parser = optparse.OptionParser(usage="%prog [options] [hostname]")
-parser.add_option("-C","--Ca",dest="CA",
-                  help="RDMA device to use. Specify a device name or node GUID");
-parser.add_option("-P","--Port",dest="port",
-                  help="RDMA end port to use. Specify a GID, port GUID, DEVICE/PORT or port number.");
-parser.add_option('-p', '--port', default=4444, type="int", dest="ip_port",
-                  help="listen on/connect to port PORT")
-parser.add_option('-6', '--ipv6', action="store_const",
-                  const=socket.AF_INET6, dest="af", default=0,
-                  help="use IPv6")
-parser.add_option('-b', '--bidirectional', default=False, action="store_true",
-                  help="measure bidirectional bandwidth")
-parser.add_option('-d', '--ib-dev', metavar="DEV", dest="CA",
-                  help="use IB device DEV")
-parser.add_option('-i', '--ib-port', type="int", metavar="PORT", dest="port",
-                  help="use port PORT of IB device")
-parser.add_option('-s', '--size', default=64*1024, type="int", metavar="BYTES",
-                  help="exchange messages of size BYTES,(client only)")
-parser.add_option('-t', '--tx-depth', default=100, type="int", help="number of exchanges")
-parser.add_option('-n', '--iters', default=1000, type="int",
-                  help="number of exchanges (client only)")
-parser.add_option("--debug",dest="debug",action="count",default=0,
-                  help="Increase the debug level, each -d increases by 1.")
-(options, args) = parser.parse_args()
-
-lib = LibIBOpts(parser,options,args,1,(str,));
-dev = lib.get_end_port();
 
 infotype = namedtuple('infotype', 'path addr rkey size iters')
 
@@ -51,7 +22,7 @@ class Endpoint(object):
     mr = None;
     peerinfo = None;
 
-    def __init__(self, opt):
+    def __init__(self,opt,dev):
         self.opt = opt
         self.ctx = rdma.get_verbs(dev)
         self.cc = self.ctx.comp_channel();
@@ -112,13 +83,13 @@ class Endpoint(object):
         rate = self.opt.size*self.opt.iters/1e6/(tcomp-tpost)
         print "%.1f MB/sec" % rate
 
-def client_mode(hostname, opt):
-    with Endpoint(opt) as end:
+def client_mode(hostname,opt,dev):
+    with Endpoint(opt,dev) as end:
         ret = socket.getaddrinfo(hostname,str(opt.ip_port),opt.af,
                                  socket.SOCK_STREAM);
         ret = ret[0];
         with contextlib.closing(socket.socket(ret[0],ret[1])) as sock:
-            if options.debug >= 1:
+            if opt.debug >= 1:
                 print "Connecting to %r %r"%(ret[4][0],ret[4][1]);
             sock.connect(ret[4]);
 
@@ -152,7 +123,7 @@ def client_mode(hostname, opt):
             sock.shutdown(socket.SHUT_WR);
             sock.recv(1024);
 
-def server_mode(opt):
+def server_mode(opt,dev):
     ret = socket.getaddrinfo(None,str(opt.ip_port),opt.af,
                              socket.SOCK_STREAM,0,
                              socket.AI_PASSIVE);
@@ -160,7 +131,7 @@ def server_mode(opt):
     with contextlib.closing(socket.socket(ret[0],ret[1])) as sock:
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.bind(ret[4]);
-        if options.debug >= 1:
+        if opt.debug >= 1:
             print "Listening on %r %r"%(ret[4][0],ret[4][1]);
         sock.listen(1)
 
@@ -172,7 +143,7 @@ def server_mode(opt):
             opt.size = peerinfo.size;
             opt.iters = peerinfo.iters;
 
-            with Endpoint(opt) as end:
+            with Endpoint(opt,dev) as end:
                 with rdma.get_umad(end.ctx.end_port) as umad:
                     end.path = peerinfo.path;
                     end.path.end_port = end.ctx.end_port;
@@ -200,18 +171,43 @@ def server_mode(opt):
                 s.shutdown(socket.SHUT_WR);
                 s.recv(1024);
 
-try:
-    if len(args) == 1:
-        client_mode(args[0], options)
+def cmd_rdma_bw(argv,o):
+    """Perform a RDMA bandwidth test over a RC QP.
+       Usage: %prog rdam_bw [SERVER]
+
+       If SERVER is not specified then a server instance is started. A
+       connection is made using TCP/IP sockets between the client and server
+       process. This connection is used to exchange the connection
+       information."""
+
+    o.add_option("-C","--Ca",dest="CA",
+                 help="RDMA device to use. Specify a device name or node GUID");
+    o.add_option("-P","--Port",dest="port",
+                 help="RDMA end port to use. Specify a GID, port GUID, DEVICE/PORT or port number.");
+    o.add_option('-p', '--port', default=4444, type="int", dest="ip_port",
+                 help="listen on/connect to port PORT")
+    o.add_option('-6', '--ipv6', action="store_const",
+                 const=socket.AF_INET6, dest="af", default=0,
+                 help="use IPv6")
+    o.add_option('-b', '--bidirectional', default=False, action="store_true",
+                 help="measure bidirectional bandwidth")
+    o.add_option('-d', '--ib-dev', metavar="DEV", dest="CA",
+                 help="use IB device DEV")
+    o.add_option('-i', '--ib-port', type="int", metavar="PORT", dest="port",
+                 help="use port PORT of IB device")
+    o.add_option('-s', '--size', default=1024*1024, type="int", metavar="BYTES",
+                 help="exchange messages of size BYTES,(client only)")
+    o.add_option('-t', '--tx-depth', default=100, type="int", help="number of exchanges")
+    o.add_option('-n', '--iters', default=1000, type="int",
+                 help="number of exchanges (client only)")
+    o.add_option("--debug",dest="debug",action="count",default=0,
+                 help="Increase the debug level, each -d increases by 1.")
+
+    (args,values) = o.parse_args(argv);
+    lib = LibIBOpts(o,args,1,(str,));
+
+    if len(values) == 1:
+        client_mode(values[0],args,lib.get_end_port())
     else:
-        server_mode(options)
-    sys.exit(0);
-except rdma.MADError as err:
-    err.dump_detailed(sys.stderr,"E:",level=options.debug);
-    if options.debug >= 2:
-        raise;
-except rdma.RDMAError as err:
-    print "E:",err;
-    if options.debug >= 2:
-        raise;
-sys.exit(100);
+        server_mode(args,lib.get_end_port())
+    return True;

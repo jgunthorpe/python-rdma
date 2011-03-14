@@ -43,6 +43,8 @@ commands = {
     "ibnodes": ("libibtool.discovery",),
     "ibnetdiscover": ("libibtool.discovery",),
 
+    "rdma_bw": ("libibtool.rdma_bw",),
+
     "help": (__name__,),
 };
 
