@@ -250,3 +250,33 @@ Specific commands:
   truncated version.
 * `ibportstate` can work with CA ports if --sa is used (FIXME: Just do
    the --sa action for all CA ports..)
+
+Commands
+========
+
+Supported:
+
+============ ============= ================ ===================
+dump_lfts.sh dump_mfts.sh  ibaddr           ibfindnodesusing.pl
+ibhosts      ibnetdiscover ibnodes          ibportstate
+ibprintca.pl ibprintrt.pl  ibprintswitch.pl ibroute
+ibrouters    ibstat        ibstatus         ibswitches
+ibv_devices  perfquery     rdma_bw          saquery
+sminfo	     smpdump	   smpquery
+============ ============= ================ ===================
+
+To be completed:
+
+==================== ============= ================== =================
+check_lft_balance.pl ibcheckerrors ibcheckerrs        ibchecknet
+ibchecknode          ibcheckport   ibcheckportstate   ibcheckportwidth
+ibcheckstate         ibcheckwidth  ibclearcounters    ibclearerrors
+ibdatacounters       ibdatacounts  ibdiscover.pl      ibidsverify.pl
+iblinkinfo[.pl]      ibping        ibqueryerrors[.pl] ibswportwatch.pl
+ibsysstat            ibtracert     set_nodedesc.sh    vendstat
+==================== ============= ================== =================
+
+Verbs examples/tests:
+
+* Review test\_??\_loop in tests/verbs for an example of: `ibv_rc_pingpong`,
+  `ibv_uc_pingpong`, `ibv_ud_pingpong`, `ibv_srq_pingpong`
