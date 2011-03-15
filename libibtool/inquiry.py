@@ -426,3 +426,37 @@ def cmd_decode_mad(argv,o):
     fmt = kind[0](bytes);
     print fmt.__class__.__name__,fmt.describe();
     fmt.printer(sys.stdout,header=False);
+
+def cmd_set_nodedesc(argv,o):
+    """Set or display the node description for CAs.
+       Usage: %prog [-v] [NAME]
+
+       By default all CAs are altered, use -C or -P to select a single CA."""
+    o.add_option("-v",dest="view_all",action="store_true",
+                 help="Increase the verbosity level of diagnostic messages, each -v increases by 1.")
+    o.add_option("-C","--Ca",dest="CA",
+                 help="RDMA device to use. Specify a device name or node GUID");
+    o.add_option("-P","--Port",dest="port",
+                 help="RDMA end port to use. Specify a GID, port GUID, DEVICE/PORT or port number.");
+    (args,values) = o.parse_args(argv);
+
+    dev = None
+    if args.CA is not None:
+        dev = rdma.get_device(args.CA);
+    if dev is None and args.port is not None:
+        dev = rdma.get_end_port(args.port).parent;
+
+    if args.view_all or len(values) <= 0:
+        for I in rdma.get_devices():
+            if dev is not None and I != dev:
+                continue;
+            print "%s: %s"%(I.name,IBA_describe.dstr(I.node_desc))
+    else:
+        name = values[0].decode();
+        name = name.encode("utf-8");
+        for I in rdma.get_devices():
+            if dev is not None and I != dev:
+                continue;
+            with open(os.path.join(I._dir,"node_desc"),"w") as F:
+                F.write(name);
+    return True;

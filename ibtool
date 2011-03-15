@@ -30,6 +30,8 @@ commands = {
     "decode_mad": ("libibtool.inquiry",),
     "ibportstate": ("libibtool.inquiry",),
     "query": ("libibtool.inquiry",),
+    "set_nodedesc": ("libibtool.inquiry",),
+    "set_nodedesc.sh": ("libibtool.inquiry","cmd_set_nodedesc",False),
 
     "ibhosts": ("libibtool.discovery",),
     "ibprintca": ("libibtool.discovery",),

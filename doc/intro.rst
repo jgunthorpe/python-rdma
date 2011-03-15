@@ -53,7 +53,7 @@ libibverbs       100% coverage via :mod:`rdma.ibverbs` (through Pyrex)
 libibnetdisc     ~80% coverage. No support for switch chassis grouping.
 librdmacm        Not covered
 libibcm          Not covered
-infiniband-diags 22 commands re-implemented, 25 un-implemented.
+infiniband-diags 23 commands re-implemented, 24 un-implemented.
                  Review :ref:`ibtool`
 ibutils          Good coverage of the internal APIs but no
                  coverage for the user tools.

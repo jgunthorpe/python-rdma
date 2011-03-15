@@ -101,6 +101,7 @@ class ibtool_cmds_test(unittest.TestCase):
                 if err.status != IBA.MAD_STATUS_UNSUP_METHOD_ATTR_COMBO:
                     raise;
         self.cmd("query","PerformanceGet","MADClassPortInfo");
+        self.cmd("set_nodedesc");
 
     def test_with_link_exc(self):
         self.assertEquals(self.end_port.state,IBA.PORT_STATE_ACTIVE);

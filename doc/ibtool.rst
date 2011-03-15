@@ -250,20 +250,22 @@ Specific commands:
   truncated version.
 * `ibportstate` can work with CA ports if --sa is used (FIXME: Just do the
   --sa action for all CA ports..)
+* `set_nodedesc` got the -C and -P options to set a single device. Also works
+  with UTF-8 properly.
 
 Commands
 ========
 
 Supported:
 
-============ ============= ================ ===================
-dump_lfts.sh dump_mfts.sh  ibaddr           ibfindnodesusing.pl
-ibhosts      ibnetdiscover ibnodes          ibportstate
-ibprintca.pl ibprintrt.pl  ibprintswitch.pl ibroute
-ibrouters    ibstat        ibstatus         ibswitches
-ibv_devices  perfquery     rdma_bw          saquery
-sminfo	     smpdump	   smpquery
-============ ============= ================ ===================
+==============  ============= ================ ===================
+dump_lfts.sh    dump_mfts.sh  ibaddr           ibfindnodesusing.pl
+ibhosts         ibnetdiscover ibnodes          ibportstate
+ibprintca.pl    ibprintrt.pl  ibprintswitch.pl ibroute
+ibrouters       ibstat        ibstatus         ibswitches
+ibv_devices     perfquery     rdma_bw          saquery
+set_nodedesc.sh sminfo	      smpdump	       smpquery
+=============== ============= ================ ===================
 
 To be completed:
 
@@ -273,7 +275,7 @@ ibchecknode          ibcheckport   ibcheckportstate   ibcheckportwidth
 ibcheckstate         ibcheckwidth  ibclearcounters    ibclearerrors
 ibdatacounters       ibdatacounts  ibdiscover.pl      ibidsverify.pl
 iblinkinfo[.pl]      ibping        ibqueryerrors[.pl] ibswportwatch.pl
-ibsysstat            ibtracert     set_nodedesc.sh    vendstat
+ibsysstat            ibtracert     vendstat
 ==================== ============= ================== =================
 
 Verbs examples/tests:
