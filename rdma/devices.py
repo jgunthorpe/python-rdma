@@ -30,6 +30,9 @@ def _conv_int_desc(s):
 
 def _conv_unicode(s):
     "A unicode string"
+    # The kernel puts a single \n on the description..
+    if s[-1] == '\n':
+        return s[:-1].decode("utf-8");
     return s.decode("utf-8");
 
 class SysFSCache(object):
