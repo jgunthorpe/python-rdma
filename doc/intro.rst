@@ -22,7 +22,7 @@ much more important than high performance:
   suites. Several bugs were found and patched in the OFA stack just during the
   development of the library's internal test suite.
 - Training and problem exploration. Although the interface is quite different
-  from the C APIs the general concept flow over, and the Python bindings can
+  from the C APIs the general concepts flow over, and the Python bindings can
   be used without burdensome explicit error handling.
 
 I also feel it is an fairly comprehensive exploration of an alternative and
@@ -57,6 +57,7 @@ infiniband-diags 22 commands re-implemented, 25 un-implemented.
                  Review :ref:`ibtool`
 ibutils          Good coverage of the internal APIs but no
                  coverage for the user tools.
+perftest	 `rdma_bw` is implemented as an example.
 ================ =====================================================
 
 Other than :mod:`rdma.ibverbs` all of the module is written in pure Python.

@@ -18,6 +18,7 @@ Contents:
    ibverbs.rst
    ibtool.rst
    license.rst
+   releases.rst
 
 Indices and tables
 ==================

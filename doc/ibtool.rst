@@ -248,8 +248,8 @@ Specific commands:
   the information instead of having to load a full topology.
 * `ibprintca/rt/switch` displays the complete node stanza, instead of just a
   truncated version.
-* `ibportstate` can work with CA ports if --sa is used (FIXME: Just do
-   the --sa action for all CA ports..)
+* `ibportstate` can work with CA ports if --sa is used (FIXME: Just do the
+  --sa action for all CA ports..)
 
 Commands
 ========
@@ -280,3 +280,4 @@ Verbs examples/tests:
 
 * Review test\_??\_loop in tests/verbs for an example of: `ibv_rc_pingpong`,
   `ibv_uc_pingpong`, `ibv_ud_pingpong`, `ibv_srq_pingpong`
+* `rdma_bw` is similar to the same program in `perftest`

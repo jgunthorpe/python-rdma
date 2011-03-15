@@ -12,7 +12,7 @@ to find the port, passing in a command line argument to specify the port. The
 library provides standardized parsing of an end port description. Users are
 encouraged to use end port GIDs.
 
-A list if RDMA devices is available through the :func:`rdma.get_devices`
+A list of RDMA devices is available through the :func:`rdma.get_devices`
 call.
 
 Related modules:
@@ -33,14 +33,14 @@ Usage guidelines:
 * :exc:`rdma.RDMAError` is thrown for general error conditions, like 'Device
   Not Found'. The single argument is a string containing the failure message.
   This are either system failure messages with no possible recovery, or sane
-  context localized failures - ie get_end_port throws :exc:`rdma.RDMAError`
-  if it cannot return a port.
+  context localized failures - ie :func:`~rdma.get_end_port` throws
+  :exc:`rdma.RDMAError` if it cannot return a port.
 * :exc:`rdma.MADError` is thrown for error conditions that arise from MAD
   RPC processing, including error status MADs and malformed replies.
 * :exc:`rdma.MADTimeoutError` is thrown when a MAD RPC call times out.
 * :exc:`rdma.MADClassError` is thrown when a MAD RPC call errors out with
   a class specific error.
-* :exc:`rdma.SysError`
+* :exc:`rdma.SysError` for kernel syscalls that fail.
 * :exc:`rdma.path.SAPathNotFoundError` when a path cannot be resolved due to the
   SA reporting it was not found.
 * :exc:`rdma.ibverbs.WRError` when a verbs work request fails to post.
@@ -53,7 +53,7 @@ exception may appear as a simple timeout error. This is generally pretty
 useless. The :exc:`rdma.MADError` class includes a mechanism to stack error
 messages, the lowest layer puts a layer appropriate message and higher layers
 stack their layer appropriate messages. To process this extra information any
-application using the library should use try block as follows::
+application using the library should use a try block as follows::
 
  try:
     do_stuff();

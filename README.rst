@@ -2,10 +2,15 @@
  Python RDMA
 =============
 
-This package contains the Python module `rdma` which provides access to the
-Linux RDMA stack in the Python language. It is an amalgamation of the
-functionality contained in the Open Fabrics Alliance packages `libibmad`,
-`libibumad`, `libibverbs`, `libibnetdisc` and `infiniband-diags`.
+This package contains the Python module `rdma` which provides a Python API for
+the Linux RDMA stack. It is an amalgamation of the functionality contained in
+the Open Fabrics Alliance packages `libibmad`, `libibumad`, `libibverbs`,
+`libibnetdisc` and `infiniband-diags`.
+
+A new API was developed for this library that is designed to take advantage of
+Python features and provides a very uniform, integrated design across all
+the different aspects of IB and RDMA programming. It has a particular focus on
+ease of use and correct operation of the IB and RDMA protocol stacks.
 
 The module is written entirely in Python and only relies on external
 system libraries to provide ibverbs functionality.
