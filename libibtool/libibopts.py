@@ -8,22 +8,9 @@ import rdma.path;
 import rdma.IBA as IBA;
 from libibtool import *;
 
-def tmpl_target(s):
-    dr = s.split(",");
-    if len(dr) == 1:
-        try:
-            return rdma.IBA.conv_ep_addr(s);
-        except ValueError:
-            return s;
-
-    if dr[-1] == '':
-        dr = [int(I) for I in dr[:-1]];
-    else:
-        dr = [int(I) for I in dr];
-    for I in dr:
-        if I >= 255:
-            raise CmdError("Invalid DR path");
-    return dr;
+def tmpl_target(s,default_end_port,require_dev,require_ep):
+    return rdma.path.from_string(s,default_end_port,require_dev,
+                                 require_ep);
 def tmpl_int(s):
     return int(s,0);
 
@@ -35,14 +22,75 @@ class LibIBOpts(object):
     debug = 0;
     sbn = None;
     sbn_loaded = None;
+    end_port = None;
 
     def __init__(self,o,args,values=None,max_values=0,template=None):
         self.args = args;
         self.o = o;
+
         self.end_port = self.get_end_port();
+        if template:
+            if len(values) > max_values:
+                raise CmdError("Too many arguments, expected no more than %u."%(
+                    max_values));
+
+            # Special processing for tmpl_target. The target path specified
+            # can choose the local end port, however all specified targets on
+            # the command line must share the same end port. The selection
+            # must also be consistent with the command line arguments.
+            default_end_port = self.end_port;
+            require_ep = None;
+            require_dev = None
+            if self.args.port is not None:
+                require_ep = default_end_port;
+            elif self.args.CA is not None:
+                require_dev = default_end_port.parent;
+
+            for I in range(len(values)):
+                try:
+                    tmpl = template[I];
+                    v = values[I];
+                    if tmpl == tmpl_target:
+                        if self.args.addr_direct:
+                            # -D 0 is the same as our 0,
+                            try:
+                                desc = int(v,0);
+                                v = "%u,"%(int(v,0));
+                            except ValueError:
+                                pass
+                        if self.args.addr_guid:
+                            # Will will Parse the infiniband diags hex format
+                            # GUIDs if -G is specified.
+                            try:
+                                v = str(IBA.GUID(int(v,16)));
+                            except ValueError:
+                                pass
+
+                        path = tmpl(v,default_end_port,
+                                    require_dev,require_ep);
+
+                        if self.args.addr_direct and not isinstance(path,rdma.path.IBDRPath):
+                            raise ValueError("Not a directed route");
+                        if self.args.addr_guid and path.DGID is None:
+                            raise ValueError("Not a GUID");
+                        if self.args.addr_lid and path.DLID == 0:
+                            raise ValueError("Not a LID");
+
+                        values[I] = path;
+                        if path.end_port is not None:
+                            require_ep = path.end_port;
+                            require_dev = None;
+                            default_end_port = require_ep
+                    else:
+                        values[I] = tmpl(v);
+                except ValueError as err:
+                    raise CmdError("Invalid command line argument #%u %r - %s"%(
+                        I+1,values[I],err));
+            self.end_port = default_end_port;
+
         self.end_port.sa_path.SMKey = getattr(args,"smkey",0);
         self.debug = args.debug;
-        if self.debug > 1:
+        if self.debug >= 1:
             print "debug: Using end port %s %s"%(self.end_port,self.end_port.default_gid);
         o.verbosity = max(self.debug,getattr(args,"verbosity",0));
 
@@ -57,17 +105,6 @@ class LibIBOpts(object):
                 args.use_sa = True;
             if args.discovery is None:
                 args.discovery = "LID";
-
-        if template:
-            if len(values) > max_values:
-                raise CmdError("Too many arguments, expected no more than %u."%(
-                    max_values));
-            for I in range(len(values)):
-                try:
-                    values[I] = template[I](values[I]);
-                except ValueError as err:
-                    raise CmdError("Invalid command line argument #%u %r"%(
-                        I+1,values[I]));
 
         if o.verbosity >= 2:
             self.format_args = {"format": "dump"};
@@ -95,7 +132,6 @@ class LibIBOpts(object):
         name = "debug: "+name;
         if self.debug >= 1:
             print name,path;
-        if self.debug >= 2:
             print " "*len(name),repr(path);
 
     @staticmethod
@@ -142,62 +178,49 @@ class LibIBOpts(object):
                          default=None,
                          help="File to save/restore cached discovery data.");
 
-    def get_path(self,umad,desc,smp=False):
-        """Return a :class:`rdma.path.IBPath` for the destination description desc."""
-        if isinstance(desc,list):
-            # tmp_target does the parse for us
-            return rdma.path.IBDRPath(self.end_port,
-                                      drPath = bytes("").join("%c"%(I) for I in desc));
+    def get_path(self,umad,path,smp=False):
+        """Check *path* for correctness and return it."""
+        if isinstance(path,rdma.path.IBDRPath):
+            return path;
 
-        if self.args.addr_direct:
-            # -D 0 is the same as our 0,
-            try:
-                desc = int(desc,0);
-            except ValueError:
-                raise CmdError("Target was not parsed as directed route");
-            return rdma.path.IBDRPath(self.end_port,
-                                      drPath = bytes("%c"%(desc)));
-
-        try:
-            ep = rdma.IBA.conv_ep_addr(desc);
-        except ValueError:
-            raise CmdError("Could not parse %r as a TARGET. Tried as a GID, port GUID, directed route and LID."%(desc))
-
-        if self.args.addr_guid and not isinstance(ep,IBA.GID):
-            raise CmdError("Target was not parsed as a GUID");
-        if self.args.addr_lid and not (isinstance(ep,int) or isinstance(ep,long)):
-            raise CmdError("Target was not parsed as a LID");
+        if path.complete():
+            return path;
 
         # VL15 packets don't have a SL so we don't have to do a PR query.
-        if smp and isinstance(ep,int) or isinstance(ep,long):
-            return rdma.path.IBPath(umad.end_port,
-                                    SLID=umad.end_port.lid,
-                                    DLID=ep);
+        if smp and path.DLID != 0:
+            path.SLID = path.end_port.lid;
+            return path;
 
         self.debug_print_path("SA",self.end_port.sa_path);
         if umad == None:
             with self.get_umad() as umad:
-                return rdma.path.get_mad_path(umad,ep);
-        return rdma.path.get_mad_path(umad,ep);
+                return rdma.path.resolve_path(umad,path);
+        return rdma.path.resolve_path(umad,path);
 
-    def get_smp_path(self,desc,umad):
-        """Return a :class:`rdma.path.IBPath` for the destination description desc.
-        The path is suitable for use with SMPs."""
-        if desc:
-            path = self.get_path(umad,desc,True);
-            path.dqpn = 0;
+    def get_smp_path(self,path,umad):
+        """Return a :class:`rdma.path.IBPath` for *path. The path is suitable
+        for use with SMPs."""
+        if path:
+            if path.dqpn is None:
+                path.dqpn = 0;
+            if path.qkey is None:
+                path.qkey = IBA.IB_DEFAULT_QP0_QKEY;
             path.sqpn = 0;
-            path.qkey = IBA.IB_DEFAULT_QP0_QKEY;
+            path = self.get_path(umad,path,True);
         else:
             path = rdma.path.IBDRPath(self.end_port);
         self.debug_print_path("SMP",path);
         return path;
 
-    def get_gmp_path(self,desc,umad):
-        """Return a :class:`rdma.path.IBPath` for the destination description desc.
-        The path is suitable for use with SMPs."""
-        if desc:
-            path = self.get_path(umad,desc);
+    def get_gmp_path(self,path,umad):
+        """Return a :class:`rdma.path.IBPath` for *path. The path is suitable
+        for use with SMPs."""
+        if path:
+            if path.dqpn is None:
+                path.dqpn = 1;
+            if path.qkey is None:
+                path.qkey = IBA.IB_DEFAULT_QP1_QKEY;
+            path = self.get_path(umad,path);
             if isinstance(path,rdma.path.IBDRPath):
                 # Convert the DR path into a LID path for use with GMPs using
                 # the SA.
@@ -208,9 +231,6 @@ class LibIBOpts(object):
                     import sys;
                     sat = sys.modules["rdma.satransactor"].SATransactor(umad);
                 path = rdma.path.get_mad_path(umad,sat.get_path_lid(path));
-            path.dqpn = 1;
-            path.sqpn = 1;
-            path.qkey = IBA.IB_DEFAULT_QP1_QKEY;
         else:
             path = rdma.path.IBPath(
                 umad.end_port,
@@ -218,19 +238,21 @@ class LibIBOpts(object):
                 DLID=self.end_port.lid,
                 DGID=self.end_port.default_gid,
                 qkey = IBA.IB_DEFAULT_QP1_QKEY,
-                dqpn = 1,
-                sqpn = 1);
+                dqpn = 1);
         self.debug_print_path("GMP",path);
         return path;
 
     def get_umad(self,gmp=False):
         """Return a generic umad."""
-        return self.get_umad_for_target(None,gmp=gmp);
+        return self.get_umad_for_target(gmp=gmp);
 
-    def get_umad_for_target(self,dest,gmp=False):
-        """Return a UMAD suitable for use to talk to dest."""
-        # FIXME: dest should play a role in determining the local end port if it is
-        # a GID
+    def get_umad_for_target(self,path=False,gmp=False):
+        """Return a UMAD suitable for use to talk to *path*. *path* is an
+        :class:`rdma.path.IBPath`. If *path* is `None` then a loopback path is
+        resolved, if *path* is `False` then no path is resolved.
+        """
+        if path:
+            assert(path.end_port == self.end_port);
         umad = rdma.get_umad(self.end_port);
         try:
             if self.debug >= 1:
@@ -243,12 +265,12 @@ class LibIBOpts(object):
                 import sys;
                 umad = sys.modules["rdma.satransactor"].SATransactor(umad);
 
-            if dest is None:
+            if path is False:
                 self.path = None;
             elif gmp:
-                self.path = self.get_gmp_path(dest,umad);
+                self.path = self.get_gmp_path(path,umad);
             else:
-                self.path = self.get_smp_path(dest,umad);
+                self.path = self.get_smp_path(path,umad);
             return umad;
         except:
             umad.close();

@@ -130,7 +130,7 @@ def cmd_ibaddr(argv,o):
     lib = LibIBOpts(o,args,values,1,(tmpl_target,));
 
     if not values:
-        values = ('',);
+        values = (None,);
 
     if args.lid is None and args.gid is None:
         args.lid = True;
@@ -250,7 +250,7 @@ def cmd_sminfo(argv,o):
     lib = LibIBOpts(o,args,values,2,(tmpl_target,tmpl_int));
 
     if not values:
-        values = ('',);
+        values = (None,);
 
     with lib.get_umad_for_target(values[0]) as umad:
         if values[0]:

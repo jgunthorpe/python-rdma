@@ -70,7 +70,7 @@ def go_listing(argv,o,node_type,lib=None):
         (args,values) = o.parse_args(argv,expected_values=0);
         lib = LibIBOpts(o,args,values);
 
-    with lib.get_umad_for_target(None) as umad:
+    with lib.get_umad() as umad:
         sched = lib.get_sched(umad);
         sbn = lib.get_subnet(sched,
                              ["all_NodeInfo %u"%(node_type),
@@ -96,7 +96,7 @@ def go_print_node(argv,o,node_type):
         raise CmdError("Too few arguments");
 
     node_guid = values[0];
-    with lib.get_umad_for_target(None) as umad:
+    with lib.get_umad() as umad:
         sched = lib.get_sched(umad);
 
         if isinstance(sched,rdma.satransactor.SATransactor):
@@ -158,7 +158,7 @@ def cmd_ibnodes(argv,o):
     (args,values) = o.parse_args(argv,expected_values=0);
     lib = LibIBOpts(o,args,values);
 
-    with lib.get_umad_for_target(None) as umad:
+    with lib.get_umad() as umad:
         sched = lib.get_sched(umad);
         sbn = lib.get_subnet(sched,
                              ["all_NodeInfo",
@@ -243,7 +243,7 @@ def cmd_ibnetdiscover(argv,o):
     (args,values) = o.parse_args(argv,expected_values=0);
     lib = LibIBOpts(o,args,values);
 
-    with lib.get_umad_for_target(None) as umad:
+    with lib.get_umad() as umad:
         sched = lib.get_sched(umad);
         # Sigh, I'd love to have incremental output but my tidy encapsulation
         # does not allow that.

@@ -158,7 +158,7 @@ def cmd_dump_lfts(argv,o):
     args.do_lfdb = True;
     args.do_mfdb = False;
 
-    with lib.get_umad_for_target(None) as umad:
+    with lib.get_umad() as umad:
         sched = lib.get_sched(umad);
         sbn = lib.get_subnet(sched,
                              ["all_LIDs",
@@ -183,7 +183,7 @@ def cmd_dump_mfts(argv,o):
     args.do_mfdb = True;
     args.no_dests = True;
 
-    with lib.get_umad_for_target(None) as umad:
+    with lib.get_umad() as umad:
         sched = lib.get_sched(umad);
         sbn = lib.get_subnet(sched,
                              ["all_SwitchInfo"]);

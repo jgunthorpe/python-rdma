@@ -53,14 +53,18 @@ Most of the commands will operate on a remote port, this requires doing a MAD
 RPC from the local end port to the remote. Commands accept a uniform format
 for specifying the target end port
 
-      =========== ===================
-      Format      Example
-      =========== ===================
-      Port GID    fe80::2:c903:0:1491
-      Port GUID   0002:c903:0000:1491
-      LID         12 (decimal)
-      DR Path     0,1  (the thing connected to port 1)
-      =========== ===================
+      ============= =====================================
+      Format        Example
+      ============= =====================================
+      Port GID      fe80::2:c903:0:1491
+      Scoped GID    fe80::2:c903:0:1491%mlx4_0/1
+      Port GUID     0002:c903:0000:1491
+      LID           12 (decimal)
+      DR Path       0,1  (the thing connected to port 1)
+      Path Spec	    IBPath(SLID=8,DLID=8,SL=2,pkey=0xFFF)
+      Hex Port GUID 0x0002c90300001491
+      	       	    (requires -G)
+      ============= =====================================
 
 The directed route (DR) path option allows specifying a directed route path,
 the value ``0,`` is the local end port, ``0,1`` is the thing connected to port
@@ -75,6 +79,12 @@ If a GMP is required then the address is resolved to a full path using the SA.
 Resolving a directed route to a GMP path is done using
 a series of :class:`rdma.IBA.SALinkRecord` RPCs.
 
+When using a full path specification refer to the documentation for
+:class:`rdma.path.IBPath`, the format is the classes :func:`repr` format. If a
+complete path, with source and destination, is specified then it is used as
+is, otherwise the SA will be used to resolve it. This is true even for GMP
+paths. This extended format can be used to specify all parameters, including
+pkey, presence and content of a GRH, packet_life_time, etc.
 
 Error Handling
 ==============

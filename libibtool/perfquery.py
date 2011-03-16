@@ -59,7 +59,7 @@ def cmd_perfquery(argv,o):
     lib = LibIBOpts(o,args,values,3,(tmpl_target,tmpl_int,tmpl_int));
 
     if len(values) == 0:
-        values = ('',);
+        values = (None,);
 
     global _format_args
     _format_args = lib.format_args;
