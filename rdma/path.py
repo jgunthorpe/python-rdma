@@ -163,8 +163,12 @@ class IBPath(Path):
         try:
             return self._cached_SGID_index;
         except AttributeError:
+            pass
+        try:
             self._cached_SGID_index = self.end_port.gids.index(self.SGID);
             return self._cached_SGID_index;
+        except ValueError:
+            raise rdma.RDMAError("GID %s not available on %s"%(self.SGID,self.end_port));
     @SGID_index.setter
     def SGID_index(self,value):
         self.SGID = self.end_port.gids[value];
@@ -178,8 +182,12 @@ class IBPath(Path):
         try:
             return self._cached_pkey_index;
         except AttributeError:
+            pass
+        try:
             self._cached_pkey_index = self.end_port.pkeys.index(self.pkey);
             return self._cached_pkey_index;
+        except ValueError:
+            raise rdma.RDMAError("PKey 0x%x not available on %s"%(self.pkey,self.end_port));
     @pkey_index.setter
     def pkey_index(self,value):
         self.pkey = self.end_port.pkeys[value];
