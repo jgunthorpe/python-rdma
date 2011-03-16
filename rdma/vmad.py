@@ -32,7 +32,9 @@ class VMAD(rdma.madtransactor.MADTransactor):
             self._allocated_ctx = True;
         elif isinstance(parent,ibv.Context):
             self._ctx = parent;
-        self.end_port = self._ctx.end_port;
+        self.end_port = path.end_port;
+        if path.end_port.parent != self._ctx.node:
+            raise rdma.RDMAError("Cannot connect path %r to verbs %r"%(self._ctx,path))
 
         self._cc = self._ctx.comp_channel();
         self._cq = self._ctx.cq(2*depth,self._cc);
