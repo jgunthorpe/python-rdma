@@ -106,9 +106,6 @@ def go_print_node(argv,o,node_type):
             # Can't search by node GUID, do it the hard way..
             sbn = lib.get_subnet(sched,
                                  ["all_NodeInfo %u"%(node_type)]);
-        # FIXME: Move me
-        if sbn.topology is None:
-            sbn.topology = {};
 
         node = sbn.nodes.get(node_guid);
         if node is None:

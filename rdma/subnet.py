@@ -255,6 +255,7 @@ class Subnet(object):
         self.ports = {};
         self.lids = [];
         self.all_nodes = set();
+        self.topology = {};
         self.loaded = set();
 
     def set_max_lid(self,max_lid):

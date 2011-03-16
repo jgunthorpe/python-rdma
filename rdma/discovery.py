@@ -320,9 +320,6 @@ def topo_peer_SMP(sched,sbn,port,get_desc=True):
     LID routing.
 
     This does nothing if the information is already loaded."""
-    if sbn.topology is None:
-        sbn.topology = {};
-
     peer_port = sbn.topology.get(port);
     if peer_port is None:
         portIdx = port.parent.ports.index(port);
