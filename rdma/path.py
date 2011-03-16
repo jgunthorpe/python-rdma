@@ -64,6 +64,10 @@ class Path(object):
                  if k[0] != "_" and k != "end_port" and getattr(cls,k,None) != v);
         return (cls,(None,),d);
 
+    def complete(self):
+        """Return `True` if the path is complete and usable."""
+        return self.end_port is not None;
+
 class IBPath(Path):
     """Describe a path in an IB network with a LRH and GRH and BTH
 
@@ -138,6 +142,17 @@ class IBPath(Path):
     drdatomic = 255;
     #: Source issuable RD atomic
     srdatomic = 255;
+
+    def complete(self):
+        if self.DLID == 0 or self.DLID >= IBA.LID_MULTICAST:
+            return False;
+        if self.SLID == 0 or self.SLID >= IBA.LID_MULTICAST:
+            return False;
+        if self.has_grh and (self.SGID is None or self.DGID is None):
+            return False;
+        if self.dqpn is None:
+            return False;
+        return Path.complete(self);
 
     def reverse(self,for_reply=True):
         """Reverse this path in-place according to IBA 13.5.4. If *for_reply*
@@ -305,6 +320,9 @@ class IBDRPath(IBPath):
     def has_grh(self):
         """Returns False, GID addressing is not possible for DR paths."""
         return False;
+
+    def complete(self):
+        return Path.complete(self) and bool(self.drPath);
 
     @classmethod
     def _format_drPath(cls,v):
