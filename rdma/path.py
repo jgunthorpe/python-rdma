@@ -1,5 +1,6 @@
 # Copyright 2011 Obsidian Research Corp. GLPv2, see COPYING.
 import os;
+import sys;
 import rdma;
 import rdma.IBA as IBA;
 
@@ -7,7 +8,10 @@ class Path(object):
     """Describe an RDMA path. This also serves to cache the path for cases
     that need it in an AH or other format. Paths should be considered final,
     once construction is finished their content must never change. This is to
-    prevent cached data in the path from becoming stale."""
+    prevent cached data in the path from becoming stale.
+
+    The :func:`repr` format will produce a string that is valid Python and is also
+    compatible with :func:`from_spec_string`."""
 
     #: Number of times a MAD will be resent, or the value of retry_cnt for a
     #: RC QP.
@@ -19,6 +23,8 @@ class Path(object):
         """*end_port* is the :class:`rdma.devices.EndPort` this path is
         associated with. *kwargs* is applied to set attributes of the
         instance during initialization."""
+        if isinstance(end_port,str) or isinstance(end_port,unicode):
+            end_port = rdma.get_end_port(end_port);
         self.end_port = end_port;
         for k,v in kwargs.iteritems():
             setattr(self,k,v);
@@ -41,10 +47,14 @@ class Path(object):
 
     def __repr__(self):
         cls = self.__class__;
-        keys = ("%s=%r"%(k,v) for k,v in sorted(self.__dict__.iteritems())
+        keys = ("%s=%s"%(k,getattr(cls,"_format_%s"%(k),lambda x:repr(x))(v))
+                for k,v in sorted(self.__dict__.iteritems())
                 if k[0] != "_" and k != "end_port" and getattr(cls,k,None) != v);
-        return "%s(end_port=%r, %s)"%(cls.__name__,str(self.end_port),
-                                      ", ".join(keys));
+        if self.end_port is None:
+            ep = None;
+        else:
+            ep = str(self.end_port)
+        return "%s(end_port=%r, %s)"%(cls.__name__,ep,", ".join(keys));
 
     def __reduce__(self):
         """When we pickle :class:`~rdma.path.IBPath` objects the *end_port*
@@ -233,6 +243,17 @@ class IBPath(Path):
                                                 2**self.dack_resp_time);
             return self._cached_qp_timeout;
 
+    @classmethod
+    def _format_pkey(cls,v):
+        return "0x%x"%(v);
+    _format_qkey = _format_pkey
+    @classmethod
+    def _format_DLID(cls,v):
+        if v >= IBA.LID_MULTICAST:
+            return "0x%x"%(v);
+        return str(v);
+    _format_SLID = _format_DLID
+
     def __str__(self):
         if self.has_grh:
             res = "%s %r -> %s %u TC=%r FL=%r HL=%r"%(
@@ -240,7 +261,7 @@ class IBPath(Path):
                 self.flow_label,self.hop_limit);
         else:
             res = "%r -> %r"%(self.SLID,self.DLID);
-        return "Path %s SL=%r PKey=%r DQPN=%r"%(
+        return "Path %s SL=%r PKey=0x%x DQPN=%r"%(
             res,self.SL,self.pkey,self.dqpn);
 
 class IBDRPath(IBPath):
@@ -276,6 +297,10 @@ class IBDRPath(IBPath):
     def has_grh(self):
         """Returns False, GID addressing is not possible for DR paths."""
         return False;
+
+    @classmethod
+    def _format_drPath(cls,v):
+        return ":".join("%u"%(ord(I)) for I in v) + ":";
 
     def __str__(self):
         # No LID components
@@ -322,22 +347,32 @@ class LazyIBPath(IBPath):
         return rdma.path.IBPath.__repr__(self);
 
 def get_mad_path(mad,ep_addr,**kwargs):
-    """Query the SA and return a path for *ep_addr* (:func:rdma.IBA.conv_ep_addr is
-    called automatically).
+    """Query the SA and return a path for *ep_addr*.
 
     This is a simplified query function to return MAD paths from the end port
-    associated with *mad* to the destination *ep_addr*.
+    associated with *mad* to the destination *ep_addr*.  If *ep_addr* is a
+    string then :func:`from_string` is called automatically, otherwise
+    :func:`rdma.IBA.conv_ep_addr` is used. Thus this will accept a destination
+    address string, an integer (DLID), :class:`~rdma.IBA.GID` (DGID) and
+    :class:`~rdma.IBA.GUID` (DGID).
 
     This returns a single reversible path.
 
     :raises ValueError: If dest is not appropriate.
     :raises rdma.path.SAPathNotFoundError: If *ep_addr* was not found at the SA.
     :raises rdma.MADError: If the RPC failed in some way."""
-    ep_addr = IBA.conv_ep_addr(ep_addr);
-    if isinstance(ep_addr,IBA.GID):
-        path = IBPath(mad.end_port,DGID=ep_addr,**kwargs);
+    ty = type(ep_addr);
+    if ty == str or ty == unicode:
+        path = from_string(ep_addr,require_ep=mad.end_port);
+        for k,v in kwargs.iteritems():
+            setattr(path,k,v);
     else:
-        path = IBPath(mad.end_port,DLID=ep_addr,**kwargs);
+        ep_addr = IBA.conv_ep_addr(ep_addr);
+        if isinstance(ep_addr,IBA.GID):
+            path = IBPath(mad.end_port,DGID=ep_addr,**kwargs);
+        else:
+            path = IBPath(mad.end_port,DLID=ep_addr,**kwargs);
+
     return resolve_path(mad,path,True);
 
 def resolve_path(mad,path,reversible=False,properties=None):
@@ -424,3 +459,165 @@ def fill_path(qp,path,max_rd_atomic=255):
         path.sqpsn = int(os.urandom(3).encode("hex"),16);
     if path.dqpsn == 0:
         path.dqpsn = int(os.urandom(3).encode("hex"),16);
+
+def from_spec_string(s):
+    """Construct a *Path* (or derived) instance from it's `repr` string.
+
+    This parser is safe to use with untrusted data.
+
+    :raises ValueError: If the string can not be parsed."""
+    import re,itertools;
+    m = re.match("^(.+?)\(\s*?(.*?)\s*?\)$",s);
+    if m is None:
+        raise ValueError("Invalid path specification %r"%(s,));
+    m = m.groups();
+    cls = getattr(sys.modules[__name__],m[0],None)
+    if cls is None or not issubclass(cls,Path):
+        raise ValueError("Invalid path specification %r, bad path type"%(s,));
+
+    kwargs = dict((t[0].strip(), t[2].strip())
+                  for t in (I.partition('=')
+                            for I in m[1].split(',')));
+
+    if len(kwargs) < 1:
+        raise ValueError("Invalid path specification %r"%(s,));
+    for k,v in kwargs.iteritems():
+        if v == '':
+            raise ValueError("Invalid path specification %r"%(s,));
+        if not hasattr(cls,k):
+            raise ValueError("Path attribute %r is not known"%(k,));
+
+        if v.startswith("GID("):
+            v = v[4:-1];
+            if v[0] == '"' or v[0] == "'":
+                v = v[1:-1];
+            kwargs[k] = IBA.GID(v);
+        elif k.find("GID") != -1:
+            kwargs[k] = IBA.GID(v);
+        elif k == "drPath":
+            # Using : because I am too lazy to fix the splitter to respect quotes.
+            dr = v.split(":");
+            if len(dr) == 1:
+                raise ValueError("Invalid DR path specification %r"%(v,));
+            if dr[-1] == '':
+                dr = [int(I) for I in dr[:-1]];
+            else:
+                dr = [int(I) for I in dr];
+            for I in dr:
+                if I >= 255:
+                    raise ValueError("Invalid DR path specification %r"%(v,));
+                if len(dr) == 0:
+                    raise ValueError("Invalid DR path specification %r"%(s,));
+                if dr[0] != 0:
+                    raise ValueError("Invalid DR path specification %r"%(s,));
+            kwargs[k] = bytes("").join("%c"%(I) for I in dr);
+        elif k == "end_port":
+            if v[0] == '"' or v[0] == "'":
+                v = v[1:-1];
+            try:
+                if v == "None":
+                    kwargs[k] = None;
+                else:
+                    kwargs[k] = rdma.get_end_port(v);
+            except rdma.RDMAError, e:
+                raise ValueError("Could not find %r: %s"%(v,e));
+        else:
+            try:
+                kwargs[k] = int(v,0);
+            except ValueError:
+                raise ValueError("%r=%r is not a valid integer"%(k,v));
+    if "end_port" not in kwargs:
+        kwargs["end_port"] = None;
+    return cls(**kwargs);
+
+def _check_ep(ep,require_dev=None,require_ep=None):
+    if require_dev is not None and ep.parent != require_dev:
+        raise ValueError("Path requires device %s, got %s"%(require_dev,ep))
+    if require_ep is not None and ep != require_ep:
+        raise ValueError("Path requires end port %s, got %s"%(require_ep,ep))
+
+def from_string(s,default_end_port=None,require_dev=None,require_ep=None):
+    """Convert the string *s* into an instance of :class:`Path` or
+    derived.
+
+    Supported formats for *s* are:
+      =========== ============================ ========================
+      Format      Example                      Creates
+      =========== ============================ ========================
+      Port GID    fe80::2:c903:0:1491          IBPath.DGID = s
+      Scope'd GID fe80::2:c903:0:1491%mlx4_0/1 IBPath.DGID = s
+      Port GUID   0002:c903:0000:1491          IBPath.DGID = fe80:: + s
+      LID         12                           IBPath.DLID = 12
+      Hex LID     0xc                          IBPath.DLID = 12
+      DR Path     0,1,                         IBDRPath.drPath = '\\\\0\\\\1'
+      Path Spec   IBPath(DLID=2,SL=2)          IBPath.{DLID=2,SL=2}
+      =========== ============================ ========================
+
+    If the format unambiguously specifies an end port, eg due to a provided
+    scope or by specifying the subnet prefix then the result will have `end_port`
+    set appropriately. Otherwise `end_port` is set to `default_end_port`.
+
+    *require_dev* and *require_ep* will restrict the lookup to returning
+    a path for those conditions. If a scoped address is given that doesn't
+    match then :exc:`ValueError` is raised. These options should be used when
+    a path is being parsed for use with an existing bound resource (eg
+    a :class:`rdma.ibverbs.Context` or :class:`rdma.ibverbs.`)
+
+    FUTURE: This may return paths other than IB for other technologies.
+
+    :raises ValueError: If the string can not be parsed."""
+    if require_ep is not None:
+        default_end_port = require_ep;
+
+    if s.find("(") != -1:
+        ret = from_spec_string(s);
+        if ret.end_port is None:
+            ret.end_port = default_end_port;
+        else:
+            _check_ep(ret.end_port,require_dev,require_ep);
+        return ret;
+
+    dr = s.split(",");
+    if len(dr) != 1:
+        if dr[-1] == '':
+            dr = [int(I) for I in dr[:-1]];
+        else:
+            dr = [int(I) for I in dr];
+        for I in dr:
+            if I >= 255:
+                raise ValueError("Invalid DR path specification %r"%(s,));
+        if len(dr) == 0:
+            raise ValueError("Invalid DR path specification %r"%(s,));
+        if dr[0] != 0:
+            raise ValueError("Invalid DR path specification %r"%(s,));
+        drPath = bytes("").join("%c"%(I) for I in dr);
+        return IBDRPath(default_end_port,drPath=drPath);
+
+    a = s.split('%');
+    if len(a) == 2:
+        DGID = IBA.GID(a[0])
+        try:
+            end_port = rdma.get_end_port(a[1]);
+            _check_ep(end_port,require_dev,require_ep);
+        except rdma.RDMAError, e:
+            raise ValueError("Could not find %r: %s"%(a[1],e));
+        return IBPath(end_port,DGID=DGID);
+
+    res = rdma.IBA.conv_ep_addr(s);
+    if isinstance(res,IBA.GID):
+        # Search all the GIDs for one that matches the prefix, someday we
+        # should have a host routing table for this lookup...
+        prefix = int(res) >> 64;
+        if prefix != IBA.GID_DEFAULT_PREFIX and require_ep is None:
+            for I in rdma.get_devices():
+                if I != require_dev and require_dev is not None:
+                    continue;
+                for J in I.end_ports:
+                    for G in J.gids:
+                        if int(G) >> 64 == prefix:
+                            _check_ep(J,require_dev,require_ep);
+                            return IBPath(J,DGID=res);
+        return IBPath(default_end_port,DGID=res);
+    if isinstance(res,int) or isinstance(res,long):
+        return IBPath(default_end_port,DLID=res);
+    raise ValueError("Invalid destination %r"%(s,))

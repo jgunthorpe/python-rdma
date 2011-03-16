@@ -251,6 +251,8 @@ class GUID(bytes):
         return "%s:%s:%s:%s"%(tmp[0:4],tmp[4:8],tmp[8:12],tmp[12:16]);
     def __repr__(self):
         return "GUID('%s')"%(self.__str__());
+    def __int__(self):
+        return int(bytes.__str__(self).encode("hex"),16);
 
     def __reduce__(self):
         return (GUID,(bytes.__str__(self),True));
@@ -309,6 +311,8 @@ class GID(bytes):
     def guid(self):
         """Return the GUID portion of the GID."""
         return GUID(bytes.__getslice__(self,8,16),raw=True);
+    def __int__(self):
+        return int(bytes.__str__(self).encode("hex"),16);
 
     def __reduce__(self):
         return (GID,(bytes.__str__(self),True));
