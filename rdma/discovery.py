@@ -335,6 +335,7 @@ def topo_peer_SMP(sched,sbn,port,get_desc=True):
 
         peer_node,peer_zport = yield subnet_ninf_SMP(sched,sbn,peer_path,
                                                      get_desc,use_sa);
+        get_desc = False;
         if not use_sa:
             lpn = getattr(peer_path,"_cached_subnet_localPortNum",
                           peer_node.ninf.localPortNum);
