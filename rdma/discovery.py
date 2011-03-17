@@ -120,6 +120,7 @@ def subnet_ninf_SMP(sched,sbn,path,get_desc=True,use_sa=None,done_desc=None):
     else:
         ninf = yield sched.SubnGet(IBA.SMPNodeInfo,path);
         result = sbn.get_node_ninf(ninf,path);
+        sched.result = result;
         node,port = result
 
         if node.desc is not None or get_desc is False:
