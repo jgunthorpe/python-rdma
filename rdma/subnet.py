@@ -102,6 +102,11 @@ class Port(object):
         """The port number for this port."""
         return self.parent.ports.index(self);
 
+    def __repr__(self):
+        ep = self.to_end_port();
+        return "<Port #%u %s %s 0x%x>"%(self.port_id,
+                                        ep.portGUID,ep.LID,id(self))
+
 class CA(Node):
     """Hold onto information about a single CA node in the network."""
 
@@ -288,7 +293,8 @@ class Subnet(object):
 
     def get_path_smp(self,sched,end_port):
         """Return a VL15 SMP path to *end_port*. If directed routing is being
-        used then this must be used to get paths."""
+        used then this must be used to get paths. *sched* is an object with an
+        `end_port` attribute."""
         if self.paths is not None:
             path = self.paths.get(end_port);
             if path is not None:
