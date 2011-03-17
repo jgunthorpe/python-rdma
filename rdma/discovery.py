@@ -303,11 +303,14 @@ def topo_SMP(sched,sbn,get_desc=True):
         sbn.loaded.add("all_NodeDescription");
     sbn.loaded.add("all_topology");
 
-def topo_peer_SMP(sched,sbn,port,get_desc=True):
-    """Generator to fetch a single connected peer. This updates
+def topo_peer_SMP(sched,sbn,port,get_desc=True,path=None,
+                  peer_path=None):
     """Coroutine to fetch a single connected peer. This updates
     :attr:`rdma.subnet.Subnet.topology`. It also fetches a port info to setup
     LID routing.
+
+    *peer_path* is the path out *port*, created by
+     :meth:`rdma.subnet.Subnet.advance_dr`.
 
     This does nothing if the information is already loaded."""
     peer_port = sbn.topology.get(port);
@@ -315,17 +318,16 @@ def topo_peer_SMP(sched,sbn,port,get_desc=True):
         portIdx = port.parent.ports.index(port);
 
         use_sa = isinstance(sched,rdma.satransactor.SATransactor);
-        path = sbn.get_path_smp(sched,port.to_end_port());
-
-        if isinstance(path,rdma.path.IBDRPath):
-            peer_path = path.copy();
-            peer_path.drPath += chr(portIdx);
-        else:
+        if peer_path is None:
+            if path is None:
+                path = sbn.get_path_smp(sched,port.to_end_port());
             peer_path = sbn.advance_dr(path,portIdx);
 
         # Resolve the DR path using the SA and update our topology information
         # as well.
         if use_sa:
+            if path is None:
+                path = sbn.get_path_smp(sched,port.to_end_port());
             req = IBA.ComponentMask(IBA.SALinkRecord());
             req.fromLID = yield sched.prepare_path_lid(path);
             req.fromPort = portIdx;
