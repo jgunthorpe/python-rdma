@@ -56,7 +56,7 @@
   </struct>
 
   <struct name="HdrDETH" bytes="8" desc="Datagram Extended Transport Header" sect="9.3.2">
-    <mb bits="32" off="0[0]">QKey</mb>
+    <mb bits="32" off="0[0]" display="hex">QKey</mb>
     <mb bits="8" off="0[32]"></mb>
     <mb bits="24" off="0[40]">srcQP</mb>
   </struct>

@@ -267,8 +267,8 @@
           methods="SubnAdmGet SubnAdmSet SubnAdmGetTable SubnAdmDelete">
     <mb bits="128" off="0[0]" type="HdrIPv6Addr">MGID<!--MGID--></mb>
     <mb bits="128" off="0[128]" type="HdrIPv6Addr">portGID<!--PortGID--></mb>
-    <mb bits="32" off="0[256]">QKey<!--Q_Key--></mb>
-    <mb bits="16" off="0[288]">MLID<!--MLID--></mb>
+    <mb bits="32" off="0[256]" display="hex">QKey<!--Q_Key--></mb>
+    <mb bits="16" off="0[288]" display="hex">MLID<!--MLID--></mb>
     <mb bits="2" off="0[304]">MTUSelector<!--MTUSelector--></mb>
     <mb bits="6" off="0[306]">MTU<!--MTU--></mb>
     <mb bits="8" off="0[312]" display="hex">TClass<!--TClass--></mb>

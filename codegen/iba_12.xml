@@ -45,8 +45,8 @@
     <mb bits="32" off="4"><!--Reserved--></mb>
     <mb bits="64" off="8" display="hex">serviceID<!--ServiceID--></mb>
     <mb bits="64" off="16">LGUID<!--Local CA GUID--></mb>
-    <mb bits="32" off="24">localCMQKey<!--Local CM Q_Key--></mb>
-    <mb bits="32" off="28">localQKey<!--Local Q_Key--></mb>
+    <mb bits="32" off="24" display="hex">localCMQKey<!--Local CM Q_Key--></mb>
+    <mb bits="32" off="28" display="hex">localQKey<!--Local Q_Key--></mb>
     <mb bits="24" off="32">localQPN<!--Local QPN--></mb>
     <mb bits="8" off="35">responderResources<!--Responder Resources--></mb>
     <mb bits="24" off="36">localEECN<!--Local EECN--></mb>
@@ -113,7 +113,7 @@
           methods="CommMgtSend">
     <mb bits="32" off="0">LCID<!--Local Communication ID--></mb>
     <mb bits="32" off="4">RCID<!--Remote Communication ID--></mb>
-    <mb bits="32" off="8">localQKey<!--Local Q_Key--></mb>
+    <mb bits="32" off="8" display="hex">localQKey<!--Local Q_Key--></mb>
     <mb bits="24" off="12">localQPN<!--Local QPN--></mb>
     <mb bits="8" off="15"><!--Reserved--></mb>
     <mb bits="24" off="16">localEEContext<!--Local EE Context Number--></mb>
@@ -178,7 +178,7 @@
           methods="CommMgtSend">
     <mb bits="32" off="0">LCID<!--Local Communication ID--></mb>
     <mb bits="32" off="4">RCID<!--Remote Communication ID--></mb>
-    <mb bits="32" off="8">QKey<!--Local CM Q_KEY--></mb>
+    <mb bits="32" off="8" display="hex">QKey<!--Local CM Q_KEY--></mb>
     <mb bits="24" off="12">RQPN<!--Remote QPN/EECN--></mb>
     <mb bits="5" off="15">RCMTimeout<!--Remote CM Response Timeout--></mb>
     <mb bits="3" off="15[5]"><!--Reserved--></mb>
@@ -241,7 +241,7 @@
     <mb bits="24" off="4">QPN<!--QPN--></mb>
     <mb bits="8" off="7">status<!--Status--></mb>
     <mb bits="64" off="8" display="hex">serviceID<!--ServiceID--></mb>
-    <mb bits="32" off="16">QKey<!--Q_Key--></mb>
+    <mb bits="32" off="16" display="hex">QKey<!--Q_Key--></mb>
     <mb bits="576" off="20" type="struct MADClassPortInfo">classPortinfo<!--ClassPortinfo--></mb>
     <mb bits="1120" off="92">privateData<!--Private Data--></mb>
   </struct>
