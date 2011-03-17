@@ -263,6 +263,24 @@ class Subnet(object):
         if len(self.lids) <= max_lid:
             self.lids.extend(None for I in range(len(self.lids),max_lid+1));
 
+    def path_to_port(self,path):
+        """Return a :class:`Port` instance for *path* or `None` if one does not
+        exist."""
+        ret = getattr(path,"_cached_subnet_end_port",None)
+        if ret is not None:
+            return ret;
+
+        if isinstance(path,rdma.path.IBDRPath):
+            pass;
+        else:
+            if ret is None and path.DGID is not None:
+                ret = self.ports.get(path.DGID.guid());
+            if ret is None and path.DLID != 0 and path.DLID < len(self.lids):
+                ret = self.lids[path.DLID];
+            if ret is not None:
+                path._cached_subnet_end_port = ret;
+        return ret;
+
     def get_path_smp(self,sched,end_port):
         """Return a VL15 SMP path to *end_port*. If directed routing is being
         used then this must be used to get paths."""

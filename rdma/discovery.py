@@ -402,6 +402,44 @@ def topo_surround_SMP(sched,sbn,node,get_desc=True):
         else:
             sched.queue(do_port(node.ports.index(I),path));
 
+def subnet_fill_port(sched,sbn,port,path=None,get_desc=True):
+    """Generator to fill in the `pinf`, `ninf`, and `desc` for
+    *port*. This will also collect the end port `pinf` as well as the
+    `pinf` for *port* if they are different.
+
+    This does nothing if the information is already loaded."""
+    node = port.parent;
+    port_ep = port.to_end_port();
+    if path is None:
+        path = sbn.get_path_smp(sched,port_ep);
+    if node.ninf is None:
+        yield rdma.discovery.subnet_ninf_SMP(sched,sbn,path,get_desc);
+        get_desc = False;
+    if get_desc and node.desc is None:
+        yield node.get_desc(sched,path);
+    if port.pinf is None:
+        yield rdma.discovery.subnet_pinf_SMP(sched,sbn,
+                                             node.ports.index(port),
+                                             path);
+    if port_ep.pinf is None and port_ep != port:
+        yield rdma.discovery.subnet_pinf_SMP(sched,sbn,
+                                             node.ports.index(port_ep),
+                                             path);
+
+def subnet_get_port(sched,sbn,path,get_desc=True):
+    """Coroutine to associate *path* with a :class:`rdma.subnet.Port`
+    structure with a filled in `pinf`, `ninf` and `desc`. The
+    :class:`~rdma.subnet.Port` can be retrieved through
+    :meth:`rdma.subnet.Subnet.path_to_port`.
+
+    This does nothing if the information is already loaded."""
+    ret = sbn.path_to_port(path);
+    if ret is None:
+        yield subnet_ninf_SMP(sched,sbn,path,get_desc);
+        ret = sbn.path_to_port(path);
+        get_desc = False;
+    yield sched.mqueue(subnet_fill_port(sched,sbn,ret,path,get_desc));
+
 def load(sched,sbn,stuff):
     """Fill *sbn* with the discovery items in *stuff*. *stuff* may be a list
        of strings where each string is one of:
