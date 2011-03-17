@@ -300,6 +300,49 @@ class Subnet(object):
             self.paths[end_port] = path;
         return path;
 
+    def advance_dr(self,path,portIdx):
+        """Create a new :class:`~rdma.path.IBDRPath` that goes to the
+        device connected to *port_idx* of *path*."""
+        # LID route to a HCA followed by DR route after does not work, in the local
+        # host case I think this is a kernel bug, but other cases seem to be as the
+        # spec intends.
+        drPath = getattr(path,"drPath","\0") + chr(portIdx);
+        if path.DLID == path.end_port.lid:
+            # Local loopback
+            return rdma.path.IBDRPath(path.end_port,drPath=drPath);
+        else:
+            if isinstance(path,rdma.path.IBDRPath):
+                ret = path.copy();
+                ret.drPath = drPath;
+            else:
+                ret = rdma.path.IBDRPath(path.end_port,
+                                         SLID=path.SLID,
+                                         drSLID=path.SLID,
+                                         DLID=path.DLID,
+                                         drPath=drPath);
+
+            ep = self.path_to_port(path);
+            if ep is not None and not isinstance(ep.parent,Switch):
+                # If we are DR'ing from a non-CA then the only possible legal
+                # thing is to go back out the same port. Dropping the last entry
+                # from the DR list is the same thing.
+                if len(drPath) >= 3 and ep.parent.ports.index(ep) == portIdx:
+                    ret.drPath = drPath[:-2];
+                else:
+                    # Hum, we know this will fail, try and fix it up with our topology
+                    # database..
+                    np = self.topology.get(ep.parent.get_port(portIdx));
+                    if np is not None:
+                        ret = self.get_path_smp(path,np.to_end_port());
+
+                # When we eat the DR path like this it breaks
+                # localPortNum, but since we are going in and out of the
+                # same port we can just record what it should have been
+                # here.
+                ret._cached_subnet_localPortNum = ord(drPath[-2]);
+
+            return ret;
+
     def link_end_port(self,port,portIdx=None,nodeGUID=None,portGUID=None,
                       path=None,LID=None,LMC=0):
         """Use the provided information about *port* to update the database.

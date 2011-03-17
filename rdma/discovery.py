@@ -251,19 +251,7 @@ class _SubnetTopo(object):
             return;
 
         # DR one hop
-        drPath = getattr(path,"drPath","\0") + chr(portIdx);
-        if path.DLID == path.end_port.lid:
-            # I think there is a kernel/HCA bug here, LID route to the HCA
-            # port followed by directed route out the port does not work,
-            # so just use a normal DR to get out the HCA port in that case.
-            npath = rdma.path.IBDRPath(path.end_port,
-                                       drPath=drPath);
-        else:
-            npath = rdma.path.IBDRPath(path.end_port,
-                                       SLID=path.SLID,
-                                       drSLID=path.SLID,
-                                       DLID=path.DLID,
-                                       drPath=drPath);
+        npath = self.sbn.advance_dr(path,portIdx);
         self.sched_step(aport,npath,depth+1);
 
     def do_node(self,path,depth=0,peer=None):
@@ -332,11 +320,7 @@ def topo_peer_SMP(sched,sbn,port,get_desc=True):
             peer_path = path.copy();
             peer_path.drPath += chr(portIdx);
         else:
-            peer_path = rdma.path.IBDRPath(path.end_port,
-                                           SLID=path.SLID,
-                                           drSLID=path.SLID,
-                                           DLID=path.DLID,
-                                           drPath="\0" + chr(portIdx));
+            peer_path = sbn.advance_dr(path,portIdx);
 
         # Resolve the DR path using the SA and update our topology information
         # as well.
@@ -352,7 +336,9 @@ def topo_peer_SMP(sched,sbn,port,get_desc=True):
         peer_node,peer_zport = yield subnet_ninf_SMP(sched,sbn,peer_path,
                                                      get_desc,use_sa);
         if not use_sa:
-            peer_port = sbn.get_port(portIdx=peer_node.ninf.localPortNum,
+            lpn = getattr(peer_path,"_cached_subnet_localPortNum",
+                          peer_node.ninf.localPortNum);
+            peer_port = sbn.get_port(portIdx=lpn,
                                      path=peer_path);
 
         sbn.topology[port] = peer_port;
