@@ -315,7 +315,7 @@ def topo_peer_SMP(sched,sbn,port,get_desc=True,path=None,
     This does nothing if the information is already loaded."""
     peer_port = sbn.topology.get(port);
     if peer_port is None:
-        portIdx = port.parent.ports.index(port);
+        portIdx = port.port_id;
 
         use_sa = isinstance(sched,rdma.satransactor.SATransactor);
         if peer_path is None:

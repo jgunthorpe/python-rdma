@@ -97,6 +97,11 @@ class Port(object):
         For switches this returns port 0, otherwise it returns itself."""
         return self.parent.to_end_port(self);
 
+    @property
+    def port_id(self):
+        """The port number for this port."""
+        return self.parent.ports.index(self);
+
 class CA(Node):
     """Hold onto information about a single CA node in the network."""
 
@@ -326,7 +331,7 @@ class Subnet(object):
                 # If we are DR'ing from a non-CA then the only possible legal
                 # thing is to go back out the same port. Dropping the last entry
                 # from the DR list is the same thing.
-                if len(drPath) >= 3 and ep.parent.ports.index(ep) == portIdx:
+                if len(drPath) >= 3 and ep.port_id == portIdx:
                     ret.drPath = drPath[:-2];
                 else:
                     # Hum, we know this will fail, try and fix it up with our topology
