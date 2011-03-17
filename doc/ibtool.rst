@@ -262,20 +262,28 @@ Specific commands:
   --sa action for all CA ports..)
 * `set_nodedesc` got the -C and -P options to set a single device. Also works
   with UTF-8 properly.
+* `ibtracert` supports 1 or 2 arguments, with the single argument form
+  meaning start at the current node, ala IP trace route
+* `ibtracert` can resolve all address forms for the two arguments, and
+  will use the SA to fill missing details.
+* `ibtracert` supports all discovery options including caching and LID/SA
+  discovery. When used with LID routing the tool is no longer bound by the
+  64 hop DR limit.
 
 Commands
 ========
 
 Supported:
 
-==============  ============= ================ ===================
-dump_lfts.sh    dump_mfts.sh  ibaddr           ibfindnodesusing.pl
-ibhosts         ibnetdiscover ibnodes          ibportstate
-ibprintca.pl    ibprintrt.pl  ibprintswitch.pl ibroute
-ibrouters       ibstat        ibstatus         ibswitches
-ibv_devices     perfquery     rdma_bw          saquery
-set_nodedesc.sh sminfo	      smpdump	       smpquery
-=============== ============= ================ ===================
+=============== =============== ================ ===================
+dump_lfts.sh    dump_mfts.sh  	ibaddr           ibfindnodesusing.pl
+ibhosts         ibnetdiscover 	ibnodes          ibportstate
+ibprintca.pl    ibprintrt.pl  	ibprintswitch.pl ibroute
+ibrouters       ibstat        	ibstatus         ibswitches
+ibtracert	ibv_devices     perfquery        rdma_bw
+saquery		set_nodedesc.sh sminfo	      	 smpdump
+smpquery
+=============== =============== ================ ===================
 
 To be completed:
 
@@ -285,7 +293,7 @@ ibchecknode          ibcheckport   ibcheckportstate   ibcheckportwidth
 ibcheckstate         ibcheckwidth  ibclearcounters    ibclearerrors
 ibdatacounters       ibdatacounts  ibdiscover.pl      ibidsverify.pl
 iblinkinfo[.pl]      ibping        ibqueryerrors[.pl] ibswportwatch.pl
-ibsysstat            ibtracert     vendstat
+ibsysstat            vendstat
 ==================== ============= ================== =================
 
 Verbs examples/tests:

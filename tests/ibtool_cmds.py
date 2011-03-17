@@ -145,6 +145,10 @@ class ibtool_cmds_test(unittest.TestCase):
 
         self.cmd("ibportstate","-D",self.peer_dr,"1","query");
 
+        self.cmd("ibtracert",self.peer_pinf.LID);
+        self.cmd("ibtracert",self.end_port.lid);
+        self.cmd("ibtracert",self.peer_ninf.portGUID);
+
     def test_discovery(self):
         self.assertEquals(self.end_port.state,IBA.PORT_STATE_ACTIVE);
 
