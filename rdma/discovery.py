@@ -112,7 +112,7 @@ def subnet_ninf_SMP(sched,sbn,path,get_desc=True,use_sa=None,done_desc=None):
 
     if use_sa:
         req = IBA.ComponentMask(IBA.SANodeRecord());
-        req.LID = sched.get_path_lid(path);
+        req.LID = yield sched.prepare_path_lid(path);
         ret = yield sched.SubnAdmGet(req);
         sched.result = sbn.get_node_ninf(ret.nodeInfo,path);
         sched.result[0].set_desc(ret.nodeDescription.nodeString);
@@ -305,6 +305,7 @@ def topo_SMP(sched,sbn,get_desc=True):
 
 def topo_peer_SMP(sched,sbn,port,get_desc=True):
     """Generator to fetch a single connected peer. This updates
+    """Coroutine to fetch a single connected peer. This updates
     :attr:`rdma.subnet.Subnet.topology`. It also fetches a port info to setup
     LID routing.
 
@@ -326,7 +327,7 @@ def topo_peer_SMP(sched,sbn,port,get_desc=True):
         # as well.
         if use_sa:
             req = IBA.ComponentMask(IBA.SALinkRecord());
-            req.fromLID = sched.get_path_lid(path);
+            req.fromLID = yield sched.prepare_path_lid(path);
             req.fromPort = portIdx;
             rep = yield sched.SubnAdmGet(req);
             peer_path._cached_resolved_dlid = rep.toLID;

@@ -62,6 +62,7 @@ class SATransactor(rdma.madtransactor.MADTransactor):
         if (not isinstance(path,rdma.path.IBDRPath) or
             path.drDLID != IBA.LID_PERMISSIVE or
             getattr(path,"_cached_resolved_dlid",None) is not None):
+            self._parent.result = self.get_path_lid(path);
             return;
 
         start_lid = path.DLID;
@@ -76,6 +77,7 @@ class SATransactor(rdma.madtransactor.MADTransactor):
             rep = yield self._parent.SubnAdmGet(req);
             start_lid = rep.toLID;
         path._cached_resolved_dlid = start_lid;
+        self._parent.result = start_lid;
 
     def _get_new_TID(self):
         return self._parent._get_new_TID();
