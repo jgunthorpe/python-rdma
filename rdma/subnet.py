@@ -58,7 +58,7 @@ class Node(object):
             num = len(self.ports)
         else:
             num = self.ninf.numPorts+1;
-        for I in range(1,num+1):
+        for I in range(1,num):
             port = self.get_port(I);
             if (port.portGUID is not None or port.LID is not None):
                 yield (port,I);
