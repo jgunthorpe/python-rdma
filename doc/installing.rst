@@ -22,16 +22,20 @@ The build process is simply::
 Once built the library can be tested without installation by setting
 `PYTHONPATH`::
 
- $ export PYTHONPATH=`pwd`/lib.*/
+ $ export PYTHONPATH=`pwd`/build/lib.*/
  $ ./ibtool help
 
 To install into `/usr/local/` use `./setup.py install`.
 
-If your system has IB libraries installed outside the system path, perform the
-build similar to the following::
+If your system has IB libraries installed outside the system path, you need to
+create a setup.cfg similar to the following::
 
- $ ./setup.py build_ext -I /opt/ofa64-1.5.1/include -L /opt/ofa64-1.5.1/lib/ --rpath=/opt/ofa64-1.5.1/lib
- $ ./setup.py build
+ [build_ext]
+ include-dirs=/opt/ofa64-1.5.1/include
+ library-dirs=/opt/ofa64-1.5.1/lib
+ rpath=/opt/ofa64-1.5.1/lib
+
+Prior to running `./setup.py build`.
 
 .. note::
  `Python` 2.6 packages are available for RHEL and related via the Fedora
