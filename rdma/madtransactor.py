@@ -59,6 +59,9 @@ class MADTransactor(object):
     #: The end_port this is associated with
     end_port = None;
 
+    # Used when emulating an async interface in do_async
+    result = None;
+
     @property
     def is_async(self):
         """True if this is an async MADTransactor interface."""
@@ -279,6 +282,8 @@ class MADTransactor(object):
         """This runs a simple async work coroutine against a synchronous
         instance. In this case the coroutine yields its own next result."""
         assert(self.is_async == False);
+        if op is None:
+            return self.result;
         result = None;
         self.result = None;
         while True:
@@ -287,6 +292,8 @@ class MADTransactor(object):
                     result = op.next();
                 else:
                     result = op.send(result);
+                    if result is None:
+                        result = True;
             except StopIteration:
                 return self.result;
 

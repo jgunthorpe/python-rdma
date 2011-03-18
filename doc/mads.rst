@@ -198,6 +198,8 @@ A coroutine can yield:
    once the thing queued is finished.
  * The result of :meth:`~rdma.sched.MADSchedule.mqueue` - yield will return
    once the generator is exhausted and all the coroutines it spawned are finished.
+ * `None` - yield immediately returns. This is useful for calling something
+   that might be a coroutine or a normal function that returns `None`.
 
 .. automodule:: rdma.sched
    :members:

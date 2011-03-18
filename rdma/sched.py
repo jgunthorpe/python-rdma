@@ -144,6 +144,12 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
                 result = None;
                 continue;
 
+            if work is None:
+                ctx._result = self.result;
+                self.result = None;
+                result = True;
+                continue;
+
             try:
                 self._sendMAD(ctx,work);
             except:
