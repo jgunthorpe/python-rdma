@@ -384,6 +384,9 @@ def get_mad_path(mad,ep_addr,**kwargs):
 
     This returns a single reversible path.
 
+    If *mad* is an async instance then this routine returns a coroutine that
+    will do the resolution, otherwise the new path is returned.
+
     :raises ValueError: If dest is not appropriate.
     :raises rdma.path.SAPathNotFoundError: If *ep_addr* was not found at the SA.
     :raises rdma.MADError: If the RPC failed in some way."""
@@ -407,6 +410,9 @@ def resolve_path(mad,path,reversible=False,properties=None):
 
     *properties* is a dictionary of additional PR fields to set in the query.
 
+    If *mad* is an async instance then this routine returns a coroutine that
+    will do the resolution, otherwise the new path is returned.
+
     FUTURE: This routine may populate path with up to 3 full path records, one
     for GMPs, one for the forward direction and one for the return direction.
     If the path is being used for UD then it should probably set the
@@ -414,7 +420,11 @@ def resolve_path(mad,path,reversible=False,properties=None):
 
     :raises rdma.path.SAPathNotFoundError: If *ep_addr* was not found at the SA.
     :raises rdma.MADError: If the RPC failed in some way."""
+    if mad.is_async:
+        return _resolve_path_async(mad,path,reversible,properties);
+    return mad.do_async(_resolve_path_async(mad,path,reversible,properties));
 
+def _resolve_path_async(mad,path,reversible=False,properties=None):
     if path.end_port is None:
         path.end_port = mad.end_port;
 
@@ -438,7 +448,7 @@ def resolve_path(mad,path,reversible=False,properties=None):
             setattr(q,k,v);
 
     try:
-        rep = mad.SubnAdmGet(q);
+        rep = yield mad.SubnAdmGet(q);
     except rdma.MADClassError as err:
         if err.code == IBA.MAD_STATUS_SA_NO_RECORDS:
             raise SAPathNotFoundError("Failed getting path record for path %r."%(path),
@@ -462,7 +472,7 @@ def resolve_path(mad,path,reversible=False,properties=None):
     path.rate = rep.rate;
     path.has_grh = rep.hopLimit != 0;
     path.packet_life_time = rep.packetLifeTime;
-    return path;
+    mad.result = path;
 
 def fill_path(qp,path,max_rd_atomic=255):
     """Fill in fields in path assuming *path* will be used with a QP. The

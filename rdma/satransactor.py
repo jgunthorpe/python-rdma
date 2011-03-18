@@ -226,6 +226,9 @@ class SATransactor(rdma.madtransactor.MADTransactor):
     @result.setter
     def result(self,value):
         self._parent.result = value;
+    @property
+    def is_async(self):
+        return self._parent.is_async;
 
     def __enter__(self):
         return self;

@@ -280,6 +280,7 @@ class MADTransactor(object):
         instance. In this case the coroutine yields its own next result."""
         assert(self.is_async == False);
         result = None;
+        self.result = None;
         while True:
             try:
                 if result is None:
@@ -287,7 +288,7 @@ class MADTransactor(object):
                 else:
                     result = op.send(result);
             except StopIteration:
-                return;
+                return self.result;
 
     # TODO ['BMGet', 'BMSet', 'CommMgtGet', 'CommMgtSend', 'CommMgtSet',
     # 'DevMgtGet', 'DevMgtSet', 'SNMPGet',
