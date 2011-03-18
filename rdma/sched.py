@@ -143,7 +143,13 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
                     ctx._op = work;
                 result = None;
                 continue;
-            self._sendMAD(ctx,work);
+
+            try:
+                self._sendMAD(ctx,work);
+            except:
+                ctx._exc = sys.exc_info();
+                result = True;
+                continue;
             return;
 
         self._mqueue.append(ctx);
