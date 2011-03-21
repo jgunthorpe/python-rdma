@@ -219,6 +219,7 @@ Specific commands:
 * `saquery` forgot how to do --node-name-map (FIXME)
 * `saquery` options that have an associated Selector don't set the selector.
   (FIXME)
+* `saquery` -g and -m do not work, -g sets smkey to 0 (FIXME)
 * The command `query` is added which can issue any RPC, with any packet
   content entirely using the symbolic names in this document. This is done
   with Python introspection. Eg::
