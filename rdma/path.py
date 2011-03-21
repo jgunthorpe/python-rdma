@@ -36,8 +36,9 @@ class Path(object):
         # Note: The copy module uses the __reduce__ call, so we may as
         # well just use it directly.
         tp = self.__reduce__();
+        tp[2]["end_port"] = self.end_port;
         tp[2].update(kwargs);
-        return tp[0](self.end_port,**tp[2]);
+        return tp[0](**tp[2]);
 
     def drop_cache(self):
         """Release any cached information."""
