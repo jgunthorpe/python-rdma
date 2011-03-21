@@ -20,7 +20,7 @@ class BufferPool(object):
     #: Constant value to or into *wr_id* to indicate it was posted as a recv.
     RECV_FLAG = 0;
     #: Mask to convert a *wr_id* back into a *buf_idx*.
-    BUF_IDX_MASK = 0;
+    BUF_ID_MASK = 0;
     _mr = None;
     _mem = None;
     #: `deque` of buffer indexes.

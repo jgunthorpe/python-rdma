@@ -95,7 +95,7 @@ class VMAD(rdma.madtransactor.MADTransactor):
                 pool.finish_wcs(self._qp,wc);
                 return (buf,ibv.WCPath(self.end_port,wc,
                                        pool._mem,
-                                       (wc.wr_id & pool.BUF_IDX_MASK)*pool.size,
+                                       (wc.wr_id & pool.BUF_ID_MASK)*pool.size,
                                        pkey=self.pkey,
                                        qkey=self.qkey));
 
