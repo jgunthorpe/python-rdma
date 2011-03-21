@@ -1229,6 +1229,7 @@ cdef class QP:
     cdef c.ibv_qp *_qp
     cdef c.ibv_qp_cap _cap
     cdef int _qp_type
+    cdef list _groups
 
     property pd:
         def __get__(self):
@@ -1318,6 +1319,9 @@ cdef class QP:
     cdef _close(self):
         cdef int rc
         if self._qp != NULL:
+            while self._groups:
+                g = self._groups[0];
+                self.detach_mcast(rdma.path.IBPath(None,DGID=g[0],DLID=g[1]));
             rc = c.ibv_destroy_qp(self._qp)
             if rc != 0:
                 raise rdma.SysError(errno,"ibv_destroy_qp",
@@ -1599,6 +1603,10 @@ cdef class QP:
         if rc != 0:
             raise rdma.SysError(rc,"ibv_attach_mcast",
                                 "Failed to attach to %r"%(path));
+        if self._groups is None:
+            self._groups = [];
+        # Relying on verbs to fail on double add
+        self._groups.append((path.DGID,path.DLID))
 
     def detach_mcast(self,path):
         """Detach this QP from the multicast group described by
@@ -1606,6 +1614,7 @@ cdef class QP:
         cdef int rc
         cdef void *dgid
         cdef Py_ssize_t length
+        cdef object gid
         if PyObject_AsReadBuffer(path.DGID, <const_void_ptr_ptr>&dgid,
                                  &length) != 0 or length != 16:
             raise TypeError("Expected buffer")
@@ -1613,6 +1622,8 @@ cdef class QP:
         if rc != 0:
             raise rdma.SysError(rc,"ibv_detach_mcast",
                                 "Failed to detach to %r"%(path));
+        # Relying on verbs to fail on double remove
+        self._groups.remove((path.DGID,path.DLID))
 
     def modify_to_init(self,path,int qp_access_flags=0):
         """Modify the QP to the INIT state."""
