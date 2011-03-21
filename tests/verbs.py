@@ -107,8 +107,50 @@ class umad_self_test(unittest.TestCase):
             self.assertEquals(recvs,2);
             self.assertEquals(sends,2);
 
+    def _do_loop_test_mc(self):
+        """Test HCA loop back between two QPs as well as SRQ."""
+        qp_type = ibv.IBV_QPT_UD;
+        print "Testing QP to QP loop type %u UD MULTICAST"%(qp_type)
+        with self.ctx.pd() as pd:
+            path_a,qp_a,path_b,qp_b,poller,srq,pool = \
+                    self._get_loop(pd,qp_type);
+
+            # Note: since both our QPs are on the same end port then the DLID
+            # does not matter as far as forwarding is concerned, so the HCA
+            # should replicate entirely based on the DLID.
+            mcpath = path_b.copy(DGID=IBA.GID("FF02::1"),DLID=0xC000,dqpn=0xFFFFFF,
+                                 traffic_class=0x89,
+                                 flow_label=0x1234,
+                                 hop_limit=23,
+                                 has_grh=True);
+            qp_a.attach_mcast(mcpath);
+            qp_b.attach_mcast(mcpath);
+            qp_b.post_send(pool.make_send_wr(pool.pop(),256,mcpath));
+            qp_a.post_send(pool.make_send_wr(pool.pop(),256,mcpath));
+
+            recvs = 0;
+            sends = 0
+            for wc in poller.iterwc(count=6,timeout=0.5):
+                if wc.opcode & ibv.IBV_WC_RECV:
+                    recvs = recvs + 1
+                    path = ibv.WCPath(mcpath.end_port,wc,
+                                      pool._mem,
+                                      (wc.wr_id & pool.BUF_ID_MASK)*pool.size);
+                    self.assertEquals(path.DGID,mcpath.DGID);
+                    self.assertEquals(path.SGID,mcpath.SGID);
+                    self.assertEquals(path.flow_label,mcpath.flow_label);
+                    self.assertEquals(path.traffic_class,mcpath.traffic_class);
+                    self.assertEquals(path.hop_limit,mcpath.hop_limit);
+                if wc.opcode == ibv.IBV_WC_SEND:
+                    sends = sends + 1
+                pool.finish_wcs(srq,wc);
+            self.assertFalse(poller.timedout);
+            self.assertEquals(recvs,4);
+            self.assertEquals(sends,2);
+
     def test_ud_loop(self):
         self._do_loop_test("UD");
+        self._do_loop_test_mc();
     def test_rc_loop(self):
         self._do_loop_test("RC");
     def test_uc_loop(self):
