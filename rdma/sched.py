@@ -228,14 +228,13 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
                 self._timeouts.remove(res);
                 try:
                     work = res[1]._work
-                    payload = self._completeMAD(ret,work.fmt,
-                                                work.path,
-                                                work.newer,
-                                                work.completer);
+                    res[1]._result = self._completeMAD(ret,work.fmt,
+                                                       work.path,
+                                                       work.newer,
+                                                       work.completer);
                 except:
                     res[1]._exc = sys.exc_info();
-                    payload = True;
-                self._step(res[1],payload);
+                self._step(res[1],True);
             else:
                 if self.trace_func is not None:
                     self.trace_func(self,rdma.madtransactor.TRACE_UNEXPECTED,
