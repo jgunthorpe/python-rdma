@@ -1231,7 +1231,7 @@ Subnet Administration (15)
     Member                         Position        Type                  
     ============================== =============== ======================
     :attr:`serviceID`              0:8 (64)        :class:`int`          
-    :attr:`serviceID56LSB`         4:4 (0)         :class:`int`          
+    :attr:`serviceID56LSB`         8:8 (0)         :class:`int`          
     :attr:`DGID`                   8:24 (128)      :class:`~rdma.IBA.GID`
     :attr:`SGID`                   24:40 (128)     :class:`~rdma.IBA.GID`
     :attr:`DLID`                   40:42 (16)      :class:`int`          
@@ -1844,7 +1844,7 @@ Performance Management (16.1)
     :attr:`reserved_0`    0:1 (8)   :class:`int`     
     :attr:`portSelect`    1:2 (8)   :class:`int`     
     :attr:`counterSelect` 2:4 (16)  :class:`int`     
-    :attr:`portRcvDataSL` 8:72 (32) [:class:`int`]*16
+    :attr:`portRcvDataSL` 4:68 (32) [:class:`int`]*16
     ===================== ========= =================
 
 .. class:: rdma.IBA.PMPortXmitDataSL
@@ -1863,7 +1863,7 @@ Performance Management (16.1)
     :attr:`reserved_0`     0:1 (8)   :class:`int`     
     :attr:`portSelect`     1:2 (8)   :class:`int`     
     :attr:`counterSelect`  2:4 (16)  :class:`int`     
-    :attr:`portXmitDataSL` 8:72 (32) [:class:`int`]*16
+    :attr:`portXmitDataSL` 4:68 (32) [:class:`int`]*16
     ====================== ========= =================
 
 Device Management (16.3)

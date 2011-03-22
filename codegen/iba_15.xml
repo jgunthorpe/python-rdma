@@ -232,7 +232,7 @@
           methods="SubnAdmGet SubnAdmGetTable">
     <mb bits="64" off="0[0]" display="hex">serviceID<!--ServiceID8MSB--></mb>
     <!-- Gap so component mask computes properly. Grr. -->
-    <mb bits="0" off="0[32]">serviceID56LSB<!--ServiceID56LSB--></mb>
+    <mb bits="0" off="0[64]">serviceID56LSB<!--ServiceID56LSB--></mb>
     <mb bits="128" off="0[64]" type="HdrIPv6Addr">DGID<!--DGID--></mb>
     <mb bits="128" off="0[192]" type="HdrIPv6Addr">SGID<!--SGID--></mb>
     <mb bits="16" off="0[320]">DLID<!--DLID--></mb>

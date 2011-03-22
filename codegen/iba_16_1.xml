@@ -288,7 +288,7 @@
     <mb bits="8" off="0[0]"><!--Reserved--></mb>
     <mb bits="8" off="0[8]">portSelect<!--Reserved--></mb>
     <mb bits="16" off="0[16]" display="hex">counterSelect<!--CounterSelect--></mb>
-    <mb bits="32" off="0[64]" count="16">portXmitDataSL<!--PortXmitDataSL--></mb>
+    <mb bits="32" off="0[32]" count="16">portXmitDataSL<!--PortXmitDataSL--></mb>
   </struct>
 
   <struct name="PMPortRcvDataSL"
@@ -301,6 +301,6 @@
     <mb bits="8" off="0[0]"><!--Reserved--></mb>
     <mb bits="8" off="0[8]">portSelect<!--Reserved--></mb>
     <mb bits="16" off="0[16]" display="hex">counterSelect<!--CounterSelect--></mb>
-    <mb bits="32" off="0[64]" count="16">portRcvDataSL<!--PortRcvDataSL--></mb>
+    <mb bits="32" off="0[32]" count="16">portRcvDataSL<!--PortRcvDataSL--></mb>
   </struct>
 </makestructs>

@@ -61,7 +61,7 @@ class Type(object):
     """Hold a single typed field in the structure"""
     mutable = True;
 
-    def __init__(self,xml):
+    def __init__(self,xml,off):
         self.count = int(xml.get("count","1"));
         self.bits = int(xml.get("bits"));
         self.off = xml.get("off");
@@ -72,12 +72,17 @@ class Type(object):
             self.fmt = "str";
         if self.fmt is None:
             self.fmt = "%r";
-        g = re.match("^(\d+)\[(\d+)\]$",self.off);
-        if g:
-            g = g.groups();
-            self.off = int(g[0])*8 + int(g[1]);
+        if self.off is not None:
+            g = re.match("^(\d+)\[(\d+)\]$",self.off);
+            if g:
+                g = g.groups();
+                self.off = int(g[0])*8 + int(g[1]);
+            else:
+                self.off = int(self.off)*8;
+            assert self.off == off;
         else:
-            self.off = int(self.off)*8;
+            self.off = off;
+
         self.type = xml.get("type");
         if self.type == "HdrIPv6Addr" and self.bits == 128:
             self.type = "struct IBA.GID";
@@ -165,8 +170,10 @@ class Struct(object):
         self.mb = [];
         self.packCount = 0;
 
+        off = 0;
         for I in xml.getiterator("mb"):
-            self.mb.append((I.text or "",Type(I)));
+            self.mb.append((I.text or "",Type(I,off)));
+            off = off + self.mb[-1][1].lenBits();
         assert(sum((I[1].lenBits() for I in self.mb),0) <= self.size*8);
 
     def set_reserved(self):
