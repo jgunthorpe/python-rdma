@@ -46,6 +46,20 @@ commands = {
     "ibnodes": ("libibtool.discovery",),
     "ibnetdiscover": ("libibtool.discovery",),
 
+    "ibchecknode": ("libibtool.errors",),
+    "ibcheckstate": ("libibtool.errors",),
+    "ibcheckport": ("libibtool.errors",),
+    "ibchecknet": ("libibtool.errors",),
+    "ibcheckportstate": ("libibtool.errors",),
+    "ibcheckportwidth": ("libibtool.errors",),
+    "ibcheckwidth": ("libibtool.errors",),
+    "ibcheckerrs": ("libibtool.errors",),
+    "ibcheckerrors": ("libibtool.errors",),
+    "ibclearcounters": ("libibtool.errors",),
+    "ibclearerrors": ("libibtool.errors",),
+    "ibdatacounters": ("libibtool.errors",),
+    "ibdatacounts": ("libibtool.errors",),
+
     "rdma_bw": ("libibtool.rdma_bw",),
 
     "help": (__name__,),

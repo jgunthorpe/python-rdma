@@ -149,6 +149,14 @@ class ibtool_cmds_test(unittest.TestCase):
         self.cmd("ibtracert",self.end_port.lid);
         self.cmd("ibtracert",self.peer_ninf.portGUID);
 
+        for I in ("ibchecknode","ibcheckerrs","ibdatacounts"):
+            self.cmd(I,self.peer_pinf.LID);
+            self.cmd(I,self.peer_pinf.LID,"-v");
+        for I in ("ibcheckport","ibcheckportstate","ibcheckportwidth","ibcheckerrs",
+                  "ibdatacounts"):
+            self.cmd(I,self.peer_pinf.LID,self.peer_pinf.localPortNum);
+            self.cmd(I,self.peer_pinf.LID,self.peer_pinf.localPortNum,"-v");
+
     def test_discovery(self):
         self.assertEquals(self.end_port.state,IBA.PORT_STATE_ACTIVE);
 
@@ -162,6 +170,11 @@ class ibtool_cmds_test(unittest.TestCase):
         self.cmd("ibprintca",self.end_port.parent.node_guid);
         self.cmd("ibprintswitch",self.peer_ninf.nodeGUID);
 
+        for I in ("ibcheckstate","ibcheckwidth","ibchecknet","ibcheckerrors",
+                  "ibclearcounters","ibclearerrors","ibdatacounters"):
+            self.cmd(I);
+            self.cmd(I,"-v");
+
     def test_with_link_no_sa(self):
         self.assertEquals(self.end_port.state,IBA.PORT_STATE_ACTIVE);
         self.cmd("dump_lfts","-D");
@@ -171,6 +184,8 @@ class ibtool_cmds_test(unittest.TestCase):
         self.assertEquals(self.end_port.state,IBA.PORT_STATE_ACTIVE);
         self.extra_opts = ("--sa",);
         self.test_with_link();
+        self.test_discovery();
+        self.extra_opts = ("--discovery=DR",);
         self.test_discovery();
 
 if __name__ == '__main__':

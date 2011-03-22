@@ -270,29 +270,43 @@ Specific commands:
 * `ibtracert` supports all discovery options including caching and LID/SA
   discovery. When used with LID routing the tool is no longer bound by the
   64 hop DR limit.
+* `ibcheck*` forgot how to colourize
+* `ibcheckport` checks the localPortNum if it isn't a switch, and
+  checks that a	port is not at a degraded speed and degraded width based
+  on link*Supported.
+* `ibcheck*` commands that iterate over the subnet are discovery commands
+   and use the MAD parallelizer to do their checks. For this reason
+   verbose output may be out of order, so we also show the end port LID
+   and CA port number.
+* `ibcheck*` discovery commands treat a 'node check' as an `end port check`
+   and checks all end ports on a CA. It also checks switch port 0.
+* `ibcheck*` discovery commands can use the subnet discovery database
+   to check peer ports for link speed and link width. No warnings
+   are generated if the max capability is being used. (eg SDR connected
+   to DDR).
 
 Commands
 ========
 
 Supported:
 
-=============== =============== ================ ===================
-dump_lfts.sh    dump_mfts.sh  	ibaddr           ibfindnodesusing.pl
-ibhosts         ibnetdiscover 	ibnodes          ibportstate
-ibprintca.pl    ibprintrt.pl  	ibprintswitch.pl ibroute
-ibrouters       ibstat        	ibstatus         ibswitches
-ibtracert	ibv_devices     perfquery        rdma_bw
-saquery		set_nodedesc.sh sminfo	      	 smpdump
-smpquery
-=============== =============== ================ ===================
+=================== =================== =================== ===================
+dump_lfts.sh        dump_mfts.sh	ibaddr		    ibcheckerrors
+bcheckerrs	    ibchecknet	  	ibchecknode	    ibcheckport
+ibcheckportstate    ibcheckportwidth 	ibcheckstate	    ibcheckwidth
+ibclearcounters     ibclearerrors	ibdatacounters      ibdatacounts
+ibfindnodesusing.pl ibhosts		ibnetdiscover	    ibnodes
+ibportstate	    ibprintca.pl        ibprintrt.pl	    ibprintswitch.pl
+ibroute		    ibrouters		ibstat		    ibstatus
+ibswitches	    ibtracert	    	ibv_devices         perfquery
+rdma_bw		    saquery		set_nodedesc.sh     sminfo
+smpdump		    smpquery
+=================== =================== =================== ===================
 
 To be completed:
 
 ==================== ============= ================== =================
-check_lft_balance.pl ibcheckerrors ibcheckerrs        ibchecknet
-ibchecknode          ibcheckport   ibcheckportstate   ibcheckportwidth
-ibcheckstate         ibcheckwidth  ibclearcounters    ibclearerrors
-ibdatacounters       ibdatacounts  ibdiscover.pl      ibidsverify.pl
+check_lft_balance.pl ibdiscover.pl ibidsverify.pl
 iblinkinfo[.pl]      ibping        ibqueryerrors[.pl] ibswportwatch.pl
 ibsysstat            vendstat
 ==================== ============= ================== =================

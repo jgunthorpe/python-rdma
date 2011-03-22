@@ -330,7 +330,7 @@ def cmd_ibportstate(argv,o):
        OP is one of enable, disable, reset, speed, width, query."""
     LibIBOpts.setup(o);
     (args,values) = o.parse_args(argv,);
-    lib = LibIBOpts(o,args,values,4,(tmpl_target,tmpl_int,str,int));
+    lib = LibIBOpts(o,args,values,4,(tmpl_target,tmpl_int,str,tmpl_int));
 
     if len(values) < 3:
         raise CmdError("Too few arguments");

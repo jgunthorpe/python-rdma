@@ -7,6 +7,24 @@ import rdma.IBA as IBA;
 from libibtool import *;
 from libibtool.libibopts import *;
 
+def sum_result(results):
+    # Add the results together...
+    res = results[1];
+    for I in res.MEMBERS:
+        name = I[0];
+        saturate = (1<<I[1])-1;
+        for res2 in results[2:]:
+            attr2 = getattr(res2,name);
+            if isinstance(attr2,list):
+                attr = getattr(res,name);
+                for n,J in enumerate(attr2):
+                    attr[n] = min(attr[n] + J,saturate);
+            else:
+                setattr(res,name,min(getattr(res,name) + attr2,saturate));
+    res.portSelect = 0xFF;
+    res.counterSelect = 0;
+    return res;
+
 def do_print(res,path):
     if path.DGID is not None:
         print "# Port counters: Lid %u (%s) port %u"%(path.DLID,path.DGID,res.portSelect);
@@ -155,20 +173,7 @@ def cmd_perfquery(argv,o):
                 return True;
 
             # Add the results together...
-            res = results[1];
-            for I in res.MEMBERS:
-                name = I[0];
-                saturate = (1<<I[1])-1;
-                for res2 in results[2:]:
-                    attr2 = getattr(res2,name);
-                    if isinstance(attr2,list):
-                        attr = getattr(res,name);
-                        for n,J in enumerate(attr2):
-                            attr[n] = min(attr[n] + J,saturate);
-                    else:
-                        setattr(res,name,min(getattr(res,name) + attr2,saturate));
-            res.portSelect = 0xFF;
-            res.counterSelect = 0;
+            res = sum_result(results);
         else:
             try:
                 if not args.reset_only:
