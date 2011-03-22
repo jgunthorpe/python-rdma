@@ -241,7 +241,9 @@ def do_show_counts(sched,path,gpath,ninf,pinf,portGUID,portIdx,**kwargs):
     """Coroutine to display the performance counters for a port."""
     ret = yield get_perf(sched,gpath,ninf,portIdx);
     def do_print(field):
-        n = libib_name_map_perfquery.get(field,field)
+        n = field[0].upper() + field[1:];
+        if not getattr(lib.args,"int_names",True):
+            n = libib_name_map_perfquery.get(n,n);
         print "%s:%s%u"%(n,"."*(33 - len(n)),getattr(ret,field))
     if portIdx == 255:
         print "# Port counters: Lid %u all ports"%(pinf.LID);
