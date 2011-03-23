@@ -433,7 +433,8 @@ def const_str(prefix,value,with_int=False,me=sys.modules[__name__]):
 
 def get_fmt_payload(class_id,class_version,attribute_id):
     """Find the MAD format and MAD payload classes for class_id and
-    attribute_id. *class_version* is `(base_version << 8) | class_version`."""
+    attribute_id. *class_version* is `(base_version << 8) | class_version`.
+    See :meth:`rdma.madtransactor.MADTransactor.get_request_match_key`."""
     cls = CLASS_TO_STRUCT.get((class_id,class_version));
     if cls is None:
         return (None,None);

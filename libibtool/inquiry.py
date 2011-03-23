@@ -418,7 +418,7 @@ def cmd_decode_mad(argv,o):
     hdr = IBA.MADHeader(bytes);
     if o.verbosity >= 1:
         hdr.printer(sys.stdout);
-    kind = IBA.get_fmt_payload(hdr.mgmtClass,hdr.classVersion,hdr.attributeID);
+    kind = IBA.get_fmt_payload(*rdma.madtransactor.MADTransactor.get_request_match_key(bytes));
     if kind[0] is None:
         if o.verbosity == 0:
             hdr.printer(sys.stdout);

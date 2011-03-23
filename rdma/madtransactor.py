@@ -97,6 +97,29 @@ class MADTransactor(object):
         else:
             return (x[0],x[1] | IBA.MAD_METHOD_RESPONSE,x[2]);
 
+    @staticmethod
+    def get_request_match_key(buf):
+        """Return a :class:`tuple` for matching a request MAD buf. The :class:`tuple`
+        is `((oui << 8) | mgmtClass,(baseVersion << 8) | classVersion,attributeID)`. Where *oui* is 0
+        if this is not a vendor OUI MAD."""
+        if isinstance(buf,bytearray):
+            mgmtClass = buf[1];
+            classVersion = (buf[0] << 8) | buf[2];
+            attr = (buf[16] << 8) | buf[17];
+            if mgmtClass >= 0x30 and mgmtClass <= 0x4F:
+                oui = (buf[37] << 16) | (buf[38] << 8) | buf[39];
+            else:
+                oui = 0;
+        else:
+            mgmtClass = ord(buf[1]);
+            classVersion = (ord(buf[0]) << 8) | ord(buf[2]);
+            attr = (ord(buf[16]) << 8) | ord(buf[17]);
+            if mgmtClass >= 0x30 and mgmtClass <= 0x4F:
+                oui = (ord(buf[37]) << 16) | (ord(buf[38]) << 8) | ord(buf[39]);
+            else:
+                oui = 0;
+        return ((oui << 8) | mgmtClass,classVersion,attr);
+
     def _prepareMAD(self,fmt,payload,attributeModifier,method,path):
         fmt.baseVersion = IBA.MAD_BASE_VERSION;
         fmt.mgmtClass = fmt.MAD_CLASS;
