@@ -150,7 +150,7 @@ class Struct(object):
         self.name = xml.get("name");
         self.size = int(xml.get("bytes"));
         self.desc = "%s (section %s)"%(xml.get("desc"),xml.get("sect"));
-        self.sect = tuple(I for I in xml.get("sect").split("."));
+        self.sect = tuple(I for I in xml.get("sect","").split("."));
 
         self.mgmtClass = xml.get("mgmtClass");
         self.mgmtClassVersion = xml.get("mgmtClassVersion");
@@ -497,6 +497,8 @@ for I in structs:
     if I.is_format:
         I.attributes = set();
         for J in structs:
+            if J.format is not None and J.format != I.name:
+                continue;
             if J.filename == I.filename and J.attributeID is not None:
                 I.attributes.add(J);
         for J in I.attributes:
@@ -504,7 +506,13 @@ for I in structs:
                 I.methods.update(J.methods);
 
 with safeUpdateCtx(options.struct_out) as F:
-    print >> F, """import struct,rdma.binstruct;""";
+    to_import = set(("struct","rdma.binstruct"));
+    for I in structs:
+        if I.format is not None:
+            p = I.format.rpartition('.');
+            if p[0]:
+                to_import.add(p[0]);
+    print >> F, "import %s"%(",".join(sorted(to_import)));
     for I in structs:
         I.asPython(F);
 
@@ -522,16 +530,20 @@ with safeUpdateCtx(options.struct_out) as F:
     print >> F, "CLASS_TO_STRUCT = {%s};"%(",\n\t".join("(%u,%u):%s"%(
         int(I.mgmtClass,0),int(I.mgmtClassVersion,0),I.name) for I in res));
 
-    res = []
+    res = {}
     for I in structs:
         if I.is_format:
             for J in structs:
                 if J.attributeID is not None and not I.methods.isdisjoint(J.methods):
-                    res.append((I,J));
+                    res[I.name,J.attributeID] = J
+    for I in structs:
+        if I.format is not None and I.attributeID is not None:
+            res[I.format,I.attributeID] = I;
     print >> F, "ATTR_TO_STRUCT = {%s};"%(",\n\t".join("(%s,%u):%s"%(
-        I[0].name,I[1].attributeID,I[1].name) for I in res));
+        k[0],k[1],v.name) for k,v in sorted(res.iteritems())));
 
-with safeUpdateCtx(options.rst_out) as F:
+if options.rst_out is not None:
+ with safeUpdateCtx(options.rst_out) as F:
     def is_sect_prefix(x,y):
         return x == y[:len(x)];
     sects = [(("12",),"Communication Management"),
@@ -566,7 +578,8 @@ with safeUpdateCtx(options.rst_out) as F:
     for J in lst:
         if J not in done:
                 J.asRST(F);
-with safeUpdateCtx(options.test_out) as F:
+if options.test_out is not None:
+  with safeUpdateCtx(options.test_out) as F:
     print >> F,\
 """#!/usr/bin/python
 import unittest,sys
