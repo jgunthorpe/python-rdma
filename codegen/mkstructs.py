@@ -425,7 +425,7 @@ class Struct(object):
 
         self.slots = ','.join(repr(I[0]) for I in self.mb if I[1].lenBits() != 0);
         if self.is_format:
-            print >> F,"class %s(BinFormat):"%(self.name);
+            print >> F,"class %s(rdma.binstruct.BinFormat):"%(self.name);
         else:
             print >> F,"class %s(rdma.binstruct.BinStruct):"%(self.name);
         print >> F,"    '''%s'''"%(self.desc);
@@ -504,20 +504,7 @@ for I in structs:
                 I.methods.update(J.methods);
 
 with safeUpdateCtx(options.struct_out) as F:
-    print >> F, """import struct,rdma.binstruct;
-class BinFormat(rdma.binstruct.BinStruct):
-    '''Base class for all `*Format` type packet layouts.'''
-    def describe(self):
-        '''Return a short description of the RPC described by this format.'''
-        attr = ATTR_TO_STRUCT.get((self.__class__,self.attributeID));
-        if attr is None:
-            s = '??(%u)'%(self.attributeID);
-        else:
-            s = '%s(%u)'%(attr.__name__,self.attributeID);
-        return '%s %s(%u.%u) %s'%(IBA.const_str('MAD_METHOD_',self.method,True),
-                                  self.__class__.__name__,self.mgmtClass,
-                                  self.classVersion,s);
-        """;
+    print >> F, """import struct,rdma.binstruct;""";
     for I in structs:
         I.asPython(F);
 

@@ -218,7 +218,7 @@ def struct_dump(F,s,offset=0,name_prefix=''):
             if aligned and count == 1:
                 # Special automagic decode of format data members based on
                 # attribute ID.
-                if name == "data" and isinstance(s,rdma.IBA.BinFormat):
+                if name == "data" and isinstance(s,rdma.binstruct.BinFormat):
                     nattr = IBA.ATTR_TO_STRUCT.get((s.__class__,s.attributeID));
                     if nattr != None:
                         if nattr.MAD_LENGTH <= max_dword - cur_dword:
@@ -289,7 +289,7 @@ def struct_dotted(F,s,name_prefix='',dump_list=False,skip_reserved=True,
 
         # Special automagic decode of format data members based on
         # attribute ID.
-        if name == "data" and isinstance(s,rdma.IBA.BinFormat):
+        if name == "data" and isinstance(s,rdma.binstruct.BinFormat):
             nattr = IBA.ATTR_TO_STRUCT.get((s.__class__,s.attributeID));
             if nattr != None:
                 if nattr.MAD_LENGTH <= len(attr):

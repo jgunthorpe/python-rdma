@@ -72,3 +72,15 @@ class BinStruct(object):
         """Overridden in derived classes. Compact this instance into the
         :class:`bytearray` *buf* starting at *offset*."""
         pass
+
+class BinFormat(BinStruct):
+    '''Base class for all `*Format` type packet layouts.'''
+    def describe(self):
+        '''Return a short description of the RPC described by this format.'''
+        import rdma.IBA as IBA
+        attr = IBA.ATTR_TO_STRUCT.get((self.__class__,self.attributeID));
+        return '%s %s(%u.%u) %s(%u)'%(IBA.const_str('MAD_METHOD_',self.method,True),
+                                      self.__class__.__name__,
+                                      self.mgmtClass,self.classVersion,
+                                      '??' if attr is None else attr.__name__,
+                                      self.attributeID);

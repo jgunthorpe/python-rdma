@@ -1,17 +1,4 @@
 import struct,rdma.binstruct;
-class BinFormat(rdma.binstruct.BinStruct):
-    '''Base class for all `*Format` type packet layouts.'''
-    def describe(self):
-        '''Return a short description of the RPC described by this format.'''
-        attr = ATTR_TO_STRUCT.get((self.__class__,self.attributeID));
-        if attr is None:
-            s = '??(%u)'%(self.attributeID);
-        else:
-            s = '%s(%u)'%(attr.__name__,self.attributeID);
-        return '%s %s(%u.%u) %s'%(IBA.const_str('MAD_METHOD_',self.method,True),
-                                  self.__class__.__name__,self.mgmtClass,
-                                  self.classVersion,s);
-        
 class HdrLRH(rdma.binstruct.BinStruct):
     '''Local Route Header (section 7.7)'''
     __slots__ = ('VL','LVer','SL','reserved_12','LNH','DLID','reserved_32','pktLen','SLID');
@@ -341,7 +328,7 @@ class HdrFlowControl(rdma.binstruct.BinStruct):
     def unpack_from(self,buffer,offset=0):
         (self._pack_0_32,) = struct.unpack_from('>L',buffer,offset+0);
 
-class CMFormat(BinFormat):
+class CMFormat(rdma.binstruct.BinFormat):
     '''Request for Communication (section 16.7.1)'''
     __slots__ = ('baseVersion','mgmtClass','classVersion','method','status','classSpecific','transactionID','attributeID','reserved_144','attributeModifier','data');
     MAD_LENGTH = 256
@@ -1346,7 +1333,7 @@ class SMPLIDPortBlock(rdma.binstruct.BinStruct):
     def unpack_from(self,buffer,offset=0):
         (self._pack_0_32,) = struct.unpack_from('>L',buffer,offset+0);
 
-class SMPFormat(BinFormat):
+class SMPFormat(rdma.binstruct.BinFormat):
     '''SMP Format - LID Routed (section 14.2.1.1)'''
     __slots__ = ('baseVersion','mgmtClass','classVersion','method','status','classSpecific','transactionID','attributeID','reserved_144','attributeModifier','MKey','reserved_256','data','reserved_1024');
     MAD_LENGTH = 256
@@ -1381,7 +1368,7 @@ class SMPFormat(BinFormat):
         self.reserved_1024 = bytearray(buffer[offset + 128:offset + 256])
         (self.baseVersion,self.mgmtClass,self.classVersion,self.method,self.status,self.classSpecific,self.transactionID,self.attributeID,self.reserved_144,self.attributeModifier,self.MKey,) = struct.unpack_from('>BBBBHHQHHLQ',buffer,offset+0);
 
-class SMPFormatDirected(BinFormat):
+class SMPFormatDirected(rdma.binstruct.BinFormat):
     '''SMP Format - Direct Routed (section 14.2.1.2)'''
     __slots__ = ('baseVersion','mgmtClass','classVersion','method','D','status','hopPointer','hopCount','transactionID','attributeID','reserved_144','attributeModifier','MKey','drSLID','drDLID','reserved_288','data','initialPath','returnPath');
     MAD_LENGTH = 256
@@ -2030,7 +2017,7 @@ class SAHeader(rdma.binstruct.BinStruct):
     def unpack_from(self,buffer,offset=0):
         (self.baseVersion,self.mgmtClass,self.classVersion,self.method,self.status,self.classSpecific,self.transactionID,self.attributeID,self.reserved_144,self.attributeModifier,self._pack_0_32,self.data1,self.data2,self.SMKey,self.attributeOffset,self.reserved_368,self.componentMask,) = struct.unpack_from('>BBBBHHQHHLLLLQHHQ',buffer,offset+0);
 
-class SAFormat(BinFormat):
+class SAFormat(rdma.binstruct.BinFormat):
     '''SA Format (section 15.2.1.1)'''
     __slots__ = ('baseVersion','mgmtClass','classVersion','method','status','classSpecific','transactionID','attributeID','reserved_144','attributeModifier','RMPPVersion','RMPPType','RRespTime','RMPPFlags','RMPPStatus','data1','data2','SMKey','attributeOffset','reserved_368','componentMask','data');
     MAD_LENGTH = 256
@@ -2842,7 +2829,7 @@ class SAServiceAssociationRecord(rdma.binstruct.BinStruct):
         self.serviceKey = IBA.GID(buffer[offset + 0:offset + 16],raw=True);
         self.serviceName = bytearray(buffer[offset + 16:offset + 80])
 
-class PMFormat(BinFormat):
+class PMFormat(rdma.binstruct.BinFormat):
     '''Performance Management MAD Format (section 16.1.1)'''
     __slots__ = ('baseVersion','mgmtClass','classVersion','method','status','classSpecific','transactionID','attributeID','reserved_144','attributeModifier','reserved_192','data');
     MAD_LENGTH = 256
@@ -3403,7 +3390,7 @@ class PMPortRcvDataSL(rdma.binstruct.BinStruct):
     def unpack_from(self,buffer,offset=0):
         (self.reserved_0,self.portSelect,self.counterSelect,self.portRcvDataSL[0],self.portRcvDataSL[1],self.portRcvDataSL[2],self.portRcvDataSL[3],self.portRcvDataSL[4],self.portRcvDataSL[5],self.portRcvDataSL[6],self.portRcvDataSL[7],self.portRcvDataSL[8],self.portRcvDataSL[9],self.portRcvDataSL[10],self.portRcvDataSL[11],self.portRcvDataSL[12],self.portRcvDataSL[13],self.portRcvDataSL[14],self.portRcvDataSL[15],) = struct.unpack_from('>BBHLLLLLLLLLLLLLLLL',buffer,offset+0);
 
-class DMFormat(BinFormat):
+class DMFormat(rdma.binstruct.BinFormat):
     '''Device Management MAD Format (section 16.3.1)'''
     __slots__ = ('baseVersion','mgmtClass','classVersion','method','status','classSpecific','transactionID','attributeID','reserved_144','attributeModifier','reserved_192','data');
     MAD_LENGTH = 256
@@ -3656,7 +3643,7 @@ class DMDiagCode(rdma.binstruct.BinStruct):
     def unpack_from(self,buffer,offset=0):
         (self.diagCode,self.reserved_16,) = struct.unpack_from('>HH',buffer,offset+0);
 
-class SNMPFormat(BinFormat):
+class SNMPFormat(rdma.binstruct.BinFormat):
     '''SNMP Tunneling MAD Format (section 16.4.1)'''
     __slots__ = ('baseVersion','mgmtClass','classVersion','method','status','classSpecific','transactionID','attributeID','reserved_144','attributeModifier','reserved_192','RAddress','payloadLength','segmentNumber','sourceLID','data');
     MAD_LENGTH = 256
@@ -3729,7 +3716,7 @@ class SNMPPDUInfo(rdma.binstruct.BinStruct):
     def unpack_from(self,buffer,offset=0):
         self.PDUData = bytearray(buffer[offset + 0:offset + 192])
 
-class VendFormat(BinFormat):
+class VendFormat(rdma.binstruct.BinFormat):
     '''Vendor Specific Management MAD Format (section 16.5.1)'''
     __slots__ = ('baseVersion','mgmtClass','classVersion','method','status','classSpecific','transactionID','attributeID','reserved_144','attributeModifier','data');
     MAD_LENGTH = 256
@@ -3757,7 +3744,7 @@ class VendFormat(BinFormat):
         self.data = bytearray(buffer[offset + 24:offset + 256])
         (self.baseVersion,self.mgmtClass,self.classVersion,self.method,self.status,self.classSpecific,self.transactionID,self.attributeID,self.reserved_144,self.attributeModifier,) = struct.unpack_from('>BBBBHHQHHL',buffer,offset+0);
 
-class VendOUIFormat(BinFormat):
+class VendOUIFormat(rdma.binstruct.BinFormat):
     '''Vendor Specific Management MAD Format with OUI (section 16.5.1)'''
     __slots__ = ('baseVersion','mgmtClass','classVersion','method','status','classSpecific','transactionID','attributeID','reserved_144','attributeModifier','RMPPVersion','RMPPType','RRespTime','RMPPFlags','RMPPStatus','data1','data2','reserved_288','OUI','data');
     MAD_LENGTH = 256
