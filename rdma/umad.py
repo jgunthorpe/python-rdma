@@ -38,9 +38,11 @@ class LazyIBPath(rdma.path.LazyIBPath):
         self.DLID = DLID_bits | self.end_port.lid;
         self.SLID = cpu_to_be16(SLID);
         if self.has_grh:
-            del self.SGID
+            self.SGID = IBA.GID(self.SGID,True);
             self.DGID = self.end_port.gids[DGID_index];
             self.flow_label = cpu_to_be32(flow_label);
+        else:
+            del self.SGID
 
 class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
     '''Handle to a UMAD kernel interface. This class supports the context
