@@ -3729,6 +3729,92 @@ class SNMPPDUInfo(rdma.binstruct.BinStruct):
     def unpack_from(self,buffer,offset=0):
         self.PDUData = bytearray(buffer[offset + 0:offset + 192])
 
+class VendFormat(BinFormat):
+    '''Vendor Specific Management MAD Format (section 16.5.1)'''
+    __slots__ = ('baseVersion','mgmtClass','classVersion','method','status','classSpecific','transactionID','attributeID','reserved_144','attributeModifier','data');
+    MAD_LENGTH = 256
+    MAD_CLASS = 0x9
+    MAD_CLASS_VERSION = 0x1
+    MEMBERS = [('baseVersion',8,1), ('mgmtClass',8,1), ('classVersion',8,1), ('method',8,1), ('status',16,1), ('classSpecific',16,1), ('transactionID',64,1), ('attributeID',16,1), ('reserved_144',16,1), ('attributeModifier',32,1), ('data',1856,1)]
+    def zero(self):
+        self.baseVersion = 0;
+        self.mgmtClass = 0;
+        self.classVersion = 0;
+        self.method = 0;
+        self.status = 0;
+        self.classSpecific = 0;
+        self.transactionID = 0;
+        self.attributeID = 0;
+        self.reserved_144 = 0;
+        self.attributeModifier = 0;
+        self.data = bytearray(232);
+
+    def pack_into(self,buffer,offset=0):
+        buffer[offset + 24:offset + 256] = self.data
+        struct.pack_into('>BBBBHHQHHL',buffer,offset+0,self.baseVersion,self.mgmtClass,self.classVersion,self.method,self.status,self.classSpecific,self.transactionID,self.attributeID,self.reserved_144,self.attributeModifier);
+
+    def unpack_from(self,buffer,offset=0):
+        self.data = bytearray(buffer[offset + 24:offset + 256])
+        (self.baseVersion,self.mgmtClass,self.classVersion,self.method,self.status,self.classSpecific,self.transactionID,self.attributeID,self.reserved_144,self.attributeModifier,) = struct.unpack_from('>BBBBHHQHHL',buffer,offset+0);
+
+class VendOUIFormat(BinFormat):
+    '''Vendor Specific Management MAD Format with OUI (section 16.5.1)'''
+    __slots__ = ('baseVersion','mgmtClass','classVersion','method','status','classSpecific','transactionID','attributeID','reserved_144','attributeModifier','RMPPVersion','RMPPType','RRespTime','RMPPFlags','RMPPStatus','data1','data2','reserved_288','OUI','data');
+    MAD_LENGTH = 256
+    MAD_CLASS = 0x30
+    MAD_CLASS_VERSION = 0x1
+    MEMBERS = [('baseVersion',8,1), ('mgmtClass',8,1), ('classVersion',8,1), ('method',8,1), ('status',16,1), ('classSpecific',16,1), ('transactionID',64,1), ('attributeID',16,1), ('reserved_144',16,1), ('attributeModifier',32,1), ('RMPPVersion',8,1), ('RMPPType',8,1), ('RRespTime',5,1), ('RMPPFlags',3,1), ('RMPPStatus',8,1), ('data1',32,1), ('data2',32,1), ('reserved_288',8,1), ('OUI',24,1), ('data',1728,1)]
+    def zero(self):
+        self.baseVersion = 0;
+        self.mgmtClass = 0;
+        self.classVersion = 0;
+        self.method = 0;
+        self.status = 0;
+        self.classSpecific = 0;
+        self.transactionID = 0;
+        self.attributeID = 0;
+        self.reserved_144 = 0;
+        self.attributeModifier = 0;
+        self.RMPPVersion = 0;
+        self.RMPPType = 0;
+        self.RRespTime = 0;
+        self.RMPPFlags = 0;
+        self.RMPPStatus = 0;
+        self.data1 = 0;
+        self.data2 = 0;
+        self.reserved_288 = 0;
+        self.OUI = 0;
+        self.data = bytearray(216);
+
+    @property
+    def _pack_0_32(self):
+        return ((self.RMPPVersion & 0xFF) << 24) | ((self.RMPPType & 0xFF) << 16) | ((self.RRespTime & 0x1F) << 11) | ((self.RMPPFlags & 0x7) << 8) | ((self.RMPPStatus & 0xFF) << 0)
+
+    @_pack_0_32.setter
+    def _pack_0_32(self,value):
+        self.RMPPVersion = (value >> 24) & 0xFF;
+        self.RMPPType = (value >> 16) & 0xFF;
+        self.RRespTime = (value >> 11) & 0x1F;
+        self.RMPPFlags = (value >> 8) & 0x7;
+        self.RMPPStatus = (value >> 0) & 0xFF;
+
+    @property
+    def _pack_1_32(self):
+        return ((self.reserved_288 & 0xFF) << 24) | ((self.OUI & 0xFFFFFF) << 0)
+
+    @_pack_1_32.setter
+    def _pack_1_32(self,value):
+        self.reserved_288 = (value >> 24) & 0xFF;
+        self.OUI = (value >> 0) & 0xFFFFFF;
+
+    def pack_into(self,buffer,offset=0):
+        buffer[offset + 40:offset + 256] = self.data
+        struct.pack_into('>BBBBHHQHHLLLLL',buffer,offset+0,self.baseVersion,self.mgmtClass,self.classVersion,self.method,self.status,self.classSpecific,self.transactionID,self.attributeID,self.reserved_144,self.attributeModifier,self._pack_0_32,self.data1,self.data2,self._pack_1_32);
+
+    def unpack_from(self,buffer,offset=0):
+        self.data = bytearray(buffer[offset + 40:offset + 256])
+        (self.baseVersion,self.mgmtClass,self.classVersion,self.method,self.status,self.classSpecific,self.transactionID,self.attributeID,self.reserved_144,self.attributeModifier,self._pack_0_32,self.data1,self.data2,self._pack_1_32,) = struct.unpack_from('>BBBBHHQHHLLLLL',buffer,offset+0);
+
 MEMBER_FORMATS = {'counterSelect2': 'hex', 'counterSelect3': 'hex', 'counterSelect0': 'hex', 'counterSelect1': 'hex', 'counterSelect6': 'hex', 'nodeString': 'str', 'counterSelect4': 'hex', 'redirectPKey': 'hex', 'diagCode': 'hex', 'servicePKey': 'hex', 'QOSClass': 'hex', 'initType': 'hex', 'trapQP': 'hex', 'counterSelect10': 'hex', 'altTClass': 'hex', 'MLID': 'hex', 'counterSelect': 'hex', 'QKey': 'hex', 'counterSelect12': 'hex', 'counterSelect7': 'hex', 'vendorID': 'hex', 'capabilityMask': 'hex', 'initTypeReply': 'hex', 'counterSelect14': 'hex', 'redirectQKey': 'hex', 'counterSelect5': 'hex', 'serviceName': 'str', 'IDString': 'str', 'PKeyBlock': 'hex', 'communityName': 'str', 'counterSelect8': 'hex', 'revision': 'hex', 'PKey': 'hex', 'capabilityMask2': 'hex', 'counterSelect9': 'hex', 'redirectTC': 'hex', 'trapPKey': 'hex', 'counterSelect11': 'hex', 'transactionID': 'hex', 'counterSelect13': 'hex', 'SMKey': 'hex', 'MKey': 'hex', 'localCMQKey': 'hex', 'redirectQP': 'hex', 'localQKey': 'hex', 'serviceID': 'hex', 'deviceID': 'hex', 'trapQKey': 'hex', 'TClass': 'hex'};
 CLASS_TO_STRUCT = {(7,2):CMFormat,
 	(1,1):SMPFormat,
@@ -3736,7 +3822,9 @@ CLASS_TO_STRUCT = {(7,2):CMFormat,
 	(3,2):SAFormat,
 	(4,1):PMFormat,
 	(6,1):DMFormat,
-	(8,1):SNMPFormat};
+	(8,1):SNMPFormat,
+	(9,1):VendFormat,
+	(48,1):VendOUIFormat};
 ATTR_TO_STRUCT = {(CMFormat,16):CMREQ,
 	(CMFormat,17):CMMRA,
 	(CMFormat,18):CMREJ,

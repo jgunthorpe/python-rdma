@@ -427,6 +427,14 @@ class structs_test(unittest.TestCase):
         IBA.SNMPPDUInfo().pack_into(test);
         IBA.SNMPPDUInfo().unpack_from(testr);
         IBA.SNMPPDUInfo(testr);
+        assert(len(test) == 512);
+        IBA.VendFormat().pack_into(test);
+        IBA.VendFormat().unpack_from(testr);
+        IBA.VendFormat(testr);
+        assert(len(test) == 512);
+        IBA.VendOUIFormat().pack_into(test);
+        IBA.VendOUIFormat().unpack_from(testr);
+        IBA.VendOUIFormat(testr);
     def test_struct_printer(self):
         IBA.HdrLRH().printer(sys.stdout);
         IBA.HdrLRH().printer(sys.stdout,format="dotted");
@@ -636,5 +644,9 @@ class structs_test(unittest.TestCase):
         IBA.SNMPCommunityInfo().printer(sys.stdout,format="dotted");
         IBA.SNMPPDUInfo().printer(sys.stdout);
         IBA.SNMPPDUInfo().printer(sys.stdout,format="dotted");
+        IBA.VendFormat().printer(sys.stdout);
+        IBA.VendFormat().printer(sys.stdout,format="dotted");
+        IBA.VendOUIFormat().printer(sys.stdout);
+        IBA.VendOUIFormat().printer(sys.stdout,format="dotted");
 if __name__ == '__main__':
     unittest.main()

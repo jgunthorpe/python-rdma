@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!-- Copyright 2011 Obsidian Research Corp.
+     This file is under a BSD license. See COPYING -->
+<makestructs type="IBA Vendor Specific Management">
+  <struct name="VendFormat"
+          bytes="256"
+          desc="Vendor Specific Management MAD Format"
+          sect="16.5.1"
+          mgmtClass="0x9"
+          mgmtClassVersion="1"
+          mgmtClassName="MAD_VENDOR">
+    <mb bits="192" off="0" type="struct MADHeader">MADHeader<!--Common MAD Header--></mb>
+    <mb bits="1856" off="24" display="data">data<!--Data--></mb>
+  </struct>
+
+  <struct name="VendOUIFormat"
+          bytes="256"
+          desc="Vendor Specific Management MAD Format with OUI"
+          sect="16.5.1"
+          mgmtClass="0x30"
+          mgmtClassVersion="1"
+          mgmtClassName="MAD_VENDOR_OUI">
+    <mb bits="288" off="0" type="struct RMPPHeader">RMPPHeader<!--RMPP Data--></mb>
+    <mb bits="8" off="36"></mb>
+    <mb bits="24" off="36[8]">OUI</mb>
+    <mb bits="1728" off="40" display="data">data<!--Data--></mb>
+  </struct>
+</makestructs>

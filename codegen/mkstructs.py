@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Copyright 2011 Obsidian Research Corp. GLPv2, see COPYING.
-# ./mkstructs.py -x iba_transport.xml -x iba_12.xml -x iba_13_4.xml -x iba_13_6.xml -x iba_14.xml -x iba_15.xml -x iba_16_1.xml -x iba_16_3.xml -x iba_16_4.xml  -o ../rdma/IBA_struct.py -t ../tests/iba_struct.py -r ../doc/iba_struct.inc
+# ./mkstructs.py -x iba_transport.xml -x iba_12.xml -x iba_13_4.xml -x iba_13_6.xml -x iba_14.xml -x iba_15.xml -x iba_16_1.xml -x iba_16_3.xml -x iba_16_4.xml -x iba_16_5.xml  -o ../rdma/IBA_struct.py -t ../tests/iba_struct.py -r ../doc/iba_struct.inc
 '''This script converts the XML descriptions of IB structures into python
    classes and associated codegen'''
 from __future__ import with_statement;
@@ -23,7 +23,8 @@ MAD_METHOD_DELETE = 0x15;
 MAD_METHOD_RESPONSE = 0x80;
 
 methodMap = {};
-prefix = ("Subn","CommMgt","Performance","BM","DevMgt","SubnAdm","SNMP");
+prefix = ("Subn","CommMgt","Performance","BM","DevMgt","SubnAdm","SNMP",
+          "Vend");
 for I in prefix:
     for J in ("Get","Set","Send","Trap","Delete"):
         methodMap[I+J] = "MAD_METHOD_%s"%(J.upper());
@@ -165,6 +166,7 @@ class Struct(object):
 
         self.is_format = (self.name.endswith("Format") or
                           self.name.endswith("FormatDirected"));
+        self.format = xml.get("format");
 
         self.inherits = {};
         self.mb = [];
@@ -376,6 +378,8 @@ class Struct(object):
         if self.mgmtClass:
             yield "MAD_CLASS","0x%x"%(int(self.mgmtClass,0));
             yield "MAD_CLASS_VERSION","0x%x"%(int(self.mgmtClassVersion,0));
+        if self.format:
+            yield "FORMAT",self.format
         if self.attributeID is not None:
             yield "MAD_ATTRIBUTE_ID","0x%x"%(self.attributeID);
         if self.methods and not self.is_format:
@@ -551,7 +555,8 @@ with safeUpdateCtx(options.rst_out) as F:
              (("16","1"),"Performance Management"),
              (("A13","6"),"Performance Management"),
              (("16","3"),"Device Management"),
-             (("16","4"),"SNMP Tunneling")];
+             (("16","4"),"SNMP Tunneling"),
+             (("16","5"),"Vendor Specific Management")];
     lst = sorted(structs,key=lambda x:x.name);
     done = set();
     last = None;

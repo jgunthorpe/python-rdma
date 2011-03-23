@@ -278,6 +278,17 @@ class MADTransactor(object):
         return self._subn_adm_do(payload,path,attributeModifier,
                            payload.MAD_SUBNADMSET);
 
+    def _vend_do(self,payload,path,attributeModifier,method):
+        fmt = payload.FORMAT();
+        return self._doMAD(fmt,payload,path,attributeModifier,method);
+
+    def VendGet(self,payload,path,attributeModifier=0):
+        return self._vend_do(payload,path,attributeModifier,
+                             payload.MAD_VENDGET);
+    def VendSet(self,payload,path,attributeModifier=0):
+        return self._vend_do(payload,path,attributeModifier,
+                             payload.MAD_VENDSET);
+
     def do_async(self,op):
         """This runs a simple async work coroutine against a synchronous
         instance. In this case the coroutine yields its own next result."""

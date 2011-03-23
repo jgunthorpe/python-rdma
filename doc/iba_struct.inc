@@ -2125,6 +2125,72 @@ SNMP Tunneling (16.4)
     :attr:`PDUData` 0:192 (1536) :class:`bytearray` (192)
     =============== ============ ========================
 
+Vendor Specific Management (16.5)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. class:: rdma.IBA.VendFormat
+
+    An *aggregation* of: MADHeader
+
+    Vendor Specific Management MAD Format (section 16.5.1)
+
+    .. attribute:: MAD_LENGTH = 256
+    .. attribute:: MAD_CLASS = 0x9
+    .. attribute:: MAD_CLASS_VERSION = 0x1
+    .. attribute:: MEMBERS = [('baseVersion',8,1), ('mgmtClass',8,1), ('classVersion',8,1), ('method',8,1), ('status',16,1), ('classSpecific',16,1), ('transactionID',64,1), ('attributeID',16,1), ('reserved_144',16,1), ('attributeModifier',32,1), ('data',1856,1)]
+
+    ========================= ============= ========================
+    Member                    Position      Type                    
+    ========================= ============= ========================
+    :attr:`baseVersion`       0:1 (8)       :class:`int`            
+    :attr:`mgmtClass`         1:2 (8)       :class:`int`            
+    :attr:`classVersion`      2:3 (8)       :class:`int`            
+    :attr:`method`            3:4 (8)       :class:`int`            
+    :attr:`status`            4:6 (16)      :class:`int`            
+    :attr:`classSpecific`     6:8 (16)      :class:`int`            
+    :attr:`transactionID`     8:16 (64)     :class:`int`            
+    :attr:`attributeID`       16:18 (16)    :class:`int`            
+    :attr:`reserved_144`      18:20 (16)    :class:`int`            
+    :attr:`attributeModifier` 20:24 (32)    :class:`int`            
+    :attr:`data`              24:256 (1856) :class:`bytearray` (232)
+    ========================= ============= ========================
+
+.. class:: rdma.IBA.VendOUIFormat
+
+    An *aggregation* of: MADHeader, RMPPHeader
+
+    Vendor Specific Management MAD Format with OUI (section 16.5.1)
+
+    .. attribute:: MAD_LENGTH = 256
+    .. attribute:: MAD_CLASS = 0x30
+    .. attribute:: MAD_CLASS_VERSION = 0x1
+    .. attribute:: MEMBERS = [('baseVersion',8,1), ('mgmtClass',8,1), ('classVersion',8,1), ('method',8,1), ('status',16,1), ('classSpecific',16,1), ('transactionID',64,1), ('attributeID',16,1), ('reserved_144',16,1), ('attributeModifier',32,1), ('RMPPVersion',8,1), ('RMPPType',8,1), ('RRespTime',5,1), ('RMPPFlags',3,1), ('RMPPStatus',8,1), ('data1',32,1), ('data2',32,1), ('reserved_288',8,1), ('OUI',24,1), ('data',1728,1)]
+
+    ========================= ============= ========================
+    Member                    Position      Type                    
+    ========================= ============= ========================
+    :attr:`baseVersion`       0:1 (8)       :class:`int`            
+    :attr:`mgmtClass`         1:2 (8)       :class:`int`            
+    :attr:`classVersion`      2:3 (8)       :class:`int`            
+    :attr:`method`            3:4 (8)       :class:`int`            
+    :attr:`status`            4:6 (16)      :class:`int`            
+    :attr:`classSpecific`     6:8 (16)      :class:`int`            
+    :attr:`transactionID`     8:16 (64)     :class:`int`            
+    :attr:`attributeID`       16:18 (16)    :class:`int`            
+    :attr:`reserved_144`      18:20 (16)    :class:`int`            
+    :attr:`attributeModifier` 20:24 (32)    :class:`int`            
+    :attr:`RMPPVersion`       24:25 (8)     :class:`int`            
+    :attr:`RMPPType`          25:26 (8)     :class:`int`            
+    :attr:`RRespTime`         26:26[5] (5)  :class:`int`            
+    :attr:`RMPPFlags`         26[5]:27 (3)  :class:`int`            
+    :attr:`RMPPStatus`        27:28 (8)     :class:`int`            
+    :attr:`data1`             28:32 (32)    :class:`int`            
+    :attr:`data2`             32:36 (32)    :class:`int`            
+    :attr:`reserved_288`      36:37 (8)     :class:`int`            
+    :attr:`OUI`               37:40 (24)    :class:`int`            
+    :attr:`data`              40:256 (1728) :class:`bytearray` (216)
+    ========================= ============= ========================
+
 Miscellaneous IBA Structures
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
