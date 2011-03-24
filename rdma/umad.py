@@ -124,31 +124,51 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
         """Returns agent_id"""
         buf = struct.pack("=L4LBBB3BB",
                           0,
-                          method_mask[0],method_mask[1],method_mask[2],method_mask[3],
+                          (method_mask >>  0) & 0xFFFFFFFF,
+                          (method_mask >> 32) & 0xFFFFFFFF,
+                          (method_mask >> 64) & 0xFFFFFFFF,
+                          (method_mask >> 96) & 0xFFFFFFFF,
                           dqpn,
                           mgmt_class,
                           mgmt_class_version,
-                          oui[0],oui[1],oui[2],
+                          (oui >> 16) & 0xFF,(oui >> 8) & 0xFF,oui & 0xFF,
                           rmpp_version);
         buf = fcntl.ioctl(self.dev.fileno(),self.IB_USER_MAD_REGISTER_AGENT,
                           buf);
         return struct.unpack("=L",buf[:4])[0];
 
-    def register_client(self,mgmt_class,class_version):
+    def register_client(self,mgmt_class,class_version,oui=0):
         """Manually register a MAD agent. This is done automatically for
-        sending MADs, this API is mainly intended to enable listening
-        for unsolicited messages."""
+        sending MADs, this API is mainly intended for special cases.."""
         try:
-            return self._agent_cache[mgmt_class,class_version];
+            return self._agent_cache[mgmt_class,class_version,oui];
         except KeyError:
             rmpp_version = 1 if mgmt_class == IBA.MAD_SUBNET_ADMIN else 0;
             qpn = 0 if (mgmt_class == IBA.MAD_SUBNET or
                         mgmt_class == IBA.MAD_SUBNET_DIRECTED) else 1;
             ret = self._ioctl_register_agent(qpn,mgmt_class,class_version,
-                                             (0x00,0x14,0x05),rmpp_version,
-                                             [0]*4);
-            self._agent_cache[mgmt_class,class_version] = ret;
+                                             oui,rmpp_version,0);
+            self._agent_cache[mgmt_class,class_version,oui] = ret;
             return ret;
+
+    def register_server(self,mgmt_class,class_version,oui=0,method_mask=0):
+        """Register to receive MADs that match the given
+        pattern. *method_mask* is a bitmask of the method ID to match, *oui*
+        is only used for :class:`rdma.IBA.VendOUIFormat` MADs."""
+        rmpp_version = 1 if mgmt_class == IBA.MAD_SUBNET_ADMIN else 0;
+        qpn = 0 if (mgmt_class == IBA.MAD_SUBNET or
+                    mgmt_class == IBA.MAD_SUBNET_DIRECTED) else 1;
+        ret = self._ioctl_register_agent(qpn,mgmt_class,class_version,
+                                         oui,rmpp_version,method_mask);
+        return ret;
+
+    def register_server_fmt(self,fmt):
+        """Same as :meth:`register_server` except the arguments are deduced
+        from *fmt* which should be derived from
+        :class:`rdma.binstruct.BinFormat`."""
+        return self.register_server(fmt.MAD_CLASS,fmt.MAD_CLASS_VERSION,
+                                    getattr(fmt,"MAD_CLASS_OUI",0),
+                                    getattr(fmt,"MAD_METHOD_MASK",6));
 
     def _cache_make_ah(self,path):
         """Construct the address handle for UMAD and cache it in the path
@@ -280,9 +300,15 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
         MADs received during this call are discarded until the reply is seen."""
         if path.umad_agent_id is None:
             if isinstance(buf,bytearray):
-                agent_id = self.register_client(buf[1],buf[2]);
+                agent_id = self.register_client(buf[1],buf[2],
+                                                (buf[37] << 16) |
+                                                (buf[38] << 8) |
+                                                buf[39]);
             else:
-                agent_id = self.register_client(ord(buf[1]),ord(buf[2]));
+                agent_id = self.register_client(ord(buf[1]),ord(buf[2]),
+                                                (ord(buf[37]) << 16) |
+                                                (ord(buf[38]) << 8) |
+                                                ord(buf[39]));
         else:
             agent_id = None;
         try:
@@ -320,4 +346,3 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
                 self.__class__.__name__,
                 self.parent,
                 id(self));
-
