@@ -284,6 +284,11 @@ Specific commands:
    to check peer ports for link speed and link width. No warnings
    are generated if the max capability is being used. (eg SDR connected
    to DDR).
+* `vendstat` only supports -N (FIXME)
+* `ibsysstat` has different output. This is a fairly pointless program,
+  it is included to illustrate/test a vendor OUI MAD server.
+* `ibping` uses `ibsysstat` as a server. I could not bring myself to implement
+  another ping class particularly when it used an attribute ID of 0..
 
 Commands
 ========
@@ -296,20 +301,20 @@ bcheckerrs	    ibchecknet	  	ibchecknode	    ibcheckport
 ibcheckportstate    ibcheckportwidth 	ibcheckstate	    ibcheckwidth
 ibclearcounters     ibclearerrors	ibdatacounters      ibdatacounts
 ibfindnodesusing.pl ibhosts		ibnetdiscover	    ibnodes
-ibportstate	    ibprintca.pl        ibprintrt.pl	    ibprintswitch.pl
-ibroute		    ibrouters		ibstat		    ibstatus
-ibswitches	    ibtracert	    	ibv_devices         perfquery
-rdma_bw		    saquery		set_nodedesc.sh     sminfo
-smpdump		    smpquery
+ibping		    ibportstate		ibprintca.pl        ibprintrt.pl
+ibprintswitch.pl    ibroute		ibrouters	    ibstat
+ibstatus	    ibswitches		ibsysstat	    ibtracert
+ibv_devices 	    perfquery		rdma_bw		    saquery
+set_nodedesc.sh     sminfo		smpdump		    smpquery
+vendstat
 =================== =================== =================== ===================
 
 To be completed:
 
-==================== ============= ================== =================
-check_lft_balance.pl ibdiscover.pl ibidsverify.pl
-iblinkinfo[.pl]      ibping        ibqueryerrors[.pl] ibswportwatch.pl
-ibsysstat            vendstat
-==================== ============= ================== =================
+==================== ================== ================== =================
+check_lft_balance.pl ibdiscover.pl	ibidsverify.pl     iblinkinfo[.pl]
+ibqueryerrors[.pl]   ibswportwatch.pl
+==================== ================== ================== =================
 
 Verbs examples/tests:
 

@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!-- Copyright 2011 Obsidian Research Corp.
+     This file is under a BSD license. See COPYING -->
+<makestructs type="Mellanox Specific Management">
+  <struct name="MlxGeneralInfo"
+          bytes="108"
+          attributeID="0x17"
+          attributeName="MLX_GENERAL_INFO"
+          format="libibtool.vendstruct.MlxFormat"
+          methods="VendGet">
+    <mb bits="64"></mb>
+    <!-- is3_hw_info_t -->
+    <mb bits="16">hw_revision</mb>
+    <mb bits="16">device_id</mb>
+    <mb bits="192"></mb>
+    <mb bits="32">uptime</mb>
+
+    <!-- is3_fw_info_t -->
+    <mb bits="8"></mb>
+    <mb bits="8">fw_major</mb>
+    <mb bits="8">fw_minor</mb>
+    <mb bits="8">fw_sub_minor</mb>
+    <mb bits="32">fw_build_id</mb>
+    <mb bits="8">fw_month</mb>
+    <mb bits="8">fw_day</mb>
+    <mb bits="16">fw_year</mb>
+    <mb bits="16"></mb>
+    <mb bits="16">fw_hour</mb>
+    <mb bits="128">fw_psid</mb>
+    <mb bits="32">fw_init_file_version</mb>
+
+    <!-- is3_sw_info_t -->
+    <mb bits="8"></mb>
+    <mb bits="8">hw_major</mb>
+    <mb bits="8">hw_minor</mb>
+    <mb bits="8">hw_sub_minor</mb>
+    <mb bits="224"></mb>
+  </struct>
+</makestructs>

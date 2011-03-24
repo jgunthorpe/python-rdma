@@ -102,6 +102,7 @@ class ibtool_cmds_test(unittest.TestCase):
                     raise;
         self.cmd("query","PerformanceGet","MADClassPortInfo");
         self.cmd("set_nodedesc");
+        self.cmd("vendstat","-N",self.end_port.lid);
 
     def test_with_link_exc(self):
         self.assertEquals(self.end_port.state,IBA.PORT_STATE_ACTIVE);

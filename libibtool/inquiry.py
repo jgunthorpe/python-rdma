@@ -396,6 +396,8 @@ def cmd_decode_mad(argv,o):
 
        All spaces and newlines are removed from the input text, the
        result must be a single string of hex digits."""
+    import libibtool.vendstruct
+    libibtool.vendstruct.install_vend();
     o.add_option("-v","--verbosity",dest="verbosity",action="count",default=0,
                  help="Increase the verbosity level of diagnostic messages, each -v increases by 1.")
     o.add_option("-o","--offset",dest="offset",action="store",default=0,type=int,

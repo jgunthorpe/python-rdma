@@ -60,7 +60,11 @@ commands = {
     "ibdatacounters": ("libibtool.errors",),
     "ibdatacounts": ("libibtool.errors",),
 
-    "rdma_bw": ("libibtool.rdma_bw",),
+    "rdma_bw": None,
+
+    "vendstat": None,
+    "ibsysstat": ("libibtool.vendstat",),
+    "ibping": ("libibtool.vendstat",),
 
     "help": (__name__,),
 };

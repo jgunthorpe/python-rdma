@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!-- Copyright 2011 Obsidian Research Corp.
+     This file is under a BSD license. See COPYING -->
+<makestructs type="OFA Vendor Specific Management">
+
+  <struct name="OFASysStatPing"
+          bytes="64"
+          attributeID="0x10"
+          attributeName="OFA_SYSSTAT_PING"
+          format="libibtool.vendstruct.OFASysStatFormat"
+          methods="VendGet">
+    <mb bits="64">cookie</mb>
+  </struct>
+  <struct name="OFASysStatHostInfo"
+          bytes="216"
+          attributeID="0x11"
+          attributeName="OFA_SYSSTAT_HOST_INFO"
+          format="libibtool.vendstruct.OFASysStatFormat"
+          methods="VendGet">
+    <mb bits="8" count="216" display="string">data_str</mb>
+  </struct>
+  <struct name="OFASysStatCPUInfo"
+          bytes="216"
+          attributeID="0x112"
+          attributeName="OFA_SYSSTAT_CPU_INFO"
+          format="libibtool.vendstruct.OFASysStatFormat"
+          methods="VendGet">
+    <mb bits="8" count="216" display="string">data_str</mb>
+  </struct>
+</makestructs>
