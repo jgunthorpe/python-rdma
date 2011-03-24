@@ -200,7 +200,7 @@ class CQPoller(object):
             return True;
         while True:
             if wakeat is None:
-                ret = self._poll.poll(0);
+                ret = self._poll.poll(-1);
             else:
                 timeout = wakeat - rdma.tools.clock_monotonic();
                 if timeout <= 0:

@@ -224,7 +224,6 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
         buf = bytearray(320);
         first = True;
         while True:
-            timeout = wakeat - rdma.tools.clock_monotonic();
             try:
                 rc = self.dev.readinto(buf);
             except IOError as err:
@@ -238,8 +237,13 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
             if rc is None:
                 if not first:
                     raise IOError(errno.EAGAIN,"Invalid read after poll");
-                if timeout <= 0 or not self._poll.poll(timeout*1000):
-                    return None;
+                if wakeat is None:
+                    if not self._poll.poll(-1):
+                        return None;
+                else:
+                    timeout = wakeat - rdma.tools.clock_monotonic();
+                    if timeout <= 0 or not self._poll.poll(timeout*1000):
+                        return None;
                 first = False;
                 continue;
 
