@@ -5,6 +5,22 @@ import rdma.IBA as IBA;
 TRACE_SEND = 0;
 TRACE_COMPLETE = 1;
 TRACE_UNEXPECTED = 2;
+TRACE_RECEIVE = 3;
+TRACE_REPLY = 4;
+
+class _MADFormat(rdma.binstruct.BinFormat,IBA.MADHeader):
+    """Support clase to let us trace error MADs."""
+    def __init__(self,buf):
+        IBA.MADHeader.__init__(self,buf);
+        self.match = MADTransactor.get_request_match_key(buf);
+    def describe(self):
+        '''Return a short description of the RPC described by this format.'''
+        kind = IBA.get_fmt_payload(*self.match);
+        return '%s %s(%u.%u) %s(%u)'%(IBA.const_str('MAD_METHOD_',self.method,True),
+                                      '??' if kind[0] is None else kind[0].__name__,
+                                      self.mgmtClass,self.classVersion,
+                                      '??' if kind[1] is None else kind[1].__name__,
+                                      self.attributeID);
 
 def simple_tracer(mt,kind,fmt=None,path=None,ret=None):
     """Simply logs summaries of what is happening to :data:`sys.stdout`.
@@ -17,6 +33,11 @@ def simple_tracer(mt,kind,fmt=None,path=None,ret=None):
             return;
         else:
             print "debug: RPC %s completed to '%s' len %u."%(desc,path,len(ret[0]));
+    if kind == TRACE_RECEIVE:
+        print "debug: RPC %s received from '%s' len %u."%(fmt.describe(),
+                                                          path,len(ret[0]));
+    if kind == TRACE_REPLY:
+        print "debug: RPC %s reply to '%s'"%(fmt.describe(),path);
     if kind == TRACE_UNEXPECTED:
         print "debug: Got unexpected MAD from '%s'."%(ret[1]);
 
@@ -35,6 +56,16 @@ def dumper_tracer(mt,kind,fmt=None,path=None,ret=None):
     if kind == TRACE_UNEXPECTED:
         simple_tracer(mt,kind,fmt=fmt,path=path,ret=ret);
         IBA.MADHeader(bytes(ret[0])).printer(sys.stdout);
+    if kind == TRACE_RECEIVE:
+        simple_tracer(mt,kind,fmt=fmt,path=path,ret=ret);
+        if fmt is not None:
+            print "debug: Incoming request",fmt.describe();
+            fmt.printer(sys.stdout,header=False);
+    if kind == TRACE_REPLY:
+        simple_tracer(mt,kind,fmt=fmt,path=path,ret=ret);
+        if fmt is not None:
+            print "debug: Outgoing reply",fmt.describe();
+            fmt.printer(sys.stdout,header=False);
 
 class MADTransactor(object):
     """This class is a mixin for everything that implements a MAD RPC
@@ -311,6 +342,110 @@ class MADTransactor(object):
     def VendSet(self,payload,path,attributeModifier=0):
         return self._vend_do(payload,path,attributeModifier,
                              payload.MAD_VENDSET);
+
+    def parse_request(self,rbuf,path):
+        """Parse a request packet into a format and data.
+
+        :raises rdma.MADError: If the packet could not be parsed."""
+        l = len(rbuf);
+        if l <= IBA.MADHeader.MAD_LENGTH:
+            raise rdma.MADError(req_buf=rbuf,path=path,
+                                reply_status=0,
+                                msg="Invalid request size.Got %u, expected at least %u"%(
+                                    l,IBA.MADHeader.MAD_LENGTH));
+        match = self.get_request_match_key(rbuf);
+        if match[1] >> 8 != IBA.MAD_BASE_VERSION:
+            raise rdma.MADError(req_buf=rbuf,path=path,
+                                reply_status=IBA.MAD_STATUS_BAD_VERSION,
+                                msg="Invalid base version, got key %r"%(match));
+        kind = IBA.get_fmt_payload(*match);
+        if kind[0] is None:
+            for clsid,ver in IBA.CLASS_TO_STRUCT.iterkeys():
+                if clsid == kind[0]:
+                    raise rdma.MADError(req_buf=rbuf,path=path,
+                                        reply_status=IBA.MAD_STATUS_BAD_VERSION,
+                                        msg="Invalid class version, got key %r"%(match));
+            raise rdma.MADError(req_buf=rbuf,path=path,
+                                reply_status=IBA.MAD_STATUS_UNSUP_METHOD,
+                                msg="Unsupported class ID, got key %r"%(match));
+        if l != kind[0].MAD_LENGTH:
+            raise rdma.MADError(req_buf=rbuf,path=path,
+                                reply_status=0,
+                                msg="Invalid request size.Got %u, expected %u"%(
+                                    l,kind[0].MAD_LENGTH));
+
+        # The try wrappers the unpack incase the MAD is busted somehow.
+        try:
+            fmt = kind[0](rbuf);
+            if self.trace_func is not None:
+                self.trace_func(self,TRACE_RECEIVE,fmt=fmt,path=path,
+                                ret=(rbuf,path));
+            if kind[1] is None:
+                raise rdma.MADError(req=fmt,req_buf=rbuf,path=path,
+                                    reply_status=IBA.MAD_STATUS_UNSUP_METHOD_ATTR_COMBO,
+                                    msg="Unsupported attribute ID for %s, got key %r"%(
+                                        fmt.describe(),match));
+            return fmt,kind[1](fmt.data);
+        except rdma.MADError:
+            raise
+        except:
+            e = rdma.MADError(req_buf=rbuf,path=path,
+                              reply_status=IBA.MAD_STATUS_INVALID_ATTR_OR_MODIFIER,
+                              exc_info=sys.exc_info());
+            raise rdma.MADError,e,e.exc_info[2]
+
+    def send_error_exc(self,exc):
+        """Call :meth:`send_error_reply` with the arguments derived from
+        the :exc:`rdma.MADError` exception passed in."""
+        status = getattr(exc,"reply_status",IBA.MAD_STATUS_UNSUP_METHOD);
+        if status == 0:
+            return
+        self.send_error_reply(exc.req_buf,exc.path,status);
+
+    def send_error_reply(self,buf,path,status,class_code=0):
+        """Generate an error reply for a MAD. *buf* is the full original
+        packet. This entire packet is returned with an appropriate error code
+        set. *status* and *class_code* should be set to the appropriate result
+        code."""
+        hdr = _MADFormat(buf);
+        hdr.status = (status & 0x1F) | ((class_code & IBA.MAD_STATUS_CLASS_MASK) <<  IBA.MAD_STATUS_CLASS_SHIFT)
+        if hdr.method == IBA.MAD_METHOD_SET:
+            hdr.method = IBA.MAD_METHOD_GET_RESP
+        else:
+            hdr.method = hdr.method | IBA.MAD_METHOD_RESPONSE;
+        buf = bytearray(buf);
+        hdr.pack_into(buf);
+
+        path.reverse();
+        if self.trace_func is not None:
+            self.trace_func(self,TRACE_REPLY,fmt=hdr,path=path);
+        self.sendto(buf,path);
+
+    def send_reply(self,ofmt,payload,path,attributeModifier=0,
+                   status=0,class_code=0):
+        """Generate a reply packet. *ofmt* should be the request format."""
+        fmt = ofmt.__class__();
+        fmt.baseVersion = IBA.MAD_BASE_VERSION;
+        fmt.mgmtClass = fmt.MAD_CLASS;
+        fmt.classVersion = fmt.MAD_CLASS_VERSION;
+        fmt.status = (status & 0x1F) | ((class_code & IBA.MAD_STATUS_CLASS_MASK) <<  IBA.MAD_STATUS_CLASS_SHIFT)
+        if ofmt.method == IBA.MAD_METHOD_SET:
+            fmt.method = IBA.MAD_METHOD_GET_RESP
+        else:
+            fmt.method = ofmt.method | IBA.MAD_METHOD_RESPONSE;
+        fmt.transactionID = ofmt.transactionID;
+        fmt.attributeID = ofmt.attributeID;
+        fmt.attributeModifier = attributeModifier;
+
+        if not isinstance(payload,type):
+            payload.pack_into(fmt.data);
+        buf = bytearray(fmt.MAD_LENGTH);
+        fmt.pack_into(buf);
+
+        path.reverse();
+        if self.trace_func is not None:
+            self.trace_func(self,TRACE_REPLY,fmt=fmt,path=path);
+        self.sendto(buf,path);
 
     def do_async(self,op):
         """This runs a simple async work coroutine against a synchronous

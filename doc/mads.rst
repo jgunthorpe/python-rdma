@@ -62,6 +62,25 @@ All RPC functions have a similar signature:
    :raises rdma.MADTimeoutError: If the MAD timed out.
    :raises AttributeError: If payload or path are invalid.
 
+Support is also provided for processing incoming MADs as a server. The basic
+template is::
+
+                try:
+		    fmt,req = umad.parse_request(buf,path);
+		    raise rdma.MADError(req=fmt,req_buf=buf,path=path,
+                        reply_status=IBA.MAD_STATUS_UNSUP_METHOD_ATTR_COMBO,
+                        msg="Unsupported attribute ID %s"%(
+                            fmt.describe()));
+                except rdma.MADError as err:
+                    err.dump_detailed(sys.stderr,"E:",level=1);
+                    umad.send_error_exc(err);
+
+*fmt* will be an instance of the appropriate class format structure, and *req*
+will be an instance of the appropriate payload structure. Continued parsing of
+the request should happen within the try block and errors raised as
+:exc:`rdma.MADError` with *reply_status* set appropriately. Once a reply is
+prepared use :meth:`rdma.madtransactor.MADTransactor.send_reply`.
+
 .. automodule:: rdma.madtransactor
    :members:
    :undoc-members:

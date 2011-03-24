@@ -11,7 +11,10 @@ class RDMAError(Exception):
 class MADError(RDMAError):
     """Thrown when a MAD RPC fails in some way. The throw site includes as
     much information about the error context as possible. Depending on the
-    throw context not all members may be available."""
+    throw context not all members may be available.
+
+    If the RPC is an incoming request then this exception contains enough information
+    for the catch to generate an error reply MAD."""
     req = None;
     rep = None;
     rep_buf = None;
@@ -24,6 +27,10 @@ class MADError(RDMAError):
         """
         :type req: derived from :class:`~rdma.binstruct.BinStruct`
         :param req: The MAD's `*Format` that was originally sent.
+        :type req_buf: :class:`bytearray`
+        :param req_buf: The entire raw request MAD data, if *fmt* is not present.
+        :type reply_status: :class:`int`
+        :param reply_status: The status value to use when generating an error reply for *req_buf*.
         :type path: :class:`~rdma.path.IBPath`
         :param path: The destination path for the request.
         :type rep: derived from :class:`~rdma.binstruct.BinStruct`
