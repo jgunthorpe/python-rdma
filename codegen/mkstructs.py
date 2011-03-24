@@ -528,7 +528,7 @@ with safeUpdateCtx(options.struct_out) as F:
 
     res = (I for I in structs if I.is_format);
     print >> F, "CLASS_TO_STRUCT = {%s};"%(",\n\t".join("(%u,%u):%s"%(
-        int(I.mgmtClass,0),int(I.mgmtClassVersion,0),I.name) for I in res));
+        int(I.mgmtClass,0),(1<<8) | int(I.mgmtClassVersion,0),I.name) for I in res));
 
     res = {}
     for I in structs:

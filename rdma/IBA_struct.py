@@ -3803,15 +3803,15 @@ class VendOUIFormat(rdma.binstruct.BinFormat):
         (self.baseVersion,self.mgmtClass,self.classVersion,self.method,self.status,self.classSpecific,self.transactionID,self.attributeID,self.reserved_144,self.attributeModifier,self._pack_0_32,self.data1,self.data2,self._pack_1_32,) = struct.unpack_from('>BBBBHHQHHLLLLL',buffer,offset+0);
 
 MEMBER_FORMATS = {'counterSelect2': 'hex', 'counterSelect3': 'hex', 'counterSelect0': 'hex', 'counterSelect1': 'hex', 'counterSelect6': 'hex', 'nodeString': 'str', 'counterSelect4': 'hex', 'redirectPKey': 'hex', 'diagCode': 'hex', 'servicePKey': 'hex', 'QOSClass': 'hex', 'initType': 'hex', 'trapQP': 'hex', 'counterSelect10': 'hex', 'altTClass': 'hex', 'MLID': 'hex', 'counterSelect': 'hex', 'QKey': 'hex', 'counterSelect12': 'hex', 'counterSelect7': 'hex', 'vendorID': 'hex', 'capabilityMask': 'hex', 'initTypeReply': 'hex', 'counterSelect14': 'hex', 'redirectQKey': 'hex', 'counterSelect5': 'hex', 'serviceName': 'str', 'IDString': 'str', 'PKeyBlock': 'hex', 'communityName': 'str', 'counterSelect8': 'hex', 'revision': 'hex', 'PKey': 'hex', 'capabilityMask2': 'hex', 'counterSelect9': 'hex', 'redirectTC': 'hex', 'trapPKey': 'hex', 'counterSelect11': 'hex', 'transactionID': 'hex', 'counterSelect13': 'hex', 'SMKey': 'hex', 'MKey': 'hex', 'localCMQKey': 'hex', 'redirectQP': 'hex', 'localQKey': 'hex', 'serviceID': 'hex', 'deviceID': 'hex', 'trapQKey': 'hex', 'TClass': 'hex'};
-CLASS_TO_STRUCT = {(7,2):CMFormat,
-	(1,1):SMPFormat,
-	(129,1):SMPFormatDirected,
-	(3,2):SAFormat,
-	(4,1):PMFormat,
-	(6,1):DMFormat,
-	(8,1):SNMPFormat,
-	(9,1):VendFormat,
-	(48,1):VendOUIFormat};
+CLASS_TO_STRUCT = {(7,258):CMFormat,
+	(1,257):SMPFormat,
+	(129,257):SMPFormatDirected,
+	(3,258):SAFormat,
+	(4,257):PMFormat,
+	(6,257):DMFormat,
+	(8,257):SNMPFormat,
+	(9,257):VendFormat,
+	(48,257):VendOUIFormat};
 ATTR_TO_STRUCT = {(CMFormat,16):CMREQ,
 	(CMFormat,17):CMMRA,
 	(CMFormat,18):CMREJ,
