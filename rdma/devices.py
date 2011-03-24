@@ -191,8 +191,10 @@ class EndPort(SysFSCache):
         """A string describing the speed of the port. eg '10 Gb/sec (4X)'."""
         return self._cached_sysfs("rate");
     @property
-    # FIXME: Not sure what this is ?
-    def cap_mask(self): return self._cached_sysfs("cap_mask",_conv_hex);
+    def cap_mask(self):
+        """The value of :attr:`rdma.IBA.SMPPortInfo.capabilityMask` for this
+        end port."""
+        return self._cached_sysfs("cap_mask",_conv_hex);
 
     @property
     def default_gid(self):
