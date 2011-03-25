@@ -289,6 +289,13 @@ Specific commands:
   it is included to illustrate/test a vendor OUI MAD server.
 * `ibping` uses `ibsysstat` as a server. I could not bring myself to implement
   another ping class particularly when it used an attribute ID of 0..
+* `ibswportwatch` has all the same options as `perfquery` and can watch
+  all kinds of counters. The output format is different, but
+  much more complete.
+* `ibswportwatch` by default does the `-b` option, since this is
+  less surprising. To get the threshold checking behavior use
+  `--threshold`. A limits file identical to `ibcheckerrors`
+  is supported.
 
 Commands
 ========
@@ -303,17 +310,17 @@ ibclearcounters     ibclearerrors	ibdatacounters      ibdatacounts
 ibfindnodesusing.pl ibhosts		ibnetdiscover	    ibnodes
 ibping		    ibportstate		ibprintca.pl        ibprintrt.pl
 ibprintswitch.pl    ibroute		ibrouters	    ibstat
-ibstatus	    ibswitches		ibsysstat	    ibtracert
-ibv_devices 	    perfquery		rdma_bw		    saquery
-set_nodedesc.sh     sminfo		smpdump		    smpquery
-vendstat
+ibstatus	    ibswitches		ibswportwatch.pl    ibsysstat
+ibtracert	    ibv_devices		perfquery	    rdma_bw
+saquery		    set_nodedesc.sh     sminfo		    smpdump
+smpquery	    vendstat
 =================== =================== =================== ===================
 
 To be completed:
 
 ==================== ================== ================== =================
 check_lft_balance.pl ibdiscover.pl	ibidsverify.pl     iblinkinfo[.pl]
-ibqueryerrors[.pl]   ibswportwatch.pl
+ibqueryerrors[.pl]
 ==================== ================== ================== =================
 
 Verbs examples/tests:

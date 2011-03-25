@@ -95,11 +95,8 @@ class ibtool_cmds_test(unittest.TestCase):
         self.cmd("perfquery");
         for I in ["-x","-X","-S","-D","-E","-F","--vl-xmit-errs","--vl-xmit-wait",
                   "--vl-congestion"]:
-            try:
+            with self.ignore_mad_unsupported():
                 self.cmd("perfquery",I);
-            except rdma.MADError as err:
-                if err.status != IBA.MAD_STATUS_UNSUP_METHOD_ATTR_COMBO:
-                    raise;
         self.cmd("query","PerformanceGet","MADClassPortInfo");
         self.cmd("set_nodedesc");
         self.cmd("vendstat","-N",self.end_port.lid);
@@ -140,6 +137,23 @@ class ibtool_cmds_test(unittest.TestCase):
                   "--vl-congestion"]:
             with self.ignore_mad_unsupported():
                 self.cmd("perfquery",I,self.peer_pinf.LID,self.peer_ninf.localPortNum);
+            with self.ignore_mad_unsupported():
+                self.cmd("perfquery",I,self.peer_pinf.LID);
+            with self.ignore_mad_unsupported():
+                self.cmd("perfquery",I,self.peer_pinf.LID,"-a");
+            with self.ignore_mad_unsupported():
+                self.cmd("perfquery",I,self.peer_pinf.LID,"-l");
+            with self.ignore_mad_unsupported():
+                self.cmd("perfquery",I,self.peer_pinf.LID,"-r");
+            with self.ignore_mad_unsupported():
+                self.cmd("perfquery",I,self.peer_pinf.LID,"-ar");
+            with self.ignore_mad_unsupported():
+                self.cmd("perfquery",I,self.peer_dr);
+
+            with self.ignore_mad_unsupported():
+                self.cmd("ibswportwatch","-n2","-p0.05",I,self.peer_pinf.LID,self.peer_ninf.localPortNum);
+            with self.ignore_mad_unsupported():
+                self.cmd("ibswportwatch","-n2","-p0.05",I,self.peer_pinf.LID);
 
         for I in ['CPI', 'PR', 'IIR', 'VLAR', 'MCMR', 'NR', 'SR', 'LR', 'MFTR', 'LFTR', 'SL2VL', 'PKTR', 'PIR', 'SWI']:
             self.cmd("saquery",I);

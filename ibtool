@@ -18,6 +18,8 @@ commands = {
     "ibfindnodesusing.pl": ("libibtool.ibroute","cmd_ibfindnodesusing",False),
 
     "perfquery": None,
+    "ibswportwatch": ("libibtool.perfquery",),
+    "ibswportwatch.pl": ("libibtool.perfquery","cmd_ibswportwatch",False),
     "saquery": None,
     "smpquery": None,
     "ibtracert": None,
