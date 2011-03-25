@@ -230,7 +230,8 @@ class LibIBOpts(object):
                     __import__("rdma.satransactor");
                     import sys;
                     sat = sys.modules["rdma.satransactor"].SATransactor(umad);
-                path = rdma.path.get_mad_path(umad,sat.get_path_lid(path));
+                path = rdma.path.get_mad_path(umad,sat.get_path_lid(path),
+                                              dqpn=1,qkey=IBA.IB_DEFAULT_QP1_QKEY);
         else:
             path = rdma.path.IBPath(
                 umad.end_port,
