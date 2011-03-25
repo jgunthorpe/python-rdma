@@ -275,15 +275,15 @@ Specific commands:
   checks that a	port is not at a degraded speed and degraded width based
   on link*Supported.
 * `ibcheck*` commands that iterate over the subnet are discovery commands
-   and use the MAD parallelizer to do their checks. For this reason
-   verbose output may be out of order, so we also show the end port LID
-   and CA port number.
+  and use the MAD parallelizer to do their checks. For this reason
+  verbose output may be out of order, so we also show the end port LID
+  and CA port number.
 * `ibcheck*` discovery commands treat a 'node check' as an `end port check`
-   and checks all end ports on a CA. It also checks switch port 0.
+  and checks all end ports on a CA. It also checks switch port 0.
 * `ibcheck*` discovery commands can use the subnet discovery database
-   to check peer ports for link speed and link width. No warnings
-   are generated if the max capability is being used. (eg SDR connected
-   to DDR).
+  to check peer ports for link speed and link width. No warnings
+  are generated if the max capability is being used. (eg SDR connected
+  to DDR).
 * `vendstat` only supports -N (FIXME)
 * `ibsysstat` has different output. This is a fairly pointless program,
   it is included to illustrate/test a vendor OUI MAD server.
@@ -296,6 +296,9 @@ Specific commands:
   less surprising. To get the threshold checking behavior use
   `--threshold`. A limits file identical to `ibcheckerrors`
   is supported.
+* `ibidsverify` works like the `ibcheck\*` functions, not something
+  unique. Doesn't bother to check nodeGUIDs becuase discovery cannot create
+  duplicates. Learned to check LIDs considering LMC as well.
 
 Commands
 ========
@@ -307,21 +310,26 @@ dump_lfts.sh        dump_mfts.sh	ibaddr		    ibcheckerrors
 bcheckerrs	    ibchecknet	  	ibchecknode	    ibcheckport
 ibcheckportstate    ibcheckportwidth 	ibcheckstate	    ibcheckwidth
 ibclearcounters     ibclearerrors	ibdatacounters      ibdatacounts
-ibfindnodesusing.pl ibhosts		ibnetdiscover	    ibnodes
-ibping		    ibportstate		ibprintca.pl        ibprintrt.pl
-ibprintswitch.pl    ibroute		ibrouters	    ibstat
-ibstatus	    ibswitches		ibswportwatch.pl    ibsysstat
-ibtracert	    ibv_devices		perfquery	    rdma_bw
-saquery		    set_nodedesc.sh     sminfo		    smpdump
-smpquery	    vendstat
+ibfindnodesusing.pl ibhosts		ibidsverify.pl	    ibnetdiscover
+ibnodes		    ibping		ibportstate	    ibprintca.pl
+ibprintrt.pl	    ibprintswitch.pl    ibroute		    ibrouters
+ibstat		    ibstatus		ibswitches	    ibswportwatch.pl
+ibsysstat	    ibtracert		ibv_devices	    perfquery
+rdma_bw		    saquery		set_nodedesc.sh     sminfo
+smpdump		    smpquery		vendstat
 =================== =================== =================== ===================
 
 To be completed:
 
 ==================== ================== ================== =================
-check_lft_balance.pl ibdiscover.pl	ibidsverify.pl     iblinkinfo[.pl]
-ibqueryerrors[.pl]
+check_lft_balance.pl ibdiscover.pl	iblinkinfo[.pl]    ibqueryerrors[.pl]
 ==================== ================== ================== =================
+
+* `ibqueryerrors` is nearly identical to `ibcheckerrors`, `ibcheckerr`,
+  `ibclearcounters`, and `ibclearcounters`. The `ibtool` version of the
+  `ibcheck*` programs already includes all the optimizations, plus more, that
+  are in `ibqueryerrors`. Even though the output formatting is much better
+  I have not re-implemented it. (FIXME)
 
 Verbs examples/tests:
 

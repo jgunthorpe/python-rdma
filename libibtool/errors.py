@@ -113,7 +113,6 @@ def clear_check(func):
     func.kind = KIND_CLEAR;
     return func;
 
-@perf_check
 def get_perf(sched,path,ninf,portIdx,reset=False,select=0xFFFF):
     """Coroutine to get port counters."""
     cnts = IBA.PMPortCounters();
@@ -221,6 +220,40 @@ def do_check_portwidth(sched,path,desc,pinf,port,sbn,**kwargs):
             max_width,
             desc=desc,
             fmt=lambda v:"%ux"%(IBA_describe.link_width(v)));
+
+@node_check
+def do_check_duplicates(sched,path,desc,pinf,port,sbn,**kwargs):
+    """Coroutine to check that LIDs, port GUIDs and node GUIDs are not
+    duplicated."""
+    global all_lids
+    global all_pguids
+    global all_nguids
+
+    for I in IBA.lid_lmc_range(pinf.LID,pinf.LMC):
+        tport = all_lids.get(I);
+        if tport is None:
+            all_lids[I] = port;
+        else:
+            if tport != port:
+                raise CheckError("Duplicate LIDs found, %s %s, at %s"%(
+                    tport.portGUID,port.portGUID,desc));
+
+    # Discovery will explode before it causes either of these..
+    ng = port.parent.ninf.nodeGUID
+    tnode = all_nguids.get(ng);
+    if tnode is None:
+        all_nguids[ng] = port.parent;
+    else:
+        if tnode != port.parent:
+            raise CheckError("Duplicate node GUIDs found, GUID %s at %s"%(
+                ng,desc));
+    tport = all_pguids.get(port.portGUID);
+    if tport is None:
+        all_pguids[port.portGUID] = port;
+    else:
+        if tport != port:
+            raise CheckError("Duplicate port GUIDs found, GUID %s at %s"%(
+                port.portGUID,desc));
 
 @perf_check
 def do_check_errors(sched,path,gpath,ninf,pinf,portGUID,portIdx,**kwargs):
@@ -572,6 +605,21 @@ def cmd_ibclearerrors(argv,o):
     return perform_topo_check(argv,o,[do_clear_error_counters]);
 
 def cmd_ibdatacounters(argv,o):
-    """Show data counters for all ports
+    """Show data counters for all ports.
        Usage: %prog"""
     return perform_topo_check(argv,o,[do_show_counts]);
+
+def cmd_ibidsverify(argv,o):
+    """Check that there are no duplicate LIDs, nodeGUIDS or portGUIDs in the
+       network.
+       Usage: %prog
+
+       Note: The discovery process relies on the portGUID to detect looping,
+       so duplicates cannot be reliably detected."""
+    global all_lids
+    global all_pguids
+    global all_nguids
+    all_lids = {}
+    all_pguids = {}
+    all_nguids = {}
+    return perform_topo_check(argv,o,[do_check_duplicates]);

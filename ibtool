@@ -61,6 +61,8 @@ commands = {
     "ibclearerrors": ("libibtool.errors",),
     "ibdatacounters": ("libibtool.errors",),
     "ibdatacounts": ("libibtool.errors",),
+    "ibidsverify": ("libibtool.errors",),
+    "ibidsverify.pl": ("libibtool.errors","cmd_ibidsverify",False),
 
     "rdma_bw": None,
 

@@ -186,7 +186,8 @@ class ibtool_cmds_test(unittest.TestCase):
         self.cmd("ibprintswitch",self.peer_ninf.nodeGUID);
 
         for I in ("ibcheckstate","ibcheckwidth","ibchecknet","ibcheckerrors",
-                  "ibclearcounters","ibclearerrors","ibdatacounters"):
+                  "ibclearcounters","ibclearerrors","ibdatacounters",
+                  "ibidsverify"):
             self.cmd(I);
             self.cmd(I,"-v");
 
