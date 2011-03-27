@@ -299,6 +299,8 @@ Specific commands:
 * `ibidsverify` works like the `ibcheck\*` functions, not something
   unique. Doesn't bother to check nodeGUIDs becuase discovery cannot create
   duplicates. Learned to check LIDs considering LMC as well.
+* `iblinkinfo` formats the output with slightly more alignment. Forgot
+  how to do `--hops`
 
 Commands
 ========
@@ -310,7 +312,8 @@ dump_lfts.sh        dump_mfts.sh	ibaddr		    ibcheckerrors
 bcheckerrs	    ibchecknet	  	ibchecknode	    ibcheckport
 ibcheckportstate    ibcheckportwidth 	ibcheckstate	    ibcheckwidth
 ibclearcounters     ibclearerrors	ibdatacounters      ibdatacounts
-ibfindnodesusing.pl ibhosts		ibidsverify.pl	    ibnetdiscover
+ibfindnodesusing.pl ibhosts		ibidsverify.pl	    iblinkinfo[.pl]
+ibnetdiscover
 ibnodes		    ibping		ibportstate	    ibprintca.pl
 ibprintrt.pl	    ibprintswitch.pl    ibroute		    ibrouters
 ibstat		    ibstatus		ibswitches	    ibswportwatch.pl
@@ -322,7 +325,7 @@ smpdump		    smpquery		vendstat
 To be completed:
 
 ==================== ================== ================== =================
-check_lft_balance.pl ibdiscover.pl	iblinkinfo[.pl]    ibqueryerrors[.pl]
+check_lft_balance.pl ibdiscover.pl	ibqueryerrors[.pl]
 ==================== ================== ================== =================
 
 * `ibqueryerrors` is nearly identical to `ibcheckerrors`, `ibcheckerr`,

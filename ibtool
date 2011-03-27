@@ -47,6 +47,8 @@ commands = {
     "ibprintswitch.pl": ("libibtool.discovery","cmd_ibprintswitch",False),
     "ibnodes": ("libibtool.discovery",),
     "ibnetdiscover": ("libibtool.discovery",),
+    "iblinkinfo": ("libibtool.discovery",),
+    "iblinkinfo.pl": ("libibtool.discovery","cmd_iblinkinfo",False),
 
     "ibchecknode": ("libibtool.errors",),
     "ibcheckstate": ("libibtool.errors",),

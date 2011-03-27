@@ -1,6 +1,7 @@
 # Copyright 2011 Obsidian Research Corp. GLPv2, see COPYING.
 import sys;
 import time;
+import math;
 from libibtool import *;
 from libibtool.libibopts import *;
 import rdma.IBA as IBA;
@@ -271,4 +272,110 @@ def cmd_ibnetdiscover(argv,o):
         else:
             print_ibnetdiscover_topology(sbn,root);
 
+    return lib.done();
+
+def better_possible(a,b,cur):
+    best = a & b;
+    best = best & (~cur);
+    return cur < best;
+
+def print_switch(sbn,args,switch):
+    guid = (switch.ports[0].portGUID if args.port_guid else
+            switch.ninf.nodeGUID);
+    first = True;
+    for port,idx in switch.iterports():
+        if idx == 0:
+            continue;
+        pinf = port.pinf;
+        if args.only_down:
+            if pinf.portPhysicalState == IBA.PHYS_PORT_STATE_LINK_UP:
+                continue;
+        if first and not args.line_mode:
+            print "Switch %s %s:"%(guid,
+                                   IBA_describe.dstr(switch.desc,True));
+            first = False;
+        if pinf.portPhysicalState != IBA.PHYS_PORT_STATE_LINK_UP:
+            link = "%s/%s"%(
+                IBA_describe.phys_link_state(pinf.portPhysicalState),
+                IBA_describe.link_state(pinf.portState));
+        else:
+            link = "%2ux %s %s/%s"%(
+                IBA_describe.link_width(pinf.linkWidthActive),
+                IBA_describe.link_speed(pinf.linkSpeedActive),
+                IBA_describe.phys_link_state(pinf.portPhysicalState),
+                IBA_describe.link_state(pinf.portState));
+        if args.additional:
+            additional = " (HOQ:%u VL_Stall:%u)"%(pinf.HOQLife,pinf.VLStallCount);
+        else:
+            additional = "";
+        lhs = "%3d %4d[  ] ==(%s)%s"%(port.LID,idx,link,additional);
+
+        peer_port = sbn.topology.get(port);
+        if port is None:
+            rhs = "DOWN";
+        else:
+            rhs = "%3d %4d[  ] %s"%(
+                peer_port.LID,idx,
+                IBA_describe.dstr(peer_port.parent.desc,True));
+        err = []
+        if better_possible(pinf.linkWidthSupported,peer_port.pinf.linkWidthSupported,
+                           pinf.linkWidthEnabled):
+            err.append("Could be %sx"%(
+                IBA_describe.link_width(1<<int(math.floor(math.log(pinf.linkWidthSupported,2))))));
+        if better_possible(pinf.linkSpeedSupported,peer_port.pinf.linkSpeedSupported,
+                           pinf.linkSpeedEnabled):
+            err.append("Could be %s"%(
+                IBA_describe.link_speed(1<<int(math.floor(math.log(pinf.linkSpeedSupported,2))))));
+        err = ",".join(err);
+        if err:
+            err = " (%s)"%(err);
+
+        if args.line_mode:
+            print "%s %s %-40s==> %s%s"%(guid,
+                                         IBA_describe.dstr(switch.desc,True),
+                                         lhs,rhs,err);
+        else:
+            print "   %-40s==> %s%s"%(lhs,rhs,err);
+
+def cmd_iblinkinfo(argv,o):
+    """Display the topology of the subnet, differently.
+       Usage: %prog [TARGET]"""
+    o.add_option("-g","--portguids",action="store_true",dest="port_guid",
+                 help="Display port GUIDs not node GUIDs.");
+    o.add_option("-l","--line",action="store_true",dest="line_mode",
+                 help="Prefix each link with the switch GUID.");
+    o.add_option("-p","--additional",action="store_true",dest="additional",
+                 help="Also print VLStallCount and HOQLife.");
+    o.add_option("--down",action="store_true",dest="only_down",
+                 help="Only print downed links");
+    LibIBOpts.setup(o,discovery=True);
+    (args,values) = o.parse_args(argv);
+    lib = LibIBOpts(o,args,values,1,(tmpl_target,));
+
+    if len(values) < 1:
+        values = (None,);
+
+    with lib.get_umad_for_target(values[0]) as umad:
+        sched = lib.get_sched(umad);
+        if values[0] is None:
+            sbn = lib.get_subnet(sched,
+                                 ["all_NodeInfo",
+                                  "all_NodeDescription",
+                                  "all_PortInfo",
+                                  "all_topology"]);
+            root = sbn.ports[umad.parent.port_guid];
+            for I in sbn.iterbfs(root):
+                if isinstance(I.parent,rdma.subnet.Switch):
+                    print_switch(sbn,args,I.parent);
+        else:
+            sbn = lib.get_subnet(sched,());
+            sched.run(queue=rdma.discovery.subnet_get_port(sched,sbn,lib.path));
+            port = sbn.path_to_port(lib.path);
+            if not isinstance(port.parent,rdma.subnet.Switch):
+                raise CmdError("Port %s is not a switch"%(port));
+            sched.run(queue=rdma.discovery.topo_surround_SMP(sched,sbn,port.parent));
+            peer_ports = [(sbn.topology.get(I),idx) for I,idx in port.parent.iterports()];
+            sched.run(mqueue=(rdma.discovery.subnet_pinf_SMP(sched,sbn,idx,sbn.get_path_smp(sched,I.to_end_port()))
+                              for I,idx in peer_ports if I is not None and I.pinf is None));
+            print_switch(sbn,args,port.parent);
     return lib.done();
