@@ -301,6 +301,11 @@ Specific commands:
   duplicates. Learned to check LIDs considering LMC as well.
 * `iblinkinfo` formats the output with slightly more alignment. Forgot
   how to do `--hops`
+* `ibdiscover.pl` is aliased to `subnet_diff` because they do the same
+  thing even if they work completely differently.
+* `subnet_diff` will compare the set of end ports, nodes, and links between
+  two subnet cache files. It also checks the link rates and LID to end port
+  mapping for differences.
 
 Commands
 ========
@@ -312,27 +317,28 @@ dump_lfts.sh        dump_mfts.sh	ibaddr		    ibcheckerrors
 bcheckerrs	    ibchecknet	  	ibchecknode	    ibcheckport
 ibcheckportstate    ibcheckportwidth 	ibcheckstate	    ibcheckwidth
 ibclearcounters     ibclearerrors	ibdatacounters      ibdatacounts
-ibfindnodesusing.pl ibhosts		ibidsverify.pl	    iblinkinfo[.pl]
-ibnetdiscover
-ibnodes		    ibping		ibportstate	    ibprintca.pl
-ibprintrt.pl	    ibprintswitch.pl    ibroute		    ibrouters
-ibstat		    ibstatus		ibswitches	    ibswportwatch.pl
-ibsysstat	    ibtracert		ibv_devices	    perfquery
-rdma_bw		    saquery		set_nodedesc.sh     sminfo
-smpdump		    smpquery		vendstat
+ibdiscover.pl	    ibfindnodesusing.pl ibhosts		    ibidsverify.pl
+iblinkinfo[.pl]     ibnetdiscover	ibnodes		    ibping
+ibportstate	    ibprintca.pl	ibprintrt.pl	    ibprintswitch.pl
+ibroute		    ibrouters		ibstat		    ibstatus
+ibswitches	    ibswportwatch.pl	ibsysstat	    ibtracert
+ibv_devices	    perfquery		rdma_bw		    saquery
+set_nodedesc.sh     sminfo		smpdump		    smpquery
+vendstat
 =================== =================== =================== ===================
 
 To be completed:
 
-==================== ================== ================== =================
-check_lft_balance.pl ibdiscover.pl	ibqueryerrors[.pl]
-==================== ================== ================== =================
+==================== ==================
+check_lft_balance.pl ibqueryerrors[.pl]
+==================== ==================
 
 * `ibqueryerrors` is nearly identical to `ibcheckerrors`, `ibcheckerr`,
   `ibclearcounters`, and `ibclearcounters`. The `ibtool` version of the
   `ibcheck*` programs already includes all the optimizations, plus more, that
   are in `ibqueryerrors`. Even though the output formatting is much better
   I have not re-implemented it. (FIXME)
+* I'm not sure what `check_lft_balance.pl` does.
 
 Verbs examples/tests:
 

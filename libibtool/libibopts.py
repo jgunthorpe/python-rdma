@@ -304,6 +304,17 @@ class LibIBOpts(object):
             return dev.end_ports.first();
         return rdma.get_end_port("%s/%s"%(dev.name,self.args.port));
 
+    def compute_cache_fn(self,fn):
+        from string import Template
+        if fn is None:
+            return None;
+        return Template(fn).safe_substitute(
+            C=str(self.end_port.parent),
+            CA=str(self.end_port.parent),
+            P=str(self.end_port.port_id),
+            PORT=str(self.end_port.port_id),
+            A="%s-%s"%(str(self.end_port.parent),self.end_port.port_id));
+
     @property
     def cache_fn(self):
         """Return the cache filename. This does a template substitution,
@@ -312,17 +323,11 @@ class LibIBOpts(object):
         - $P and ${PORT} are the port id.
         - $A is $C-$P.
         """
-        from string import Template
-        if self.args.cache is None:
-            ret = None
-        else:
-            ret = Template(self.args.cache).safe_substitute(
-                C=str(self.end_port.parent),
-                CA=str(self.end_port.parent),
-                P=str(self.end_port.port_id),
-                PORT=str(self.end_port.port_id),
-                A="%s-%s"%(str(self.end_port.parent),self.end_port.port_id));
-        self.__dict__["cache_fn"] = ret;
+        try:
+            return self.__dict_-["cache_fn"];
+        except AttributeError:
+            pass;
+        ret = self.__dict__["cache_fn"] = self.compute_cache_fn(self.args.cache);
         return ret;
 
     def get_subnet(self,sched=None,stuff=None):
