@@ -318,13 +318,14 @@ class Subnet(object):
         # host case I think this is a kernel bug, but other cases seem to be as the
         # spec intends.
         drPath = getattr(path,"drPath","\0") + chr(portIdx);
-        if path.DLID == path.end_port.lid:
+        if (path.DLID == path.end_port.lid and
+            path.DLID != IBA.LID_PERMISSIVE and
+            path.DLID != 0):
             # Local loopback
             return rdma.path.IBDRPath(path.end_port,drPath=drPath);
         else:
             if isinstance(path,rdma.path.IBDRPath):
-                ret = path.copy();
-                ret.drPath = drPath;
+                ret = path.copy(drPath=drPath);
             else:
                 ret = rdma.path.IBDRPath(path.end_port,
                                          SLID=path.SLID,
