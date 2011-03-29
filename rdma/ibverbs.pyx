@@ -1374,7 +1374,7 @@ cdef class QP:
 
         cattr.min_rnr_timer = attr.min_rnr_timer
         cattr.sq_psn = attr.sq_psn
-        cattr.max_rd_atomic = attr.max_rd_atomic
+        cattr.max_dest_rd_atomic = attr.max_dest_rd_atomic
         cattr.path_mig_state = attr.path_mig_state
 
         if cmask & c.IBV_QP_CAP:
