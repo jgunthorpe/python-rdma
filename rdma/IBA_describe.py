@@ -264,7 +264,7 @@ def struct_dump(F,s,offset=0,name_prefix=''):
                     continue;
             mb.append("%s=%r"%(name,getattr(s,name)));
 
-        if cur_dword >= max_dword:
+        if cur_dword+3 >= max_dword:
             return
 
         print >> F, "%3u %02X%02X%02X%02X %s"%\
