@@ -568,8 +568,18 @@ class Subnet(object):
         function requires a correct *portIdx* if the node type is not known.
 
         :rtype: :class:`Port`"""
-        port = self.get_port(port_select=port_select,localPortNum=pinf.localPortNum,
-                             portIdx=portIdx,path=path,LID=pinf.LID);
+        # Note, pinf.LID is not strongly defined by IBA for external switch
+        # ports, if it is invalid we don't use it, otherwise we assume the
+        # returned value matches switch port 0.
+        LMC = None;
+        if ((LID is None or LID == pinf.LID) and pinf.LID != 0 and
+            pinf.LID < IBA.LID_MULTICAST):
+            LID = pinf.LID;
+            LMC = pinf.LMC;
+        port = self.get_port(port_select=port_select,
+                             localPortNum=pinf.localPortNum,
+                             portIdx=portIdx,path=path,
+                             LID=LID,LMC=LMC);
         port.pinf = pinf;
         return port;
 

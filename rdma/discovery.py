@@ -247,7 +247,9 @@ class _SubnetTopo(object):
                 path._cached_subnet_end_port = tmp;
                 delattr(path,"drPath");
 
-        if pinf.portState == IBA.PORT_STATE_DOWN or aport in self.sbn.topology:
+        if (pinf.portState == IBA.PORT_STATE_DOWN or
+            aport in self.sbn.topology or
+            portIdx == 0):
             return;
 
         # DR one hop
@@ -271,7 +273,7 @@ class _SubnetTopo(object):
                 self.sbn.topology[aport] = peer;
                 self.sbn.topology[peer] = aport;
             self.sched.mqueue(self.do_port(path,node,I,depth)
-                              for I in range(1,ninf.numPorts+1));
+                              for I in range(0,ninf.numPorts+1));
         else:
             if peer is not None:
                 self.sbn.topology[port] = peer;
