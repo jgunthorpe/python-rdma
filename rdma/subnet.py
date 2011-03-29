@@ -318,6 +318,8 @@ class Subnet(object):
         # host case I think this is a kernel bug, but other cases seem to be as the
         # spec intends.
         drPath = getattr(path,"drPath","\0") + chr(portIdx);
+        if len(drPath) > 64:
+            raise rdma.RDMAError("DR path length limit exceeded, %r"%(drPath));
         if (path.DLID == path.end_port.lid and
             path.DLID != IBA.LID_PERMISSIVE and
             path.DLID != 0):
