@@ -63,8 +63,8 @@ def display_LFDB(switch,sbn,path,all):
         print "%u valid lids dumped"%(count);
 
 def get_switch(sched,sbn,args,path):
-    ninf = yield sched.SubnGet(IBA.SMPNodeInfo,path);
-    node,port = sbn.get_node_ninf(ninf,path);
+    node,port = yield rdma.discovery.subnet_ninf_SMP(sched,sbn,path);
+    ninf = node.ninf;
 
     if not isinstance(node,rdma.subnet.Switch):
         if args.verbosity >= 1:
@@ -235,10 +235,11 @@ def cmd_ibfindnodesusing(argv,o):
             sbn.paths = {};
 
         sched.run(queue=get_switch(sched,sbn,args,path));
-        switch = sbn.search_end_port(path=path).parent;
+        switch = sbn.path_to_port(path=path).parent;
         if args.port <= 0 or args.port > switch.ninf.numPorts:
             raise CmdError("Port %u is invalid, switch has %u ports"%(
                 args.port,switch,ninf.numPorts));
+        print switch.desc
         port = switch.get_port(args.port);
         eport = port.to_end_port();
         LIDs = set(LID for LID,port in enumerate(switch.lfdb)

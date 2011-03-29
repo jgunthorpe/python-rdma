@@ -144,6 +144,8 @@ Compared to the libib versions:
   issued. Some commands have `SubnAdmGetTable` support when in `--sa` mode
   which makes them run faster. (Be warned, opensm has various bugs in its
   \*Record support)
+* None of the commands unconditionally write files into /var/cache/ or otherwise
+  do file IO by default.
 
 Discovery:
 
