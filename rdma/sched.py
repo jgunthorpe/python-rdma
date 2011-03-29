@@ -215,8 +215,9 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
                     # sends so we have to iterate here carefully.
                     while self._timeouts:
                         k = self._timeouts[0];
-                        if k[0] <= now:
-                            del self._timeouts[0];
+                        if k[0] > now:
+                            break;
+                        del self._timeouts[0];
                         self._do_timeout(k);
                     continue;
 
@@ -241,7 +242,7 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
                                     ret=ret);
 
     def _do_timeout(self,res):
-        """The timeout list entry res has timed out - either error it
+        """The timeout list entry *res* has timed out - either error it
         or issue a retry"""
         ctx = res[1]
         work = ctx._work;
