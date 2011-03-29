@@ -130,8 +130,16 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
                     raise;
 
             if isinstance(work,Context):
+                if work._done:
+                    continue;
                 self._ctx_waiters[work].append(ctx);
                 return;
+
+            if work is None:
+                ctx._result = self.result;
+                self.result = None;
+                result = True;
+                continue;
 
             if inspect.isgenerator(work):
                 if ctx._gengen:
@@ -142,12 +150,6 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
                     ctx._opstack.append(ctx._op);
                     ctx._op = work;
                 result = None;
-                continue;
-
-            if work is None:
-                ctx._result = self.result;
-                self.result = None;
-                result = True;
                 continue;
 
             try:
