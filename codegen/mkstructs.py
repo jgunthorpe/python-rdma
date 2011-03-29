@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Copyright 2011 Obsidian Research Corp. GLPv2, see COPYING.
-# ./mkstructs.py -x iba_transport.xml -x iba_12.xml -x iba_13_4.xml -x iba_13_6.xml -x iba_14.xml -x iba_15.xml -x iba_16_1.xml -x iba_16_3.xml -x iba_16_4.xml -x iba_16_5.xml  -o ../rdma/IBA_struct.py -t ../tests/iba_struct.py -r ../doc/iba_struct.inc
+# ./mkstructs.py -x iba_transport.xml -x iba_12.xml -x iba_13_4.xml -x iba_13_6.xml -x iba_14.xml -x iba_15.xml -x iba_16_1.xml -x iba_16_3.xml -x iba_16_4.xml -x iba_16_5.xml  -o ../rdma/IBA_struct.py -r ../doc/iba_struct.inc
 '''This script converts the XML descriptions of IB structures into python
    classes and associated codegen'''
 from __future__ import with_statement;
@@ -470,7 +470,6 @@ class Struct(object):
 parser = optparse.OptionParser(usage="%prog")
 parser.add_option('-x', '--xml', dest='xml', action="append")
 parser.add_option('-o', '--struct-out', dest='struct_out')
-parser.add_option('-t', '--test-out', dest='test_out')
 parser.add_option('-r', '--rst-out', dest='rst_out')
 (options, args) = parser.parse_args()
 
@@ -578,31 +577,3 @@ if options.rst_out is not None:
     for J in lst:
         if J not in done:
                 J.asRST(F);
-if options.test_out is not None:
-  with safeUpdateCtx(options.test_out) as F:
-    print >> F,\
-"""#!/usr/bin/python
-import unittest,sys
-import rdma.IBA as IBA;
-
-class structs_test(unittest.TestCase):
-    def test_component_mask(self):
-        # See C15-0.1.27
-        self.assertEqual(IBA.SAPortInfoRecord.COMPONENT_MASK["portInfo.capabilityMask"],7)
-        self.assertEqual(IBA.SALinearForwardingTableRecord.COMPONENT_MASK["linearForwardingTable.portBlock"],3)
-
-    def test_struct_packer(self):
-        test = bytearray(512);
-        testr = bytes(test);"""
-    for I in structs:
-        print >> F,'        assert(len(test) == 512);';
-        print >> F,'        IBA.%s().pack_into(test);'%(I.name);
-        print >> F,'        IBA.%s().unpack_from(testr);'%(I.name);
-        print >> F,'        IBA.%s(testr);'%(I.name);
-    print >> F, "    def test_struct_printer(self):";
-    for I in structs:
-        print >> F,'        IBA.%s().printer(sys.stdout);'%(I.name);
-        print >> F,'        IBA.%s().printer(sys.stdout,format="dotted");'%(I.name);
-    print >> F,\
-"""if __name__ == '__main__':
-    unittest.main()""";
