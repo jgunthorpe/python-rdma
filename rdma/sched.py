@@ -131,6 +131,7 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
 
             if isinstance(work,Context):
                 if work._done:
+                    result = True;
                     continue;
                 self._ctx_waiters[work].append(ctx);
                 return;
@@ -145,7 +146,9 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
                 if ctx._gengen:
                     # Create a new context
                     self._mqueue.append(ctx);
-                    ctx = Context(work,False,ctx);
+                    nctx = Context(work,False,ctx);
+                    ctx._result = nctx;
+                    ctx = nctx;
                 else:
                     ctx._opstack.append(ctx._op);
                     ctx._op = work;

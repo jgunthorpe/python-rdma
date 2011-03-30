@@ -202,6 +202,11 @@ A generator can yield:
  * A coroutine. The coroutine is scheduled to run as though
    :meth:`rmda.madschedule.MADSchedule.queue` had been called. The generator
    does not wait for the coroutine to finish.
+ * The result of :meth:`~rdma.sched.MADSchedule.queue`, or the result of
+   yield'ing a coroutine. Yield will return once the thing queued is
+   finished.
+ * The result of :meth:`~rdma.sched.MADSchedule.mqueue` - yield will return
+   once the generator is exhausted and all the coroutines it spawned are finished.
 
 A coroutine can yield:
  * The result of a RPC call function (a tuple describing the MAD to send). The
