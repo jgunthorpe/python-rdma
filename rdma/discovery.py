@@ -1,6 +1,6 @@
 # Copyright 2011 Obsidian Research Corp. GLPv2, see COPYING.
 import rdma;
-import heapq;
+import collections;
 import rdma.path;
 import rdma.satransactor;
 import rdma.IBA as IBA;
@@ -186,58 +186,115 @@ def subnet_swinf_SMP(sched,sbn):
 class _SubnetTopo(object):
     """This scans the topology of of a subnet using SMPs either with pure
     directed route or a combination of directed route a LID routing. This is
-    more complex than the dumb basic approach because it enforced breadth first
-    ordering of the DR paths. This produces shortest paths to all nodes and
-    thus gives us the best chance of not exceeding the hop count on large
+    more complex than the dumb basic approach because it enforces breadth
+    first ordering of the DR paths. This produces shortest paths to all nodes
+    and thus gives us the best chance of not exceeding the hop count on large
     networks."""
+    class _Depth(object):
+        ctx = None;
+        todo_nodes = None;
+        todo_ports = None;
+        running = False;
+        def __init__(self):
+            self.todo_nodes = [];
+            self.todo_ports = [];
+
     # FIXME: Error handling strategy :(
     done_desc = None;
     lid_route = True;
-    todo_running = False;
 
     def __init__(self,sched,sbn,get_desc,lid_route):
         self.sched = sched;
         self.sbn = sbn;
         self.lid_route = lid_route;
-        self.todo = [];
+        self.todo = collections.defaultdict(_SubnetTopo._Depth);
         if get_desc:
             self.done_desc = set();
 
-    def sched_step(self,aport,path,depth):
-        """Queue reading the node attached to aport."""
-        tp = (depth,aport,path);
-        # This might produce duplicate aports in the heap, but we check and
-        # prune for that in do_todo.
-        heapq.heappush(self.todo,tp);
-        if self.todo_running == False:
-            todo_running = True;
-            self.sched.queue(self.do_todo());
+    def sched_node(self,aport,path,portIdx,depth):
+        """Queue reading the node attached to *aport*."""
+        bucket = self.todo[depth];
+        bucket.todo_nodes.append((aport,path,portIdx));
+        if not bucket.running:
+            bucket.running = True;
+            bucket.ctx = self.sched.mqueue(self.do_todo(bucket.ctx,bucket,
+                                                        depth));
 
-    def do_todo(self):
-        """Generator to get the node attached to a port."""
+    def sched_ports(self,node,path,portIdx,depth):
+        """Queue reading the PortInfos attached to node."""
+        bucket = self.todo[depth];
+        bucket.todo_ports.append((node,path,portIdx,depth));
+        if not bucket.running:
+            bucket.running = True;
+            bucket.ctx = self.sched.mqueue(self.do_todo(bucket.ctx,bucket,
+                                                        depth));
+
+    def do_todo(self,old_ctx,bucket,depth):
+        """Generator to get the node and port infos. This is centralized
+        to enforce the BFS order, each *depth* gets a single operating
+        version of this generator."""
         try:
-            while self.todo:
-                depth,aport,path = heapq.heappop(self.todo);
-                peer = self.sbn.topology.get(aport);
-                if (peer is not None and peer.parent is not None and
-                    peer.parent.ninf is not None):
-                    continue;
-                yield self.do_node(path,depth,aport);
-        finally:
-            self.todo_running = False;
+            # We can fetch the topology for our current depth whenever
+            # We have finished fetching topology for depth-2. This way we
+            # know we cannot get a shorter path to the current depth.
+            pbucket = self.todo[depth-2];
+            while pbucket.ctx:
+                tmp = pbucket.ctx;
+                yield tmp;
+                if pbucket.ctx == tmp:
+                    pbucket.ctx = None;
+            last = None;
+            while bucket.todo_nodes or bucket.todo_ports:
+                if bucket.todo_nodes:
+                    aport,path,portIdx = bucket.todo_nodes.pop();
+                    peer = self.sbn.topology.get(aport);
+                    if (peer is not None and peer.parent is not None and
+                        peer.parent.ninf is not None):
+                        continue;
 
-    def do_port(self,path,node,portIdx,depth):
+                    # Defer computing the next hop path for as long as
+                    # possible to give the best chance of becoming a LID
+                    # routed path.
+                    npath = self.sbn.advance_dr(path,portIdx);
+                    last = yield self.do_node(npath,depth,aport);
+
+                if bucket.todo_ports:
+                    node,path,portIdx,depth = bucket.todo_ports.pop();
+                    r = ((portIdx,) if portIdx is not None else
+                         range(0,node.ninf.numPorts+1));
+                    for portIdx in r:
+                        aport = node.get_port(portIdx);
+                        if (aport.pinf is not None and
+                            aport in self.sbn.topology):
+                            continue;
+                        yield self.do_port(path,node,aport,portIdx,depth);
+
+                    # Get the description too, we do this after
+                    # the ports so it has a better chance of being LID
+                    # routed.
+                    if self.done_desc is not None:
+                        if node.desc is not None or node in self.done_desc:
+                            return;
+                        self.done_desc.add(node);
+                        self.sched.queue(node.get_desc(self.sched,path));
+
+        finally:
+            bucket.running = False;
+
+        # Wait for all the work started by the CTX we are replacing to
+        # finish.
+        yield old_ctx;
+
+    def do_port(self,path,node,aport,portIdx,depth):
         """Coroutine to get a :class:`~rdma.IBA.SMPPortInfo` and schedule
         scanning the attached node, if applicable."""
-        aport = node.get_port(portIdx);
-        if aport.pinf is not None and aport in self.sbn.topology:
-            return;
-
         pinf = yield self.sched.SubnGet(IBA.SMPPortInfo,path,portIdx);
         aport = self.sbn.get_port_pinf(pinf,path=path,portIdx=portIdx);
 
         if self.lid_route and isinstance(path,rdma.path.IBDRPath):
-            # The first pinf we get for the path transforms it into a LID path
+            # The first pinf we get for the path with a LID transforms it into
+            # a LID path. Some switches will return the LID on all ports,
+            # others return 0 for everything but port 0.
             if (pinf.LID != 0 and pinf.LID < IBA.LID_MULTICAST):
                 path.SLID = path.end_port.lid;
                 path.DLID = pinf.LID;
@@ -252,9 +309,7 @@ class _SubnetTopo(object):
             portIdx == 0):
             return;
 
-        # DR one hop
-        npath = self.sbn.advance_dr(path,portIdx);
-        self.sched_step(aport,npath,depth+1);
+        self.sched_node(aport,path,portIdx,depth+1);
 
     def do_node(self,path,depth=0,peer=None):
         """Coroutine to get the :class:`~rdma.IBA.SMPNodeInfo` and scan all the
@@ -272,19 +327,12 @@ class _SubnetTopo(object):
                 aport = node.get_port(ninf.localPortNum);
                 self.sbn.topology[aport] = peer;
                 self.sbn.topology[peer] = aport;
-            self.sched.mqueue(self.do_port(path,node,I,depth)
-                              for I in range(0,ninf.numPorts+1));
+            self.sched_ports(node,path,None,depth);
         else:
             if peer is not None:
                 self.sbn.topology[port] = peer;
                 self.sbn.topology[peer] = port;
-            yield self.do_port(path,node,ninf.localPortNum,depth);
-
-        if self.done_desc is not None:
-            if node.desc is not None or node in self.done_desc:
-                return;
-            self.done_desc.add(node);
-            yield node.get_desc(self.sched,path);
+            self.sched_ports(node,path,ninf.localPortNum,depth);
 
 def topo_SMP(sched,sbn,get_desc=True):
     """Generator to fetch an entire subnet topology using SMPs."""
