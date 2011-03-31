@@ -29,17 +29,17 @@ def simple_tracer(mt,kind,fmt=None,path=None,ret=None):
         desc = fmt.describe();
 
         if ret is None:
-            print "debug: RPC %s TIMED OUT to '%s'."%(desc,path);
+            print "D: RPC %s TIMED OUT to '%s'."%(desc,path);
             return;
         else:
-            print "debug: RPC %s completed to '%s' len %u."%(desc,path,len(ret[0]));
+            print "D: RPC %s completed to '%s' len %u."%(desc,path,len(ret[0]));
     if kind == TRACE_RECEIVE:
-        print "debug: RPC %s received from '%s' len %u."%(fmt.describe(),
+        print "D: RPC %s received from '%s' len %u."%(fmt.describe(),
                                                           path,len(ret[0]));
     if kind == TRACE_REPLY:
-        print "debug: RPC %s reply to '%s'"%(fmt.describe(),path);
+        print "D: RPC %s reply to '%s'"%(fmt.describe(),path);
     if kind == TRACE_UNEXPECTED:
-        print "debug: Got unexpected MAD from '%s'."%(ret[1]);
+        print "D: Got unexpected MAD from '%s'."%(ret[1]);
 
 def dumper_tracer(mt,kind,fmt=None,path=None,ret=None):
     """Logs full decoded packet dumps of what is happening to
@@ -47,11 +47,11 @@ def dumper_tracer(mt,kind,fmt=None,path=None,ret=None):
     :attr:`rdma.madtransactor.MADTransactor.trace_func`."""
     if kind == TRACE_COMPLETE:
         simple_tracer(mt,kind,fmt=fmt,path=path,ret=ret);
-        print "debug: Request",fmt.describe();
+        print "D: Request",fmt.describe();
         fmt.printer(sys.stdout,header=False);
         if ret is not None:
             res = fmt.__class__(bytes(ret[0]));
-            print "debug: Reply",res.describe()
+            print "D: Reply",res.describe()
             res.printer(sys.stdout,header=False);
     if kind == TRACE_UNEXPECTED:
         simple_tracer(mt,kind,fmt=fmt,path=path,ret=ret);
@@ -59,12 +59,12 @@ def dumper_tracer(mt,kind,fmt=None,path=None,ret=None):
     if kind == TRACE_RECEIVE:
         simple_tracer(mt,kind,fmt=fmt,path=path,ret=ret);
         if fmt is not None:
-            print "debug: Incoming request",fmt.describe();
+            print "D: Incoming request",fmt.describe();
             fmt.printer(sys.stdout,header=False);
     if kind == TRACE_REPLY:
         simple_tracer(mt,kind,fmt=fmt,path=path,ret=ret);
         if fmt is not None:
-            print "debug: Outgoing reply",fmt.describe();
+            print "D: Outgoing reply",fmt.describe();
             fmt.printer(sys.stdout,header=False);
 
 class MADTransactor(object):

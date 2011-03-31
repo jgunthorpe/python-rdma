@@ -91,7 +91,7 @@ class LibIBOpts(object):
         self.end_port.sa_path.SMKey = getattr(args,"smkey",0);
         self.debug = args.debug;
         if self.debug >= 1:
-            print "debug: Using end port %s %s"%(self.end_port,self.end_port.default_gid);
+            print "D: Using end port %s %s"%(self.end_port,self.end_port.default_gid);
         o.verbosity = max(self.debug,getattr(args,"verbosity",0));
 
         if "discovery" in args.__dict__:
@@ -129,7 +129,7 @@ class LibIBOpts(object):
                 self.format_args = {"header": False, "colon": False, "format": "dotted"};
 
     def debug_print_path(self,name,path):
-        name = "debug: "+name;
+        name = "D: "+name;
         if self.debug >= 1:
             print name,path;
             print " "*len(name),repr(path);
