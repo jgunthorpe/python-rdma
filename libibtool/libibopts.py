@@ -381,7 +381,8 @@ class LibIBOpts(object):
         if fn is not None and self.sbn_loaded != self.sbn.loaded:
             fn_tmp = fn + ".new";
             with open(fn_tmp,"wb") as F:
-                print "D: Saving discovery cache to %r"%(fn);
+                if self.o.verbosity >= 1:
+                    print "D: Saving discovery cache to %r"%(fn);
                 pickle.dump(self.sbn,F,-1);
             os.rename(fn_tmp,fn);
         return True;
