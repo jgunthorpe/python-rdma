@@ -375,6 +375,8 @@ class Subnet(object):
             self.ports[portGUID] = port;
         if LID is not None:
             port.LID = LID;
+            if LMC is None:
+                LMC = 0;
             self.set_max_lid(LID + (1<<LMC)-1);
             for I in IBA.lid_lmc_range(LID,LMC):
                 self.lids[I] = port;
