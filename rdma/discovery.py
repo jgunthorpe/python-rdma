@@ -208,6 +208,7 @@ class _SubnetTopo(object):
         self.sbn = sbn;
         self.lid_route = lid_route;
         self.todo = collections.defaultdict(_SubnetTopo._Depth);
+        self.done_switches = set();
         if get_desc:
             self.done_desc = set();
 
@@ -264,8 +265,7 @@ class _SubnetTopo(object):
                          range(0,node.ninf.numPorts+1));
                     for portIdx in r:
                         aport = node.get_port(portIdx);
-                        if (aport.pinf is not None and
-                            aport in self.sbn.topology):
+                        if aport.pinf is not None:
                             continue;
                         yield self.do_port(path,node,aport,portIdx,depth);
 
@@ -276,8 +276,7 @@ class _SubnetTopo(object):
                         if node.desc is not None or node in self.done_desc:
                             return;
                         self.done_desc.add(node);
-                        self.sched.queue(node.get_desc(self.sched,path));
-
+                        yield node.get_desc(self.sched,path);
         finally:
             bucket.running = False;
 
@@ -305,8 +304,8 @@ class _SubnetTopo(object):
                 delattr(path,"drPath");
 
         if (pinf.portState == IBA.PORT_STATE_DOWN or
-            aport in self.sbn.topology or
-            portIdx == 0):
+            portIdx == 0 or
+            aport in self.sbn.topology):
             return;
 
         self.sched_node(aport,path,portIdx,depth+1);
@@ -315,11 +314,6 @@ class _SubnetTopo(object):
         """Coroutine to get the :class:`~rdma.IBA.SMPNodeInfo` and scan all the
         port infos."""
         ninf = yield self.sched.SubnGet(IBA.SMPNodeInfo,path);
-        if ninf.portGUID in self.sbn.ports:
-            # This can only happen if things race and two links connect to
-            # the same switch. FIXME: Well, unless the database is partially
-            # pre-populated..
-            return;
         node,port = self.sbn.get_node_ninf(ninf,path);
 
         if isinstance(node,rdma.subnet.Switch):
@@ -327,7 +321,14 @@ class _SubnetTopo(object):
                 aport = node.get_port(ninf.localPortNum);
                 self.sbn.topology[aport] = peer;
                 self.sbn.topology[peer] = aport;
-            self.sched_ports(node,path,None,depth);
+
+            # This check is just an optimization, the check for pinf == None
+            # does the same.. Don't need to do it on HCA ports since there
+            # is only one peer port for them and that will be protected by
+            # the topology update.
+            if node not in self.done_switches:
+                self.done_switches.add(node);
+                self.sched_ports(node,path,None,depth);
         else:
             if peer is not None:
                 self.sbn.topology[port] = peer;
@@ -336,7 +337,11 @@ class _SubnetTopo(object):
 
 def topo_SMP(sched,sbn,get_desc=True):
     """Generator to fetch an entire subnet topology using SMPs."""
+    # Wipe out existing volatile information. Maybe nodeDescription too?
     sbn.topology = {};
+    for I,idx in sbn.iterports():
+        I.pinf = None;
+
     fetcher = _SubnetTopo(sched,sbn,get_desc,sbn.lid_routed);
     if sbn.lid_routed:
         path = rdma.path.IBPath(sched.end_port,SLID=sched.end_port.lid,
