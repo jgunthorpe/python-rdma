@@ -22,22 +22,36 @@ class Node(object):
 
     def get_port(self,portIdx):
         """Return the port for index *portIdx*."""
-        if self.ports is None or len(self.ports) <= portIdx:
-            port = Port(self);
-            self.set_port(portIdx,port);
+        try:
+            port = self.ports[portIdx];
+            if port is None:
+                port = Port(self);
+                self.ports[portIdx] = port;
             return port;
-        port = self.ports[portIdx];
-        if port is None:
-            port = Port(self);
-            self.ports[portIdx] = port;
+        except TypeError:
+            assert self.ports is None;
+        except IndexError:
+            pass
+
+        port = Port(self);
+        self.set_port(portIdx,port);
         return port;
 
     def set_port(self,portIdx,port):
         """Store *port* in *portIdx* for :attr:`ports`."""
-        if self.ports is None:
-            self.ports = [None]*(portIdx+1);
-        if len(self.ports) <= portIdx:
-            self.ports.extend(None for I in range(len(self.ports),portIdx+1));
+        try:
+            self.ports[portIdx] = port;
+        except TypeError:
+            assert self.ports is None;
+            if self.ninf:
+                self.ports = [None]*(self.ninf.numPorts+1);
+            else:
+                self.ports = [None]*(portIdx+1);
+        except IndexError:
+            if self.ninf:
+                self.ports.extend(None for I in range(len(self.ports),self.ninf.numPorts+1));
+            else:
+                self.ports.extend(None for I in range(len(self.ports),portIdx+1));
         self.ports[portIdx] = port;
 
     def set_desc(self,nodeString):
