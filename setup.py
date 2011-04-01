@@ -156,7 +156,7 @@ class sphinx_build(Command):
             try:
                 # We need to point Sphinx at the built library, including
                 # the extension module so that autodoc works properly.
-                sys.path.insert(0,self.build_lib)
+                sys.path.insert(0,os.path.realpath(self.build_lib))
                 sphinx.main(self.sphinx_args)
             finally:
                 sys.path = opath;
