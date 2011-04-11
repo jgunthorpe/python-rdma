@@ -3,7 +3,7 @@
 Installing
 ==========
 
-`python-rdma` relies on the standard python :mod:`distutils` functionality for
+`python-rdma` relies on the standard Python :mod:`distutils` functionality for
 building and includes a `setup.py` script. The following will be required to
 build the module:
 
@@ -26,6 +26,10 @@ Once built the library can be tested without installation by setting
  $ ./ibtool help
 
 To install into `/usr/local/` use `./setup.py install`.
+
+.. note:: Due to how Python searches for libraries the *PYTHONPATH*
+ environment variable is still required to run the executable scripts, such as
+ the test suite, included in the package.
 
 If your system has IB libraries installed outside the system path, you need to
 create a setup.cfg similar to the following::
@@ -92,3 +96,7 @@ a small fabric. Some ways of running the suite::
  $ ./run-tests.py                # Run everything
  $ ./run-tests.py tests.verbs    # Only run the verbs test.
 
+.. note::
+ The test suite exercises functionality that is known to make OpenSM crash.
+ As of this writing OpenSM GIT has been fixed but the latest release (3.3.9)
+ does not include the fix.
