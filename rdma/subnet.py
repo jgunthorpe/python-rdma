@@ -573,11 +573,10 @@ class Subnet(object):
                 portIdx = localPortNum;
             if portIdx is None:
                 self.link_end_port(port,**kwargs);
-                return node,port;
+                return port;
 
-        port = node.get_port(portIdx);
         self.link_end_port(port,**kwargs);
-        return port;
+        return node.get_port(portIdx);
 
     def get_port_pinf(self,pinf,port_select=None,portIdx=None,path=None,LID=None):
         """Return the :class:`Port` object that holds the associated *pinf*. This
