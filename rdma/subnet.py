@@ -347,7 +347,8 @@ class Subnet(object):
                                          SLID=path.SLID,
                                          drSLID=path.SLID,
                                          DLID=path.DLID,
-                                         drPath=drPath);
+                                         drPath=drPath,
+                                         retries=path.retries);
 
             ep = self.path_to_port(path);
             if ep is not None and not isinstance(ep.parent,Switch):
