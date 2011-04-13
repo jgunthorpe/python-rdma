@@ -20,6 +20,18 @@ class Node(object):
     #: Array of :class`Port`. Note: CA port 1 is stored in index 1.
     ports = None;
 
+    def get_port_nc(self,portIdx):
+        """Return the port for index *portIdx*, or `None` if it does not
+        exist."""
+        try:
+            port = self.ports[portIdx];
+            return port;
+        except TypeError:
+            assert self.ports is None;
+        except IndexError:
+            pass
+        return None;
+
     def get_port(self,portIdx):
         """Return the port for index *portIdx*."""
         try:
@@ -287,6 +299,36 @@ class Subnet(object):
         if len(self.lids) <= max_lid:
             self.lids.extend(None for I in range(len(self.lids),max_lid+1));
 
+    def _resolve_dr_path(self,path):
+        """Convert the DR path *path* into an end port. Returns `None` if
+        no end port was found."""
+        drPath = path.drPath;
+        if path.DLID == IBA.LID_PERMISSIVE:
+            start = self.ports.get(path.end_port.port_guid);
+        else:
+            if path.DLID >= len(self.lids):
+                return;
+            start = self.lids[path.DLID];
+            # FIXME: This doesn't support double ended DR routes.
+
+        if start is None:
+            return None;
+        if len(drPath) <= 0:
+            return start;
+        if ord(drPath[0]) != 0:
+            return None;
+        if len(drPath) <= 1:
+            return start;
+        if not isinstance(start,Switch):
+            if ord(drPath[1]) != start.port_id:
+                return None;
+        for idx in range(1,len(drPath)):
+            aport = start.parent.get_port_nc(ord(drPath[idx]));
+            if aport is None:
+                return None;
+            start = self.topology.get(aport);
+        return start.to_end_port();
+
     def path_to_port(self,path):
         """Return a :class:`Port` instance for *path* or `None` if one does not
         exist."""
@@ -295,14 +337,14 @@ class Subnet(object):
             return ret;
 
         if isinstance(path,rdma.path.IBDRPath):
-            pass;
+            ret = self._resolve_dr_path(path);
         else:
             if ret is None and path.DGID is not None:
                 ret = self.ports.get(path.DGID.guid());
             if ret is None and path.DLID != 0 and path.DLID < len(self.lids):
                 ret = self.lids[path.DLID];
-            if ret is not None:
-                path._cached_subnet_end_port = ret;
+        if ret is not None:
+            path._cached_subnet_end_port = ret;
         return ret;
 
     def get_path_smp(self,sched,end_port):
