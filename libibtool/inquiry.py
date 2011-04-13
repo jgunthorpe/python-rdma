@@ -6,6 +6,7 @@ import rdma;
 import rdma.IBA as IBA;
 import rdma.IBA_describe as IBA_describe;
 import rdma.madtransactor;
+import rdma.satransactor;
 from libibtool import *;
 from libibtool.libibopts import *;
 
