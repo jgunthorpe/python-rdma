@@ -27,15 +27,18 @@ def simple_tracer(mt,kind,fmt=None,path=None,ret=None):
     Assign to :attr:`rdma.madtransactor.MADTransactor.trace_func`."""
     if kind == TRACE_COMPLETE:
         desc = fmt.describe();
-
         if ret is None:
             print "D: RPC %s TIMED OUT to '%s'."%(desc,path);
             return;
         else:
             print "D: RPC %s completed to '%s' len %u."%(desc,path,len(ret[0]));
     if kind == TRACE_RECEIVE:
-        print "D: RPC %s received from '%s' len %u."%(fmt.describe(),
-                                                          path,len(ret[0]));
+        desc = fmt.describe();
+        if ret is None:
+            print "D: RPC %s retry to '%s'."%(desc,path);
+            return;
+        print "D: RPC %s received from '%s' len %u."%(desc,
+                                                      path,len(ret[0]));
     if kind == TRACE_REPLY:
         print "D: RPC %s reply to '%s'"%(fmt.describe(),path);
     if kind == TRACE_UNEXPECTED:

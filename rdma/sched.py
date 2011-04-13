@@ -65,7 +65,7 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
         ctx._retries = path.retries;
         bisect.insort(self._timeouts,itm);
 
-        rmatch = self._get_reply_match_key(buf);
+        ctx._rmatch = rmatch = self._get_reply_match_key(buf);
         assert(rmatch not in self._keys);
         self._keys[rmatch] = itm;
 
@@ -251,11 +251,10 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
         or issue a retry"""
         ctx = res[1]
         work = ctx._work;
+        del self._keys[ctx._rmatch];
         if ctx._retries == 0:
             # Pass the timeout back into MADTransactor and capture the
             # result
-            rmatch = self._get_reply_match_key(work.buf);
-            del self._keys[rmatch];
             try:
                 self._completeMAD(None,work.fmt,work.path,
                                   work.newer,work.completer);
@@ -268,11 +267,15 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
         ctx._retries = ctx._retries - 1;
 
         # Resend
+        if self.trace_func is not None:
+            self.trace_func(self,rdma.madtransactor.TRACE_RECEIVE,
+                            fmt=work.fmt,path=work.path);
         rep = self._umad._execute(work.buf,work.path,sendOnly=True);
         if rep:
             self._replyqueue.append(rep);
-        res = (mad[1].mad_timeout + rdma.tools.clock_monotonic(),ctx);
+        res = (work.path.mad_timeout + rdma.tools.clock_monotonic(),ctx);
         bisect.insort(self._timeouts,res);
+        self._keys[ctx._rmatch] = res;
 
     # Implement the MADTransactor interface. This is the asynchronous use model,
     # where the RPC functions return the work to do, not the result.
