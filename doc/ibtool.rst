@@ -309,6 +309,18 @@ Specific commands:
   two subnet cache files. It also checks the link rates and LID to end port
   mapping for differences.
 
+New Commands
+============
+
+* `query` can issue nearly arbitrary SMPs and GMPs
+* `subnet_diff` can compute the differences between two subnets
+* `set_port_state` will disable or enable a group of ports intelligently
+  selecting communication paths that don't cross the affected links using
+  directed route. This can be used to partition an IB network.
+* `init_all_ports` will set all ports in the network to the INIT state.
+  This can be used to try and recover a network that may be locked up due
+  to credit loop or otherwise.
+
 Commands
 ========
 

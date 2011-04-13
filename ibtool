@@ -74,6 +74,8 @@ commands = {
 
     "subnet_diff": None,
     "ibdiscover.pl": ("libibtool.subnet_diff","cmd_subnet_diff",False),
+    "set_port_state": None,
+    "init_all_ports": ("libibtool.set_port_state",),
 
     "help": (__name__,),
 };
