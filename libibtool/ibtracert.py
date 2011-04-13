@@ -136,7 +136,7 @@ def trace(umad,sched,sbn,sport,spath,dport,dpath,step_fn):
         seen.add(nport);
         cport = nport;
         if sbn.lid_routed:
-            cpath = sbn.get_path_smp(sched,cport);
+            cpath = sbn.get_path_smp(sched,cport.to_end_port());
         else:
             cpath = npath
     return cpath

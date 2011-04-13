@@ -485,6 +485,7 @@ def perform_topo_check(argv,o,funcs):
 
     def run(path,port,portIdx,kind):
         node = port.parent
+        ep = port.to_end_port();
         failed = False;
         cidx = (0 if kind == KIND_NODE else
                 2 if kind == KIND_PORT else
@@ -497,8 +498,8 @@ def perform_topo_check(argv,o,funcs):
         kwargs["port"] = port;
         kwargs["sbn"] = sbn;
         kwargs["portIdx"] = portIdx;
-        kwargs["desc"] = "lid %u port %s"%(port.LID,portIdx);
-        kwargs["portGUID"] = portGUID = port.to_end_port().portGUID;
+        kwargs["desc"] = "lid %u port %s"%(ep.LID,portIdx);
+        kwargs["portGUID"] = portGUID = ep.portGUID;
 
         if kind & (KIND_PERF|KIND_CLEAR):
             kwargs["gpath"] = gpath = getattr(path,"_cached_gmp_path",None);
