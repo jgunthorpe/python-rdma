@@ -672,34 +672,105 @@ class Subnet(object):
                 yield J;
 
     def iterpeers(self,start):
-        """Iterate over all end ports connected to *start*.
+        """Iterate over all ports connected to *start*.
 
-        :rtype: generator of :class:`Port`"""
+        :rtype: generator of (:class:`Port`,:class:`Port`) (peer,prior)"""
         if isinstance(start.parent,Switch):
             for I in start.parent.ports[1:]:
                 peer = self.topology.get(I);
                 if peer is not None:
-                    yield peer.to_end_port();
+                    yield (peer,I);
         else:
             peer = self.topology.get(start);
             if peer is not None:
-                yield peer.to_end_port();
+                yield (peer,start);
 
-    def iterbfs(self,start):
-        """Iterate over all end ports in a BFS order.
+    def iterbfs(self,start,priors=None):
+        """Iterate over all end ports in a BFS order. If *priors* is
+        set to a :class:`dict` then it will be populated with
+        a mapping of end port to ingress port.
 
         :rtype: generator of :class:`Port`"""
         todo = collections.deque();
-        done = set();
+        if priors is None:
+            priors = {};
+        else:
+            priors.clear();
+        priors[start] = start;
+        yield start;
         todo.append(start);
         while todo:
-            cur = todo.popleft();
-            if cur in done:
-                continue;
+            prior = todo.popleft();
+            for cur,cur_prior in self.iterpeers(prior):
+                cur_ep = cur.to_end_port();
+                if cur_ep in priors:
+                    continue;
+                priors[cur_ep] = cur_prior;
+                todo.append(cur_ep);
+                yield cur_ep;
 
-            done.add(cur);
-            todo.extend(self.iterpeers(cur));
-            yield cur;
+    class DRCacher(object):
+        """Instances of this are returned by
+        :meth:`rdma.subnet.Subnet.get_dr_cache`."""
+
+        def __init__(self,sbn,end_port,start):
+            self._sbn = sbn;
+            self._priors = {};
+            self.end_port = end_port;
+            if start is None:
+                self._start = sbn.ports[end_port.port_guid];
+                self._dlid = IBA.LID_PERMISSIVE;
+            else:
+                self._start = start;
+                self._dlid = start.LID;
+            self._iter = sbn.iterbfs(self._start,self._priors);
+
+        def get_links(self,target):
+            """Iterates over the ports from *target* to *start* (eg reversed).
+            The ports selected are the egress ports on the path from *start*.
+
+            :rtype: generator of :class:`Port`
+            :raises ValueError: If there is no path."""
+            prior = self._priors.get(target);
+            if prior is None:
+                try:
+                    while target != self._iter.next():
+                        continue;
+                except StopIteration:
+                    raise ValueError("Cannot reach %r via DR"%(target));
+                prior = self._priors[target];
+
+            yield prior;
+            while prior is not self._start:
+                prior = self._priors[prior.to_end_port()];
+                yield prior;
+
+        def get_path(self,target):
+            """Return a DR path from *start* to *target*.
+
+            :raises ValueError: If there is no path."""
+            lst = [I.port_id for I in self.get_links(target)];
+            lst.append(0);
+            lst.reverse();
+            if self._dlid != IBA.LID_PERMISSIVE:
+                return rdma.path.IBDRPath(self.end_port,
+                                          SLID=self.end_port.lid,
+                                          drSLID=self.end_port.lid,
+                                          DLID=self._dlid,
+                                          drPath=bytes(bytearray(lst)));
+            else:
+                return rdma.path.IBDRPath(self.end_port,
+                                          drPath=bytes(bytearray(lst)));
+
+    def get_dr_cache(self,end_port,start=None):
+        """Return a :class:`DRCacher` instance with a
+        :meth:`DRCacher.get_path` method that will return a DR path from
+        *start* to *target*. If *start* is not specified then it defaults to
+        the port described by *end_port*. Computing DR paths is very expensive
+        and this API returns an object that can be used to compute multiple DR
+        paths.
+        """
+        return self.DRCacher(self,end_port,start);
 
     def __getstate__(self):
         return (self.all_nodes,self.topology,self.loaded,self.lid_routed);
