@@ -302,7 +302,7 @@ def print_header(ninf,pinf,desc,portIdx,failed,kind):
         if desc:
             desc = " (%s) "%(IBA_describe.dstr(desc));
         else:
-            desc = '';
+            desc = ' ';
         if kind & KIND_PORT:
             print "Port check lid %u%sport %u:"%(pinf.LID,desc,portIdx),
         if kind & KIND_PERF:
@@ -377,12 +377,19 @@ def perform_single_check(argv,o,funcs):
         kwargs["port"] = None;
         kwargs["ninf"] = ninf = umad.SubnGet(IBA.SMPNodeInfo,path);
         if kinds & (KIND_PERF | KIND_PORT):
-            kwargs["portIdx"] = values[1];
+            kwargs["portIdx"] = portIdx = values[1];
+        else:
+            portIdx = ninf.localPortNum;
+
         if kinds & KIND_PORT:
             kwargs["pinf"] = pinf = umad.SubnGet(IBA.SMPPortInfo,path,values[1]);
-            kwargs["desc"] = "lid %u port %u"%(pinf.LID,values[1]);
+            if ninf.nodeType == IBA.NODE_SWITCH:
+                ep_pinf = umad.SubnGet(IBA.SMPPortInfo,path,0);
+            else:
+                ep_pinf = pinf;
+            kwargs["desc"] = "lid %u port %u"%(ep_pinf.LID,values[1]);
         else:
-            kwargs["pinf"] = pinf = umad.SubnGet(IBA.SMPPortInfo,path);
+            kwargs["pinf"] = ep_pinf = pinf = umad.SubnGet(IBA.SMPPortInfo,path);
         kwargs["portGUID"] = portGUID = kwargs["ninf"].portGUID;
         nodeDesc = None;
         if kinds & KIND_PERF:
@@ -398,7 +405,7 @@ def perform_single_check(argv,o,funcs):
                 for I in warnings:
                     print blue("#warn: %s"%(I));
             else:
-                print_header(ninf,pinf,nodeDesc,ninf.localPortNum,failed,
+                print_header(ninf,ep_pinf,nodeDesc,portIdx,failed,
                              kind);
 
         try:
@@ -406,7 +413,7 @@ def perform_single_check(argv,o,funcs):
             last_kind = 0;
             for func in funcs:
                 if lib.args.verbosity >= 1 and not (printed & func.kind):
-                    print_header(ninf,pinf,nodeDesc,ninf.localPortNum,None,
+                    print_header(ninf,ep_pinf,nodeDesc,portIdx,None,
                                  func.kind);
 
                 if printed != 0 and last_kind != func.kind:
@@ -518,7 +525,7 @@ def perform_topo_check(argv,o,funcs):
                     yield func(sched,path,**kwargs);
         except (CmdError,rdma.RDMAError), e:
             counts[cidx+1] = counts[cidx+1] + 1;
-            sched.result = print_header(node.ninf,port.pinf,node.desc,portIdx,True,kind);
+            sched.result = print_header(node.ninf,ep.pinf,node.desc,portIdx,True,kind);
             print red("#error: %s"%(e));
         else:
             failed = False;
@@ -526,7 +533,7 @@ def perform_topo_check(argv,o,funcs):
                 if portIdx != 0xFF:
                     counts[cidx+1] = counts[cidx+1] + 1;
                 failed = True;
-            sched.result = print_header(node.ninf,port.pinf,node.desc,portIdx,failed,kind);
+            sched.result = print_header(node.ninf,ep.pinf,node.desc,portIdx,failed,kind);
 
     counts = [0]*8;
     with lib.get_umad() as umad:
