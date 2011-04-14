@@ -141,7 +141,7 @@ def cmd_ibaddr(argv,o):
         path = lib.path;
         ninf = umad.SubnGet(IBA.SMPNodeInfo,path);
         path.DGID = IBA.GID(prefix=IBA.GID_DEFAULT_PREFIX,guid=ninf.portGUID);
-        pinf = umad.SubnGet(IBA.SMPPortInfo,path,ninf.localPortNum);
+        pinf = umad.SubnGet(IBA.SMPPortInfo,path,0);
 
         if args.gid:
             print "GID %s"%(path.DGID),
