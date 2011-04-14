@@ -372,14 +372,21 @@ def topo_peer_SMP(sched,sbn,port,get_desc=True,path=None,
     if peer_port is None:
         portIdx = port.port_id;
 
-        use_sa = isinstance(sched,rdma.satransactor.SATransactor);
         if peer_path is None:
             if path is None:
                 path = sbn.get_path_smp(sched,port.to_end_port());
             peer_path = sbn.advance_dr(path,portIdx);
 
+        if port.pinf is None:
+            yield subnet_pinf_SMP(sched,sbn,portIdx,path);
+
+        if (port.pinf.portState == IBA.PORT_STATE_DOWN or
+            portIdx == 0):
+            return
+
         # Resolve the DR path using the SA and update our topology information
         # as well.
+        use_sa = isinstance(sched,rdma.satransactor.SATransactor);
         if use_sa:
             if path is None:
                 path = sbn.get_path_smp(sched,port.to_end_port());
