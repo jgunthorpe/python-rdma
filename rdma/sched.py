@@ -9,6 +9,7 @@ class Context(object):
     _result = None;
     _work = None;
     _retries = 0;
+    _first = False;
 
     def __init__(self,op,gengen,parent=None):
         self._opstack = collections.deque();
@@ -26,7 +27,7 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
     multiple coroutines at once. coroutines are implemented as generators."""
 
     #: Maximum number of outstanding MADs at any time.
-    max_outstanding = 4;
+    max_outstanding = 4
     #: Set to return a result from a coroutine
     result = None;
 
@@ -49,7 +50,6 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
         self._keys = {};
         self._timeouts = []
         self._mqueue = collections.deque();
-        self.max_outstanding = 4;
         self._replyqueue = collections.deque();
         self._ctx_waiters = collections.defaultdict(list);
 
@@ -90,20 +90,20 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
         for I in waits:
             self._mqueue.appendleft(I);
 
-    def _step(self,ctx,result):
+    def _step(self,ctx):
         """Advance a context to its next yield statement. If result is None
         then this ctx is brand new. If ctx is not exhausted then it is put
         onto _mqueue for later"""
-        while result is None or len(self._keys) <= self.max_outstanding:
-            if ctx._result is not None:
-                result = ctx._result;
-                ctx._result = None;
+        while len(self._keys) < self.max_outstanding:
+            result = ctx._result;
+            ctx._result = None;
             try:
                 exc = ctx._exc
                 if exc is not None:
                     ctx._exc = None;
                     work = ctx._op.throw(*exc);
-                elif result is None:
+                elif ctx._first:
+                    ctx._first = False;
                     work = ctx._op.next();
                 else:
                     work = ctx._op.send(result);
@@ -113,7 +113,6 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
                     if self.result is not None:
                         ctx._result = self.result;
                         self.result = None;
-                    result = True;
                     continue;
                 else:
                     self._finish_ctx(ctx);
@@ -123,7 +122,6 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
                 if ctx._opstack:
                     ctx._op = ctx._opstack.pop();
                     ctx._exc = sys.exc_info();
-                    result = True;
                     continue;
                 else:
                     self._finish_ctx(ctx);
@@ -131,7 +129,6 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
 
             if isinstance(work,Context):
                 if work._done:
-                    result = True;
                     continue;
                 self._ctx_waiters[work].append(ctx);
                 return;
@@ -139,7 +136,6 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
             if work is None:
                 ctx._result = self.result;
                 self.result = None;
-                result = True;
                 continue;
 
             if inspect.isgenerator(work):
@@ -152,14 +148,12 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
                 else:
                     ctx._opstack.append(ctx._op);
                     ctx._op = work;
-                result = None;
                 continue;
 
             try:
                 self._sendMAD(ctx,work);
             except:
                 ctx._exc = sys.exc_info();
-                result = True;
                 continue;
             return;
 
@@ -172,7 +166,7 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
         :returns: An opaque context reference."""
         assert(inspect.isgenerator(works));
         ctx = Context(works,True);
-        self._step(ctx,None);
+        self._step(ctx);
         return ctx;
 
     def queue(self,work):
@@ -185,7 +179,7 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
             return;
         assert(inspect.isgenerator(work));
         ctx = Context(work,False);
-        self._step(ctx,None);
+        self._step(ctx);
         return ctx;
 
     def run(self,queue=None,mqueue=None):
@@ -202,8 +196,8 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
             self.mqueue(mqueue);
 
         while self._keys or self._mqueue:
-            while len(self._keys) <= self.max_outstanding and self._mqueue:
-                self._step(self._mqueue.pop(),True);
+            while len(self._keys) < self.max_outstanding and self._mqueue:
+                self._step(self._mqueue.pop());
 
             # Wait for a MAD
             if self._replyqueue:
@@ -240,7 +234,7 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
                                                        work.completer);
                 except:
                     res[1]._exc = sys.exc_info();
-                self._step(res[1],True);
+                self._step(res[1]);
             else:
                 if self.trace_func is not None:
                     self.trace_func(self,rdma.madtransactor.TRACE_UNEXPECTED,
@@ -260,7 +254,7 @@ class MADSchedule(rdma.madtransactor.MADTransactor):
                                   work.newer,work.completer);
             except:
                 ctx._exc = sys.exc_info();
-                self._step(ctx,True);
+                self._step(ctx);
             else:
                 assert(False);
             return
