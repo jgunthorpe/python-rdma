@@ -11,6 +11,7 @@ Notable Bug Fixes:
 - :class:`~rdma.sched.MADSchedule` could loose the RPC result if it got too busy.
 - :func:`rdma.discovery.topo_SMP` did not strictly enforce BFS order and
   could overrun the hop limit.
+- Non-end ports were ending up some of the subnet structures
 
 Notable Features/Improvements:
 
@@ -40,3 +41,4 @@ ibtool:
   `ibcheckerrors`, `ibclearcounters`, `ibclearerrors`, `ibdatacounters`, and
   `ibidsverify`.
 - MAD server functions `vendstat`, `ibsysstat` and `ibping`
+- New `set_port_state` and `init_all_ports` commands
