@@ -246,7 +246,7 @@ def cmd_ibfindnodesusing(argv,o):
                    if port == args.port)
 
         sched.run(queue=rdma.discovery.topo_peer_SMP(sched,sbn,port));
-        pport = sbn.topology[port];
+        pport = sbn.topology.get(port);
         if pport is None:
             raise CmdError("No link on port %u"%(args.port));
         peport = pport.to_end_port();

@@ -180,7 +180,7 @@ class ibtool_cmds_test(unittest.TestCase):
         self.cmd("ibrouters");
         self.cmd("ibnodes");
         self.cmd("ibnetdiscover");
-        self.cmd("ibfindnodesusing",self.peer_dr,"1");
+        self.cmd("ibfindnodesusing",self.peer_dr,self.peer_ninf.localPortNum);
 
         self.cmd("ibprintca",self.end_port.parent.node_guid);
         self.cmd("ibprintswitch",self.peer_ninf.nodeGUID);
