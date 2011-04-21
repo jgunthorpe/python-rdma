@@ -1,4 +1,4 @@
-# Copyright 2011 Obsidian Research Corp. GLPv2, see COPYING.
+# Copyright 2011 Obsidian Research Corp. GPLv2, see COPYING.
 import collections;
 import rdma;
 import rdma.path;
@@ -351,6 +351,7 @@ class Subnet(object):
         """Return a VL15 SMP path to *end_port*. If directed routing is being
         used then this must be used to get paths. *sched* is an object with an
         `end_port` attribute."""
+        assert(end_port == end_port.to_end_port());
         if self.paths is not None:
             path = self.paths.get(end_port);
             if path is not None:
@@ -419,6 +420,7 @@ class Subnet(object):
         """Use the provided information about *port* to update the database.
 
         Note: For switches *portIdx* must be 0."""
+        assert(port == port.to_end_port());
         if (LID is None and path is not None and
             not isinstance(path,rdma.path.IBDRPath)):
             LID = path.DLID;

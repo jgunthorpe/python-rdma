@@ -1,4 +1,4 @@
-# Copyright 2011 Obsidian Research Corp. GLPv2, see COPYING.
+# Copyright 2011 Obsidian Research Corp. GPLv2, see COPYING.
 from __future__ import with_statement;
 import rdma;
 import rdma.IBA as IBA;

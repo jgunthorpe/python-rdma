@@ -1,5 +1,5 @@
 # -*- Python -*-
-# Copyright 2011 Obsidian Research Corp. GLPv2, see COPYING.
+# Copyright 2011 Obsidian Research Corp. GPLv2, see COPYING.
 
 include 'libibverbs_enums.pxd'
 
