@@ -56,7 +56,7 @@ class madschedule_test(unittest.TestCase):
             inf = yield sched.SubnGet(IBA.SMPNodeInfo,self.local_path);
             with self.with_assertRaises(rdma.MADError):
                 yield sched.SubnGet(IBA.SMPPortInfo,
-                                    self.local_path,inf.numPorts+1);
+                                    self.local_path,inf.numPorts+3);
 
         sched = rdma.sched.MADSchedule(self.umad);
         sched.run(first(self,sched));

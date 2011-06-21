@@ -30,7 +30,7 @@ class umad_self_test(unittest.TestCase):
 
         self.assertRaises(rdma.MADError,
                           self.umad.SubnGet,IBA.SMPPortInfo,
-                          self.local_path,ports+1);
+                          self.local_path,ports+3);
 
     def test_timeout(self):
         self.assertEqual(self.umad.recvfrom(100),None);
