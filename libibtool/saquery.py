@@ -11,6 +11,12 @@ import rdma.IBA_describe as IBA_describe;
 from libibtool import *;
 from libibtool.libibopts import *;
 
+def fsplit(s,c,count):
+    res = s.split(c);
+    while len(res) < count:
+        res.append(None);
+    return res;
+
 def arg_nr(query,values):
     """LID"""
     query.LID = IBA.conv_lid(values[0]);
@@ -18,7 +24,7 @@ def arg_nr(query,values):
 
 def arg_pir(query,values):
     """[LID]/[PORT]"""
-    s = values[0].split('/');
+    s = fsplit(values[0],'/',2);
     if s[0]:
         query.endportLID = IBA.conv_lid(s[0]);
     if s[1]:
@@ -27,7 +33,7 @@ def arg_pir(query,values):
 
 def arg_sl2vl(query,values):
     """[lid]/[in_port]/[out_port]"""
-    s = values[0].split('/');
+    s = fsplit(values[0],'/',3);
     if s[0]:
         query.LID = IBA.conv_lid(s[0]);
     if s[1]:
@@ -38,7 +44,7 @@ def arg_sl2vl(query,values):
 
 def arg_pkey(query,values):
     """[lid]/[port]/[block]"""
-    s = values[0].split('/');
+    s = fsplit(values[0],'/',3);
     if s[0]:
         query.LID = IBA.conv_lid(s[0]);
     if s[1]:
@@ -49,7 +55,7 @@ def arg_pkey(query,values):
 
 def arg_vlarb(query,values):
     """[lid]/[port]/[block]"""
-    s = values[0].split('/');
+    s = fsplit(values[0],'/',3);
     if s[0]:
         query.LID = IBA.conv_lid(s[0]);
     if s[1]:
@@ -60,7 +66,7 @@ def arg_vlarb(query,values):
 
 def arg_link(query,values):
     """[from_lid]/[from_port] [to_lid]/[to_port]"""
-    s = values[0].split('/');
+    s = fsplit(values[0],'/',2);
     if s[0]:
         query.fromLID = IBA.conv_lid(s[0]);
     if s[1]:
@@ -70,7 +76,7 @@ def arg_link(query,values):
     if not values:
         return;
 
-    s = values[0].split('/');
+    s = fsplit(values[0],'/',2);
     if s[0]:
         query.toLID = IBA.conv_lid(s[0]);
     if s[1]:
@@ -79,7 +85,7 @@ def arg_link(query,values):
 
 def arg_lft(query,values):
     """[lid]/[block]"""
-    s = values[0].split('/');
+    s = fsplit(values[0],'/',2);
     if s[0]:
         query.LID = IBA.conv_lid(s[0]);
     if s[1]:
@@ -88,7 +94,7 @@ def arg_lft(query,values):
 
 def arg_mft(query,values):
     """[lid]/[block]"""
-    s = values[0].split('/');
+    s = fsplit(values[0],'/',2);
     if s[0]:
         query.LID = IBA.conv_lid(s[0]);
     if s[1]:
