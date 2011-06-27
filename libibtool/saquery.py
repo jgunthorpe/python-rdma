@@ -20,7 +20,7 @@ def arg_pir(query,values):
     """[LID]/[PORT]"""
     s = values[0].split('/');
     if s[0]:
-        query.LID = IBA.conv_lid(s[0]);
+        query.endportLID = IBA.conv_lid(s[0]);
     if s[1]:
         query.portNum = int(s[1],0);
     del values[0];
