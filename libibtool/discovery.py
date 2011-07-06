@@ -184,7 +184,7 @@ Ca\t%u %s\t# "%s"'''%(ninf.nodeGUID,ninf.numPorts,as_node_name(node),
         print '''switchguid=%s(%s)
 Switch\t%u %s\t# "%s" base port 0 lid %u lmc %u'''%\
                 (ninf.nodeGUID,port.portGUID,ninf.numPorts,as_node_name(node),
-                 IBA_describe.dstr(node.desc),port.LID,port.pinf.LMC);
+                 IBA_describe.dstr(node.desc),port.LID or 0,port.pinf.LMC);
     else:
         print '''nodeguid=%s
 ??%u\t%u %s\t# "%s"'''%(ninf.nodeGUID,ninf.nodeType,ninf.numPorts,as_node_name(node),
@@ -198,12 +198,13 @@ Switch\t%u %s\t# "%s" base port 0 lid %u lmc %u'''%\
         if is_switch:
             print '%s\t%s\t# "%s" lid %u %ux%s'%(
                     idx,as_port_name(peer),IBA_describe.dstr(peer.parent.desc),
-                    peer.to_end_port().LID,IBA_describe.link_width(port.pinf.linkWidthActive),
+                    peer.to_end_port().LID or 0,
+                    IBA_describe.link_width(port.pinf.linkWidthActive),
                     IBA_describe.link_speed(port.pinf.linkSpeedActive));
         else:
             print '%s(%s)\t%s\t# lid %u lmc %u "%s" %ux%s'%(
                 idx,port.portGUID,as_port_name(peer),
-                port.LID,port.pinf.LMC,
+                port.LID or 0,port.pinf.LMC,
                 IBA_describe.dstr(peer.parent.desc),
                 IBA_describe.link_width(port.pinf.linkWidthActive),
                 IBA_describe.link_speed(port.pinf.linkSpeedActive));
