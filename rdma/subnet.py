@@ -657,7 +657,7 @@ class Subnet(object):
 
     def iterports(self):
         """Iterate over all ports. This only returns ports that are in the network,
-        ie ports on a CA that are no reachable are not returned.
+        ie ports on a CA that are not reachable are not returned.
 
         :rtype: generator of tuple(:class:`Port`,portIdx)"""
         for I in self.all_nodes:
