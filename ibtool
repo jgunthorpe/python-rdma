@@ -1,145 +1,83 @@
 #!/usr/bin/env python
 # Copyright 2011 Obsidian Research Corp. GPLv2, see COPYING.
-from __future__ import with_statement;
 import sys;
 import rdma;
-import inspect;
-from libibtool import *;
 from libibtool.tools import *;
 
 # Generate the global command map
+banner = """Command suite for IB management v%s"""%(rdma.__version__);
+
 commands = {
     "ibroute": None,
-    "dump_lfts": ("libibtool.ibroute",),
-    "dump_lfts.sh": ("libibtool.ibroute","cmd_dump_lfts",False),
-    "dump_mfts": ("libibtool.ibroute",),
-    "dump_mfts.sh": ("libibtool.ibroute","cmd_dump_mfts",False),
-    "ibfindnodesusing": ("libibtool.ibroute",),
-    "ibfindnodesusing.pl": ("libibtool.ibroute","cmd_ibfindnodesusing",False),
+    "dump_lfts": (".ibroute",),
+    "dump_lfts.sh": (".ibroute","cmd_dump_lfts",False),
+    "dump_mfts": (".ibroute",),
+    "dump_mfts.sh": (".ibroute","cmd_dump_mfts",False),
+    "ibfindnodesusing": (".ibroute",),
+    "ibfindnodesusing.pl": (".ibroute","cmd_ibfindnodesusing",False),
 
     "perfquery": None,
-    "ibswportwatch": ("libibtool.perfquery",),
-    "ibswportwatch.pl": ("libibtool.perfquery","cmd_ibswportwatch",False),
+    "ibswportwatch": (".perfquery",),
+    "ibswportwatch.pl": (".perfquery","cmd_ibswportwatch",False),
     "saquery": None,
     "smpquery": None,
     "ibtracert": None,
 
-    "ibv_devices": ("libibtool.inquiry",),
-    "ibstat": ("libibtool.inquiry",),
-    "ibstatus": ("libibtool.inquiry",),
-    "ibaddr": ("libibtool.inquiry",),
-    "sminfo": ("libibtool.inquiry",),
-    "smpdump": ("libibtool.inquiry",),
-    "decode_mad": ("libibtool.inquiry",),
-    "ibportstate": ("libibtool.inquiry",),
-    "query": ("libibtool.inquiry",),
-    "set_nodedesc": ("libibtool.inquiry",),
-    "set_nodedesc.sh": ("libibtool.inquiry","cmd_set_nodedesc",False),
+    "ibv_devices": (".inquiry",),
+    "ibstat": (".inquiry",),
+    "ibstatus": (".inquiry",),
+    "ibaddr": (".inquiry",),
+    "sminfo": (".inquiry",),
+    "smpdump": (".inquiry",),
+    "decode_mad": (".inquiry",),
+    "ibportstate": (".inquiry",),
+    "query": (".inquiry",),
+    "set_nodedesc": (".inquiry",),
+    "set_nodedesc.sh": (".inquiry","cmd_set_nodedesc",False),
 
-    "ibhosts": ("libibtool.discovery",),
-    "ibprintca": ("libibtool.discovery",),
-    "ibprintca.pl": ("libibtool.discovery","cmd_ibprintca",False),
-    "ibrouters": ("libibtool.discovery",),
-    "ibprintrt": ("libibtool.discovery",),
-    "ibprintrt.pl": ("libibtool.discovery","cmd_ibprintrt",False),
-    "ibswitches": ("libibtool.discovery",),
-    "ibprintswitch": ("libibtool.discovery",),
-    "ibprintswitch.pl": ("libibtool.discovery","cmd_ibprintswitch",False),
-    "ibnodes": ("libibtool.discovery",),
-    "ibnetdiscover": ("libibtool.discovery",),
-    "iblinkinfo": ("libibtool.discovery",),
-    "iblinkinfo.pl": ("libibtool.discovery","cmd_iblinkinfo",False),
+    "ibhosts": (".discovery",),
+    "ibprintca": (".discovery",),
+    "ibprintca.pl": (".discovery","cmd_ibprintca",False),
+    "ibrouters": (".discovery",),
+    "ibprintrt": (".discovery",),
+    "ibprintrt.pl": (".discovery","cmd_ibprintrt",False),
+    "ibswitches": (".discovery",),
+    "ibprintswitch": (".discovery",),
+    "ibprintswitch.pl": (".discovery","cmd_ibprintswitch",False),
+    "ibnodes": (".discovery",),
+    "ibnetdiscover": (".discovery",),
+    "iblinkinfo": (".discovery",),
+    "iblinkinfo.pl": (".discovery","cmd_iblinkinfo",False),
 
-    "ibchecknode": ("libibtool.errors",),
-    "ibcheckstate": ("libibtool.errors",),
-    "ibcheckport": ("libibtool.errors",),
-    "ibchecknet": ("libibtool.errors",),
-    "ibcheckportstate": ("libibtool.errors",),
-    "ibcheckportwidth": ("libibtool.errors",),
-    "ibcheckwidth": ("libibtool.errors",),
-    "ibcheckerrs": ("libibtool.errors",),
-    "ibcheckerrors": ("libibtool.errors",),
-    "ibclearcounters": ("libibtool.errors",),
-    "ibclearerrors": ("libibtool.errors",),
-    "ibdatacounters": ("libibtool.errors",),
-    "ibdatacounts": ("libibtool.errors",),
-    "ibidsverify": ("libibtool.errors",),
-    "ibidsverify.pl": ("libibtool.errors","cmd_ibidsverify",False),
+    "ibchecknode": (".errors",),
+    "ibcheckstate": (".errors",),
+    "ibcheckport": (".errors",),
+    "ibchecknet": (".errors",),
+    "ibcheckportstate": (".errors",),
+    "ibcheckportwidth": (".errors",),
+    "ibcheckwidth": (".errors",),
+    "ibcheckerrs": (".errors",),
+    "ibcheckerrors": (".errors",),
+    "ibclearcounters": (".errors",),
+    "ibclearerrors": (".errors",),
+    "ibdatacounters": (".errors",),
+    "ibdatacounts": (".errors",),
+    "ibidsverify": (".errors",),
+    "ibidsverify.pl": (".errors","cmd_ibidsverify",False),
 
     "rdma_bw": None,
 
     "vendstat": None,
-    "ibsysstat": ("libibtool.vendstat",),
-    "ibping": ("libibtool.vendstat",),
+    "ibsysstat": (".vendstat",),
+    "ibping": (".vendstat",),
 
     "subnet_diff": None,
-    "ibdiscover.pl": ("libibtool.subnet_diff","cmd_subnet_diff",False),
+    "ibdiscover.pl": (".subnet_diff","cmd_subnet_diff",False),
     "set_port_state": None,
-    "init_all_ports": ("libibtool.set_port_state",),
+    "init_all_ports": (".set_port_state",),
 
-    "help": (__name__,),
+    "help": (".tools",),
 };
-
-def get_cmd_func(name):
-    loc = commands[name];
-    module = "libibtool.%s"%(name)
-    func = "cmd_%s"%(name);
-    shown = True;
-    if loc is not None:
-        if len(loc) >= 3:
-            shown = loc[2];
-        if len(loc) >= 2:
-            func = loc[1];
-        if len(loc) >= 1:
-            module = loc[0];
-
-    rmodule = sys.modules.get(module);
-    if rmodule is None:
-        __import__(module);
-        rmodule = sys.modules[module];
-    return getattr(rmodule,func),shown;
-
-def cmd_help(argv,o):
-    """Display the help text
-       Usage: %prog"""
-    (args,values) = o.parse_args(argv);
-
-    if len(argv) == 0:
-        # Abuse the optparse help formatter to format the help text for
-        # our commands
-        class Formatter(MyHelpFormatter):
-            def format_option(self, option):
-                if option.action == "help":
-                    self.option_strings[option] = "help";
-                else:
-                    self.option_strings[option] = self.option_strings[option][3:];
-                return MyHelpFormatter.format_option(self,option);
-
-        o = MyOptParse(cmd_help);
-        for k in sorted(commands.iterkeys()):
-            if k == "help":
-                continue
-            func,shown = get_cmd_func(k);
-            if not shown:
-                continue;
-            doc = inspect.getdoc(func);
-            doc = [i for i in doc.split("\n") if len(i) != 0];
-            o.add_option("--x" + k,action="store_true",help=doc[0]);
-
-        print "ibtool - Command suite for IB management"
-        print "Usage: ibtool command [args]"
-        print
-        print o.format_option_help(Formatter());
-        print "ibtool help [command] shows detailed help for each command";
-        return True;
-
-    if len(argv) == 1 and commands.has_key(argv[0]):
-        func,shown = get_cmd_func(argv[0]);
-        o = MyOptParse(func);
-        func(["--help"],o);
-    else:
-        print "No help text for %s"%(argv);
-    return True;
 
 if __name__ == '__main__':
     if len(sys.argv) == 1:
