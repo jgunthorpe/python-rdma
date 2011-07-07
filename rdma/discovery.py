@@ -274,7 +274,7 @@ class _SubnetTopo(object):
                     # routed.
                     if self.done_desc is not None:
                         if node.desc is not None or node in self.done_desc:
-                            return;
+                            continue;
                         self.done_desc.add(node);
                         yield node.get_desc(self.sched,path);
         finally:
