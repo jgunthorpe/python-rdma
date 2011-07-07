@@ -17,7 +17,13 @@ class MyOptParse(optparse.OptionParser):
     #: Global verbosity for exception reporting
     verbosity = 0;
 
-    def __init__(self,cmd,option_list = [],description = None):
+    def __init__(self,cmd,option_list = [],description = None,
+                 top_mod=None):
+        if top_mod == None:
+            self.top_mod = sys.modules['__main__'];
+        else:
+            self.top_mod = top_mod;
+
         optparse.OptionParser.__init__(self,option_list=option_list,
                                        description=description,
                                        formatter=MyHelpFormatter());
@@ -51,13 +57,16 @@ class MyOptParse(optparse.OptionParser):
 
 default_module = __name__.rpartition('.')[0];
 
-def get_cmd_func(name):
+def get_cmd_func(name,top_mod=None):
+    if top_mod == None:
+        top_mod = sys.modules['__main__'];
+
     # Fetch the commands dict from the top level
-    commands = sys.modules['__main__'].commands;
+    commands = top_mod.commands;
 
     loc = commands[name];
     module = "." + name;
-    func = "cmd_%s"%(name);
+    func = "cmd_%s"%(name.replace('-','_'));
     shown = True;
     if loc is not None:
         if len(loc) >= 3:
@@ -66,6 +75,11 @@ def get_cmd_func(name):
             func = loc[1];
         if len(loc) >= 1:
             module = loc[0];
+    else:
+        # If not module is specified search the top level otherwise assume it
+        # is part of the default_module with a name equal to the command name.
+        if getattr(top_mod,func,None):
+            module = top_mod.__name__;
 
     if module[0] == '.':
         module = default_module + module;
@@ -80,7 +94,7 @@ def cmd_help(argv,o):
     """Display the help text
        Usage: %prog"""
     # Fetch the commands dict from the top level
-    commands = sys.modules['__main__'].commands;
+    commands = o.top_mod.commands;
 
     (args,values) = o.parse_args(argv);
 
@@ -95,11 +109,11 @@ def cmd_help(argv,o):
                     self.option_strings[option] = self.option_strings[option][3:];
                 return MyHelpFormatter.format_option(self,option);
 
-        o = MyOptParse(cmd_help);
+        o = MyOptParse(cmd_help,top_mod=o.top_mod);
         for k in sorted(commands.iterkeys()):
             if k == "help":
                 continue
-            func,shown = get_cmd_func(k);
+            func,shown = get_cmd_func(k,o.top_mod);
             if not shown:
                 continue;
             doc = inspect.getdoc(func);
@@ -115,8 +129,8 @@ def cmd_help(argv,o):
         return True;
 
     if len(argv) == 1 and commands.has_key(argv[0]):
-        func,shown = get_cmd_func(argv[0]);
-        o = MyOptParse(func);
+        func,shown = get_cmd_func(argv[0],top_mod=o.top_mod);
+        o = MyOptParse(func,top_mod=o.top_mod);
         func(["--help"],o);
     else:
         print "No help text for %s"%(argv);

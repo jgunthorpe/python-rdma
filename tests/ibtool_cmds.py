@@ -2,14 +2,13 @@
 import unittest
 import os.path
 import sys
+import imp
 from contextlib import contextmanager;
-import tests.ibtool
 import rdma;
 import rdma.IBA as IBA;
-import libibtool;
 
 class ibtool_cmds_test(unittest.TestCase):
-    get_cmd_func = None;
+    cmd_mod = None;
 
     @contextmanager
     def with_assertRaises(self,excClass):
@@ -34,9 +33,13 @@ class ibtool_cmds_test(unittest.TestCase):
 
     def setUp(self):
         self.extra_opts = None;
-        if self.get_cmd_func is None:
-            self.ibtool = sys.modules["tests.ibtool"];
-            self.get_cmd_func = self.ibtool.get_cmd_func;
+        if self.cmd_mod is None:
+            fn = os.path.join(os.path.dirname(sys.modules[__name__].__file__),
+                              os.path.pardir,
+                              "ibtool");
+            self.cmd_mod = imp.load_source("__ibtool__",fn);
+            self.get_cmd_func = self.cmd_mod.get_cmd_func;
+
             self.end_port = rdma.get_end_port();
 
             self.peer_dr = "0,%u"%(self.end_port.port_id);
@@ -65,17 +68,22 @@ class ibtool_cmds_test(unittest.TestCase):
         print "------------- Execute",args," ------------";
         sys.stdout.flush();
         try:
-            func,shown = self.get_cmd_func(args[0]);
-            o = libibtool.tools.MyOptParse(func);
+            func,shown = self.get_cmd_func(args[0],top_mod=self.cmd_mod);
+            o = self.cmd_mod.MyOptParse(func,top_mod=self.cmd_mod);
             if not func(["%s"%(I) for I in args[1:]],o):
                 raise self.ibtool.CmdError("Command failed");
         except:
             print "Command %r threw exception"%(args,);
             raise;
 
+    def test_help(self):
+        self.cmd("help");
+        for I in self.cmd_mod.commands:
+            with self.with_assertRaises(SystemExit):
+                self.cmd("help",I);
+
     def test_good(self):
         """Test good calls to ibtools"""
-        self.cmd("help");
         self.cmd("ibv_devices");
         self.cmd("ibstat");
         self.cmd("ibstat","-l");
