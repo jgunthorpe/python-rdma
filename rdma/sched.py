@@ -1,6 +1,6 @@
 # Copyright 2011 Obsidian Research Corp. GPLv2, see COPYING.
 import collections,inspect,sys,bisect
-import rdma,rdma.madtransactor;
+import rdma,rdma.madtransactor,rdma.tools;
 
 class Context(object):
     _parent = None;

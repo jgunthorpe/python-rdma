@@ -49,7 +49,7 @@ class LazyIBPath(rdma.path.LazyIBPath):
         else:
             del self.SGID
 
-class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
+class LinuxUMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
     '''Handle to a UMAD kernel interface. This class supports the context
     manager protocol.'''
     IB_IOCTL_MAGIC = 0x1b

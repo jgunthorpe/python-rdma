@@ -2,6 +2,7 @@
 import sys
 import os
 import os.path
+import collections
 
 __version__ = "0.1";
 
@@ -226,6 +227,41 @@ def get_device(name=None):
     except KeyError:
         raise RDMAError("RDMA device %r not found."%(name));
 
+class KeyList(collections.Sequence):
+    def __new__(cls, pairs=None):
+        obj = super(KeyList, cls).__new__(cls)
+        obj._okeys = []
+        obj._data = {}
+        if pairs is None:
+            pairs = ()
+        for k,v in pairs:
+            obj._okeys.append(k)
+            obj._data[k] = v
+        obj._okeys = tuple(obj._okeys)
+        return obj
+
+    def itervalues(self):
+        return self.__iter__()
+
+    def iterkeys(self):
+        return self._okeys.__iter__()
+
+    def first(self):
+        return self[self._okeys[0]]
+
+    def __len__(self):
+        return len(self._okeys)
+
+    def __iter__(self):
+        for I in self._okeys:
+            yield self._data[I]
+
+    def __getitem__(self, idx):
+        return self._data[idx]
+
+    def __repr__(self):
+        return '{%s}' % ', '.join('%r: %r'%(k,self[k]) for k in self._okeys)
+
 _cached_devices = None;
 def get_devices(refresh=False):
     '''Return a container of :class:`rdma.devices.RDMADevice` objects for all devices in the system.
@@ -242,21 +278,24 @@ def get_devices(refresh=False):
         return _cached_devices;
 
     import rdma.devices;
-    if not os.path.exists(rdma.devices.SYS_INFINIBAND):
-        return ();
+    import rdma.sim
 
-    _cached_devices = rdma.devices.DemandList2(
-        rdma.devices.SYS_INFINIBAND,
-        lambda x:rdma.devices.RDMADevice(x),
-        lambda x:x);
+    L = {}
+    if os.path.exists(rdma.devices.SYS_INFINIBAND):
+        for name in os.listdir(rdma.devices.SYS_INFINIBAND):
+            L[name] = rdma.devices.RDMADevice(name)
+
+    if os.environ.get('IBSIM_SERVER_NAME'):
+        L['ibsim0'] = rdma.sim.SimDevice('ibsim0')
+
+    _cached_devices = KeyList((name, L[name]) for name in sorted(L.keys()))
     return _cached_devices;
 
 def get_umad(port,path=None,**kwargs):
     '''Create a :class:`rdma.umad.UMAD` instance for the associated
     :class:`rdma.devices.EndPort`. UMAD instances can issue SMPs and GMPs.
     If only GMP is required then use :func:`get_gmp_mad`.'''
-    import rdma.umad;
-    return rdma.umad.UMAD(port,**kwargs);
+    return port.umad(**kwargs);
 
 def get_gmp_mad(port,path=None,verbs=None,**kwargs):
     '''Return a subclass instace of :class:`rdma.madtransactor.MADTransactor`

@@ -178,6 +178,10 @@ class EndPort(SysFSCache):
         else:
             raise rdma.RDMAError("Unable to open issm device for %s"%(repr(parent)));
 
+    def umad(self):
+        import rdma.umad
+        return rdma.umad.LinuxUMAD(self)
+
     @property
     def lid(self): return self._cached_sysfs("lid",_conv_hex);
     @property
