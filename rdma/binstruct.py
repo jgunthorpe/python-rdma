@@ -57,6 +57,14 @@ class BinStruct(object):
         self.pack_into(buf);
         return (self.__class__,(bytes(buf),));
 
+    def __cmp__(self,rhs):
+        """Bytewise compare of two structures"""
+        lhsb = bytearray(self.MAD_LENGTH);
+        self.pack_into(lhsb);
+        rhsb = bytearray(rhs.MAD_LENGTH);
+        rhs.pack_into(rhsb);
+        return cmp(lhsb,rhsb);
+
     # 'pure virtual' functions
     def zero(self):
         """Overridden in derived classes. Set this instance back to the
