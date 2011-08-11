@@ -95,7 +95,9 @@ class LibIBOpts(object):
         o.verbosity = max(self.debug,getattr(args,"verbosity",0));
 
         if "discovery" in args.__dict__:
-            if args.discovery is None and self.end_port.state != IBA.PORT_STATE_ACTIVE:
+            if (args.discovery is None and
+                (self.end_port.state != IBA.PORT_STATE_ACTIVE or
+                 not 0 < self.end_port.lid < IBA.LID_MULTICAST)):
                 args.discovery = "DR";
             if args.use_sa and args.discovery is not None and args.discovery != "SA":
                 raise CmdError("Can't combine --sa with discovery mode %r"%(args.discovery));
