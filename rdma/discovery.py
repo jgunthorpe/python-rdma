@@ -511,7 +511,7 @@ def load(sched,sbn,stuff):
     if "all_PortInfo" in stuff:
         stuff.add("all_NodeInfo");
     if "all_LIDs" in stuff:
-        stuff.add("all_SMPNodeInfo");
+        stuff.add("all_NodeInfo");
 
     # Deal with a qualifying space after the thing eg 'all_NodeInfo 1'
     non_sa = set();
