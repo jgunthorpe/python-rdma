@@ -257,7 +257,7 @@ def cmd_sminfo(argv,o):
         if values[0]:
             path = lib.path;
         else:
-            path = umad.end_port.sa_path.copy(dqpn=0);
+            path = umad.end_port.sa_path.copy(dqpn=0,qkey=IBA.IB_DEFAULT_QP0_QKEY);
 
         sinf = IBA.SMPSMInfo();
         if args.smkey is not None:
