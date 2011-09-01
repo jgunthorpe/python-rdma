@@ -1,11 +1,28 @@
 # Copyright 2011 Obsidian Research Corp. GPLv2, see COPYING.
 import rdma;
 import abc;
+import struct
 
-# FIXME
+uint32_t = struct.Struct('>L')
+uint64_t = struct.Struct('>Q')
+
 def pack_array8(buf,offset,mlen,count,inp):
-    return
-    raise rdma.RDMAError("Not implemented");
+    val = 0;
+    width = 0
+    for I in range(count):
+        val = (val<<mlen) | inp[I];
+        width += mlen
+        if width == 64:
+            uint64_t.pack_into(buf, offset, val)
+            val = width = 0
+            offset += 8
+        elif width == 32:
+            uint32_t.pack_into(buf, offset, val)
+            val = width = 0
+            offset += 4
+
+    assert width == 0
+
 def unpack_array8(buf,offset,mlen,count,inp):
     """Starting at *offset* in *buf* assign *count* entries each *mlen* bits
     wide to indexes in *inp*."""

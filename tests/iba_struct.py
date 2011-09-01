@@ -2,6 +2,7 @@
 import unittest,sys
 import rdma.IBA as IBA;
 import rdma.binstruct;
+import os
 
 structs = set(I for I in IBA.__dict__.itervalues()
               if isinstance(I,type) and issubclass(I,rdma.binstruct.BinStruct));
@@ -35,6 +36,13 @@ class structs_test(unittest.TestCase):
             assert(len(test) == 512);
             I().unpack_from(testr);
             I(testr);
+
+        raw = os.urandom(512);
+        for I in structs:
+            attr = I();
+            attr.unpack_from(raw);
+            attr.pack_into(test);
+            self.assertEqual(raw[0:I.MAD_LENGTH], test[0:I.MAD_LENGTH]);
 
     def test_struct_printer_dump(self):
         """Checking printer dump style"""

@@ -106,6 +106,8 @@ class Type(object):
         if self.count != 1:
             if self.bits == 8:
                 return "bytearray(%u)"%(self.count);
+            if self.isObject():
+                return "[%s for I in range(%u)]" % (base,self.count);
             return "[%s]*%u"%(base,self.count);
         return base;
     def type_desc(self):

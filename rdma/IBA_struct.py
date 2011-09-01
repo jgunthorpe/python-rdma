@@ -1561,11 +1561,11 @@ class SMPGUIDInfo(rdma.binstruct.BinStruct):
     MAD_SUBNSET = 0x2 # MAD_METHOD_SET
     MEMBERS = [('GUIDBlock',64,8)]
     def __init__(self,*args):
-        self.GUIDBlock = [IBA.GUID()]*8;
+        self.GUIDBlock = [IBA.GUID() for I in range(8)];
         rdma.binstruct.BinStruct.__init__(self,*args);
 
     def zero(self):
-        self.GUIDBlock = [IBA.GUID()]*8;
+        self.GUIDBlock = [IBA.GUID() for I in range(8)];
 
     def pack_into(self,buffer,offset=0):
         self.GUIDBlock[0].pack_into(buffer,offset + 0);
@@ -1825,11 +1825,11 @@ class SMPRandomForwardingTable(rdma.binstruct.BinStruct):
     MAD_SUBNSET = 0x2 # MAD_METHOD_SET
     MEMBERS = [('LIDPortBlock',32,16)]
     def __init__(self,*args):
-        self.LIDPortBlock = [SMPLIDPortBlock()]*16;
+        self.LIDPortBlock = [SMPLIDPortBlock() for I in range(16)];
         rdma.binstruct.BinStruct.__init__(self,*args);
 
     def zero(self):
-        self.LIDPortBlock = [SMPLIDPortBlock()]*16;
+        self.LIDPortBlock = [SMPLIDPortBlock() for I in range(16)];
 
     def pack_into(self,buffer,offset=0):
         self.LIDPortBlock[0].pack_into(buffer,offset + 0);
@@ -3552,11 +3552,11 @@ class DMServiceEntries(rdma.binstruct.BinStruct):
     MAD_DEVMGTGET = 0x1 # MAD_METHOD_GET
     MEMBERS = [('serviceEntry',384,4)]
     def __init__(self,*args):
-        self.serviceEntry = [DMServiceEntry()]*4;
+        self.serviceEntry = [DMServiceEntry() for I in range(4)];
         rdma.binstruct.BinStruct.__init__(self,*args);
 
     def zero(self):
-        self.serviceEntry = [DMServiceEntry()]*4;
+        self.serviceEntry = [DMServiceEntry() for I in range(4)];
 
     def pack_into(self,buffer,offset=0):
         self.serviceEntry[0].pack_into(buffer,offset + 0);
