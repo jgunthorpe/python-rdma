@@ -82,6 +82,22 @@ class BinStruct(object):
         rhs.pack_into(rhsb);
         return cmp(lhsb,rhsb);
 
+    def compare(self,lhs,mask):
+        """Compare *self* and *lhs* using the rules for component mask
+        matching."""
+        for k,v in self.COMPONENT_MASK.iteritems():
+            if not (mask & (1<<v)):
+                continue;
+
+            # FIXME: something smarter with selector
+            if k.startswith("reserved") or k.endswith("Selector"):
+                continue;
+
+            res = cmp(eval("self.%s"%(k)),eval("lhs.%s"%(k)));
+            if res != 0:
+                return res;
+        return 0;
+
     # 'pure virtual' functions
     def zero(self):
         """Overridden in derived classes. Set this instance back to the
