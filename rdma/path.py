@@ -216,7 +216,7 @@ class IBPath(Path):
         :attr:`rdma.devices.EndPort.lid`."""
         # FIXME: Don't think more than this is actually necessary, the mask in
         # done in the kernel, drivers and HW as well. Kept as a placeholder.
-        return self.SLID & 0xFF;
+        return self.SLID & 0x7F;
     @SLID_bits.setter
     def SLID_bits(self,value):
         self.SLID = value | self.end_port.lid;
@@ -228,7 +228,7 @@ class IBPath(Path):
         :attr:`rdma.devices.EndPort.lid`."""
         # FIXME: Don't think more than this is actually necessary, the mask in
         # done in the kernel, drivers and HW as well. Kept as a placeholder.
-        return self.DLID & 0xFF;
+        return self.DLID & 0x7F;
     @DLID_bits.setter
     def DLID_bits(self,value):
         self.DLID = value | self.end_port.lid;
