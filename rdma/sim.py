@@ -137,13 +137,16 @@ class SimEndPort(object):
         self._gids = None
 
     def _get(self, field):
-        now = time.time()
+        now = rdma.tools.clock_monotonic()
         if now > self._port_info_age + 1:
             info = conn._ctl(SIM_CTL_GET_PORTINFO, struct.pack('B', self.port_id))
             self._port_info.unpack_from(info[4])
             self._port_info_age = now
 
         return getattr(self._port_info, field)
+
+    def _drop(self,names):
+        self._port_info_age = 0
 
     def umad(self):
         return SimUMAD(self)
@@ -250,6 +253,38 @@ class SimEndPort(object):
                                                 pkey_index=pkey_idx,
                                                 packet_life_time=self.subnet_timeout);
         return self._cached_sa_path;
+
+    def lid_change(self):
+        """Called if the port's LID has changed. Generally from
+        :meth:`rdma.ibverbs.Context.handle_async_event`."""
+        self._drop(("lid","lid_mask_count"));
+        self.sm_change()
+
+    def sm_change(self):
+        """Called if the port's SM has changed. Generally from
+        :meth:`rdma.ibverbs.Context.handle_async_event`."""
+        self._drop(("sm_lid","sm_sl"))
+        try:
+            path = self._cached_sa_path
+
+            # Interesting choice here, we update the existing path so
+            # that retries will use the new address, but this also means
+            # that debug prints after here will show the new address..
+            path.drop_cache();
+            path.DLID = self.sm_lid
+            path.SL = self.sm_sl
+            path.SLID = self.lid
+            path.packet_life_time = self.subnet_timeout
+        except AttributeError:
+            pass;
+
+    def pkey_change(self):
+        """Called if the port's pkey list has changed. Generally from
+        :meth:`rdma.ibverbs.Context.handle_async_event`."""
+        self.pkeys.clear();
+        self.sm_change();
+        # Hmm, we could keep WeakRefs for all of the Paths associated
+        # with this end port and fix them up too..
 
     def __str__(self):
         return "%s/%u"%(self.parent,self.port_id)
