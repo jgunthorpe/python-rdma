@@ -22,6 +22,7 @@ Related modules:
    devices.rst
    path.rst
    tools.rst
+   sim.rst
 
 Exceptions
 ==========
