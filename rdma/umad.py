@@ -31,7 +31,7 @@ class LazyIBPath(rdma.path.LazyIBPath):
          self.SGID,
          flow_label,
          pkey_index) = \
-         UMAD.ib_mad_addr_t.unpack(self._cached_umad_ah);
+         LinuxUMAD.ib_mad_addr_t.unpack(self._cached_umad_ah);
         self.sqpn = cpu_to_be32(sqpn);
         # There is no pkey validation for SMPs (see IBA figure 156), so the
         # pkey should always be the default NOTE: mtcha at least has been seen
