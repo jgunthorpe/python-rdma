@@ -450,6 +450,47 @@ class MADTransactor(object):
             self.trace_func(self,TRACE_REPLY,fmt=fmt,path=path);
         self.sendto(buf,path);
 
+    def send_rmpp_reply(self,ofmt,attrClass,payload,path,attributeModifier=0,
+                        status=0,class_code=0):
+        """Like send_reply, but generates an RMPP reply packet.
+        *ofmt* should be the request format.
+        *attrClass* is the class of the attribute, eg. IBA.SANodeRecord.
+        *payload* is a list or tuple of type attrClass, potentially with zero elements."""
+        fmt = ofmt.__class__();
+        hdrlen = fmt.MAD_LENGTH - len(fmt.data);
+        attrlen = attrClass.MAD_LENGTH + (8 - attrClass.MAD_LENGTH % 8);
+        buflen = hdrlen + len(payload)*attrlen;
+
+        fmt.baseVersion = IBA.MAD_BASE_VERSION;
+        fmt.mgmtClass = fmt.MAD_CLASS;
+        fmt.classVersion = fmt.MAD_CLASS_VERSION;
+        fmt.status = (status & 0x1F) | ((class_code & IBA.MAD_STATUS_CLASS_MASK) <<  IBA.MAD_STATUS_CLASS_SHIFT)
+        if ofmt.method == IBA.MAD_METHOD_SET:
+            fmt.method = IBA.MAD_METHOD_GET_RESP
+        else:
+            fmt.method = ofmt.method | IBA.MAD_METHOD_RESPONSE;
+        fmt.transactionID = ofmt.transactionID;
+        fmt.attributeID = ofmt.attributeID;
+        fmt.attributeModifier = attributeModifier;
+        fmt.attributeOffset = attrlen / 8;
+        fmt.RMPPFlags = IBA.RMPP_ACTIVE;
+        fmt.data1 = 1;
+        fmt.data2 = attrlen * len(payload);
+
+        buf = bytearray(max(buflen,fmt.MAD_LENGTH));
+        fmt.pack_into(buf);
+        offset = hdrlen;
+        for chunk in payload:
+            chunk.pack_into(buf, offset);
+            offset += attrlen;
+        if len(buf) > buflen:
+            del buf[buflen:];
+
+        path.reverse();
+        if self.trace_func is not None:
+            self.trace_func(self,TRACE_REPLY,fmt=fmt,path=path);
+        self.sendto(buf,path);
+
     def do_async(self,op):
         """This runs a simple async work coroutine against a synchronous
         instance. In this case the coroutine yields its own next result."""
