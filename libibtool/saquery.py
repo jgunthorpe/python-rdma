@@ -199,7 +199,9 @@ def do_print(out,s):
             args = _format_args;
         s.printer(out,**args);
         ninf.printer(out,**args);
-        print >> out,"NodeDescription..........%s"%(IBA_describe.dstr(IBA_describe.description(desc.nodeString)));
+        print >> out,"NodeDescription%s%s"%(
+            "."*(args.get("column",33) - 15),
+            IBA_describe.dstr(IBA_describe.description(desc.nodeString)));
     elif isinstance(s,IBA.SAPortInfoRecord):
         pinf = s.portInfo;
         s.portInfo = None;
@@ -359,7 +361,11 @@ def cmd_saquery(argv,o):
     lib = LibIBOpts(o,args);
 
     global _format_args
-    _format_args = lib.format_args;
+    _format_args = copy.copy(lib.format_args);
+    # We cannot handle dump output because of how dotted output is mangled
+    # to match the libib tools.
+    _format_args["format"] = "dotted";
+    _format_args["header"] = False;
     if _format_args["format"] != "dotted":
         out = sys.stdout;
     else:
