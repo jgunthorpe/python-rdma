@@ -414,6 +414,8 @@ class MADTransactor(object):
         hdr.status = (status & 0x1F) | ((class_code & IBA.MAD_STATUS_CLASS_MASK) <<  IBA.MAD_STATUS_CLASS_SHIFT)
         if hdr.method == IBA.MAD_METHOD_SET:
             hdr.method = IBA.MAD_METHOD_GET_RESP
+        elif hdr.method == IBA.MAD_METHOD_TRAP:
+            return;
         else:
             hdr.method = hdr.method | IBA.MAD_METHOD_RESPONSE;
         buf = bytearray(buf);
@@ -434,6 +436,10 @@ class MADTransactor(object):
         fmt.status = (status & 0x1F) | ((class_code & IBA.MAD_STATUS_CLASS_MASK) <<  IBA.MAD_STATUS_CLASS_SHIFT)
         if ofmt.method == IBA.MAD_METHOD_SET:
             fmt.method = IBA.MAD_METHOD_GET_RESP
+        elif ofmt.method == IBA.MAD_METHOD_TRAP:
+            if status != 0:
+                return;
+            fmt.method = IBA.MAD_METHOD_TRAP_REPRESS;
         else:
             fmt.method = ofmt.method | IBA.MAD_METHOD_RESPONSE;
         fmt.transactionID = ofmt.transactionID;
