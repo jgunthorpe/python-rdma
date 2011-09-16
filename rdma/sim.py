@@ -331,6 +331,11 @@ class SimUMAD(rdma.madtransactor.MADTransactor):
         path.SLID = slid
         path.DQPN = dqpn
         path.SQPN = sqpn
+        # Routing failure in the simulator
+        if status == 110:
+            return None;
+        if status != 0:
+            raise IOError(status,"Simulator recv failed");
         return (bytearray(pkt),path)
 
     def _execute(self,buf,path,sendOnly=False):
