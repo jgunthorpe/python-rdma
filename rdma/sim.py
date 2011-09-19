@@ -101,7 +101,7 @@ class SimDevice(object):
         return self
 
     def __exit__(self, *exc_info):
-        return False
+        pass
 
     @property
     def hca_type(self):
@@ -321,7 +321,7 @@ class SimUMAD(rdma.madtransactor.MADTransactor):
         return self
 
     def __exit__(self, *exc_info):
-        return False
+        pass
 
     def close(self):
         pass
