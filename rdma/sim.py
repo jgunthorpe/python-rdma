@@ -11,6 +11,9 @@ import select
 import socket
 import struct
 import time
+import fcntl
+import errno
+import contextlib
 
 SIM_SERVER_HOST = os.environ.get('IBSIM_SERVER_NAME', 'localhost')
 SIM_SERVER_PORT = int(os.environ.get('IBSIM_SERVER_PORT', '7070'))
@@ -286,6 +289,14 @@ class SimEndPort(object):
         # Hmm, we could keep WeakRefs for all of the Paths associated
         # with this end port and fix them up too..
 
+    def enable_sa_capability(self):
+        @contextlib.contextmanager
+        def holder(parent):
+            conn._ctl(SIM_CTL_SET_ISSM, struct.pack('=L', 1))
+            yield None
+            conn._ctl(SIM_CTL_SET_ISSM, struct.pack('=L', 0))
+        return holder(self);
+
     def __str__(self):
         return "%s/%u"%(self.parent,self.port_id)
 
@@ -294,6 +305,8 @@ class SimUMAD(rdma.madtransactor.MADTransactor):
     def __init__(self,parent):
         global conn
         rdma.madtransactor.MADTransactor.__init__(self)
+        fcntl.fcntl(conn._pkt_sock.fileno(),fcntl.F_SETFL,
+                    fcntl.fcntl(conn._pkt_sock.fileno(), fcntl.F_GETFL) | os.O_NONBLOCK);
         self._poll = select.poll()
         self._poll.register(conn._pkt_sock, select.POLLIN)
         self.end_port = parent
@@ -313,6 +326,15 @@ class SimUMAD(rdma.madtransactor.MADTransactor):
     def close(self):
         pass
 
+    def register_client(self,mgmt_class,class_version,oui=0):
+        return 1;
+
+    def register_server(self,mgmt_class,class_version,oui=0,method_mask=0):
+        return 1;
+
+    def register_server_fmt(self,fmt):
+        return 1;
+
     def sendto(self,buf,path,agent_id=None):
         global conn
         req = _struct_request.pack(path.DLID, path.SLID, path.dqpn, path.sqpn, 0,
@@ -320,23 +342,41 @@ class SimUMAD(rdma.madtransactor.MADTransactor):
         conn._pkt_sock.send(req)
 
     def recvfrom(self,wakeat):
-        global conn
-        timeout = wakeat - rdma.tools.clock_monotonic();
-        if timeout <= 0 or not self._poll.poll(timeout*1000):
-            return None
-        resp = conn._pkt_sock.recv(512)
-        dlid, slid, dqpn, sqpn, status, length, pkt = _struct_request.unpack(resp)
-        path = rdma.path.IBPath(self.end_port)
-        path.DLID = dlid
-        path.SLID = slid
-        path.DQPN = dqpn
-        path.SQPN = sqpn
-        # Routing failure in the simulator
-        if status == 110:
-            return None;
-        if status != 0:
-            raise IOError(status,"Simulator recv failed");
-        return (bytearray(pkt),path)
+        first = True;
+        while True:
+            try:
+                resp = conn._pkt_sock.recv(512)
+            except socket.error as e:
+                if e.errno == errno.EAGAIN:
+                    resp = None;
+                else:
+                    raise
+
+            if resp is None:
+                if not first:
+                    raise IOError(errno.EAGAIN,"Invalid read after poll");
+                if wakeat is None:
+                    if not self._poll.poll(-1):
+                        return None;
+                else:
+                    timeout = wakeat - rdma.tools.clock_monotonic();
+                    if timeout <= 0 or not self._poll.poll(timeout*1000):
+                        return None;
+                first = False;
+                continue;
+
+            dlid, slid, dqpn, sqpn, status, length, pkt = _struct_request.unpack(resp)
+            path = rdma.path.IBPath(self.end_port)
+            path.DLID = dlid
+            path.SLID = slid
+            path.dqpn = dqpn
+            path.sqpn = sqpn
+            # Routing failure in the simulator
+            if status == 110:
+                return None;
+            if status != 0:
+                raise IOError(status,"Simulator recv failed");
+            return (bytearray(pkt),path)
 
     def _execute(self,buf,path,sendOnly=False):
         self.sendto(buf,path)
