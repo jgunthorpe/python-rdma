@@ -7,6 +7,7 @@ import rdma.IBA as IBA;
 import os,re,collections
 
 SYS_INFINIBAND = "/sys/class/infiniband/";
+SYS_INFINIBAND_MAD = "/sys/class/infiniband_mad/";
 
 def _conv_gid2guid(s):
     """Return the GUID portion of a GID string.
@@ -167,6 +168,15 @@ class EndPort(SysFSCache):
             except IOError:
                 continue;
             yield I;
+
+    def enable_sa_capability(self):
+        """Enable the SA capability mask. This returns an instance that
+        supports the context manager protocol that should be closed once
+        the SA is finished."""
+        for I in self._iterate_services_end_port(SYS_INFINIBAND_MAD,"issm\d+"):
+            return rdma.tools.SysFSDevice(self,I);
+        else:
+            raise rdma.RDMAError("Unable to open issm device for %s"%(repr(parent)));
 
     @property
     def lid(self): return self._cached_sysfs("lid",_conv_hex);
