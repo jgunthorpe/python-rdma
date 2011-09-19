@@ -28,6 +28,7 @@ prefix = ("Subn","CommMgt","Performance","BM","DevMgt","SubnAdm","SNMP",
 for I in prefix:
     for J in ("Get","Set","Send","Trap","Delete"):
         methodMap[I+J] = "MAD_METHOD_%s"%(J.upper());
+    methodMap[I+"TrapRepress"] = "MAD_METHOD_TRAP_REPRESS";
     methodMap[I+"GetTable"] = "MAD_METHOD_GET_TABLE";
     methodMap[I+"GetTraceTable"] = "MAD_METHOD_GET_TRACE_TABLE";
     methodMap[I+"GetMulti"] = "MAD_METHOD_GET_MULTI";

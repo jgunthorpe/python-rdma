@@ -435,4 +435,24 @@
     <mb bits="31" off="0[1]"><!--Reserved--></mb>
   </struct>
 
+  <!-- FIXME: this is temporary until mkstructs can handle containers -->
+  <struct name="SMPNoticeTrap"
+          bytes="64"
+          desc="Notice"
+          sect="13.4.8.2"
+          attributeID="0x02"
+          attributeName="MAD_NOTICE"
+          methods="SubnTrap SubnTrapRepress"
+          parameter="dataDetails">
+    <mb bits="1" off="0[0]">isGeneric<!--IsGeneric--></mb>
+    <mb bits="7" off="0[1]">noticeType<!--NoticeType--></mb>
+    <mb bits="24" off="0[8]">nodeType<!--NodeType / VendorID--></mb>
+    <mb bits="16" off="0[32]">trapNumber<!--TrapNumber / DeviceID--></mb>
+    <mb bits="16" off="0[48]">issuerLID<!--IssuerLID--></mb>
+    <mb bits="1" off="0[64]">noticeToggle<!--NoticeToggle--></mb>
+    <mb bits="15" off="0[65]">noticeCount<!--NoticeCount--></mb>
+    <mb bits="16" off="0[80]">dataDetails<!--DataDetails--></mb>
+    <mb bits="16" count="26" off="0[96]">dataDetails2<!--DataDetails--></mb>
+  </struct>
+
 </makestructs>

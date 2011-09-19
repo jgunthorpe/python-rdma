@@ -418,6 +418,30 @@ Generic MAD (13.4)
     :attr:`producerType`  33:36 (24)   :class:`int`          
     ===================== ============ ======================
 
+.. class:: rdma.IBA.SMPNoticeTrap
+
+    Notice (section 13.4.8.2)
+
+    .. attribute:: MAD_LENGTH = 64
+    .. attribute:: MAD_ATTRIBUTE_ID = 0x2
+    .. attribute:: MAD_SUBNTRAP = 0x5 # MAD_METHOD_TRAP
+    .. attribute:: MAD_SUBNTRAPREPRESS = 0x7 # MAD_METHOD_TRAP_REPRESS
+    .. attribute:: MEMBERS = [('isGeneric',1,1), ('noticeType',7,1), ('nodeType',24,1), ('trapNumber',16,1), ('issuerLID',16,1), ('noticeToggle',1,1), ('noticeCount',15,1), ('dataDetails',16,1), ('dataDetails2',16,26)]
+
+    ==================== ============ =================
+    Member               Position     Type             
+    ==================== ============ =================
+    :attr:`isGeneric`    0:0[1] (1)   :class:`int`     
+    :attr:`noticeType`   0[1]:1 (7)   :class:`int`     
+    :attr:`nodeType`     1:4 (24)     :class:`int`     
+    :attr:`trapNumber`   4:6 (16)     :class:`int`     
+    :attr:`issuerLID`    6:8 (16)     :class:`int`     
+    :attr:`noticeToggle` 8:8[1] (1)   :class:`int`     
+    :attr:`noticeCount`  8[1]:10 (15) :class:`int`     
+    :attr:`dataDetails`  10:12 (16)   :class:`int`     
+    :attr:`dataDetails2` 12:64 (16)   [:class:`int`]*26
+    ==================== ============ =================
+
 RMPP (13.6)
 ^^^^^^^^^^^
 

@@ -1969,6 +1969,55 @@ class SMPLedInfo(rdma.binstruct.BinStruct):
     def unpack_from(self,buffer,offset=0):
         (self._pack_0_32,) = struct.unpack_from('>L',buffer,offset+0);
 
+class SMPNoticeTrap(rdma.binstruct.BinStruct):
+    '''Notice (section 13.4.8.2)'''
+    __slots__ = ('isGeneric','noticeType','nodeType','trapNumber','issuerLID','noticeToggle','noticeCount','dataDetails','dataDetails2');
+    MAD_LENGTH = 64
+    MAD_ATTRIBUTE_ID = 0x2
+    MAD_SUBNTRAP = 0x5 # MAD_METHOD_TRAP
+    MAD_SUBNTRAPREPRESS = 0x7 # MAD_METHOD_TRAP_REPRESS
+    MEMBERS = [('isGeneric',1,1), ('noticeType',7,1), ('nodeType',24,1), ('trapNumber',16,1), ('issuerLID',16,1), ('noticeToggle',1,1), ('noticeCount',15,1), ('dataDetails',16,1), ('dataDetails2',16,26)]
+    def __init__(self,*args):
+        self.dataDetails2 = [0]*26;
+        rdma.binstruct.BinStruct.__init__(self,*args);
+
+    def zero(self):
+        self.isGeneric = 0;
+        self.noticeType = 0;
+        self.nodeType = 0;
+        self.trapNumber = 0;
+        self.issuerLID = 0;
+        self.noticeToggle = 0;
+        self.noticeCount = 0;
+        self.dataDetails = 0;
+        self.dataDetails2 = [0]*26;
+
+    @property
+    def _pack_0_32(self):
+        return ((self.isGeneric & 0x1) << 31) | ((self.noticeType & 0x7F) << 24) | ((self.nodeType & 0xFFFFFF) << 0)
+
+    @_pack_0_32.setter
+    def _pack_0_32(self,value):
+        self.isGeneric = (value >> 31) & 0x1;
+        self.noticeType = (value >> 24) & 0x7F;
+        self.nodeType = (value >> 0) & 0xFFFFFF;
+
+    @property
+    def _pack_1_32(self):
+        return ((self.noticeToggle & 0x1) << 31) | ((self.noticeCount & 0x7FFF) << 16) | ((self.dataDetails & 0xFFFF) << 0)
+
+    @_pack_1_32.setter
+    def _pack_1_32(self,value):
+        self.noticeToggle = (value >> 31) & 0x1;
+        self.noticeCount = (value >> 16) & 0x7FFF;
+        self.dataDetails = (value >> 0) & 0xFFFF;
+
+    def pack_into(self,buffer,offset=0):
+        struct.pack_into('>LHHLHHHHHHHHHHHHHHHHHHHHHHHHHH',buffer,offset+0,self._pack_0_32,self.trapNumber,self.issuerLID,self._pack_1_32,self.dataDetails2[0],self.dataDetails2[1],self.dataDetails2[2],self.dataDetails2[3],self.dataDetails2[4],self.dataDetails2[5],self.dataDetails2[6],self.dataDetails2[7],self.dataDetails2[8],self.dataDetails2[9],self.dataDetails2[10],self.dataDetails2[11],self.dataDetails2[12],self.dataDetails2[13],self.dataDetails2[14],self.dataDetails2[15],self.dataDetails2[16],self.dataDetails2[17],self.dataDetails2[18],self.dataDetails2[19],self.dataDetails2[20],self.dataDetails2[21],self.dataDetails2[22],self.dataDetails2[23],self.dataDetails2[24],self.dataDetails2[25]);
+
+    def unpack_from(self,buffer,offset=0):
+        (self._pack_0_32,self.trapNumber,self.issuerLID,self._pack_1_32,self.dataDetails2[0],self.dataDetails2[1],self.dataDetails2[2],self.dataDetails2[3],self.dataDetails2[4],self.dataDetails2[5],self.dataDetails2[6],self.dataDetails2[7],self.dataDetails2[8],self.dataDetails2[9],self.dataDetails2[10],self.dataDetails2[11],self.dataDetails2[12],self.dataDetails2[13],self.dataDetails2[14],self.dataDetails2[15],self.dataDetails2[16],self.dataDetails2[17],self.dataDetails2[18],self.dataDetails2[19],self.dataDetails2[20],self.dataDetails2[21],self.dataDetails2[22],self.dataDetails2[23],self.dataDetails2[24],self.dataDetails2[25],) = struct.unpack_from('>LHHLHHHHHHHHHHHHHHHHHHHHHHHHHH',buffer,offset+0);
+
 class SAHeader(rdma.binstruct.BinStruct):
     '''SA Header (section 15.2.1.1)'''
     __slots__ = ('baseVersion','mgmtClass','classVersion','method','status','classSpecific','transactionID','attributeID','reserved_144','attributeModifier','RMPPVersion','RMPPType','RRespTime','RMPPFlags','RMPPStatus','data1','data2','SMKey','attributeOffset','reserved_368','componentMask');
@@ -3870,6 +3919,7 @@ ATTR_TO_STRUCT = {(CMFormat,16):CMREQ,
 	(SAFormat,58):SAMultiPathRecord,
 	(SAFormat,59):SAServiceAssociationRecord,
 	(SAFormat,243):SAInformInfoRecord,
+	(SMPFormat,2):SMPNoticeTrap,
 	(SMPFormat,16):SMPNodeDescription,
 	(SMPFormat,17):SMPNodeInfo,
 	(SMPFormat,18):SMPSwitchInfo,
@@ -3884,6 +3934,7 @@ ATTR_TO_STRUCT = {(CMFormat,16):CMREQ,
 	(SMPFormat,32):SMPSMInfo,
 	(SMPFormat,48):SMPVendorDiag,
 	(SMPFormat,49):SMPLedInfo,
+	(SMPFormatDirected,2):SMPNoticeTrap,
 	(SMPFormatDirected,16):SMPNodeDescription,
 	(SMPFormatDirected,17):SMPNodeInfo,
 	(SMPFormatDirected,18):SMPSwitchInfo,
