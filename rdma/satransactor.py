@@ -233,6 +233,6 @@ class SATransactor(rdma.madtransactor.MADTransactor):
     def __enter__(self):
         return self;
     def __exit__(self,*exc_info):
-        return self._parent.close();
+        self._parent.close();
     def close(self):
         return self._parent.close();

@@ -38,7 +38,7 @@ class Endpoint(object):
         return self;
 
     def __exit__(self,*exc_info):
-        return self.close();
+        self.close();
 
     def close(self):
         if self.ctx is not None:

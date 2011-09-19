@@ -66,7 +66,7 @@ class SysFSDevice(object):
     def __enter__(self):
         return self;
     def __exit__(self,*exc_info):
-        return self.dev.close();
+        self.dev.close();
     def close(self):
         return self.dev.close();
 
