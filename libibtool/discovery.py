@@ -13,6 +13,8 @@ def as_node_name(node):
         return '"H-%s"'%(node.ninf.nodeGUID);
     if isinstance(node,rdma.subnet.Switch):
         return '"S-%s"'%(node.ninf.nodeGUID);
+    if isinstance(node,rdma.subnet.Router):
+        return '"R-%s"'%(node.ninf.nodeGUID);
     return '"?-%s"'%(node.ninf.nodeGUID);
 
 def as_port_name(port):
@@ -185,6 +187,10 @@ Ca\t%u %s\t# "%s"'''%(ninf.nodeGUID,ninf.numPorts,as_node_name(node),
 Switch\t%u %s\t# "%s" base port 0 lid %u lmc %u'''%\
                 (ninf.nodeGUID,port.portGUID,ninf.numPorts,as_node_name(node),
                  IBA_describe.dstr(node.desc),port.LID or 0,port.pinf.LMC);
+    elif isinstance(node,rdma.subnet.Router):
+        print '''rtguid=%s
+Rt\t%u %s\t# "%s"'''%(ninf.nodeGUID,ninf.numPorts,as_node_name(node),
+                      IBA_describe.dstr(node.desc));
     else:
         print '''nodeguid=%s
 ??%u\t%u %s\t# "%s"'''%(ninf.nodeGUID,ninf.nodeType,ninf.numPorts,as_node_name(node),
