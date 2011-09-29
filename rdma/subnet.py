@@ -538,7 +538,7 @@ class Subnet(object):
         else:
             node = port.parent;
         if not isinstance(node,type_):
-            if isinstance(node,Node):
+            if node.__class__ == Node:
                 # This was a temporary node, re-type it appropriately.
                 node.__class__ = type_;
                 if isinstance(node,Switch):
