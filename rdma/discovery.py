@@ -79,8 +79,14 @@ def subnet_topology_SA(sched,sbn):
 
     sbn.topology = {};
     for I in res:
-        f = sbn.get_port(portIdx=I.fromPort,LID=I.fromLID);
-        t = sbn.get_port(portIdx=I.toPort,LID=I.toLID);
+        # The fromPort/toPort is reserved if the node is not a switch,
+        # don't use it.
+        fn,f = sbn.get_node(rdma.subnet.Node,LID=I.fromLID);
+        tn,t = sbn.get_node(rdma.subnet.Node,LID=I.toLID);
+        if isinstance(fn,rdma.subnet.Switch):
+            f = sbn.get_port(portIdx=I.fromPort,LID=I.fromLID);
+        if isinstance(tn,rdma.subnet.Switch):
+            t = sbn.get_port(portIdx=I.toPort,LID=I.toLID);
 
         sbn.topology[f] = t;
         sbn.topology[t] = f;
