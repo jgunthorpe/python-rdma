@@ -334,6 +334,9 @@ def cmd_saquery(argv,o):
     o.add_option("-I",action="store_const",dest="kind",
                  const=IBA.SAInformInfoRecord);
 
+    o.add_option("--get",action="store_true",dest="use_get",
+                 help="Use a SubnAdmGet() method instead of SubnAdmGetTable()");
+
     o.add_option("--dlid",action="store",dest="X_DLID");
     o.add_option("--slid",action="store",dest="X_SLID");
     o.add_option("--mlid",action="store",dest="X_MLID");
@@ -441,7 +444,7 @@ def cmd_saquery(argv,o):
         path = umad.end_port.sa_path;
 
         name_map = _format_args.get("name_map",{});
-        if getattr(query,"MAD_SUBNADMGETTABLE",None) is None:
+        if getattr(query,"MAD_SUBNADMGETTABLE",None) is None or args.use_get:
             ret = umad.SubnAdmGet(query_cm,path);
             n = ret.__class__.__name__;
             print "%s:"%(name_map.get(n,n));
