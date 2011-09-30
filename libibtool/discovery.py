@@ -284,6 +284,7 @@ def print_switch(sbn,args,switch):
     guid = (switch.ports[0].portGUID if args.port_guid else
             switch.ninf.nodeGUID);
     first = True;
+    port0 = switch.get_port(0)
     for port,idx in switch.iterports():
         if idx == 0:
             continue;
@@ -297,36 +298,38 @@ def print_switch(sbn,args,switch):
             first = False;
         if pinf.portPhysicalState != IBA.PHYS_PORT_STATE_LINK_UP:
             link = "%s/%s"%(
-                IBA_describe.phys_link_state(pinf.portPhysicalState),
-                IBA_describe.link_state(pinf.portState));
+                IBA_describe.link_state(pinf.portState),
+                IBA_describe.phys_link_state(pinf.portPhysicalState));
         else:
             link = "%2ux %s %s/%s"%(
                 IBA_describe.link_width(pinf.linkWidthActive),
                 IBA_describe.link_speed(pinf.linkSpeedActive),
-                IBA_describe.phys_link_state(pinf.portPhysicalState),
-                IBA_describe.link_state(pinf.portState));
+                IBA_describe.link_state(pinf.portState),
+                IBA_describe.phys_link_state(pinf.portPhysicalState));
         if args.additional:
             additional = " (HOQ:%u VL_Stall:%u)"%(pinf.HOQLife,pinf.VLStallCount);
         else:
             additional = "";
-        lhs = "%3d %4d[  ] ==(%s)%s"%(port.LID,idx,link,additional);
+        lhs = "%3d %4d[  ] ==(%s)%s"%(port0.LID,idx,link,additional);
 
+	err = []
         peer_port = sbn.topology.get(port);
-        if port is None:
-            rhs = "DOWN";
+        if peer_port is None:
+            rhs = '[  ] "" ( )';
         else:
             rhs = "%3d %4d[  ] %s"%(
-                peer_port.LID,idx,
+                peer_port.to_end_port().LID,idx,
                 IBA_describe.dstr(peer_port.parent.desc,True));
-        err = []
-        if better_possible(pinf.linkWidthSupported,peer_port.pinf.linkWidthSupported,
-                           pinf.linkWidthEnabled):
-            err.append("Could be %sx"%(
-                IBA_describe.link_width(1<<int(math.floor(math.log(pinf.linkWidthSupported,2))))));
-        if better_possible(pinf.linkSpeedSupported,peer_port.pinf.linkSpeedSupported,
-                           pinf.linkSpeedEnabled):
-            err.append("Could be %s"%(
-                IBA_describe.link_speed(1<<int(math.floor(math.log(pinf.linkSpeedSupported,2))))));
+
+	    if better_possible(pinf.linkWidthSupported,peer_port.pinf.linkWidthSupported,
+	                       pinf.linkWidthEnabled):
+	        err.append("Could be %sx"%(
+	            IBA_describe.link_width(1<<int(math.floor(math.log(pinf.linkWidthSupported,2))))));
+	    if better_possible(pinf.linkSpeedSupported,peer_port.pinf.linkSpeedSupported,
+	                       pinf.linkSpeedEnabled):
+	        err.append("Could be %s"%(
+	            IBA_describe.link_speed(1<<int(math.floor(math.log(pinf.linkSpeedSupported,2))))));
+
         err = ",".join(err);
         if err:
             err = " (%s)"%(err);
