@@ -374,6 +374,14 @@ class ComponentMask(object):
         object.__setattr__(self,"component_mask",
                            self.component_mask | (1<<bit));
 
+    def unmask(self,name):
+        """Exclude the component mask value *name* in the calculation.
+
+        :raises ValueError: If *name* is not a valid component name"""
+        bit = self._obj.COMPONENT_MASK[name];
+        object.__setattr__(self,"component_mask",
+                           self.component_mask & (0xFFFFFFFFFFFFFFFF ^ (1<<bit)));
+
     def _touch(self,name):
         bit = self._obj.COMPONENT_MASK.get(name);
         if bit is not None:
