@@ -311,6 +311,9 @@ class GID(bytes):
     def guid(self):
         """Return the GUID portion of the GID."""
         return GUID(bytes.__getslice__(self,8,16),raw=True);
+    def prefix(self):
+        """Return the prefix portion of the GID."""
+        return GUID(bytes.__getslice__(self,0,8),raw=True);
     def __int__(self):
         return int(bytes.__str__(self).encode("hex"),16);
 
