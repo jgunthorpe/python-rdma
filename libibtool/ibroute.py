@@ -25,6 +25,17 @@ def display_MFDB(switch,path,all):
                      for I in range(switch.ninf.numPorts+1))
         count = count+1;
         print "0x%x       %s"%(IBA.LID_MULTICAST+lid,s)
+
+    # If a default route is configured then show it as well.
+    bits = 0;
+    if 0 < switch.swinf.defaultMulticastPrimaryPort <= switch.ninf.numPorts:
+        bits = bits | (1 << switch.swinf.defaultMulticastPrimaryPort);
+        if 0 < switch.swinf.defaultMulticastNotPrimaryPort <= switch.ninf.numPorts:
+            bits = bits | (1 << switch.swinf.defaultMulticastNotPrimaryPort);
+    if bits != 0:
+        print "default      %s"%(" ".join((" x " if bits & (1<<I) else "   ")
+                                       for I in range(switch.ninf.numPorts+1)));
+
     if all:
         print "%u mlids dumped"%(count);
     else:
