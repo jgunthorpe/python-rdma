@@ -26,7 +26,7 @@ def _fetch_mcast_link(sched,sbn,out_port,path,mlid,topo):
     if not isinstance(nport.parent,rdma.subnet.Switch):
         return
     if sbn.lid_routed:
-        npath = sbn.get_path_smp(sched,nport);
+        npath = sbn.get_path_smp(sched,nport.to_end_port());
     yield _fetch_mcast(sched,sbn,nport,npath,mlid,topo);
 
 def _fetch_mcast(sched,sbn,port,path,mlid,topo):
@@ -37,8 +37,12 @@ def _fetch_mcast(sched,sbn,port,path,mlid,topo):
     positions = (switch.ninf.numPorts + 15)//16;
     block = [0]*32;
 
-    # FIXME: This presumes the use of multicast forwarding table, not the
-    # upstream/downstream stuff
+    # Compute the default value for 0 MFT entries.
+    defbits = 0;
+    if 0 < switch.swinf.defaultMulticastPrimaryPort <= switch.ninf.numPorts:
+        defbits = defbits | (1 << switch.swinf.defaultMulticastPrimaryPort);
+        if 0 < switch.swinf.defaultMulticastNotPrimaryPort <= switch.ninf.numPorts:
+            defbits = defbits | (1 << switch.swinf.defaultMulticastNotPrimaryPort);
 
     def get_block(pos):
         inf = yield sched.SubnGet(IBA.SMPMulticastForwardingTable,
@@ -49,6 +53,8 @@ def _fetch_mcast(sched,sbn,port,path,mlid,topo):
 
     port_id = port.port_id;
     ports = block[idx % 32];
+    if ports == 0:
+        ports = defbits;
     sched.mqueue(_fetch_mcast_link(sched,sbn,switch.get_port(I),path,mlid,topo)
                  for I in range(0,switch.ninf.numPorts+1)
                  if ports & (1 << I) and I != port_id);
@@ -171,7 +177,8 @@ def cmd_ibtracert(argv,o):
        If SOURCE is not specified then the local end port is used.
 
        When tracing a multicast path the entire multicast spanning tree
-       for the MLID is loaded, the route that goes between start/end"""
+       for the MLID is loaded, and the route that goes between start/end
+       is printed"""
     LibIBOpts.setup(o,address=True,discovery=True);
     o.add_option("-r","--reverse",action="store_true",dest="reverse",
                  help="Swap source and target");
@@ -186,7 +193,7 @@ def cmd_ibtracert(argv,o):
 
     with lib.get_umad_for_target() as umad:
         sched = lib.get_sched(umad);
-        sbn = lib.get_subnet(sched,());
+        sbn = lib.get_subnet(sched,["all_SwitchInfo"]);
 
         # Index 0 is the source, 1 is the target, 2 is the first source
         if len(values) == 1:
@@ -277,6 +284,7 @@ def cmd_ibtracert(argv,o):
             if lib.debug >= 1:
                 print "D: Multicast spanning tree topology contains %u entries"%(len(topo))
             lst = trace_mcast(topo,ports[0],ports[1]);
+            step(ports[0],topo[ports[0]]);
             for I in lst:
                 step(I,topo[I]);
         else:
