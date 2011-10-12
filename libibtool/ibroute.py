@@ -116,7 +116,7 @@ def cmd_ibroute(argv,o):
             if not isinstance(sched,rdma.satransactor.SATransactor):
                 max_port = switch.ninf.numPorts;
                 LIDs = [LID for LID,port in enumerate(switch.lfdb)
-                        if port <= max_port];
+                        if port <= max_port and LID != 0];
 
                 sched.run(queue=rdma.discovery.subnet_ninf_LIDS_SMP(sched,sbn,LIDs,
                                                                     True));
