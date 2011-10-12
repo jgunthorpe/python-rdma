@@ -6,7 +6,7 @@ IBSIM Module
 
 Python RDMA has native support for communicating with the `ibsim` subnet
 simulator. This support does not require any preload library or sysfs
-emulation direction. The integrated module queries all information directly
+emulation directory. The integrated module queries all information directly
 from the simulator.
 
 The usage of the simulator is straightforward::
