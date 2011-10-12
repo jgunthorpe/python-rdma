@@ -358,9 +358,9 @@ class ComponentMask(object):
     #: The computed component_mask
     component_mask = 0
 
-    def __init__(self,obj):
+    def __init__(self,obj,mask=0):
         """*obj* is wrappered"""
-        object.__setattr__(self,"component_mask",0);
+        object.__setattr__(self,"component_mask",mask);
         object.__setattr__(self,"_obj",obj);
 
     @property
@@ -402,6 +402,8 @@ class ComponentMask(object):
         return res;
 
     def __setattr__(self,name,value):
+        if name == 'component_mask':
+            return object.__setattr__(self,name,value);
         self._touch(name);
         return setattr(self._obj,name,value);
 
