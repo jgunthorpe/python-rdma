@@ -336,6 +336,8 @@ def cmd_saquery(argv,o):
 
     o.add_option("--get",action="store_true",dest="use_get",
                  help="Use a SubnAdmGet() method instead of SubnAdmGetTable()");
+    o.add_option("--no-defaults",action="store_true",dest="no_defaults",
+                 help="Do not set default values for any queries");
 
     o.add_option("--dlid",action="store",dest="X_DLID");
     o.add_option("--slid",action="store",dest="X_SLID");
@@ -427,21 +429,28 @@ def cmd_saquery(argv,o):
                 n,query.__class__.__name__,", ".join(query.COMPONENT_MASK.iterkeys())));
         set_mad_attr(query_cm,n,v);
 
-    # Diagnostic output to show what the query argument is.
-    if o.verbosity >= 1:
-        cm = query_cm.component_mask;
-        ret = [];
-        for k,v in query.COMPONENT_MASK.iteritems():
-            if cm & (1 << v):
-                ret.append((v,k,eval("query_cm.%s"%(k))))
-        ret.sort();
-        if ret:
-            print "Performing query on %s with component mask:"%(query.__class__.__name__);
-            for v,k,arg in ret:
-                print "  %2u %s = %r"%(v,k,arg);
-
     with lib.get_umad(gmp=True) as umad:
         path = umad.end_port.sa_path;
+
+        # Special help for PathRecords, spec says SGID and numbPath are mandatory for GetTable.
+        if args.kind == IBA.SAPathRecord and not args.use_get and not args.no_defaults:
+            if not (query_cm.component_mask & (1<<query.COMPONENT_MASK["numbPath"])):
+                query_cm.numbPath = 1;
+            if not (query_cm.component_mask & (1<<query.COMPONENT_MASK["SGID"])):
+                query_cm.SGID = umad.parent.default_gid;
+
+        # Diagnostic output to show what the query argument is.
+        if o.verbosity >= 1:
+            cm = query_cm.component_mask;
+            ret = [];
+            for k,v in query.COMPONENT_MASK.iteritems():
+                if cm & (1 << v):
+                    ret.append((v,k,eval("query_cm.%s"%(k))))
+            ret.sort();
+            if ret:
+                print "Performing query on %s with component mask:"%(query.__class__.__name__);
+                for v,k,arg in ret:
+                    print "  %2u %s = %r"%(v,k,arg);
 
         name_map = _format_args.get("name_map",{});
         if getattr(query,"MAD_SUBNADMGETTABLE",None) is None or args.use_get:
