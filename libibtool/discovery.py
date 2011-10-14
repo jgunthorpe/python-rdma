@@ -202,13 +202,13 @@ Rt\t%u %s\t# "%s"'''%(ninf.nodeGUID,ninf.numPorts,as_node_name(node),
             continue;
 
         if is_switch:
-            print '%s\t%s\t# "%s" lid %u %ux%s'%(
+            print '[%s]\t%s\t# "%s" lid %u %ux%s'%(
                     idx,as_port_name(peer),IBA_describe.dstr(peer.parent.desc),
                     peer.to_end_port().LID or 0,
                     IBA_describe.link_width(port.pinf.linkWidthActive),
                     IBA_describe.link_speed(port.pinf.linkSpeedActive));
         else:
-            print '%s(%s)\t%s\t# lid %u lmc %u "%s" %ux%s'%(
+            print '[%s](%s)\t%s\t# lid %u lmc %u "%s" %ux%s'%(
                 idx,port.portGUID,as_port_name(peer),
                 port.LID or 0,port.pinf.LMC,
                 IBA_describe.dstr(peer.parent.desc),
