@@ -64,6 +64,9 @@ class SimConnection(object):
         port = SIM_SERVER_PORT + self._client_id + 1
         self._pkt_sock.connect((addr, port))
 
+        fcntl.fcntl(self._pkt_sock.fileno(),fcntl.F_SETFL,
+                    fcntl.fcntl(self._pkt_sock.fileno(), fcntl.F_GETFL) | os.O_NONBLOCK);
+
     def __del__(self):
         self._ctl(SIM_CTL_DISCONNECT);
 
@@ -197,14 +200,12 @@ class SimEndPort(object):
     @property
     def gids(self):
         if self._gids is None:
-            prefix = self._get('GIDPrefix')
+            # Fetch the port guid with a mad
+            with self.umad() as umad:
+                guid = umad.SubnGet(rdma.IBA.SMPNodeInfo(),
+                                    rdma.path.IBDRPath(self)).portGUID;
 
-            # FIXME: simulator reports node guid only.
-            # The following conversion into port guid relies on convention:
-            guid = bytearray(8)
-            self.parent.node_guid.pack_into(guid)
-            guid[7] = self.port_id
-            guid = str(guid)
+            prefix = self._get('GIDPrefix')
 
             default_gid = IBA.GID(prefix=IBA.GID_DEFAULT_PREFIX, guid=guid)
             if prefix == IBA.GID_DEFAULT_PREFIX:
@@ -305,8 +306,6 @@ class SimUMAD(rdma.madtransactor.MADTransactor):
     def __init__(self,parent):
         global conn
         rdma.madtransactor.MADTransactor.__init__(self)
-        fcntl.fcntl(conn._pkt_sock.fileno(),fcntl.F_SETFL,
-                    fcntl.fcntl(conn._pkt_sock.fileno(), fcntl.F_GETFL) | os.O_NONBLOCK);
         self._poll = select.poll()
         self._poll.register(conn._pkt_sock, select.POLLIN)
         self.end_port = parent
