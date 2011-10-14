@@ -99,7 +99,7 @@ def do_guid(umad,kind,path,attr):
 
     guids = [];
     for I in range((count+7)//8):
-        guids.extend(umad.SubnGet(kind,path,(attr << 16) | I).GUIDBlock);
+        guids.extend(umad.SubnGet(kind,path,I).GUIDBlock);
 
     for num,I in enumerate(guids[:count]):
         if num % 2 == 0:
@@ -111,6 +111,24 @@ def do_guid(umad,kind,path,attr):
         print;
     print "%u guids capacity for this port"%(count);
 
+def do_lft(umad,kind,path,attr):
+    swi = umad.SubnGet(IBA.SMPSwitchInfo,path);
+
+    count = swi.linearFDBCap;
+    lft = [];
+    for I in range((count+63)//64):
+        lft.extend(umad.SubnGet(kind,path,I).portBlock);
+
+    for num,I in enumerate(lft[:count]):
+        if num % 8 == 0:
+            if num != 0:
+                print;
+            print "%3u:"%(num),
+        print I,
+    if count != 0:
+        print;
+    print "%u LFT capacity for this port, top is %u"%(count,swi.linearFDBTop);
+
 OPS = {"NodeInfo": ("NI",IBA.SMPNodeInfo,do_ni),
        "NodeDesc": ("ND",IBA.SMPNodeDescription,do_nd),
        "PortInfo": ("PI",IBA.SMPPortInfo,do_pi),
@@ -118,7 +136,8 @@ OPS = {"NodeInfo": ("NI",IBA.SMPNodeInfo,do_ni),
        "PKeyTable": ("PKeys",IBA.SMPPKeyTable,do_pkeys),
        "SL2VLTable": ("SL2VL",IBA.SMPSLToVLMappingTable,do_sl2vl),
        "VLArbitration": ("VLArb",IBA.SMPVLArbitrationTable,do_vlarb),
-       "GUIDInfo": ("GI",IBA.SMPGUIDInfo,do_guid)};
+       "GUIDInfo": ("GI",IBA.SMPGUIDInfo,do_guid),
+       "LinearForwardingTable": ("LFT",IBA.SMPLinearForwardingTable,do_lft)};
 
 def tmpl_op(s):
     s = s.lower();
