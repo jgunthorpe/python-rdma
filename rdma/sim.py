@@ -14,6 +14,7 @@ import time
 import fcntl
 import errno
 import contextlib
+import sys
 
 SIM_SERVER_HOST = os.environ.get('IBSIM_SERVER_NAME', 'localhost')
 SIM_SERVER_PORT = int(os.environ.get('IBSIM_SERVER_PORT', '7070'))
@@ -40,6 +41,8 @@ _struct_request = struct.Struct('>HHLLLQ 256s') # sim_request
 conn = None
 
 class SimConnection(object):
+    _ctl_sock = None;
+
     def __init__(self, nodeid=None, qp=0, issm=0):
         if nodeid is None:
             nodeid = ''
@@ -51,14 +54,23 @@ class SimConnection(object):
         self._pkt_sock.bind(('', 0))
         self._client_id = self._pkt_sock.getsockname()[1]
 
-        self._ctl_sock = socket.socket(a[0], a[1], socket.IPPROTO_IP)
-        self._ctl_sock.bind(('', 0))
-        self._ctl_sock.connect(a[4])
+        try:
+            self._ctl_sock = socket.socket(a[0], a[1], socket.IPPROTO_IP)
+            self._ctl_sock.bind(('', 0))
+            self._ctl_sock.connect(a[4])
 
-        resp = self._ctl(SIM_CTL_CONNECT,
-                         _struct_info.pack(self._client_id, qp, issm, nodeid))
-        info = _struct_info.unpack(resp[4][:_struct_info.size])
-        self._client_id = info[0]
+            resp = self._ctl(SIM_CTL_CONNECT,
+                             _struct_info.pack(self._client_id, qp, issm, nodeid))
+            info = _struct_info.unpack(resp[4][:_struct_info.size])
+            self._client_id = info[0];
+        except socket.error as e:
+            self._ctl_sock = None;
+            e = rdma.SysError(e.errno,"??","simulator socket setup to %r"%(
+                a[4],));
+            raise rdma.SysError,e,sys.exc_info()[2];
+        except:
+            self._ctl_sock = None;
+            raise
 
         addr = a[4][0]
         port = SIM_SERVER_PORT + self._client_id + 1
@@ -68,7 +80,8 @@ class SimConnection(object):
                     fcntl.fcntl(self._pkt_sock.fileno(), fcntl.F_GETFL) | os.O_NONBLOCK);
 
     def __del__(self):
-        self._ctl(SIM_CTL_DISCONNECT);
+        if self._ctl_sock is not None:
+            self._ctl(SIM_CTL_DISCONNECT);
 
     def _ctl(self, type, data=None):
         if data is None:
