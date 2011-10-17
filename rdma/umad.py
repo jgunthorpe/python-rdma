@@ -30,10 +30,15 @@ class LazyIBPath(rdma.path.LazyIBPath):
          self.traffic_class,
          self.SGID,
          flow_label,
-         self.pkey_index) = \
+         pkey_index) = \
          UMAD.ib_mad_addr_t.unpack(self._cached_umad_ah);
         self.sqpn = cpu_to_be32(sqpn);
-        # FIXME: dqpn can be derived from agent_id
+        # There is no pkey validation for SMPs (see IBA figure 156), so the
+        # pkey should always be the default NOTE: mtcha at least has been seen
+        # to return random values for pkey_index on SMPs, which is why we need
+        # this check.
+        if self.dqpn != 0:
+            self.pkey_index = pkey_index;
         self.qkey = cpu_to_be32(qkey);
         self.DLID = DLID_bits | self.end_port.lid;
         self.SLID = cpu_to_be16(SLID);
@@ -105,6 +110,7 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
         self._poll.register(self.dev.fileno(),select.POLLIN);
 
         self._agent_cache = {};
+        self._agent_id_dqpn = {};
 
         self._tid = int(os.urandom(4).encode("hex"),16);
         self.end_port = parent;
@@ -149,6 +155,7 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
             ret = self._ioctl_register_agent(qpn,mgmt_class,class_version,
                                              oui,rmpp_version,0);
             self._agent_cache[mgmt_class,class_version,oui] = ret;
+            self._agent_id_dqpn[ret] = qpn;
             return ret;
 
     def register_server(self,mgmt_class,class_version,oui=0,method_mask=0):
@@ -160,6 +167,7 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
                     mgmt_class == IBA.MAD_SUBNET_DIRECTED) else 1;
         ret = self._ioctl_register_agent(qpn,mgmt_class,class_version,
                                          oui,rmpp_version,method_mask);
+        self._agent_id_dqpn[ret] = qpn;
         return ret;
 
     def register_server_fmt(self,fmt):
@@ -270,6 +278,7 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
             path = rdma.path.IBPath(self.parent);
             (path.umad_agent_id,status,timeout_ms,retries,length,
              path._cached_umad_ah) = self.ib_user_mad_t.unpack_from(bytes(buf),0);
+            path.dqpn = self._agent_id_dqpn.get(path.umad_agent_id,0);
             path.__class__ = LazyIBPath;
 
             if status != 0:
