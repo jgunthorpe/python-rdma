@@ -293,6 +293,10 @@ class LibIBOpts(object):
         """Process the options for specifying the device similar to libib, this
         version is much richer though."""
         if self.args.CA is None and self.args.port is None:
+            for dev in rdma.get_devices():
+                for ep in dev.end_ports:
+                    if ep.state >= IBA.PORT_STATE_INIT:
+                        return ep
             return rdma.get_end_port();
         if self.args.CA is None:
             try:
