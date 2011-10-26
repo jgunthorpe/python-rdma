@@ -319,6 +319,9 @@ def struct_dotted(F,s,name_prefix='',dump_list=False,skip_reserved=True,
             if fmt == "str":
                 fmt = "%s";
                 conv = lambda value: dstr(description(value),quotes=True);
+            if fmt == "gid_prefix":
+                fmt = "%s/64";
+                conv = lambda value: IBA.GID(prefix=value,guid=IBA.GUID(0));
 
         if count != 1 and len(attr) == count and conv == None:
             if isinstance(attr[0],rdma.binstruct.BinStruct):

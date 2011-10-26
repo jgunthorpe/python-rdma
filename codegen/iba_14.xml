@@ -286,7 +286,7 @@
           attributeName="SMP_PORT_INFO"
           methods="SubnGet SubnSet">
     <mb bits="64" off="0[0]" display="hex">MKey<!--M_Key--></mb>
-    <mb bits="64" off="0[64]">GIDPrefix<!--GIDPrefix--></mb>
+    <mb bits="64" off="0[64]" display="gid_prefix">GIDPrefix<!--GIDPrefix--></mb>
     <mb bits="16" off="0[128]">LID<!--LID--></mb>
     <mb bits="16" off="0[144]">masterSMLID<!--MasterSMLID--></mb>
     <mb bits="32" off="0[160]" display="hex">capabilityMask<!--CapabilityMask--></mb>

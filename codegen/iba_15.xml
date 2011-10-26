@@ -293,7 +293,7 @@
           attributeID="0x39"
           attributeName="SA_TRACE_RECORD"
           methods="SubnAdmGetTraceTable">
-    <mb bits="64" off="0[0]">GIDPrefix<!--GIDPrefix--></mb>
+    <mb bits="64" off="0[0]" display="gid_prefix">GIDPrefix<!--GIDPrefix--></mb>
     <mb bits="16" off="0[64]">IDGeneration<!--IDGeneration--></mb>
     <mb bits="8" off="0[80]"><!--Reserved--></mb>
     <mb bits="8" off="0[88]">nodeType<!--NodeType--></mb>
