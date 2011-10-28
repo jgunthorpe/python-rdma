@@ -59,7 +59,7 @@ def phys_link_state(value):
         return "Link UP";
     if value == IBA.PHYS_PORT_STATE_LINK_ERR_RECOVERY:
         return "Error Recovery";
-    if value == IBA.PHYS_PORT_STATE_LINK_PHY_TEST:
+    if value == IBA.PHYS_PORT_STATE_PHY_TEST:
         return "Phy Test";
     return "?? %u"%(value);
 
