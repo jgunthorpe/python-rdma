@@ -28,7 +28,7 @@ class SysFSDevice(object):
             st = os.lstat(path);
             if not stat.S_ISCHR(st.st_mode) or st.st_rdev != dev:
                 return None;
-            F = io.FileIO(path,"r+b");
+            F = io.FileIO(path,"r+");
             st2 = os.fstat(F.fileno());
             if st.st_mode == st2.st_mode and st.st_rdev == st2.st_rdev:
                 return (F,path);
