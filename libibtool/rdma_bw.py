@@ -76,7 +76,7 @@ class Endpoint(object):
             if completions == n:
                 break;
         else:
-            raise rdma.RDMError("CQ timed out");
+            raise rdma.RDMAError("CQ timed out");
 
         tcomp = clock_monotonic()
 
