@@ -95,6 +95,12 @@ def get_max(v):
         I = I + 1;
     return 1<<I;
 
+def link_configured(pinf):
+    """True if the port info is in a configured state such that speed and width
+    can be considered valid."""
+    return (pinf.portPhysicalState == PHYS_PORT_STATE_LINK_UP or
+            pinf.portPhysicalState == PHYS_PORT_STATE_LINK_ERR_RECOVERY);
+
 # Decorators to tell what kind of check the function is doing so the
 # caller code can do the right thing.
 KIND_NODE = (1<<0)
@@ -187,9 +193,13 @@ def do_check_port(sched,path,desc,ninf,pinf,portIdx,port,sbn,**kwargs):
     """Coroutine to do the checkport action"""
     # Figure out the max speed of both sides of the link if we have topology.
     max_speed = get_max(pinf.linkSpeedSupported);
+    if not link_configured(port.pinf):
+        return
     if sbn is not None:
         peer_port = sbn.topology.get(port);
         if peer_port is not None and peer_port.pinf is not None:
+            if not link_configured(peer_port.pinf):
+                return
             max_speed = min(max_speed,get_max(peer_port.pinf.linkSpeedSupported));
     checkEQ(pinf,"linkSpeedActive",
             max_speed,
@@ -212,9 +222,13 @@ def do_check_portwidth(sched,path,desc,pinf,port,sbn,**kwargs):
     """Coroutine to do the checkportwidth action"""
     # Figure out the max width of both sides of the link if we have topology.
     max_width = get_max(pinf.linkWidthSupported);
+    if not link_configured(port.pinf):
+        return
     if sbn is not None:
         peer_port = sbn.topology.get(port);
         if peer_port is not None and peer_port.pinf is not None:
+            if not link_configured(peer_port.pinf):
+                return
             max_width = min(max_width,get_max(peer_port.pinf.linkWidthSupported));
     # FIXME: What about 12x ports vs three 4x ports? How is that reported?
     checkEQ(pinf,"linkWidthActive",
