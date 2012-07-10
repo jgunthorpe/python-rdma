@@ -298,6 +298,9 @@ def print_switch(sbn,args,switch):
         if args.only_down:
             if pinf.portPhysicalState == IBA.PHYS_PORT_STATE_LINK_UP:
                 continue;
+        if args.only_up:
+            if pinf.portPhysicalState == IBA.PHYS_PORT_STATE_POLLING:
+                continue
         if first and not args.line_mode:
             print "Switch %s %s:"%(guid,
                                    IBA_describe.dstr(switch.desc,True));
@@ -358,6 +361,8 @@ def cmd_iblinkinfo(argv,o):
                  help="Also print VLStallCount and HOQLife.");
     o.add_option("--down",action="store_true",dest="only_down",
                  help="Only print downed links");
+    o.add_option("--up",action="store_true",dest="only_up",
+                 help="Only print links that are not POLLING");
     LibIBOpts.setup(o,discovery=True);
     (args,values) = o.parse_args(argv);
     lib = LibIBOpts(o,args,values,1,(tmpl_target,));
