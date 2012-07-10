@@ -139,9 +139,9 @@ def description(value):
         zero = 0;
     else:
         zero = ord(0);
-    for I in range(len(value)-1,-1,-1):
-        if value[I] != zero:
-            return value[:I+1].decode("UTF-8");
+    for I in range(0,len(value)-1,1):
+        if value[I] == zero:
+            return value[:I].decode("UTF-8");
     return '';
 
 def dstr(value,quotes = False):
