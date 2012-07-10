@@ -324,7 +324,7 @@ def print_switch(sbn,args,switch):
             rhs = '[  ] "" ( )';
         else:
             rhs = "%3d %4d[  ] %s"%(
-                peer_port.to_end_port().LID,idx,
+                peer_port.to_end_port().LID,peer_port.port_id,
                 IBA_describe.dstr(peer_port.parent.desc,True));
 
 	    if better_possible(pinf.linkWidthSupported,peer_port.pinf.linkWidthSupported,
