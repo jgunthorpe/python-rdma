@@ -4,6 +4,7 @@ import rdma.IBA as IBA;
 import rdma.IBA_describe as IBA_describe;
 from libibtool import *;
 from libibtool.libibopts import *;
+from libibtool.perfquery import sum_result;
 
 class CheckError(CmdError):
     pass
