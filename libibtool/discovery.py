@@ -389,7 +389,15 @@ def cmd_iblinkinfo(argv,o):
             if not isinstance(port.parent,rdma.subnet.Switch):
                 raise CmdError("Port %s is not a switch"%(port));
             sched.run(queue=rdma.discovery.topo_surround_SMP(sched,sbn,port.parent));
-            peer_ports = [(sbn.topology.get(I),idx) for I,idx in port.parent.iterports()];
+
+            # Fill in the pinfs we are going to use
+            peer_ports = set(I for I,Idx in port.parent.iterports());
+            peer_ports.update(peer for peer,prior in sbn.iterpeers(port.parent));
+            sched.run(mqueue=(rdma.discovery.subnet_pinf_SMP(sched,sbn,I.port_id,
+                                                             sbn.get_path_smp(sched,I.to_end_port()))
+                              for I in peer_ports if (I is not None and
+                                                      I.pinf is None)));
+
             sched.run(mqueue=(rdma.discovery.subnet_pinf_SMP(sched,sbn,idx,sbn.get_path_smp(sched,I.to_end_port()))
                               for I,idx in peer_ports if I is not None and I.pinf is None));
             print_switch(sbn,args,port.parent);
