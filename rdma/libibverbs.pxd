@@ -6,7 +6,7 @@ include 'libibverbs_enums.pxd'
 cdef extern from 'infiniband/verbs.h':
 
     union ibv_gid:
-        char *raw
+        char raw[16]
 
     struct ibv_global_route:
         ibv_gid dgid
