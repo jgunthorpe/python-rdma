@@ -376,6 +376,13 @@ def find_port_gid(devices,gid):
 
     :returns: (:class:`EndPort`,gid_index)
     :raises rdma.RDMAError: If no matching device is found."""
+    # The link local prefix should always be valid
+    if gid.prefix() == IBA.GUID(IBA.GID_DEFAULT_PREFIX):
+        return find_port_guid(devices,gid.guid()),gid;
+
+    if gid.guid() == IBA.GUID(0):
+        raise rdma.RDMAError("RDMA end port %r not found."%(gid));
+
     for I in devices:
         for J in I.end_ports:
             try:
