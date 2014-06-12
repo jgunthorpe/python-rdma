@@ -1,0 +1,5 @@
+python-rdma (0.1-1) unstable; urgency=low
+
+  * source package automatically created by stdeb 0.6.0+git
+
+ -- Jason Gunthorpe <jgunthorpe@obsidianresearch.com>  Thu, 12 Jun 2014 11:57:49 -0600

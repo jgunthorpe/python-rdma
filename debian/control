@@ -1,0 +1,14 @@
+Source: python-rdma
+Maintainer: Jason Gunthorpe <jgunthorpe@obsidianreserch.com>
+Section: python
+Priority: optional
+Build-Depends: python-all-dev (>= 2.6.6-3), debhelper (>= 7.4.3), libibverbs-dev (>= 1.1)
+Standards-Version: 3.9.1
+
+Package: python-rdma
+Architecture: any
+Depends: ${misc:Depends}, ${python:Depends}, ${shlibs:Depends}
+Description: RDMA functionality for python
+   python-rdma provides the 'rdma' module to access RDMA verbs (libibverbs)
+   for python as well as the ibtool command that implements many InfiniBand
+   diagnostics and tools.
