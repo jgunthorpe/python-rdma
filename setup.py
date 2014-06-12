@@ -11,8 +11,11 @@ from distutils.extension import Extension
 
 try:
     import Pyrex.Distutils
+    import Pyrex.Compiler.Version;
+    if Pyrex.Compiler.Version.version.split('.') < (0,9,9):
+        raise ImportError
 except ImportError:
-    log.info("Pyrex is not installed -- using shippped Pyrex output");
+    log.info("Pyrex > 0.9.9 is not installed -- using shippped Pyrex output");
     # If we don't have Pyrex then just use the shipped .c file that is already built.
     ibverbs_module = Extension('rdma.ibverbs', ['rdma/ibverbs.c'],
                                libraries=['ibverbs']);
