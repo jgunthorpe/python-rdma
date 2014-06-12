@@ -37,7 +37,7 @@ else:
             enum = {}
             for m in re.finditer(r'enum\s+(\w+)\s*{(.*?)}', s, re.DOTALL):
                 name = m.group(1)
-                constants = [c.partition('=')[0].strip() for c in m.group(2).split(',')]
+                constants = [c.partition('=')[0].strip() for c in m.group(2).split(',') if c.strip() != ""]
                 enum[name] = tuple(constants)
 
             return enum
