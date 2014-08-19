@@ -85,6 +85,8 @@ class Type(object):
         else:
             self.off = off;
 
+        self.in_comp_mask = int(xml.get("comp_mask","1")) != 0;
+
         self.type = xml.get("type");
         if self.type == "HdrIPv6Addr" and self.bits == 128:
             self.type = "struct IBA.GID";
@@ -224,8 +226,13 @@ class Struct(object):
             if follow and struct is not None and struct in structMap:
                 tmp = structMap[struct].gen_component_mask(False);
                 res.extend("%s.%s"%(name,J) for J in tmp);
-            else:
-                res.append(name)
+            elif mbt.in_comp_mask:
+                # serviceData is special, each array elements gets a mask.
+                if name.startswith("serviceData"):
+                    for I in range(mbt.count):
+                        res.append(name + "_%u"%(I));
+                else:
+                    res.append(name)
         return res;
 
     def groupMB(self):

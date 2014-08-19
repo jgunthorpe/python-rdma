@@ -156,7 +156,7 @@
     <mb bits="128" off="0[0]" type="HdrIPv6Addr">subscriberGID<!--SubscriberGID--></mb>
     <mb bits="16" off="0[128]">enumeration<!--Enumeration--></mb>
     <mb bits="16" off="0[144]"><!--Reserved--></mb>
-    <mb bits="32" off="0[160]"><!--Reserved--></mb>
+    <mb bits="32" off="0[160]" comp_mask="0"><!--Reserved--></mb>
     <mb bits="288" off="0[192]" type="struct MADInformInfo">informInfo<!--InformInfo--></mb>
     <mb bits="160" off="0[480]"><!--Reserved (Extra Space)--></mb>
   </struct>

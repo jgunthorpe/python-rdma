@@ -1046,7 +1046,7 @@ Subnet Administration (15)
     .. attribute:: MAD_ATTRIBUTE_ID = 0xf3
     .. attribute:: MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
-    .. attribute:: COMPONENT_MASK = {'subscriberGID':0, 'enumeration':1, 'reserved_144':2, 'reserved_160':3, 'informInfo.GID':4, 'informInfo.LIDRangeBegin':5, 'informInfo.LIDRangeEnd':6, 'informInfo.reserved_160':7, 'informInfo.isGeneric':8, 'informInfo.subscribe':9, 'informInfo.type':10, 'informInfo.trapNumber':11, 'informInfo.QPN':12, 'informInfo.reserved_248':13, 'informInfo.respTimeValue':14, 'informInfo.reserved_256':15, 'informInfo.producerType':16, 'reserved_480':17}
+    .. attribute:: COMPONENT_MASK = {'subscriberGID':0, 'enumeration':1, 'reserved_144':2, 'informInfo.GID':3, 'informInfo.LIDRangeBegin':4, 'informInfo.LIDRangeEnd':5, 'informInfo.reserved_160':6, 'informInfo.isGeneric':7, 'informInfo.subscribe':8, 'informInfo.type':9, 'informInfo.trapNumber':10, 'informInfo.QPN':11, 'informInfo.reserved_248':12, 'informInfo.respTimeValue':13, 'informInfo.reserved_256':14, 'informInfo.producerType':15, 'reserved_480':16}
     .. attribute:: MEMBERS = [('subscriberGID',128,1), ('enumeration',16,1), ('reserved_144',16,1), ('reserved_160',32,1), ('informInfo',288,1), ('reserved_480',160,1)]
 
     ===================== =========== ================================
@@ -1389,7 +1389,7 @@ Subnet Administration (15)
     .. attribute:: MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
     .. attribute:: MAD_SUBNADMSET = 0x2 # MAD_METHOD_SET
-    .. attribute:: COMPONENT_MASK = {'serviceID':0, 'serviceGID':1, 'servicePKey':2, 'reserved_208':3, 'serviceLease':4, 'serviceKey':5, 'serviceName':6, 'serviceData8':7, 'serviceData16':8, 'serviceData32':9, 'serviceData64':10}
+    .. attribute:: COMPONENT_MASK = {'serviceID':0, 'serviceGID':1, 'servicePKey':2, 'reserved_208':3, 'serviceLease':4, 'serviceKey':5, 'serviceName':6, 'serviceData8_0':7, 'serviceData8_1':8, 'serviceData8_2':9, 'serviceData8_3':10, 'serviceData8_4':11, 'serviceData8_5':12, 'serviceData8_6':13, 'serviceData8_7':14, 'serviceData8_8':15, 'serviceData8_9':16, 'serviceData8_10':17, 'serviceData8_11':18, 'serviceData8_12':19, 'serviceData8_13':20, 'serviceData8_14':21, 'serviceData8_15':22, 'serviceData16_0':23, 'serviceData16_1':24, 'serviceData16_2':25, 'serviceData16_3':26, 'serviceData16_4':27, 'serviceData16_5':28, 'serviceData16_6':29, 'serviceData16_7':30, 'serviceData32_0':31, 'serviceData32_1':32, 'serviceData32_2':33, 'serviceData32_3':34, 'serviceData64_0':35, 'serviceData64_1':36}
     .. attribute:: MEMBERS = [('serviceID',64,1), ('serviceGID',128,1), ('servicePKey',16,1), ('reserved_208',16,1), ('serviceLease',32,1), ('serviceKey',128,1), ('serviceName',8,64), ('serviceData8',8,16), ('serviceData16',16,8), ('serviceData32',32,4), ('serviceData64',64,2)]
 
     ===================== ============ ============================
