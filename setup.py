@@ -12,7 +12,7 @@ from distutils.extension import Extension
 try:
     import Pyrex.Distutils
     import Pyrex.Compiler.Version;
-    if Pyrex.Compiler.Version.version.split('.') < (0,9,9):
+    if tuple(int(I) for I in Pyrex.Compiler.Version.version.split('.')) < (0,9,9):
         raise ImportError
 except ImportError:
     log.info("Pyrex > 0.9.9 is not installed -- using shippped Pyrex output");
