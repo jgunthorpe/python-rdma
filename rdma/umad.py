@@ -295,8 +295,14 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
         MAD. I consider this to be a bug in the kernel, but we fix it here
         by constructing an error MAD."""
         buf = copy.copy(buf);
-        rmatch = self._get_reply_match_key(buf);
-        buf[3] = rmatch[1];
+
+        meth = buf[3];
+        if meth == IBA.MAD_METHOD_SET:
+            meth = IBA.MAD_METHOD_GET_RESP;
+        else:
+            meth = meth | IBA.MAD_METHOD_RESPONSE;
+        buf[3] = meth;
+
         buf[4] = 0;
         buf[5] = IBA.MAD_STATUS_INVALID_ATTR_OR_MODIFIER; # Guessing.
         path = path.copy();

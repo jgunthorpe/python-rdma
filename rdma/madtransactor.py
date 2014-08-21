@@ -112,24 +112,24 @@ class MADTransactor(object):
 
     @staticmethod
     def _get_match_key(buf):
-        """Return a tuple that represents the 'key' for MAD buf.
-        If two keys match then they are the same transaction."""
-        # baseVersion,mgmtClass,classVersion method transactionID[31:0],attributeID
+        """Return an integer that represents the 'key' for MAD buf.
+           If two keys match then they are the same transaction.
+           The result is mgmtClass || transactionID[31:0], see
+           C13-19.1.1"""
+        # FIXME: vmad needs to test all 64 bits.
         if isinstance(buf,bytearray):
-            return (bytes(buf[0:2]),buf[3],bytes(buf[12:18]));
-        return (buf[0:2],ord(buf[3]),buf[12:18]);
+            return ((buf[1] << 32) |
+                    (buf[12] << 24) |
+                    (buf[13] << 16) |
+                    (buf[14] << 8) |
+                    (buf[15] << 0));
+        return ((ord(buf[1]) << 32) |
+                (ord(buf[12]) << 24) |
+                (ord(buf[13]) << 16) |
+                (ord(buf[14]) << 8) |
+                (ord(buf[15]) << 0));
 
-    @staticmethod
-    def _get_reply_match_key(buf):
-        """Return a tuple that represents the 'key' for response to MAD buf.
-        If two keys match then they are the same transaction."""
-        # baseVersion,mgmtClass,classVersion method transactionID[31:0],attributeID
-        x = MADTransactor._get_match_key(buf)
-        # Hmmm, I wonder if this should live someplace else?
-        if x[1] == IBA.MAD_METHOD_SET:
-            return (x[0],IBA.MAD_METHOD_GET_RESP,x[2]);
-        else:
-            return (x[0],x[1] | IBA.MAD_METHOD_RESPONSE,x[2]);
+    _get_reply_match_key = _get_match_key;
 
     @staticmethod
     def get_request_match_key(buf):
