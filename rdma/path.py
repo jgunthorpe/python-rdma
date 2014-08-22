@@ -63,6 +63,10 @@ class Path(object):
         cls = self.__class__;
         d = dict((k,v) for k,v in self.__dict__.iteritems()
                  if k[0] != "_" and k != "end_port" and getattr(cls,k,None) != v);
+        if getattr(self,"_forward_path"):
+            d["_forward_path"] = self._forward_path.__reduce__();
+        if getattr(self,"_return_path"):
+            d["_return_path"] = self._return_path.__reduce__();
         return (cls,(None,),d);
 
     def complete(self):
@@ -83,6 +87,16 @@ class IBPath(Path):
     it with the method in question. Since this includes the BTH information
     it must also include the DQPN if that is required (eg for unconnected
     communication)"""
+
+    def __setstate__(self,d):
+        for k,v in d.iteritems():
+            setattr(self,k,v);
+
+        # Restore the internal paths when unpickleing
+        if isinstance(self._forward_path,tuple):
+            self._forward_path = self._forward_path[0](None,**self._forward_path[2]);
+        if isinstance(self._return_path,tuple):
+            self._return_path = self._return_path[0](None,**self._return_path[2]);
 
     #: Holds :attr:`rdma.IBA.HdrLRH.DLID`
     DLID = 0;
@@ -144,6 +158,11 @@ class IBPath(Path):
     #: Source issuable RD atomic
     srdatomic = 255;
 
+    #: The forward direction non-reversible path
+    _forward_path = None;
+    #: The return/reverse direction non-reversible path
+    _return_path = None;
+
     def complete(self):
         if self.DLID == 0 or self.DLID >= IBA.LID_MULTICAST:
             return False;
@@ -168,6 +187,7 @@ class IBPath(Path):
         self.dack_resp_time,self.sack_resp_time = self.sack_resp_time,self.dack_resp_time;
         self.dqpsn,self.sqpsn = self.sqpsn,self.dqpsn;
         self.drdatomic,self.srdatomic = self.srdatomic,self.drdatomic
+        self._forward_path,self._return_path = self._return_path,self._forward_path
         self.drop_cache();
         return self
 
@@ -266,6 +286,37 @@ class IBPath(Path):
             self._cached_qp_timeout = 4.096E-6*(2**(self.packet_life_time+1) +
                                                 2**self.dack_resp_time);
             return self._cached_qp_timeout;
+
+    def copy_qp_params(self,rhs):
+        """Copy the QP related parameters from *rhs*"""
+        self.dqpn = rhs.dqpn;
+        self.sqpn = rhs.sqpn;
+        self.qkey = rhs.qkey;
+        self.min_rnr_timer = rhs.min_rnr_timer;
+        self.dack_resp_time = rhs.dack_resp_time;
+        self.sack_resp_time = rhs.sack_resp_time;
+        self.dqpsn = rhs.dqpsn;
+        self.sqpsn = rhs.sqpsn;
+        self.drdatomic = rhs.drdatomic;
+        self.srdatomic = rhs.srdatomic;
+
+    @property
+    def forward_path(self):
+        """Return a forwards direction path"""
+        if self._forward_path is None:
+            return self;
+        self._forward_path.end_port = self.end_port;
+        self._forward_path.copy_qp_params(self);
+        return self._forward_path;
+
+    @property
+    def return_path(self):
+        """Return a return direction path"""
+        if self._return_path is None:
+            return self;
+        self._return_path.end_port = self.end_port;
+        self._return_path.copy_qp_params(self);
+        return self._return_path;
 
     @classmethod
     def _format_pkey(cls,v):

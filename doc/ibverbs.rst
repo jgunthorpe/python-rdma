@@ -202,7 +202,7 @@ socket). Side A would do this::
   path.reverse(for_reply=False);
   path.set_end_port(end_port.parent);
 
-  qp.establish(self.path,ibv.IBV_ACCESS_REMOTE_WRITE);
+  qp.establish(self.path.forward_path,ibv.IBV_ACCESS_REMOTE_WRITE);
 
   # Synchronize transition to RTS
   send_to_side_b(True);
@@ -216,9 +216,9 @@ Side B would do this::
   rdma.path.fill_path(qp,path);
   with rdma.get_gmp_mad(path.end_port) as umad:
      rdma.path.resolve_path(umad,path);
-  send_to_sid_a(pickle.pickle(path));
+  send_to_side_a(pickle.pickle(path));
 
-  qp.establish(self.path,ibv.IBV_ACCESS_REMOTE_WRITE);
+  qp.establish(self.path.forward_path,ibv.IBV_ACCESS_REMOTE_WRITE);
 
   # Synchronize transition to RTS
   recv_from_side_a();
@@ -229,7 +229,7 @@ and :func:`rdma.path.resolve_path` gets the path record(s) from the SA.
 
 This procedure implements the same process and information exchange that the
 normal IB CM would do, including negotiating responder resources and having
-the capability to setup asymmetric paths (unimplemented today).
+the capability to setup asymmetric paths.
 
 Any QP type is supported by this basic procedure, the extra information
 exchanged is simply not used.

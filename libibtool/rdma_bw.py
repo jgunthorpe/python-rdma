@@ -46,7 +46,7 @@ class Endpoint(object):
 
     def connect(self, peerinfo):
         self.peerinfo = peerinfo
-        self.qp.establish(self.path,ibv.IBV_ACCESS_REMOTE_WRITE);
+        self.qp.establish(self.path.forward_path,ibv.IBV_ACCESS_REMOTE_WRITE);
 
     def rdma(self):
         swr = ibv.send_wr(wr_id=0,
@@ -110,7 +110,7 @@ def client_mode(hostname,opt,dev):
             end.path.set_end_port(end.ctx.node);
 
             print "path to peer %r\nMR peer raddr=%x peer rkey=%x"%(
-                end.path,peerinfo.addr,peerinfo.rkey);
+                end.path.forward_path,peerinfo.addr,peerinfo.rkey);
             print "%u iterations of %u is %u bytes"%(opt.iters,opt.size,
                                                      opt.iters*opt.size);
 
@@ -157,7 +157,7 @@ def server_mode(opt,dev):
                                              iters=None)))
 
                 print "path to peer %r\nMR peer raddr=%x peer rkey=%x"%(
-                    end.path,peerinfo.addr,peerinfo.rkey);
+                    end.path.forward_path,peerinfo.addr,peerinfo.rkey);
                 print "%u iterations of %u is %u bytes"%(opt.iters,opt.size,
                                                          opt.iters*opt.size);
 
