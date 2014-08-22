@@ -200,7 +200,7 @@ socket). Side A would do this::
   send_to_side_b(pickle.pickle(path));
   path = pickle.unpickle(recv_from_side_b());
   path.reverse(for_reply=False);
-  path.end_port = end_port;
+  path.set_end_port(end_port.parent);
 
   qp.establish(self.path,ibv.IBV_ACCESS_REMOTE_WRITE);
 

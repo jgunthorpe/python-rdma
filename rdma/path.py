@@ -278,6 +278,16 @@ class IBPath(Path):
         return str(v);
     _format_SLID = _format_DLID
 
+    def set_end_port(self,node):
+        """Set self.end_port to the end port on node that matches the source
+        description in this path"""
+        for I in node.end_ports:
+            for J in I.gids:
+                if J == self.SGID:
+                    self.end_port = I;
+                    return;
+        raise rdma.RDMAError("RDMA end port %r not found."%(self.SGID));
+
     def __str__(self):
         if self.has_grh:
             res = "%s %r -> %s %u TC=%r FL=%r HL=%r"%(

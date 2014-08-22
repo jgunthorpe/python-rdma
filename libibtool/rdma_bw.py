@@ -107,7 +107,7 @@ def client_mode(hostname,opt,dev):
 
             end.path = peerinfo.path;
             end.path.reverse(for_reply=False);
-            end.path.end_port = end.ctx.end_port;
+            end.path.set_end_port(end.ctx.node);
 
             print "path to peer %r\nMR peer raddr=%x peer rkey=%x"%(
                 end.path,peerinfo.addr,peerinfo.rkey);
