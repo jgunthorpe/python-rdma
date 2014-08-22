@@ -69,7 +69,7 @@ class umad_self_test(unittest.TestCase):
         path_a = rdma.path.IBPath(self.end_port,qkey=999,
                                   DGID=self.end_port.default_gid);
         with rdma.get_gmp_mad(self.end_port,verbs=self.ctx) as vmad:
-            rdma.path.resolve_path(vmad,path_a,reversible=True);
+            rdma.path.resolve_path(vmad,path_a);
         qp_a = pd.qp(qp_type,depth,cq,depth,cq,srq=srq);
         rdma.path.fill_path(qp_a,path_a,max_rd_atomic=0);
 

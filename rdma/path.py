@@ -403,9 +403,9 @@ def get_mad_path(mad,ep_addr,**kwargs):
         else:
             path = IBPath(mad.end_port,DLID=ep_addr,**kwargs);
 
-    return resolve_path(mad,path,True);
+    return resolve_path(mad,path);
 
-def resolve_path(mad,path,reversible=False,properties=None):
+def resolve_path(mad,path,reversible=True,properties=None):
     """Resolve *path* to a full path for use with a QP. *path* must have at
     least a DGID or DLID set.
 
