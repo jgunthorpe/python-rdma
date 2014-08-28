@@ -12,6 +12,10 @@ Notable Bug Fixes:
 - :func:`rdma.discovery.topo_SMP` did not strictly enforce BFS order and
   could overrun the hop limit.
 - Non-end ports were ending up some of the subnet structures
+- Ignore pkey index for QP0 packets (work around a kernel/driver bug)
+- Fix parsing of Node Description [Chas Williams]
+- Incorrect calculation of COMP_MASK bit positions for SAInformInfoRecord and
+  SAServiceRecord
 
 Notable Features/Improvements:
 
@@ -26,9 +30,11 @@ Notable Features/Improvements:
   used with :class:`~rdma.sched.MADSchedule`, or synchronously.
 - Support for acting as a GMP server, including vendor MADs and vendor
   MADs with OUIs. See :meth:`rdma.madtransactor.MADTransactor.parse_request`
+- DEB and RPM packaging
 
 ibtool:
 
+- Default to use the first port with a link if no specific port is specified.
 - Better target address parsing using :func:`rdma.path.from_string`
 - Add `set_nodedesc[.sh]`
 - Add `ibtracert`
@@ -42,3 +48,6 @@ ibtool:
   `ibidsverify`.
 - MAD server functions `vendstat`, `ibsysstat` and `ibping`
 - New `set_port_state` and `init_all_ports` commands
+- `--get` option for `saquery`
+- `dump_mfts` shows the default routing too
+- Add `smpquerty lft`
