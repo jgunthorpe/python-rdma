@@ -341,7 +341,12 @@ class RDMADevice(SysFSCache):
     @property
     def fw_ver(self):
         "Device firmware version string."
-        return self._cached_sysfs("fw_ver");
+        try:
+            return self._cached_sysfs("fw_ver");
+        except IOError:
+            self._cache["fw_ver"] = None;
+            return None;
+
     @property
     def sys_image_guid(self): return self._cached_sysfs("sys_image_guid",IBA.GUID);
     @property
