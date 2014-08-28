@@ -453,15 +453,20 @@ def cmd_saquery(argv,o):
                     print "  %2u %s = %r"%(v,k,arg);
 
         name_map = _format_args.get("name_map",{});
-        if getattr(query,"MAD_SUBNADMGETTABLE",None) is None or args.use_get:
-            ret = umad.SubnAdmGet(query_cm,path);
-            n = ret.__class__.__name__;
-            print "%s:"%(name_map.get(n,n));
-            do_print(out,ret);
-        else:
-            ret = umad.SubnAdmGetTable(query_cm,path);
-            for I in ret:
-                n = I.__class__.__name__;
-                print "%s dump:"%(name_map.get(n,n));
-                do_print(out,I);
+        try:
+            if getattr(query,"MAD_SUBNADMGETTABLE",None) is None or args.use_get:
+                ret = umad.SubnAdmGet(query_cm,path);
+                n = ret.__class__.__name__;
+                print "%s:"%(name_map.get(n,n));
+                do_print(out,ret);
+            else:
+                ret = umad.SubnAdmGetTable(query_cm,path);
+                for I in ret:
+                    n = I.__class__.__name__;
+                    print "%s dump:"%(name_map.get(n,n));
+                    do_print(out,I);
+        except rdma.MADClassError as err:
+            if err.code != IBA.MAD_STATUS_SA_NO_RECORDS:
+                return;
+            print "No Records.";
     return True;
