@@ -98,8 +98,8 @@ def get_max(v):
 def link_configured(pinf):
     """True if the port info is in a configured state such that speed and width
     can be considered valid."""
-    return (pinf.portPhysicalState == PHYS_PORT_STATE_LINK_UP or
-            pinf.portPhysicalState == PHYS_PORT_STATE_LINK_ERR_RECOVERY);
+    return (pinf.portPhysicalState == IBA.PHYS_PORT_STATE_LINK_UP or
+            pinf.portPhysicalState == IBA.PHYS_PORT_STATE_LINK_ERR_RECOVERY);
 
 # Decorators to tell what kind of check the function is doing so the
 # caller code can do the right thing.
@@ -193,7 +193,7 @@ def do_check_port(sched,path,desc,ninf,pinf,portIdx,port,sbn,**kwargs):
     """Coroutine to do the checkport action"""
     # Figure out the max speed of both sides of the link if we have topology.
     max_speed = get_max(pinf.linkSpeedSupported);
-    if not link_configured(port.pinf):
+    if not link_configured(pinf):
         return
     if sbn is not None:
         peer_port = sbn.topology.get(port);
@@ -222,7 +222,7 @@ def do_check_portwidth(sched,path,desc,pinf,port,sbn,**kwargs):
     """Coroutine to do the checkportwidth action"""
     # Figure out the max width of both sides of the link if we have topology.
     max_width = get_max(pinf.linkWidthSupported);
-    if not link_configured(port.pinf):
+    if not link_configured(pinf):
         return
     if sbn is not None:
         peer_port = sbn.topology.get(port);
