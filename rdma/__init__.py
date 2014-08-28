@@ -131,9 +131,15 @@ class MADClassError(MADError):
     code = None;
 
     def __init__(self,req,code,**kwargs):
-        MADError.__init__(self,req=req,code=code,
-                          msg="RPC %s got class specific error %u"%(
-                              req.describe(),code),**kwargs);
+        import rdma.IBA as IBA;
+        if isinstance(req,IBA.SAFormat):
+            MADError.__init__(self,req=req,code=code,
+                              msg="RPC %s got class specific error %s"%(
+                    req.describe(),IBA.const_str("MAD_STATUS_SA_",code,True)),**kwargs);
+        else:
+            MADError.__init__(self,req=req,code=code,
+                              msg="RPC %s got class specific error %u"%(
+                    req.describe(),code),**kwargs);
 
 class SysError(RDMAError,OSError):
     '''Thrown when a system call fails. Inclues errno'''
