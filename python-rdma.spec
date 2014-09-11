@@ -27,7 +27,10 @@ The module is written entirely in Python and only relies on external system
 libraries to provide ibverbs functionality.
 
 %prep
-%setup -n %{name}-%{version}
+%setup
+
+# Record the GIT version this RPM was built from
+echo "__git_head__ = '"`zcat %{sources} | git get-tar-commit-id`"'" >> rdma/__init__.py
 
 %build
 env CFLAGS="$RPM_OPT_FLAGS" python setup.py build
