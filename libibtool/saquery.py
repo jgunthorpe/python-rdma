@@ -467,6 +467,6 @@ def cmd_saquery(argv,o):
                     do_print(out,I);
         except rdma.MADClassError as err:
             if err.code != IBA.MAD_STATUS_SA_NO_RECORDS:
-                return;
+                raise;
             print "No Records.";
     return True;
