@@ -221,9 +221,13 @@ class IBPath(Path):
             pass
         try:
             self._cached_pkey_index = self.end_port.pkeys.index(self.pkey);
-            return self._cached_pkey_index;
         except ValueError:
-            raise rdma.RDMAError("PKey 0x%x not available on %s"%(self.pkey,self.end_port));
+            try:
+                self._cached_pkey_index = self.end_port.pkeys.index(self.pkey ^ IBA.PKEY_MEMBERSHIP_BIT);
+            except ValueError:
+                raise rdma.RDMAError("PKey 0x%x not available on %s"%(self.pkey,self.end_port));
+
+        return self._cached_pkey_index;
     @pkey_index.setter
     def pkey_index(self,value):
         self.pkey = self.end_port.pkeys[value];

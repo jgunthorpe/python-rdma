@@ -29,6 +29,7 @@ LID_COUNT_MULTICAST = (0xFFFE - 0xC000) + 1;
 #: Partition Key Constants
 PKEY_DEFAULT = 0xFFFF;
 PKEY_PARTIAL_DEFAULT = 0x7FFF;
+PKEY_MEMBERSHIP_BIT = (1<<15);
 PKEY_INVALID = 0;
 
 #: Well known QKEY Constants
