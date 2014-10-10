@@ -28,6 +28,9 @@ class LibIBOpts(object):
         self.args = args;
         self.o = o;
 
+        self.debug = args.debug;
+        o.verbosity = max(self.debug,getattr(args,"verbosity",0));
+
         self.end_port = self.get_end_port();
         if template:
             if len(values) > max_values:
@@ -89,10 +92,8 @@ class LibIBOpts(object):
             self.end_port = default_end_port;
 
         self.end_port.sa_path.SMKey = getattr(args,"smkey",0);
-        self.debug = args.debug;
         if self.debug >= 1:
             print "D: Using end port %s %s"%(self.end_port,self.end_port.default_gid);
-        o.verbosity = max(self.debug,getattr(args,"verbosity",0));
 
         if "discovery" in args.__dict__:
             if (args.discovery is None and
