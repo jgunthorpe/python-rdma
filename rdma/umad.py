@@ -188,6 +188,13 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
             slid_bits = 0;
         else:
             slid_bits = path.SLID_bits;
+
+        # SMP packets must be forced to pkey 0xFFFF by the driver and do not
+        # use the pkey table.
+        pkey_idx = 0;
+        if path.sqpn != 0:
+            pkey_idx = path.pkey_index;
+
         if path.has_grh:
             res = self.ib_mad_addr_t.pack(cpu_to_be32(path.dqpn),
                                           cpu_to_be32(path.qkey),
@@ -200,14 +207,14 @@ class UMAD(rdma.tools.SysFSDevice,rdma.madtransactor.MADTransactor):
                                           path.traffic_class,
                                           path.DGID,
                                           cpu_to_be32(path.flow_label),
-                                          path.pkey_index);
+                                          pkey_idx);
         else:
             res = self.ib_mad_addr_local_t.pack(cpu_to_be32(path.dqpn),
                                                 cpu_to_be32(path.qkey),
                                                 cpu_to_be16(path.DLID),
                                                 path.SL,
                                                 slid_bits,
-                                                path.pkey_index);
+                                                pkey_idx);
         path._cached_umad_ah = res;
         return res;
 
