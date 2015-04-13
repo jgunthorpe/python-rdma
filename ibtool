@@ -76,6 +76,8 @@ commands = {
     "set_port_state": None,
     "init_all_ports": (".set_port_state",),
 
+    "set_guid": (".guid",),
+
     "help": (".tools",),
 };
 

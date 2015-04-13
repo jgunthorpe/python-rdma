@@ -986,8 +986,10 @@ Subnet Administration (15)
 
     .. attribute:: MAD_LENGTH = 72
     .. attribute:: MAD_ATTRIBUTE_ID = 0x30
+    .. attribute:: MAD_SUBNADMDELETE = 0x15 # MAD_METHOD_DELETE
     .. attribute:: MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
+    .. attribute:: MAD_SUBNADMSET = 0x2 # MAD_METHOD_SET
     .. attribute:: COMPONENT_MASK = {'LID':0, 'blockNum':1, 'reserved_24':2, 'reserved_32':3, 'GUIDInfo.GUIDBlock':4}
     .. attribute:: MEMBERS = [('LID',16,1), ('blockNum',8,1), ('reserved_24',8,1), ('reserved_32',32,1), ('GUIDInfo',512,1)]
 

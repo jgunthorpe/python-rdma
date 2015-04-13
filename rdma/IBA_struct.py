@@ -2436,8 +2436,10 @@ class SAGUIDInfoRecord(rdma.binstruct.BinStruct):
     __slots__ = ('LID','blockNum','reserved_24','reserved_32','GUIDInfo');
     MAD_LENGTH = 72
     MAD_ATTRIBUTE_ID = 0x30
+    MAD_SUBNADMDELETE = 0x15 # MAD_METHOD_DELETE
     MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
+    MAD_SUBNADMSET = 0x2 # MAD_METHOD_SET
     COMPONENT_MASK = {'LID':0, 'blockNum':1, 'reserved_24':2, 'reserved_32':3, 'GUIDInfo.GUIDBlock':4}
     MEMBERS = [('LID',16,1), ('blockNum',8,1), ('reserved_24',8,1), ('reserved_32',32,1), ('GUIDInfo',512,1)]
     def __init__(self,*args):

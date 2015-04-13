@@ -181,7 +181,7 @@
           sect="15.2.5.18"
           attributeID="0x30"
           attributeName="SA_GUID_INFO_RECORD"
-          methods="SubnAdmGet SubnAdmGetTable">
+          methods="SubnAdmGet SubnAdmGetTable SubnAdmSet SubnAdmDelete">
     <mb bits="16" off="0[0]">LID<!--LID--></mb>
     <mb bits="8" off="0[16]">blockNum<!--BlockNum--></mb>
     <mb bits="8" off="0[24]"><!--Reserved--></mb>

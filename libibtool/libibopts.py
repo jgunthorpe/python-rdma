@@ -17,6 +17,9 @@ def tmpl_int(s):
 def tmpl_node_guid(s):
     return IBA.GUID(s);
 
+def tmpl_port_guid(s):
+    return IBA.GUID(s);
+
 class LibIBOpts(object):
     """Emulate the commandline parsing of legacy tools."""
     debug = 0;
