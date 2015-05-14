@@ -8,7 +8,10 @@ URL: https://github.com/jgunthorpe/python-rdma
 Vendor: Obsidian Research Corporation
 Source: python-rdma-%{version}.tgz
 
+BuildRequires: gcc
 BuildRequires: libibverbs-devel
+BuildRequires: python-devel
+BuildRequires: python-sphinx
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
