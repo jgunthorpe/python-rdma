@@ -41,7 +41,7 @@
   </struct>
 
   <struct name="SAPortInfoRecord"
-          bytes="64"
+          bytes="68"
           desc="Container for PortInfo"
           sect="15.2.5.3"
           attributeID="0x12"
@@ -50,7 +50,7 @@
     <mb bits="16" off="0[0]">endportLID<!--EndportLID--></mb>
     <mb bits="8" off="0[16]">portNum<!--PortNum--></mb>
     <mb bits="8" off="0[24]"><!--Reserved--></mb>
-    <mb bits="480" off="0[32]" type="struct SMPPortInfo">portInfo<!--PortInfo--></mb>
+    <mb bits="512" off="0[32]" type="struct SMPPortInfo">portInfo<!--PortInfo--></mb>
   </struct>
 
   <struct name="SASLToVLMappingTableRecord"

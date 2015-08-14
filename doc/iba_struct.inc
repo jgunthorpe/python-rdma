@@ -758,66 +758,71 @@ Subnet Management (14)
 
     Port Information (section 14.2.5.6)
 
-    .. attribute:: MAD_LENGTH = 60
+    .. attribute:: MAD_LENGTH = 64
     .. attribute:: MAD_ATTRIBUTE_ID = 0x15
     .. attribute:: MAD_SUBNGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNSET = 0x2 # MAD_METHOD_SET
-    .. attribute:: MEMBERS = [('MKey',64,1), ('GIDPrefix',64,1), ('LID',16,1), ('masterSMLID',16,1), ('capabilityMask',32,1), ('diagCode',16,1), ('MKeyLeasePeriod',16,1), ('localPortNum',8,1), ('linkWidthEnabled',8,1), ('linkWidthSupported',8,1), ('linkWidthActive',8,1), ('linkSpeedSupported',4,1), ('portState',4,1), ('portPhysicalState',4,1), ('linkDownDefaultState',4,1), ('MKeyProtectBits',2,1), ('reserved_274',3,1), ('LMC',3,1), ('linkSpeedActive',4,1), ('linkSpeedEnabled',4,1), ('neighborMTU',4,1), ('masterSMSL',4,1), ('VLCap',4,1), ('initType',4,1), ('VLHighLimit',8,1), ('VLArbitrationHighCap',8,1), ('VLArbitrationLowCap',8,1), ('initTypeReply',4,1), ('MTUCap',4,1), ('VLStallCount',3,1), ('HOQLife',5,1), ('operationalVLs',4,1), ('partitionEnforcementInbound',1,1), ('partitionEnforcementOutbound',1,1), ('filterRawInbound',1,1), ('filterRawOutbound',1,1), ('MKeyViolations',16,1), ('PKeyViolations',16,1), ('QKeyViolations',16,1), ('GUIDCap',8,1), ('clientReregister',1,1), ('reserved_409',2,1), ('subnetTimeOut',5,1), ('reserved_416',3,1), ('respTimeValue',5,1), ('localPhyErrors',4,1), ('overrunErrors',4,1), ('maxCreditHint',16,1), ('reserved_448',8,1), ('linkRoundTripLatency',24,1)]
+    .. attribute:: MEMBERS = [('MKey',64,1), ('GIDPrefix',64,1), ('LID',16,1), ('masterSMLID',16,1), ('capabilityMask',32,1), ('diagCode',16,1), ('MKeyLeasePeriod',16,1), ('localPortNum',8,1), ('linkWidthEnabled',8,1), ('linkWidthSupported',8,1), ('linkWidthActive',8,1), ('linkSpeedSupported',4,1), ('portState',4,1), ('portPhysicalState',4,1), ('linkDownDefaultState',4,1), ('MKeyProtectBits',2,1), ('reserved_274',3,1), ('LMC',3,1), ('linkSpeedActive',4,1), ('linkSpeedEnabled',4,1), ('neighborMTU',4,1), ('masterSMSL',4,1), ('VLCap',4,1), ('initType',4,1), ('VLHighLimit',8,1), ('VLArbitrationHighCap',8,1), ('VLArbitrationLowCap',8,1), ('initTypeReply',4,1), ('MTUCap',4,1), ('VLStallCount',3,1), ('HOQLife',5,1), ('operationalVLs',4,1), ('partitionEnforcementInbound',1,1), ('partitionEnforcementOutbound',1,1), ('filterRawInbound',1,1), ('filterRawOutbound',1,1), ('MKeyViolations',16,1), ('PKeyViolations',16,1), ('QKeyViolations',16,1), ('GUIDCap',8,1), ('clientReregister',1,1), ('multicastPKeyTrapSuppressionEnabled',2,1), ('subnetTimeOut',5,1), ('reserved_416',3,1), ('respTimeValue',5,1), ('localPhyErrors',4,1), ('overrunErrors',4,1), ('maxCreditHint',16,1), ('reserved_448',8,1), ('linkRoundTripLatency',24,1), ('capabilityMask2',16,1), ('linkSpeedExtActive',4,1), ('linkSpeedExtSupported',4,1), ('reserved_504',3,1), ('linkSpeedExtEnabled',5,1)]
 
-    ==================================== =============== ============
-    Member                               Position        Type        
-    ==================================== =============== ============
-    :attr:`MKey`                         0:8 (64)        :class:`int`
-    :attr:`GIDPrefix`                    8:16 (64)       :class:`int`
-    :attr:`LID`                          16:18 (16)      :class:`int`
-    :attr:`masterSMLID`                  18:20 (16)      :class:`int`
-    :attr:`capabilityMask`               20:24 (32)      :class:`int`
-    :attr:`diagCode`                     24:26 (16)      :class:`int`
-    :attr:`MKeyLeasePeriod`              26:28 (16)      :class:`int`
-    :attr:`localPortNum`                 28:29 (8)       :class:`int`
-    :attr:`linkWidthEnabled`             29:30 (8)       :class:`int`
-    :attr:`linkWidthSupported`           30:31 (8)       :class:`int`
-    :attr:`linkWidthActive`              31:32 (8)       :class:`int`
-    :attr:`linkSpeedSupported`           32:32[4] (4)    :class:`int`
-    :attr:`portState`                    32[4]:33 (4)    :class:`int`
-    :attr:`portPhysicalState`            33:33[4] (4)    :class:`int`
-    :attr:`linkDownDefaultState`         33[4]:34 (4)    :class:`int`
-    :attr:`MKeyProtectBits`              34:34[2] (2)    :class:`int`
-    :attr:`reserved_274`                 34[2]:34[5] (3) :class:`int`
-    :attr:`LMC`                          34[5]:35 (3)    :class:`int`
-    :attr:`linkSpeedActive`              35:35[4] (4)    :class:`int`
-    :attr:`linkSpeedEnabled`             35[4]:36 (4)    :class:`int`
-    :attr:`neighborMTU`                  36:36[4] (4)    :class:`int`
-    :attr:`masterSMSL`                   36[4]:37 (4)    :class:`int`
-    :attr:`VLCap`                        37:37[4] (4)    :class:`int`
-    :attr:`initType`                     37[4]:38 (4)    :class:`int`
-    :attr:`VLHighLimit`                  38:39 (8)       :class:`int`
-    :attr:`VLArbitrationHighCap`         39:40 (8)       :class:`int`
-    :attr:`VLArbitrationLowCap`          40:41 (8)       :class:`int`
-    :attr:`initTypeReply`                41:41[4] (4)    :class:`int`
-    :attr:`MTUCap`                       41[4]:42 (4)    :class:`int`
-    :attr:`VLStallCount`                 42:42[3] (3)    :class:`int`
-    :attr:`HOQLife`                      42[3]:43 (5)    :class:`int`
-    :attr:`operationalVLs`               43:43[4] (4)    :class:`int`
-    :attr:`partitionEnforcementInbound`  43[4]:43[5] (1) :class:`int`
-    :attr:`partitionEnforcementOutbound` 43[5]:43[6] (1) :class:`int`
-    :attr:`filterRawInbound`             43[6]:43[7] (1) :class:`int`
-    :attr:`filterRawOutbound`            43[7]:44 (1)    :class:`int`
-    :attr:`MKeyViolations`               44:46 (16)      :class:`int`
-    :attr:`PKeyViolations`               46:48 (16)      :class:`int`
-    :attr:`QKeyViolations`               48:50 (16)      :class:`int`
-    :attr:`GUIDCap`                      50:51 (8)       :class:`int`
-    :attr:`clientReregister`             51:51[1] (1)    :class:`int`
-    :attr:`reserved_409`                 51[1]:51[3] (2) :class:`int`
-    :attr:`subnetTimeOut`                51[3]:52 (5)    :class:`int`
-    :attr:`reserved_416`                 52:52[3] (3)    :class:`int`
-    :attr:`respTimeValue`                52[3]:53 (5)    :class:`int`
-    :attr:`localPhyErrors`               53:53[4] (4)    :class:`int`
-    :attr:`overrunErrors`                53[4]:54 (4)    :class:`int`
-    :attr:`maxCreditHint`                54:56 (16)      :class:`int`
-    :attr:`reserved_448`                 56:57 (8)       :class:`int`
-    :attr:`linkRoundTripLatency`         57:60 (24)      :class:`int`
-    ==================================== =============== ============
+    =========================================== =============== ============
+    Member                                      Position        Type        
+    =========================================== =============== ============
+    :attr:`MKey`                                0:8 (64)        :class:`int`
+    :attr:`GIDPrefix`                           8:16 (64)       :class:`int`
+    :attr:`LID`                                 16:18 (16)      :class:`int`
+    :attr:`masterSMLID`                         18:20 (16)      :class:`int`
+    :attr:`capabilityMask`                      20:24 (32)      :class:`int`
+    :attr:`diagCode`                            24:26 (16)      :class:`int`
+    :attr:`MKeyLeasePeriod`                     26:28 (16)      :class:`int`
+    :attr:`localPortNum`                        28:29 (8)       :class:`int`
+    :attr:`linkWidthEnabled`                    29:30 (8)       :class:`int`
+    :attr:`linkWidthSupported`                  30:31 (8)       :class:`int`
+    :attr:`linkWidthActive`                     31:32 (8)       :class:`int`
+    :attr:`linkSpeedSupported`                  32:32[4] (4)    :class:`int`
+    :attr:`portState`                           32[4]:33 (4)    :class:`int`
+    :attr:`portPhysicalState`                   33:33[4] (4)    :class:`int`
+    :attr:`linkDownDefaultState`                33[4]:34 (4)    :class:`int`
+    :attr:`MKeyProtectBits`                     34:34[2] (2)    :class:`int`
+    :attr:`reserved_274`                        34[2]:34[5] (3) :class:`int`
+    :attr:`LMC`                                 34[5]:35 (3)    :class:`int`
+    :attr:`linkSpeedActive`                     35:35[4] (4)    :class:`int`
+    :attr:`linkSpeedEnabled`                    35[4]:36 (4)    :class:`int`
+    :attr:`neighborMTU`                         36:36[4] (4)    :class:`int`
+    :attr:`masterSMSL`                          36[4]:37 (4)    :class:`int`
+    :attr:`VLCap`                               37:37[4] (4)    :class:`int`
+    :attr:`initType`                            37[4]:38 (4)    :class:`int`
+    :attr:`VLHighLimit`                         38:39 (8)       :class:`int`
+    :attr:`VLArbitrationHighCap`                39:40 (8)       :class:`int`
+    :attr:`VLArbitrationLowCap`                 40:41 (8)       :class:`int`
+    :attr:`initTypeReply`                       41:41[4] (4)    :class:`int`
+    :attr:`MTUCap`                              41[4]:42 (4)    :class:`int`
+    :attr:`VLStallCount`                        42:42[3] (3)    :class:`int`
+    :attr:`HOQLife`                             42[3]:43 (5)    :class:`int`
+    :attr:`operationalVLs`                      43:43[4] (4)    :class:`int`
+    :attr:`partitionEnforcementInbound`         43[4]:43[5] (1) :class:`int`
+    :attr:`partitionEnforcementOutbound`        43[5]:43[6] (1) :class:`int`
+    :attr:`filterRawInbound`                    43[6]:43[7] (1) :class:`int`
+    :attr:`filterRawOutbound`                   43[7]:44 (1)    :class:`int`
+    :attr:`MKeyViolations`                      44:46 (16)      :class:`int`
+    :attr:`PKeyViolations`                      46:48 (16)      :class:`int`
+    :attr:`QKeyViolations`                      48:50 (16)      :class:`int`
+    :attr:`GUIDCap`                             50:51 (8)       :class:`int`
+    :attr:`clientReregister`                    51:51[1] (1)    :class:`int`
+    :attr:`multicastPKeyTrapSuppressionEnabled` 51[1]:51[3] (2) :class:`int`
+    :attr:`subnetTimeOut`                       51[3]:52 (5)    :class:`int`
+    :attr:`reserved_416`                        52:52[3] (3)    :class:`int`
+    :attr:`respTimeValue`                       52[3]:53 (5)    :class:`int`
+    :attr:`localPhyErrors`                      53:53[4] (4)    :class:`int`
+    :attr:`overrunErrors`                       53[4]:54 (4)    :class:`int`
+    :attr:`maxCreditHint`                       54:56 (16)      :class:`int`
+    :attr:`reserved_448`                        56:57 (8)       :class:`int`
+    :attr:`linkRoundTripLatency`                57:60 (24)      :class:`int`
+    :attr:`capabilityMask2`                     60:62 (16)      :class:`int`
+    :attr:`linkSpeedExtActive`                  62:62[4] (4)    :class:`int`
+    :attr:`linkSpeedExtSupported`               62[4]:63 (4)    :class:`int`
+    :attr:`reserved_504`                        63:63[3] (3)    :class:`int`
+    :attr:`linkSpeedExtEnabled`                 63[3]:64 (5)    :class:`int`
+    =========================================== =============== ============
 
 .. class:: rdma.IBA.SMPRandomForwardingTable
 
@@ -1287,12 +1292,12 @@ Subnet Administration (15)
 
     Container for PortInfo (section 15.2.5.3)
 
-    .. attribute:: MAD_LENGTH = 64
+    .. attribute:: MAD_LENGTH = 68
     .. attribute:: MAD_ATTRIBUTE_ID = 0x12
     .. attribute:: MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
-    .. attribute:: COMPONENT_MASK = {'endportLID':0, 'portNum':1, 'reserved_24':2, 'portInfo.MKey':3, 'portInfo.GIDPrefix':4, 'portInfo.LID':5, 'portInfo.masterSMLID':6, 'portInfo.capabilityMask':7, 'portInfo.diagCode':8, 'portInfo.MKeyLeasePeriod':9, 'portInfo.localPortNum':10, 'portInfo.linkWidthEnabled':11, 'portInfo.linkWidthSupported':12, 'portInfo.linkWidthActive':13, 'portInfo.linkSpeedSupported':14, 'portInfo.portState':15, 'portInfo.portPhysicalState':16, 'portInfo.linkDownDefaultState':17, 'portInfo.MKeyProtectBits':18, 'portInfo.reserved_274':19, 'portInfo.LMC':20, 'portInfo.linkSpeedActive':21, 'portInfo.linkSpeedEnabled':22, 'portInfo.neighborMTU':23, 'portInfo.masterSMSL':24, 'portInfo.VLCap':25, 'portInfo.initType':26, 'portInfo.VLHighLimit':27, 'portInfo.VLArbitrationHighCap':28, 'portInfo.VLArbitrationLowCap':29, 'portInfo.initTypeReply':30, 'portInfo.MTUCap':31, 'portInfo.VLStallCount':32, 'portInfo.HOQLife':33, 'portInfo.operationalVLs':34, 'portInfo.partitionEnforcementInbound':35, 'portInfo.partitionEnforcementOutbound':36, 'portInfo.filterRawInbound':37, 'portInfo.filterRawOutbound':38, 'portInfo.MKeyViolations':39, 'portInfo.PKeyViolations':40, 'portInfo.QKeyViolations':41, 'portInfo.GUIDCap':42, 'portInfo.clientReregister':43, 'portInfo.reserved_409':44, 'portInfo.subnetTimeOut':45, 'portInfo.reserved_416':46, 'portInfo.respTimeValue':47, 'portInfo.localPhyErrors':48, 'portInfo.overrunErrors':49, 'portInfo.maxCreditHint':50, 'portInfo.reserved_448':51, 'portInfo.linkRoundTripLatency':52}
-    .. attribute:: MEMBERS = [('endportLID',16,1), ('portNum',8,1), ('reserved_24',8,1), ('portInfo',480,1)]
+    .. attribute:: COMPONENT_MASK = {'endportLID':0, 'portNum':1, 'reserved_24':2, 'portInfo.MKey':3, 'portInfo.GIDPrefix':4, 'portInfo.LID':5, 'portInfo.masterSMLID':6, 'portInfo.capabilityMask':7, 'portInfo.diagCode':8, 'portInfo.MKeyLeasePeriod':9, 'portInfo.localPortNum':10, 'portInfo.linkWidthEnabled':11, 'portInfo.linkWidthSupported':12, 'portInfo.linkWidthActive':13, 'portInfo.linkSpeedSupported':14, 'portInfo.portState':15, 'portInfo.portPhysicalState':16, 'portInfo.linkDownDefaultState':17, 'portInfo.MKeyProtectBits':18, 'portInfo.reserved_274':19, 'portInfo.LMC':20, 'portInfo.linkSpeedActive':21, 'portInfo.linkSpeedEnabled':22, 'portInfo.neighborMTU':23, 'portInfo.masterSMSL':24, 'portInfo.VLCap':25, 'portInfo.initType':26, 'portInfo.VLHighLimit':27, 'portInfo.VLArbitrationHighCap':28, 'portInfo.VLArbitrationLowCap':29, 'portInfo.initTypeReply':30, 'portInfo.MTUCap':31, 'portInfo.VLStallCount':32, 'portInfo.HOQLife':33, 'portInfo.operationalVLs':34, 'portInfo.partitionEnforcementInbound':35, 'portInfo.partitionEnforcementOutbound':36, 'portInfo.filterRawInbound':37, 'portInfo.filterRawOutbound':38, 'portInfo.MKeyViolations':39, 'portInfo.PKeyViolations':40, 'portInfo.QKeyViolations':41, 'portInfo.GUIDCap':42, 'portInfo.clientReregister':43, 'portInfo.multicastPKeyTrapSuppressionEnabled':44, 'portInfo.subnetTimeOut':45, 'portInfo.reserved_416':46, 'portInfo.respTimeValue':47, 'portInfo.localPhyErrors':48, 'portInfo.overrunErrors':49, 'portInfo.maxCreditHint':50, 'portInfo.reserved_448':51, 'portInfo.linkRoundTripLatency':52, 'portInfo.capabilityMask2':53, 'portInfo.linkSpeedExtActive':54, 'portInfo.linkSpeedExtSupported':55, 'portInfo.reserved_504':56, 'portInfo.linkSpeedExtEnabled':57}
+    .. attribute:: MEMBERS = [('endportLID',16,1), ('portNum',8,1), ('reserved_24',8,1), ('portInfo',512,1)]
 
     =================== ========== ==============================
     Member              Position   Type                          
@@ -1300,7 +1305,7 @@ Subnet Administration (15)
     :attr:`endportLID`  0:2 (16)   :class:`int`                  
     :attr:`portNum`     2:3 (8)    :class:`int`                  
     :attr:`reserved_24` 3:4 (8)    :class:`int`                  
-    :attr:`portInfo`    4:64 (480) :class:`~rdma.IBA.SMPPortInfo`
+    :attr:`portInfo`    4:68 (512) :class:`~rdma.IBA.SMPPortInfo`
     =================== ========== ==============================
 
 .. class:: rdma.IBA.SARandomForwardingTableRecord

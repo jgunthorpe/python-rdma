@@ -1589,12 +1589,12 @@ class SMPGUIDInfo(rdma.binstruct.BinStruct):
 
 class SMPPortInfo(rdma.binstruct.BinStruct):
     '''Port Information (section 14.2.5.6)'''
-    __slots__ = ('MKey','GIDPrefix','LID','masterSMLID','capabilityMask','diagCode','MKeyLeasePeriod','localPortNum','linkWidthEnabled','linkWidthSupported','linkWidthActive','linkSpeedSupported','portState','portPhysicalState','linkDownDefaultState','MKeyProtectBits','reserved_274','LMC','linkSpeedActive','linkSpeedEnabled','neighborMTU','masterSMSL','VLCap','initType','VLHighLimit','VLArbitrationHighCap','VLArbitrationLowCap','initTypeReply','MTUCap','VLStallCount','HOQLife','operationalVLs','partitionEnforcementInbound','partitionEnforcementOutbound','filterRawInbound','filterRawOutbound','MKeyViolations','PKeyViolations','QKeyViolations','GUIDCap','clientReregister','reserved_409','subnetTimeOut','reserved_416','respTimeValue','localPhyErrors','overrunErrors','maxCreditHint','reserved_448','linkRoundTripLatency');
-    MAD_LENGTH = 60
+    __slots__ = ('MKey','GIDPrefix','LID','masterSMLID','capabilityMask','diagCode','MKeyLeasePeriod','localPortNum','linkWidthEnabled','linkWidthSupported','linkWidthActive','linkSpeedSupported','portState','portPhysicalState','linkDownDefaultState','MKeyProtectBits','reserved_274','LMC','linkSpeedActive','linkSpeedEnabled','neighborMTU','masterSMSL','VLCap','initType','VLHighLimit','VLArbitrationHighCap','VLArbitrationLowCap','initTypeReply','MTUCap','VLStallCount','HOQLife','operationalVLs','partitionEnforcementInbound','partitionEnforcementOutbound','filterRawInbound','filterRawOutbound','MKeyViolations','PKeyViolations','QKeyViolations','GUIDCap','clientReregister','multicastPKeyTrapSuppressionEnabled','subnetTimeOut','reserved_416','respTimeValue','localPhyErrors','overrunErrors','maxCreditHint','reserved_448','linkRoundTripLatency','capabilityMask2','linkSpeedExtActive','linkSpeedExtSupported','reserved_504','linkSpeedExtEnabled');
+    MAD_LENGTH = 64
     MAD_ATTRIBUTE_ID = 0x15
     MAD_SUBNGET = 0x1 # MAD_METHOD_GET
     MAD_SUBNSET = 0x2 # MAD_METHOD_SET
-    MEMBERS = [('MKey',64,1), ('GIDPrefix',64,1), ('LID',16,1), ('masterSMLID',16,1), ('capabilityMask',32,1), ('diagCode',16,1), ('MKeyLeasePeriod',16,1), ('localPortNum',8,1), ('linkWidthEnabled',8,1), ('linkWidthSupported',8,1), ('linkWidthActive',8,1), ('linkSpeedSupported',4,1), ('portState',4,1), ('portPhysicalState',4,1), ('linkDownDefaultState',4,1), ('MKeyProtectBits',2,1), ('reserved_274',3,1), ('LMC',3,1), ('linkSpeedActive',4,1), ('linkSpeedEnabled',4,1), ('neighborMTU',4,1), ('masterSMSL',4,1), ('VLCap',4,1), ('initType',4,1), ('VLHighLimit',8,1), ('VLArbitrationHighCap',8,1), ('VLArbitrationLowCap',8,1), ('initTypeReply',4,1), ('MTUCap',4,1), ('VLStallCount',3,1), ('HOQLife',5,1), ('operationalVLs',4,1), ('partitionEnforcementInbound',1,1), ('partitionEnforcementOutbound',1,1), ('filterRawInbound',1,1), ('filterRawOutbound',1,1), ('MKeyViolations',16,1), ('PKeyViolations',16,1), ('QKeyViolations',16,1), ('GUIDCap',8,1), ('clientReregister',1,1), ('reserved_409',2,1), ('subnetTimeOut',5,1), ('reserved_416',3,1), ('respTimeValue',5,1), ('localPhyErrors',4,1), ('overrunErrors',4,1), ('maxCreditHint',16,1), ('reserved_448',8,1), ('linkRoundTripLatency',24,1)]
+    MEMBERS = [('MKey',64,1), ('GIDPrefix',64,1), ('LID',16,1), ('masterSMLID',16,1), ('capabilityMask',32,1), ('diagCode',16,1), ('MKeyLeasePeriod',16,1), ('localPortNum',8,1), ('linkWidthEnabled',8,1), ('linkWidthSupported',8,1), ('linkWidthActive',8,1), ('linkSpeedSupported',4,1), ('portState',4,1), ('portPhysicalState',4,1), ('linkDownDefaultState',4,1), ('MKeyProtectBits',2,1), ('reserved_274',3,1), ('LMC',3,1), ('linkSpeedActive',4,1), ('linkSpeedEnabled',4,1), ('neighborMTU',4,1), ('masterSMSL',4,1), ('VLCap',4,1), ('initType',4,1), ('VLHighLimit',8,1), ('VLArbitrationHighCap',8,1), ('VLArbitrationLowCap',8,1), ('initTypeReply',4,1), ('MTUCap',4,1), ('VLStallCount',3,1), ('HOQLife',5,1), ('operationalVLs',4,1), ('partitionEnforcementInbound',1,1), ('partitionEnforcementOutbound',1,1), ('filterRawInbound',1,1), ('filterRawOutbound',1,1), ('MKeyViolations',16,1), ('PKeyViolations',16,1), ('QKeyViolations',16,1), ('GUIDCap',8,1), ('clientReregister',1,1), ('multicastPKeyTrapSuppressionEnabled',2,1), ('subnetTimeOut',5,1), ('reserved_416',3,1), ('respTimeValue',5,1), ('localPhyErrors',4,1), ('overrunErrors',4,1), ('maxCreditHint',16,1), ('reserved_448',8,1), ('linkRoundTripLatency',24,1), ('capabilityMask2',16,1), ('linkSpeedExtActive',4,1), ('linkSpeedExtSupported',4,1), ('reserved_504',3,1), ('linkSpeedExtEnabled',5,1)]
     def zero(self):
         self.MKey = 0;
         self.GIDPrefix = 0;
@@ -1637,7 +1637,7 @@ class SMPPortInfo(rdma.binstruct.BinStruct):
         self.QKeyViolations = 0;
         self.GUIDCap = 0;
         self.clientReregister = 0;
-        self.reserved_409 = 0;
+        self.multicastPKeyTrapSuppressionEnabled = 0;
         self.subnetTimeOut = 0;
         self.reserved_416 = 0;
         self.respTimeValue = 0;
@@ -1646,6 +1646,11 @@ class SMPPortInfo(rdma.binstruct.BinStruct):
         self.maxCreditHint = 0;
         self.reserved_448 = 0;
         self.linkRoundTripLatency = 0;
+        self.capabilityMask2 = 0;
+        self.linkSpeedExtActive = 0;
+        self.linkSpeedExtSupported = 0;
+        self.reserved_504 = 0;
+        self.linkSpeedExtEnabled = 0;
 
     @property
     def _pack_0_32(self):
@@ -1695,14 +1700,14 @@ class SMPPortInfo(rdma.binstruct.BinStruct):
 
     @property
     def _pack_3_32(self):
-        return ((self.QKeyViolations & 0xFFFF) << 16) | ((self.GUIDCap & 0xFF) << 8) | ((self.clientReregister & 0x1) << 7) | ((self.reserved_409 & 0x3) << 5) | ((self.subnetTimeOut & 0x1F) << 0)
+        return ((self.QKeyViolations & 0xFFFF) << 16) | ((self.GUIDCap & 0xFF) << 8) | ((self.clientReregister & 0x1) << 7) | ((self.multicastPKeyTrapSuppressionEnabled & 0x3) << 5) | ((self.subnetTimeOut & 0x1F) << 0)
 
     @_pack_3_32.setter
     def _pack_3_32(self,value):
         self.QKeyViolations = (value >> 16) & 0xFFFF;
         self.GUIDCap = (value >> 8) & 0xFF;
         self.clientReregister = (value >> 7) & 0x1;
-        self.reserved_409 = (value >> 5) & 0x3;
+        self.multicastPKeyTrapSuppressionEnabled = (value >> 5) & 0x3;
         self.subnetTimeOut = (value >> 0) & 0x1F;
 
     @property
@@ -1726,11 +1731,23 @@ class SMPPortInfo(rdma.binstruct.BinStruct):
         self.reserved_448 = (value >> 24) & 0xFF;
         self.linkRoundTripLatency = (value >> 0) & 0xFFFFFF;
 
+    @property
+    def _pack_6_32(self):
+        return ((self.capabilityMask2 & 0xFFFF) << 16) | ((self.linkSpeedExtActive & 0xF) << 12) | ((self.linkSpeedExtSupported & 0xF) << 8) | ((self.reserved_504 & 0x7) << 5) | ((self.linkSpeedExtEnabled & 0x1F) << 0)
+
+    @_pack_6_32.setter
+    def _pack_6_32(self,value):
+        self.capabilityMask2 = (value >> 16) & 0xFFFF;
+        self.linkSpeedExtActive = (value >> 12) & 0xF;
+        self.linkSpeedExtSupported = (value >> 8) & 0xF;
+        self.reserved_504 = (value >> 5) & 0x7;
+        self.linkSpeedExtEnabled = (value >> 0) & 0x1F;
+
     def pack_into(self,buffer,offset=0):
-        struct.pack_into('>QQHHLHHBBBBLLLHHLLL',buffer,offset+0,self.MKey,self.GIDPrefix,self.LID,self.masterSMLID,self.capabilityMask,self.diagCode,self.MKeyLeasePeriod,self.localPortNum,self.linkWidthEnabled,self.linkWidthSupported,self.linkWidthActive,self._pack_0_32,self._pack_1_32,self._pack_2_32,self.MKeyViolations,self.PKeyViolations,self._pack_3_32,self._pack_4_32,self._pack_5_32);
+        struct.pack_into('>QQHHLHHBBBBLLLHHLLLL',buffer,offset+0,self.MKey,self.GIDPrefix,self.LID,self.masterSMLID,self.capabilityMask,self.diagCode,self.MKeyLeasePeriod,self.localPortNum,self.linkWidthEnabled,self.linkWidthSupported,self.linkWidthActive,self._pack_0_32,self._pack_1_32,self._pack_2_32,self.MKeyViolations,self.PKeyViolations,self._pack_3_32,self._pack_4_32,self._pack_5_32,self._pack_6_32);
 
     def unpack_from(self,buffer,offset=0):
-        (self.MKey,self.GIDPrefix,self.LID,self.masterSMLID,self.capabilityMask,self.diagCode,self.MKeyLeasePeriod,self.localPortNum,self.linkWidthEnabled,self.linkWidthSupported,self.linkWidthActive,self._pack_0_32,self._pack_1_32,self._pack_2_32,self.MKeyViolations,self.PKeyViolations,self._pack_3_32,self._pack_4_32,self._pack_5_32,) = struct.unpack_from('>QQHHLHHBBBBLLLHHLLL',buffer,offset+0);
+        (self.MKey,self.GIDPrefix,self.LID,self.masterSMLID,self.capabilityMask,self.diagCode,self.MKeyLeasePeriod,self.localPortNum,self.linkWidthEnabled,self.linkWidthSupported,self.linkWidthActive,self._pack_0_32,self._pack_1_32,self._pack_2_32,self.MKeyViolations,self.PKeyViolations,self._pack_3_32,self._pack_4_32,self._pack_5_32,self._pack_6_32,) = struct.unpack_from('>QQHHLHHBBBBLLLHHLLLL',buffer,offset+0);
 
 class SMPPKeyTable(rdma.binstruct.BinStruct):
     '''Partition Table (section 14.2.5.7)'''
@@ -2150,12 +2167,12 @@ class SANodeRecord(rdma.binstruct.BinStruct):
 class SAPortInfoRecord(rdma.binstruct.BinStruct):
     '''Container for PortInfo (section 15.2.5.3)'''
     __slots__ = ('endportLID','portNum','reserved_24','portInfo');
-    MAD_LENGTH = 64
+    MAD_LENGTH = 68
     MAD_ATTRIBUTE_ID = 0x12
     MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
-    COMPONENT_MASK = {'endportLID':0, 'portNum':1, 'reserved_24':2, 'portInfo.MKey':3, 'portInfo.GIDPrefix':4, 'portInfo.LID':5, 'portInfo.masterSMLID':6, 'portInfo.capabilityMask':7, 'portInfo.diagCode':8, 'portInfo.MKeyLeasePeriod':9, 'portInfo.localPortNum':10, 'portInfo.linkWidthEnabled':11, 'portInfo.linkWidthSupported':12, 'portInfo.linkWidthActive':13, 'portInfo.linkSpeedSupported':14, 'portInfo.portState':15, 'portInfo.portPhysicalState':16, 'portInfo.linkDownDefaultState':17, 'portInfo.MKeyProtectBits':18, 'portInfo.reserved_274':19, 'portInfo.LMC':20, 'portInfo.linkSpeedActive':21, 'portInfo.linkSpeedEnabled':22, 'portInfo.neighborMTU':23, 'portInfo.masterSMSL':24, 'portInfo.VLCap':25, 'portInfo.initType':26, 'portInfo.VLHighLimit':27, 'portInfo.VLArbitrationHighCap':28, 'portInfo.VLArbitrationLowCap':29, 'portInfo.initTypeReply':30, 'portInfo.MTUCap':31, 'portInfo.VLStallCount':32, 'portInfo.HOQLife':33, 'portInfo.operationalVLs':34, 'portInfo.partitionEnforcementInbound':35, 'portInfo.partitionEnforcementOutbound':36, 'portInfo.filterRawInbound':37, 'portInfo.filterRawOutbound':38, 'portInfo.MKeyViolations':39, 'portInfo.PKeyViolations':40, 'portInfo.QKeyViolations':41, 'portInfo.GUIDCap':42, 'portInfo.clientReregister':43, 'portInfo.reserved_409':44, 'portInfo.subnetTimeOut':45, 'portInfo.reserved_416':46, 'portInfo.respTimeValue':47, 'portInfo.localPhyErrors':48, 'portInfo.overrunErrors':49, 'portInfo.maxCreditHint':50, 'portInfo.reserved_448':51, 'portInfo.linkRoundTripLatency':52}
-    MEMBERS = [('endportLID',16,1), ('portNum',8,1), ('reserved_24',8,1), ('portInfo',480,1)]
+    COMPONENT_MASK = {'endportLID':0, 'portNum':1, 'reserved_24':2, 'portInfo.MKey':3, 'portInfo.GIDPrefix':4, 'portInfo.LID':5, 'portInfo.masterSMLID':6, 'portInfo.capabilityMask':7, 'portInfo.diagCode':8, 'portInfo.MKeyLeasePeriod':9, 'portInfo.localPortNum':10, 'portInfo.linkWidthEnabled':11, 'portInfo.linkWidthSupported':12, 'portInfo.linkWidthActive':13, 'portInfo.linkSpeedSupported':14, 'portInfo.portState':15, 'portInfo.portPhysicalState':16, 'portInfo.linkDownDefaultState':17, 'portInfo.MKeyProtectBits':18, 'portInfo.reserved_274':19, 'portInfo.LMC':20, 'portInfo.linkSpeedActive':21, 'portInfo.linkSpeedEnabled':22, 'portInfo.neighborMTU':23, 'portInfo.masterSMSL':24, 'portInfo.VLCap':25, 'portInfo.initType':26, 'portInfo.VLHighLimit':27, 'portInfo.VLArbitrationHighCap':28, 'portInfo.VLArbitrationLowCap':29, 'portInfo.initTypeReply':30, 'portInfo.MTUCap':31, 'portInfo.VLStallCount':32, 'portInfo.HOQLife':33, 'portInfo.operationalVLs':34, 'portInfo.partitionEnforcementInbound':35, 'portInfo.partitionEnforcementOutbound':36, 'portInfo.filterRawInbound':37, 'portInfo.filterRawOutbound':38, 'portInfo.MKeyViolations':39, 'portInfo.PKeyViolations':40, 'portInfo.QKeyViolations':41, 'portInfo.GUIDCap':42, 'portInfo.clientReregister':43, 'portInfo.multicastPKeyTrapSuppressionEnabled':44, 'portInfo.subnetTimeOut':45, 'portInfo.reserved_416':46, 'portInfo.respTimeValue':47, 'portInfo.localPhyErrors':48, 'portInfo.overrunErrors':49, 'portInfo.maxCreditHint':50, 'portInfo.reserved_448':51, 'portInfo.linkRoundTripLatency':52, 'portInfo.capabilityMask2':53, 'portInfo.linkSpeedExtActive':54, 'portInfo.linkSpeedExtSupported':55, 'portInfo.reserved_504':56, 'portInfo.linkSpeedExtEnabled':57}
+    MEMBERS = [('endportLID',16,1), ('portNum',8,1), ('reserved_24',8,1), ('portInfo',512,1)]
     def __init__(self,*args):
         self.portInfo = SMPPortInfo();
         rdma.binstruct.BinStruct.__init__(self,*args);
