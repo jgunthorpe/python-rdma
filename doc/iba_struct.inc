@@ -885,7 +885,7 @@ Subnet Management (14)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x12
     .. attribute:: MAD_SUBNGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNSET = 0x2 # MAD_METHOD_SET
-    .. attribute:: MEMBERS = [('linearFDBCap',16,1), ('randomFDBCap',16,1), ('multicastFDBCap',16,1), ('linearFDBTop',16,1), ('defaultPort',8,1), ('defaultMulticastPrimaryPort',8,1), ('defaultMulticastNotPrimaryPort',8,1), ('lifeTimeValue',5,1), ('portStateChange',1,1), ('optimizedSLtoVLMappingProgramming',2,1), ('LIDsPerPort',16,1), ('partitionEnforcementCap',16,1), ('inboundEnforcementCap',1,1), ('outboundEnforcementCap',1,1), ('filterRawInboundCap',1,1), ('filterRawOutboundCap',1,1), ('enhancedPort0',1,1), ('reserved_133',3,1), ('reserved_136',24,1)]
+    .. attribute:: MEMBERS = [('linearFDBCap',16,1), ('randomFDBCap',16,1), ('multicastFDBCap',16,1), ('linearFDBTop',16,1), ('defaultPort',8,1), ('defaultMulticastPrimaryPort',8,1), ('defaultMulticastNotPrimaryPort',8,1), ('lifeTimeValue',5,1), ('portStateChange',1,1), ('optimizedSLtoVLMappingProgramming',2,1), ('LIDsPerPort',16,1), ('partitionEnforcementCap',16,1), ('inboundEnforcementCap',1,1), ('outboundEnforcementCap',1,1), ('filterRawInboundCap',1,1), ('filterRawOutboundCap',1,1), ('enhancedPort0',1,1), ('reserved_133',3,1), ('reserved_136',8,1), ('multicastFDBTop',16,1)]
 
     ========================================= =============== ============
     Member                                    Position        Type        
@@ -908,7 +908,8 @@ Subnet Management (14)
     :attr:`filterRawOutboundCap`              16[3]:16[4] (1) :class:`int`
     :attr:`enhancedPort0`                     16[4]:16[5] (1) :class:`int`
     :attr:`reserved_133`                      16[5]:17 (3)    :class:`int`
-    :attr:`reserved_136`                      17:20 (24)      :class:`int`
+    :attr:`reserved_136`                      17:18 (8)       :class:`int`
+    :attr:`multicastFDBTop`                   18:20 (16)      :class:`int`
     ========================================= =============== ============
 
 .. class:: rdma.IBA.SMPVLArbitrationTable
@@ -1423,7 +1424,7 @@ Subnet Administration (15)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x14
     .. attribute:: MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
-    .. attribute:: COMPONENT_MASK = {'LID':0, 'reserved_16':1, 'switchInfo.linearFDBCap':2, 'switchInfo.randomFDBCap':3, 'switchInfo.multicastFDBCap':4, 'switchInfo.linearFDBTop':5, 'switchInfo.defaultPort':6, 'switchInfo.defaultMulticastPrimaryPort':7, 'switchInfo.defaultMulticastNotPrimaryPort':8, 'switchInfo.lifeTimeValue':9, 'switchInfo.portStateChange':10, 'switchInfo.optimizedSLtoVLMappingProgramming':11, 'switchInfo.LIDsPerPort':12, 'switchInfo.partitionEnforcementCap':13, 'switchInfo.inboundEnforcementCap':14, 'switchInfo.outboundEnforcementCap':15, 'switchInfo.filterRawInboundCap':16, 'switchInfo.filterRawOutboundCap':17, 'switchInfo.enhancedPort0':18, 'switchInfo.reserved_133':19, 'switchInfo.reserved_136':20}
+    .. attribute:: COMPONENT_MASK = {'LID':0, 'reserved_16':1, 'switchInfo.linearFDBCap':2, 'switchInfo.randomFDBCap':3, 'switchInfo.multicastFDBCap':4, 'switchInfo.linearFDBTop':5, 'switchInfo.defaultPort':6, 'switchInfo.defaultMulticastPrimaryPort':7, 'switchInfo.defaultMulticastNotPrimaryPort':8, 'switchInfo.lifeTimeValue':9, 'switchInfo.portStateChange':10, 'switchInfo.optimizedSLtoVLMappingProgramming':11, 'switchInfo.LIDsPerPort':12, 'switchInfo.partitionEnforcementCap':13, 'switchInfo.inboundEnforcementCap':14, 'switchInfo.outboundEnforcementCap':15, 'switchInfo.filterRawInboundCap':16, 'switchInfo.filterRawOutboundCap':17, 'switchInfo.enhancedPort0':18, 'switchInfo.reserved_133':19, 'switchInfo.reserved_136':20, 'switchInfo.multicastFDBTop':21}
     .. attribute:: MEMBERS = [('LID',16,1), ('reserved_16',16,1), ('switchInfo',160,1)]
 
     =================== ========== ================================

@@ -265,7 +265,8 @@
     <mb bits="1" off="0[131]">filterRawOutboundCap<!--FilterRawPacketOutboundCap--></mb>
     <mb bits="1" off="0[132]">enhancedPort0<!--EnhancedPort0--></mb>
     <mb bits="3" off="0[133]"><!--Reserved--></mb>
-    <mb bits="24" off="0[136]"><!--Reserved (Padding)--></mb>
+    <mb bits="8" off="0[136]"><!--Reserved (Padding)--></mb>
+    <mb bits="16" off="0[144]">multicastFDBTop<!--MulticastFDBTop--></mb>
   </struct>
 
   <struct name="SMPGUIDInfo"
