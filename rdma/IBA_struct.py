@@ -2571,13 +2571,13 @@ class SAPKeyTableRecord(rdma.binstruct.BinStruct):
 
 class SAPathRecord(rdma.binstruct.BinStruct):
     '''Information on paths through the subnet (section 15.2.5.16)'''
-    __slots__ = ('serviceID','DGID','SGID','DLID','SLID','rawTraffic','reserved_353','flowLabel','hopLimit','TClass','reversible','numbPath','PKey','QOSClass','SL','MTUSelector','MTU','rateSelector','rate','packetLifeTimeSelector','packetLifeTime','preference','reserved_464','reserved_480');
+    __slots__ = ('serviceID','DGID','SGID','DLID','SLID','rawTraffic','reserved_353','flowLabel','hopLimit','TClass','reversible','numbPath','PKey','QOSClass','SL','MTUSelector','MTU','rateSelector','rate','packetLifeTimeSelector','packetLifeTime','preference','reversePathPKeyMemberBit','reserved_466','reserved_480');
     MAD_LENGTH = 64
     MAD_ATTRIBUTE_ID = 0x35
     MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
-    COMPONENT_MASK = {'serviceID':0, 'serviceID56LSB':1, 'DGID':2, 'SGID':3, 'DLID':4, 'SLID':5, 'rawTraffic':6, 'reserved_353':7, 'flowLabel':8, 'hopLimit':9, 'TClass':10, 'reversible':11, 'numbPath':12, 'PKey':13, 'QOSClass':14, 'SL':15, 'MTUSelector':16, 'MTU':17, 'rateSelector':18, 'rate':19, 'packetLifeTimeSelector':20, 'packetLifeTime':21, 'preference':22, 'reserved_464':23, 'reserved_480':24}
-    MEMBERS = [('serviceID',64,1), ('DGID',128,1), ('SGID',128,1), ('DLID',16,1), ('SLID',16,1), ('rawTraffic',1,1), ('reserved_353',3,1), ('flowLabel',20,1), ('hopLimit',8,1), ('TClass',8,1), ('reversible',1,1), ('numbPath',7,1), ('PKey',16,1), ('QOSClass',12,1), ('SL',4,1), ('MTUSelector',2,1), ('MTU',6,1), ('rateSelector',2,1), ('rate',6,1), ('packetLifeTimeSelector',2,1), ('packetLifeTime',6,1), ('preference',8,1), ('reserved_464',16,1), ('reserved_480',32,1)]
+    COMPONENT_MASK = {'serviceID':0, 'serviceID56LSB':1, 'DGID':2, 'SGID':3, 'DLID':4, 'SLID':5, 'rawTraffic':6, 'reserved_353':7, 'flowLabel':8, 'hopLimit':9, 'TClass':10, 'reversible':11, 'numbPath':12, 'PKey':13, 'QOSClass':14, 'SL':15, 'MTUSelector':16, 'MTU':17, 'rateSelector':18, 'rate':19, 'packetLifeTimeSelector':20, 'packetLifeTime':21, 'preference':22, 'reversePathPKeyMemberBit':23, 'reserved_466':24, 'reserved_480':25}
+    MEMBERS = [('serviceID',64,1), ('DGID',128,1), ('SGID',128,1), ('DLID',16,1), ('SLID',16,1), ('rawTraffic',1,1), ('reserved_353',3,1), ('flowLabel',20,1), ('hopLimit',8,1), ('TClass',8,1), ('reversible',1,1), ('numbPath',7,1), ('PKey',16,1), ('QOSClass',12,1), ('SL',4,1), ('MTUSelector',2,1), ('MTU',6,1), ('rateSelector',2,1), ('rate',6,1), ('packetLifeTimeSelector',2,1), ('packetLifeTime',6,1), ('preference',8,1), ('reversePathPKeyMemberBit',2,1), ('reserved_466',14,1), ('reserved_480',32,1)]
     def zero(self):
         self.serviceID = 0;
         self.DGID = IBA.GID();
@@ -2601,7 +2601,8 @@ class SAPathRecord(rdma.binstruct.BinStruct):
         self.packetLifeTimeSelector = 0;
         self.packetLifeTime = 0;
         self.preference = 0;
-        self.reserved_464 = 0;
+        self.reversePathPKeyMemberBit = 0;
+        self.reserved_466 = 0;
         self.reserved_480 = 0;
 
     @property
@@ -2641,14 +2642,15 @@ class SAPathRecord(rdma.binstruct.BinStruct):
 
     @property
     def _pack_3_32(self):
-        return ((self.packetLifeTimeSelector & 0x3) << 30) | ((self.packetLifeTime & 0x3F) << 24) | ((self.preference & 0xFF) << 16) | ((self.reserved_464 & 0xFFFF) << 0)
+        return ((self.packetLifeTimeSelector & 0x3) << 30) | ((self.packetLifeTime & 0x3F) << 24) | ((self.preference & 0xFF) << 16) | ((self.reversePathPKeyMemberBit & 0x3) << 14) | ((self.reserved_466 & 0x3FFF) << 0)
 
     @_pack_3_32.setter
     def _pack_3_32(self,value):
         self.packetLifeTimeSelector = (value >> 30) & 0x3;
         self.packetLifeTime = (value >> 24) & 0x3F;
         self.preference = (value >> 16) & 0xFF;
-        self.reserved_464 = (value >> 0) & 0xFFFF;
+        self.reversePathPKeyMemberBit = (value >> 14) & 0x3;
+        self.reserved_466 = (value >> 0) & 0x3FFF;
 
     def pack_into(self,buffer,offset=0):
         self.DGID.pack_into(buffer,offset + 8);

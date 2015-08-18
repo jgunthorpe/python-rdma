@@ -1256,38 +1256,39 @@ Subnet Administration (15)
     .. attribute:: MAD_ATTRIBUTE_ID = 0x35
     .. attribute:: MAD_SUBNADMGET = 0x1 # MAD_METHOD_GET
     .. attribute:: MAD_SUBNADMGETTABLE = 0x12 # MAD_METHOD_GET_TABLE
-    .. attribute:: COMPONENT_MASK = {'serviceID':0, 'serviceID56LSB':1, 'DGID':2, 'SGID':3, 'DLID':4, 'SLID':5, 'rawTraffic':6, 'reserved_353':7, 'flowLabel':8, 'hopLimit':9, 'TClass':10, 'reversible':11, 'numbPath':12, 'PKey':13, 'QOSClass':14, 'SL':15, 'MTUSelector':16, 'MTU':17, 'rateSelector':18, 'rate':19, 'packetLifeTimeSelector':20, 'packetLifeTime':21, 'preference':22, 'reserved_464':23, 'reserved_480':24}
-    .. attribute:: MEMBERS = [('serviceID',64,1), ('DGID',128,1), ('SGID',128,1), ('DLID',16,1), ('SLID',16,1), ('rawTraffic',1,1), ('reserved_353',3,1), ('flowLabel',20,1), ('hopLimit',8,1), ('TClass',8,1), ('reversible',1,1), ('numbPath',7,1), ('PKey',16,1), ('QOSClass',12,1), ('SL',4,1), ('MTUSelector',2,1), ('MTU',6,1), ('rateSelector',2,1), ('rate',6,1), ('packetLifeTimeSelector',2,1), ('packetLifeTime',6,1), ('preference',8,1), ('reserved_464',16,1), ('reserved_480',32,1)]
+    .. attribute:: COMPONENT_MASK = {'serviceID':0, 'serviceID56LSB':1, 'DGID':2, 'SGID':3, 'DLID':4, 'SLID':5, 'rawTraffic':6, 'reserved_353':7, 'flowLabel':8, 'hopLimit':9, 'TClass':10, 'reversible':11, 'numbPath':12, 'PKey':13, 'QOSClass':14, 'SL':15, 'MTUSelector':16, 'MTU':17, 'rateSelector':18, 'rate':19, 'packetLifeTimeSelector':20, 'packetLifeTime':21, 'preference':22, 'reversePathPKeyMemberBit':23, 'reserved_466':24, 'reserved_480':25}
+    .. attribute:: MEMBERS = [('serviceID',64,1), ('DGID',128,1), ('SGID',128,1), ('DLID',16,1), ('SLID',16,1), ('rawTraffic',1,1), ('reserved_353',3,1), ('flowLabel',20,1), ('hopLimit',8,1), ('TClass',8,1), ('reversible',1,1), ('numbPath',7,1), ('PKey',16,1), ('QOSClass',12,1), ('SL',4,1), ('MTUSelector',2,1), ('MTU',6,1), ('rateSelector',2,1), ('rate',6,1), ('packetLifeTimeSelector',2,1), ('packetLifeTime',6,1), ('preference',8,1), ('reversePathPKeyMemberBit',2,1), ('reserved_466',14,1), ('reserved_480',32,1)]
 
-    ============================== =============== ======================
-    Member                         Position        Type                  
-    ============================== =============== ======================
-    :attr:`serviceID`              0:8 (64)        :class:`int`          
-    :attr:`serviceID56LSB`         8:8 (0)         :class:`int`          
-    :attr:`DGID`                   8:24 (128)      :class:`~rdma.IBA.GID`
-    :attr:`SGID`                   24:40 (128)     :class:`~rdma.IBA.GID`
-    :attr:`DLID`                   40:42 (16)      :class:`int`          
-    :attr:`SLID`                   42:44 (16)      :class:`int`          
-    :attr:`rawTraffic`             44:44[1] (1)    :class:`int`          
-    :attr:`reserved_353`           44[1]:44[4] (3) :class:`int`          
-    :attr:`flowLabel`              44[4]:47 (20)   :class:`int`          
-    :attr:`hopLimit`               47:48 (8)       :class:`int`          
-    :attr:`TClass`                 48:49 (8)       :class:`int`          
-    :attr:`reversible`             49:49[1] (1)    :class:`int`          
-    :attr:`numbPath`               49[1]:50 (7)    :class:`int`          
-    :attr:`PKey`                   50:52 (16)      :class:`int`          
-    :attr:`QOSClass`               52:53[4] (12)   :class:`int`          
-    :attr:`SL`                     53[4]:54 (4)    :class:`int`          
-    :attr:`MTUSelector`            54:54[2] (2)    :class:`int`          
-    :attr:`MTU`                    54[2]:55 (6)    :class:`int`          
-    :attr:`rateSelector`           55:55[2] (2)    :class:`int`          
-    :attr:`rate`                   55[2]:56 (6)    :class:`int`          
-    :attr:`packetLifeTimeSelector` 56:56[2] (2)    :class:`int`          
-    :attr:`packetLifeTime`         56[2]:57 (6)    :class:`int`          
-    :attr:`preference`             57:58 (8)       :class:`int`          
-    :attr:`reserved_464`           58:60 (16)      :class:`int`          
-    :attr:`reserved_480`           60:64 (32)      :class:`int`          
-    ============================== =============== ======================
+    ================================ =============== ======================
+    Member                           Position        Type                  
+    ================================ =============== ======================
+    :attr:`serviceID`                0:8 (64)        :class:`int`          
+    :attr:`serviceID56LSB`           8:8 (0)         :class:`int`          
+    :attr:`DGID`                     8:24 (128)      :class:`~rdma.IBA.GID`
+    :attr:`SGID`                     24:40 (128)     :class:`~rdma.IBA.GID`
+    :attr:`DLID`                     40:42 (16)      :class:`int`          
+    :attr:`SLID`                     42:44 (16)      :class:`int`          
+    :attr:`rawTraffic`               44:44[1] (1)    :class:`int`          
+    :attr:`reserved_353`             44[1]:44[4] (3) :class:`int`          
+    :attr:`flowLabel`                44[4]:47 (20)   :class:`int`          
+    :attr:`hopLimit`                 47:48 (8)       :class:`int`          
+    :attr:`TClass`                   48:49 (8)       :class:`int`          
+    :attr:`reversible`               49:49[1] (1)    :class:`int`          
+    :attr:`numbPath`                 49[1]:50 (7)    :class:`int`          
+    :attr:`PKey`                     50:52 (16)      :class:`int`          
+    :attr:`QOSClass`                 52:53[4] (12)   :class:`int`          
+    :attr:`SL`                       53[4]:54 (4)    :class:`int`          
+    :attr:`MTUSelector`              54:54[2] (2)    :class:`int`          
+    :attr:`MTU`                      54[2]:55 (6)    :class:`int`          
+    :attr:`rateSelector`             55:55[2] (2)    :class:`int`          
+    :attr:`rate`                     55[2]:56 (6)    :class:`int`          
+    :attr:`packetLifeTimeSelector`   56:56[2] (2)    :class:`int`          
+    :attr:`packetLifeTime`           56[2]:57 (6)    :class:`int`          
+    :attr:`preference`               57:58 (8)       :class:`int`          
+    :attr:`reversePathPKeyMemberBit` 58:58[2] (2)    :class:`int`          
+    :attr:`reserved_466`             58[2]:60 (14)   :class:`int`          
+    :attr:`reserved_480`             60:64 (32)      :class:`int`          
+    ================================ =============== ======================
 
 .. class:: rdma.IBA.SAPortInfoRecord
 

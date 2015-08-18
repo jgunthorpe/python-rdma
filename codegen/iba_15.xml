@@ -254,7 +254,8 @@
     <mb bits="2" off="0[448]">packetLifeTimeSelector<!--PacketLifeTimeSelector--></mb>
     <mb bits="6" off="0[450]">packetLifeTime<!--PacketLifeTime--></mb>
     <mb bits="8" off="0[456]">preference<!--Preference--></mb>
-    <mb bits="16" off="0[464]"><!--Reserved--></mb>
+    <mb bits="2" off="0[464]">reversePathPKeyMemberBit<!--ReversePathPKeyMemberBit--></mb>
+    <mb bits="14" off="0[466]"><!--Reserved--></mb>
     <mb bits="32" off="0[480]"><!--Reserved--></mb>
   </struct>
 
