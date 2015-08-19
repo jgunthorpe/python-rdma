@@ -1,8 +1,6 @@
 Version 0.2
 ===========
 
-`In progress`
-
 Notable Bug Fixes:
 
 - :attr:`rdma.devices.RDMADevice.node_desc` had a trailing \\n
