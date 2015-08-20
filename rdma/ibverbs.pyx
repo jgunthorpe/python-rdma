@@ -1086,7 +1086,7 @@ cdef class SRQ:
 
                 cwr.sg_list = csge
                 if typecheck(wr.sg_list, list) or typecheck(wr.sg_list, tuple):
-                    cwr.num_sge = len(sglist)
+                    cwr.num_sge = len(wr.sg_list)
                     for 0 <= j < cwr.num_sge:
                         sge = wr.sg_list[j]
                         csge.addr = sge.addr
@@ -1427,7 +1427,7 @@ cdef class QP:
 
                 cwr.sg_list = csge
                 if typecheck(wr.sg_list, list) or typecheck(wr.sg_list, tuple):
-                    cwr.num_sge = len(sglist)
+                    cwr.num_sge = len(wr.sg_list)
                     for 0 <= j < cwr.num_sge:
                         sge = wr.sg_list[j]
                         csge.addr = sge.addr
@@ -1507,7 +1507,7 @@ cdef class QP:
 
                 cwr.sg_list = csge
                 if typecheck(wr.sg_list, list) or typecheck(wr.sg_list, tuple):
-                    cwr.num_sge = len(sglist)
+                    cwr.num_sge = len(wr.sg_list)
                     for 0 <= j < cwr.num_sge:
                         sge = wr.sg_list[j]
                         csge.addr = sge.addr
