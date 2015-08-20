@@ -10,21 +10,19 @@ from distutils.core import Command
 from distutils.extension import Extension
 
 try:
-    import Pyrex.Distutils
-    import Pyrex.Compiler.Version;
-    if tuple(int(I) for I in Pyrex.Compiler.Version.version.split('.')) < (0,9,9):
-        raise ImportError
+    import Cython.Distutils
+    import Cython.Compiler.Version;
 except ImportError:
-    log.info("Pyrex > 0.9.9 is not installed -- using shippped Pyrex output");
-    # If we don't have Pyrex then just use the shipped .c file that is already built.
+    log.info("Cython is not installed -- using shippped Cython output");
+    # If we don't have Cython then just use the shipped .c file that is already built.
     ibverbs_module = Extension('rdma.ibverbs', ['rdma/ibverbs.c'],
                                libraries=['ibverbs']);
     from distutils.command.build_ext import build_ext
 else:
-    class build_ext(Pyrex.Distutils.build_ext):
+    class build_ext(Cython.Distutils.build_ext):
         def build_extensions(self):
             self.codegen();
-            Pyrex.Distutils.build_ext.build_extensions(self);
+            Cython.Distutils.build_ext.build_extensions(self);
 
         def get_enums(self,F):
             s = []

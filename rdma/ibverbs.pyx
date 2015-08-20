@@ -96,12 +96,12 @@ cdef to_ah_attr(c.ibv_ah_attr *cattr, object attr):
     :class:`rdma.ibverbs.ah_attr` which is copied directly (discouraged) or it
     can be a :class:`rdma.path.IBPath` which will setup the AH using the
     forward path parameters."""
-    if typecheck(attr, ah_attr):
+    if isinstance(attr, ah_attr):
         cattr.is_global = attr.is_global
         if cattr.is_global:
-            if not typecheck(attr.grh, global_route):
+            if not isinstance(attr.grh, global_route):
                 raise TypeError("attr.grh must be a global_route")
-            if not typecheck(attr.grh.dgid, IBA.GID):
+            if not isinstance(attr.grh.dgid, IBA.GID):
                 raise TypeError("attr.grh.dgid must be an IBA.GID")
             for 0 <= i < 16:
                 cattr.grh.dgid.raw[i] = ord(attr.DGID[i]);
@@ -115,7 +115,7 @@ cdef to_ah_attr(c.ibv_ah_attr *cattr, object attr):
         cattr.src_path_bits = attr.src_path_bits
         cattr.static_rate = attr.static_rate
         cattr.port_num = attr.port_num
-    elif typecheck(attr, rdma.path.IBPath):
+    elif isinstance(attr, rdma.path.IBPath):
         cattr.is_global = attr.has_grh
         if attr.DGID is not None:
             for 0 <= i < 16:
@@ -168,9 +168,9 @@ cdef _post_check(object arg, object wrtype, int max_sge, int *numsge):
 
     sgec = 0
     for wr in wrlist:
-        if not typecheck(wr, wrtype):
+        if not isinstance(wr, wrtype):
             raise TypeError("Work request must be of type %s" % wrtype.__name__)
-        if typecheck(wr.sg_list, sge):
+        if isinstance(wr.sg_list, sge):
             sgec = sgec + 1;
         elif isinstance(wr.sg_list, list) or isinstance(wr.sg_list, tuple):
             sglist = wr.sg_list
@@ -179,7 +179,7 @@ cdef _post_check(object arg, object wrtype, int max_sge, int *numsge):
             if n > max_sge:
                 raise ValueError("Too many scatter/gather entries in work request")
             for 0 <= i < n:
-                if not typecheck(sglist[i], sge):
+                if not isinstance(sglist[i], sge):
                     raise TypeError("sg_list entries must be of type ibv_sge")
         elif wr.sg_list is not None:
             raise TypeError("sg_list entries must be of type ibv_sge or a list")
@@ -206,7 +206,7 @@ class WCError(rdma.RDMAError):
         cdef QP qp
 
         if obj is not None:
-            if typecheck(obj,QP):
+            if isinstance(obj,QP):
                 qp = obj
             else:
                 qp = obj.pd.from_qp_num(wc.qp_num)
@@ -233,7 +233,7 @@ class WCError(rdma.RDMAError):
                 info.append("RQ");
             else:
                 info.append("SQ");
-        if obj is not None and typecheck(obj,SRQ):
+        if obj is not None and isinstance(obj,SRQ):
             self.srq = obj;
         if self.srq is not None:
             info.append(str(self.srq));
@@ -307,7 +307,7 @@ cdef class Context:
         cdef int i
         cdef int count
 
-        if typecheck(parent,rdma.devices.RDMADevice):
+        if isinstance(parent,rdma.devices.RDMADevice):
             self.node = parent
             self.end_port = None
         else:
@@ -1059,8 +1059,11 @@ cdef class SRQ:
         a list of them."""
         cdef list wrlist
         cdef unsigned char *mem
-        cdef c.ibv_recv_wr dummy_wr, *cwr, *cbad_wr
-        cdef c.ibv_sge dummy_sge, *csge
+        cdef c.ibv_recv_wr dummy_wr
+        cdef c.ibv_recv_wr *cwr
+        cdef c.ibv_recv_wr *cbad_wr
+        cdef c.ibv_sge dummy_sge
+        cdef c.ibv_sge *csge
         cdef int i, j, n, rc
         cdef int wr_id
         cdef int num_sge
@@ -1085,7 +1088,7 @@ cdef class SRQ:
                     cwr.next = cwr + 1
 
                 cwr.sg_list = csge
-                if typecheck(wr.sg_list, list) or typecheck(wr.sg_list, tuple):
+                if isinstance(wr.sg_list, list) or isinstance(wr.sg_list, tuple):
                     cwr.num_sge = len(wr.sg_list)
                     for 0 <= j < cwr.num_sge:
                         sge = wr.sg_list[j]
@@ -1269,13 +1272,13 @@ cdef class QP:
 
         memset(&cinit,0,sizeof(cinit));
 
-        if not typecheck(init.send_cq, CQ):
+        if not isinstance(init.send_cq, CQ):
             raise TypeError("send_cq must be a cq")
-        if not typecheck(init.recv_cq, CQ):
+        if not isinstance(init.recv_cq, CQ):
             raise TypeError("recv_cq must be a cq")
-        if not typecheck(init.cap, qp_cap):
+        if not isinstance(init.cap, qp_cap):
             raise TypeError("cap must be a qp_cap")
-        if init.srq is not None and not typecheck(init.srq, SRQ):
+        if init.srq is not None and not isinstance(init.srq, SRQ):
             raise TypeError("srq must be a SRQ")
 
         self._scq = init.send_cq
@@ -1344,9 +1347,9 @@ cdef class QP:
         cmask = mask
         if debug:
             print 'modify qp, attr = %s mask = 0x%x' % (str(attr), cmask)
-        if not typecheck(mask, int):
+        if not isinstance(mask, int):
             raise TypeError("mask must be an int")
-        if not typecheck(attr, qp_attr):
+        if not isinstance(attr, qp_attr):
             raise TypeError("attr must be a qp_attr")
         cattr.qp_state = attr.qp_state
         cattr.cur_qp_state = attr.cur_qp_state
@@ -1399,9 +1402,13 @@ cdef class QP:
         a list of them."""
         cdef list sglist, wrlist
         cdef unsigned char *mem
-        cdef c.ibv_send_wr dummy_wr, *cwr, *cbad_wr
-        cdef c.ibv_sge dummy_sge, *csge
-        cdef c.ibv_ah dummy_ah, *cah
+        cdef c.ibv_send_wr dummy_wr
+        cdef c.ibv_send_wr *cwr
+        cdef c.ibv_send_wr *cbad_wr
+        cdef c.ibv_sge dummy_sge
+        cdef c.ibv_sge *csge
+        cdef c.ibv_ah dummy_ah
+        cdef c.ibv_ah *cah
         cdef int i, j, n, rc,
         cdef int wr_id
         cdef AH ah
@@ -1426,7 +1433,7 @@ cdef class QP:
                     cwr.next = cwr + 1
 
                 cwr.sg_list = csge
-                if typecheck(wr.sg_list, list) or typecheck(wr.sg_list, tuple):
+                if isinstance(wr.sg_list, list) or isinstance(wr.sg_list, tuple):
                     cwr.num_sge = len(wr.sg_list)
                     for 0 <= j < cwr.num_sge:
                         sge = wr.sg_list[j]
@@ -1454,7 +1461,7 @@ cdef class QP:
                     cwr.wr.atomic.swap = wr.swap
                     cwr.wr.atomic.rkey = wr.rkey
                 elif self._qp_type == c.IBV_QPT_UD:
-                    if not typecheck(wr.ah,AH):
+                    if not isinstance(wr.ah,AH):
                         raise TypeError("AH must be a AH")
                     ah = wr.ah;
                     cwr.wr.ud.ah = ah._ah
@@ -1480,8 +1487,11 @@ cdef class QP:
         a list of them."""
         cdef list wrlist
         cdef unsigned char *mem
-        cdef c.ibv_recv_wr dummy_wr, *cwr, *cbad_wr
-        cdef c.ibv_sge dummy_sge, *csge
+        cdef c.ibv_recv_wr dummy_wr
+        cdef c.ibv_recv_wr *cwr
+        cdef c.ibv_recv_wr *cbad_wr
+        cdef c.ibv_sge dummy_sge
+        cdef c.ibv_sge *csge
         cdef int i, j, n, rc
         cdef int wr_id
         cdef int num_sge
@@ -1506,7 +1516,7 @@ cdef class QP:
                     cwr.next = cwr + 1
 
                 cwr.sg_list = csge
-                if typecheck(wr.sg_list, list) or typecheck(wr.sg_list, tuple):
+                if isinstance(wr.sg_list, list) or isinstance(wr.sg_list, tuple):
                     cwr.num_sge = len(wr.sg_list)
                     for 0 <= j < cwr.num_sge:
                         sge = wr.sg_list[j]

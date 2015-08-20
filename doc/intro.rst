@@ -49,7 +49,7 @@ OFA Module       Python-rdma
 libibmad         Near 100% coverage via :mod:`rdma.madtransactor` and
                  :mod:`rdma.IBA`
 libibumad        100% coverage via :mod:`rdma.umad`
-libibverbs       100% coverage via :mod:`rdma.ibverbs` (through Pyrex)
+libibverbs       100% coverage via :mod:`rdma.ibverbs` (through Cython)
 libibnetdisc     ~80% coverage. No support for switch chassis grouping.
 librdmacm        Not covered
 libibcm          Not covered

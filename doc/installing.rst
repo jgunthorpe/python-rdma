@@ -55,7 +55,7 @@ For Development
 The module ships with a few pre-built things, to do development work the
 following will also be required:
 
-- Pyrex >= 0.9.9
+- Cython >= 0.21
 - Sphinx >= 0.6.6
 
 To test the installation of the above tools do the following::
@@ -71,18 +71,14 @@ After which running Python programs from the top of the source tree will
 automatically have the correct PYTHONPATH and changes to the source itself
 will immediately be picked up without having to run `./setup.py build`
 
-However, be aware that changes to the `Pyrex` extension module will still
+However, be aware that changes to the extension module will still
 require running `./setup.py build_ext` to recompile.
 
 The two required modules are easily configured in a private user directory as
 follows::
 
- $ wget http://www.cosc.canterbury.ac.nz/greg.ewing/python/Pyrex/Pyrex-0.9.9.tar.gz
- $ wget http://pypi.python.org/packages/2.6/S/Sphinx/Sphinx-1.0.7-py2.6.egg#md5=a547658740040dd87ef71fbf723e7962
- $ tar -xzf Pyrex-0.9.9.tar.gz
- $ ln -s Pyrex-0.9.9/Pyrex .
- $ unzip Sphinx-1.0.7-py2.6.egg
- $ export PYTHONPATH=`pwd`
+ $ pip install --user Cython
+ $ pip install --user Sphinx
 
 Other approaches are possible as well.
 
