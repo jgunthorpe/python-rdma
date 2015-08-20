@@ -29,7 +29,13 @@ class Endpoint(object):
         self.cq = self.ctx.cq(2*opt.tx_depth,self.cc)
         self.poller = rdma.vtools.CQPoller(self.cq);
         self.pd = self.ctx.pd()
-        self.qp = self.pd.qp(ibv.IBV_QPT_RC,opt.tx_depth,self.cq,opt.tx_depth,self.cq);
+        self.qp = self.pd.qp(ibv.IBV_QPT_RC,
+                             opt.tx_depth,
+                             self.cq,
+                             opt.tx_depth,
+                             self.cq,
+                             max_send_sge=opt.num_sge,
+                             max_recv_sge=1);
         self.mem = mmap(-1, opt.size)
         self.mr = self.pd.mr(self.mem,
                              ibv.IBV_ACCESS_LOCAL_WRITE|ibv.IBV_ACCESS_REMOTE_WRITE)
@@ -49,10 +55,22 @@ class Endpoint(object):
         self.qp.establish(self.path.forward_path,ibv.IBV_ACCESS_REMOTE_WRITE);
 
     def rdma(self):
+        if self.opt.num_sge > 1:
+            block = self.opt.size / self.opt.num_sge + 1
+            sg_list = []
+            offset = 0
+            while offset < self.opt.size:
+                if offset + block > self.opt.size:
+                    block = self.opt.size - offset
+                sg_list.append( self.mr.sge( block, offset ) )
+                offset += block
+        else:
+            sg_list = self.mr.sge()
+
         swr = ibv.send_wr(wr_id=0,
                           remote_addr=self.peerinfo.addr,
                           rkey=self.peerinfo.rkey,
-                          sg_list=self.mr.sge(),
+                          sg_list=sg_list,
                           opcode=ibv.IBV_WR_RDMA_WRITE,
                           send_flags=ibv.IBV_SEND_SIGNALED)
 
@@ -197,6 +215,8 @@ def cmd_rdma_bw(argv,o):
                  help="use port PORT of IB device")
     o.add_option('-s', '--size', default=1024*1024, type="int", metavar="BYTES",
                  help="exchange messages of size BYTES,(client only)")
+    o.add_option('-e', '--num-sge', default=1, type="int", metavar="NUM",
+                 help="Number of sges to use.")
     o.add_option('-t', '--tx-depth', default=100, type="int", help="number of exchanges")
     o.add_option('-n', '--iters', default=1000, type="int",
                  help="number of exchanges (client only)")
