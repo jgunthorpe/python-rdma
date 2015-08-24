@@ -4,6 +4,8 @@ PACKAGE = $(firstword $(shell dh_listpackages))
 TMP     = $(CURDIR)/debian/$(PACKAGE)
 
 override_dh_auto_build:
+	# Force rebuild of cython output for Debian
+	rm rdma/ibverbs.c
 	dh_auto_build
 	python setup.py docs
 

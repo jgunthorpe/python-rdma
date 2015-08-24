@@ -4,6 +4,7 @@ FROM centos:7
 MAINTAINER Jason Gunthorpe <jgunthorpe@obsidianresearch.com>
 
 RUN yum install -y \
+	Cython \
 	gcc \
 	libibverbs-devel \
 	python-devel \

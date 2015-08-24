@@ -2,7 +2,12 @@ Source: python-rdma
 Maintainer: Jason Gunthorpe <jgunthorpe@obsidianreserch.com>
 Section: python
 Priority: optional
-Build-Depends: python2.7-dev, debhelper (>= 7.4.3), libibverbs-dev (>= 1.1), python-sphinx, dh-python
+Build-Depends: python2.7-dev,
+    debhelper (>= 7.4.3),
+    libibverbs-dev (>= 1.1),
+    python-sphinx,
+    dh-python,
+    cython (>= 0.21)
 Standards-Version: 3.9.1
 X-Python-Version: >= 2.6
 

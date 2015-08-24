@@ -5,6 +5,7 @@ MAINTAINER Jason Gunthorpe <jgunthorpe@obsidianresearch.com>
 
 RUN apt-get update && apt-get install -y \
     build-essential \
+    cython \
     debhelper \
     dh-python \
     libc6-dev \
