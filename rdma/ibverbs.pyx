@@ -138,7 +138,6 @@ cdef to_ah_attr(c.ibv_ah_attr *cattr, object attr):
 cdef object from_ah_attr(c.ibv_ah_attr *cattr):
     """Return a :class:`rdma.ibverbs.ah_attr` filled in from *cattr."""
     return ah_attr(grh=global_route(dgid=IBA.GID(PyBytes_FromStringAndSize(<char *>cattr.grh.dgid.raw,16),True),
-                                    sgid_index=cattr.grh.sgid_index,
                                     flow_label=cattr.grh.flow_label,
                                     sgid_index=cattr.grh.sgid_index,
                                     hop_limit=cattr.grh.hop_limit,
