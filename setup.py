@@ -9,69 +9,62 @@ from distutils.core import setup
 from distutils.core import Command
 from distutils.extension import Extension
 
-try:
-    import Cython.Distutils
-    import Cython.Compiler.Version;
-except ImportError:
-    log.info("Cython is not installed -- using shippped Cython output");
-    # If we don't have Cython then just use the shipped .c file that is already built.
-    ibverbs_module = Extension('rdma.ibverbs', ['rdma/ibverbs.c'],
-                               libraries=['ibverbs']);
-    from distutils.command.build_ext import build_ext
-else:
-    class build_ext(Cython.Distutils.build_ext):
-        def build_extensions(self):
-            self.codegen();
-            Cython.Distutils.build_ext.build_extensions(self);
+import Cython.Distutils
+import Cython.Compiler.Version;
 
-        def get_enums(self,F):
-            s = []
-            skip = True
-            for I in F.readlines():
-                if I[0] == '#':
-                    skip = I.find("infiniband/verbs.h") == -1;
-                else:
-                    if not skip:
-                        s.append(I)
-            s = "".join(s);
+class build_ext(Cython.Distutils.build_ext):
+    def build_extensions(self):
+        self.codegen();
+        Cython.Distutils.build_ext.build_extensions(self);
 
-            enum = {}
-            for m in re.finditer(r'enum\s+(\w+)\s*{(.*?)}', s, re.DOTALL):
-                name = m.group(1)
-                constants = [c.partition('=')[0].strip() for c in m.group(2).split(',') if c.strip() != ""]
-                enum[name] = tuple(constants)
+    def get_enums(self,F):
+        s = []
+        skip = True
+        for I in F.readlines():
+            if I[0] == '#':
+                skip = I.find("infiniband/verbs.h") == -1;
+            else:
+                if not skip:
+                    s.append(I)
+        s = "".join(s);
 
-            return enum
+        enum = {}
+        for m in re.finditer(r'enum\s+(\w+)\s*{(.*?)}', s, re.DOTALL):
+            name = m.group(1)
+            constants = [c.partition('=')[0].strip() for c in m.group(2).split(',') if c.strip() != ""]
+            enum[name] = tuple(constants)
 
-        def write_enums_pxd(self,F,enums):
-            print >> F, '\n\n'.join('\n'.join('%s = c.%s' % (c, c) for c in v)
-                                    for e,v in sorted(enums.iteritems()))
-        def write_enums_pxi(self,F,enums):
-            sep = '\n' + ' '*8
-            print >> F, '\n\n'.join('    enum %s:%s' % (e,sep) + sep.join(v)
-                                    for e,v in sorted(enums.iteritems()));
+        return enum
 
-        def codegen(self):
-            if not os.path.exists(self.build_temp):
-                os.makedirs(self.build_temp)
-            verbs_h = os.path.join(self.build_temp,"verbs_h.c")
-            verbs_h_o = verbs_h + ".out"
-            with open(verbs_h,"wt") as F:
-                F.write("#include <infiniband/verbs.h>")
-            self.compiler.preprocess(verbs_h,verbs_h_o);
+    def write_enums_pxd(self,F,enums):
+        print >> F, '\n\n'.join('\n'.join('%s = c.%s' % (c, c) for c in v)
+                                for e,v in sorted(enums.iteritems()))
+    def write_enums_pxi(self,F,enums):
+        sep = '\n' + ' '*8
+        print >> F, '\n\n'.join('    enum %s:%s' % (e,sep) + sep.join(v)
+                                for e,v in sorted(enums.iteritems()));
 
-            with open(verbs_h_o) as F:
-                enums = self.get_enums(F);
-            with open("rdma/libibverbs_enums.pxd","wt") as F:
-                print >> F, "cdef extern from 'infiniband/verbs.h':";
-                self.write_enums_pxi(F,enums);
-            with open("rdma/libibverbs_enums.pxi","wt") as F:
-                self.write_enums_pxd(F,enums);
+    def codegen(self):
+        if not os.path.exists(self.build_temp):
+            os.makedirs(self.build_temp)
+        verbs_h = os.path.join(self.build_temp,"verbs_h.c")
+        verbs_h_o = verbs_h + ".out"
+        with open(verbs_h,"wt") as F:
+            F.write("#include <infiniband/verbs.h>")
+        self.compiler.preprocess(verbs_h,verbs_h_o);
 
-    ibverbs_module = Extension('rdma.ibverbs', ['rdma/ibverbs.pyx'],
-                               libraries=['ibverbs'],
-                               depends=['rdma/libibverbs.pxd',
-                                        'rdma/libibverbs.pxi'])
+        with open(verbs_h_o) as F:
+            enums = self.get_enums(F);
+        with open("rdma/libibverbs_enums.pxd","wt") as F:
+            print >> F, "cdef extern from 'infiniband/verbs.h':";
+            self.write_enums_pxi(F,enums);
+        with open("rdma/libibverbs_enums.pxi","wt") as F:
+            self.write_enums_pxd(F,enums);
+
+ibverbs_module = Extension('rdma.ibverbs', ['rdma/ibverbs.pyx'],
+                           libraries=['ibverbs'],
+                           depends=['rdma/libibverbs.pxd',
+                                    'rdma/libibverbs.pxi'])
 
 # From PyCA
 class sphinx_build(Command):

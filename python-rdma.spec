@@ -12,9 +12,7 @@ BuildRequires: gcc
 BuildRequires: libibverbs-devel
 BuildRequires: python-devel
 BuildRequires: python-sphinx
-%if 0%{?rhel} >= 7
 BuildRequires: Cython
-%endif
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
@@ -39,9 +37,6 @@ libraries to provide ibverbs functionality.
 echo "__git_head__ = '"`zcat %{sources} | git get-tar-commit-id`"'" >> rdma/__init__.py
 
 %build
-%if 0%{?rhel} >= 7
-rm rdma/ibverbs.c
-%endif
 env CFLAGS="$RPM_OPT_FLAGS" python setup.py build
 python setup.py docs
 

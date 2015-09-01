@@ -11,3 +11,8 @@ RUN yum install -y \
 	rpm-build \
 	tar \
 	&& yum clean all
+
+ADD http://vault.centos.org/7.1.1503/os/Source/SPackages/Cython-0.19-3.el7.src.rpm /tmp/
+RUN rpmbuild --rebuild /tmp/Cython-0.19-3.el7.src.rpm && \
+    rpm -U /root/rpmbuild/RPMS/x86_64/Cython-0.19-3.el6.x86_64.rpm && \
+    rm -rf /root/rpmbuild
