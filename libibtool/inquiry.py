@@ -391,6 +391,29 @@ def cmd_ibportstate(argv,o):
             raise CmdError("Operation %r is not known"%(values[3]));
     return lib.done();
 
+def decode_link(o,bytes):
+    """Assume bytes starts with the LRH and parse accordingly. Returns bytes
+       starting at the MAD header"""
+    lhdr = IBA.HdrLRH(bytes);
+    off = 8;
+    if o.verbosity >= 1:
+        lhdr.printer(sys.stdout);
+    if lhdr.LNH & 1 == 1:
+        ghdr = IBA.HdrGRH(bytes[off:]);
+        if o.verbosity >= 1:
+            ghdr.printer(sys.stdout);
+        off = off + 40;
+    bth = IBA.HdrBTH(bytes[off:]);
+    if o.verbosity >= 1:
+        bth.printer(sys.stdout);
+    off = off + 12;
+    if bth.service == 3 and bth.function == 4:
+        deth = IBA.HdrDETH(bytes[off:]);
+        if o.verbosity >= 1:
+            deth.printer(sys.stdout);
+        off = off + 8;
+    return bytes[off:]
+
 def cmd_decode_mad(argv,o):
     """Accept on stdin a hex dump of a MAD and pretty print it.
        Usage: %prog [-v]
@@ -403,6 +426,8 @@ def cmd_decode_mad(argv,o):
                  help="Increase the verbosity level of diagnostic messages, each -v increases by 1.")
     o.add_option("-o","--offset",dest="offset",action="store",default=0,type=int,
                  help="Start at this offest before decoding.")
+    o.add_option("-l",dest="lrh",action="store_true",
+                 help="The data starts at the LRH, not the MAD header");
     (args,values) = o.parse_args(argv,expected_values = 0);
     o.verbosity = args.verbosity;
 
@@ -418,6 +443,10 @@ def cmd_decode_mad(argv,o):
     bytes = bytes[args.offset:];
     if o.verbosity >= 2:
         print bytes.encode("hex");
+
+    if args.lrh:
+        bytes = decode_link(o,bytes);
+
     hdr = IBA.MADHeader(bytes);
     if o.verbosity >= 1:
         hdr.printer(sys.stdout);
