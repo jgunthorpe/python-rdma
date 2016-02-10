@@ -11,6 +11,9 @@ import rdma.devices
 import rdma.IBA as IBA;
 import rdma.path;
 
+from cpython.string cimport PyString_AsString
+from libc.stdint cimport uint8_t
+
 cimport libibverbs as c
 
 cdef extern from 'types.h':
@@ -96,6 +99,8 @@ cdef to_ah_attr(c.ibv_ah_attr *cattr, object attr):
     :class:`rdma.ibverbs.ah_attr` which is copied directly (discouraged) or it
     can be a :class:`rdma.path.IBPath` which will setup the AH using the
     forward path parameters."""
+    # ord() is broken in cython 0.20/0.21
+    cdef uint8_t *tmp
     if isinstance(attr, ah_attr):
         cattr.is_global = attr.is_global
         if cattr.is_global:
@@ -103,8 +108,9 @@ cdef to_ah_attr(c.ibv_ah_attr *cattr, object attr):
                 raise TypeError("attr.grh must be a global_route")
             if not isinstance(attr.grh.dgid, IBA.GID):
                 raise TypeError("attr.grh.dgid must be an IBA.GID")
+            tmp = <uint8_t *>PyString_AsString(attr.DGID);
             for 0 <= i < 16:
-                cattr.grh.dgid.raw[i] = ord(attr.DGID[i]);
+                cattr.grh.dgid.raw[i] = tmp[i];
             cattr.grh.flow_label = attr.grh.flow_label
             cattr.grh.sgid_index = attr.grh.sgid_index
             cattr.grh.hop_limit = attr.grh.hop_limit
@@ -118,8 +124,9 @@ cdef to_ah_attr(c.ibv_ah_attr *cattr, object attr):
     elif isinstance(attr, rdma.path.IBPath):
         cattr.is_global = attr.has_grh
         if attr.DGID is not None:
+            tmp = <uint8_t *>PyString_AsString(attr.DGID);
             for 0 <= i < 16:
-                cattr.grh.dgid.raw[i] = ord(attr.DGID[i]);
+                cattr.grh.dgid.raw[i] = tmp[i];
         if cattr.is_global:
             cattr.grh.sgid_index = attr.SGID_index;
 
