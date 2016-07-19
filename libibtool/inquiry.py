@@ -2,11 +2,13 @@
 # Fairly simple status/inquery commands
 import sys
 import copy
+import struct;
 import rdma;
 import rdma.IBA as IBA;
 import rdma.IBA_describe as IBA_describe;
 import rdma.madtransactor;
 import rdma.satransactor;
+import rdma.binstruct;
 from libibtool import *;
 from libibtool.libibopts import *;
 
@@ -414,6 +416,45 @@ def decode_link(o,bytes):
         off = off + 8;
     return bytes[off:]
 
+class UMADHdr(rdma.binstruct.BinStruct):
+    MAD_LENGTH = 64;
+    MEMBERS = [('agent_id',32,1),('status',32,1),('timeout_ms',32,1),
+               ('retries',32,1),('length',32,1),
+               ('qpn',32,1),('qkey',32,1),('lid',16,1),('sl',8,1),
+               ('path_bits',8,1),('grh_present',8,1),('gid_index',8,1),('hop_limit',8,1),
+               ('traffic_class',8,1),('gid',128,1),('flow_label',32,1),('pkey_index',16,1),
+               ('reserved_58',8,6)];
+
+    def __init__(self,buf = None,offset = 0):
+        rdma.binstruct.BinStruct.__init__(self,buf,offset);
+        self.buf = buf[offset : offset + self.MAD_LENGTH];
+        assert len(self.buf) == self.MAD_LENGTH;
+
+    def unpack_from(self,buffer,offset=0):
+        from socket import htonl as cpu_to_be32;
+        from socket import htons as cpu_to_be16;
+
+        (self.agent_id,self.status,self.timeout_ms,self.retries,self.length,
+         self.qpn,self.qkey,self.lid,self.sl,self.path_bits,self.grh_present,self.gid_index,
+         self.hop_limit,self.traffic_class,self.gid,self.flow_label,self.pkey_index,self.reserved_58) = \
+         struct.unpack_from("=LLLLLLLHBBBBBB16sLH6s",buffer,offset+0);
+
+        self.qpn = cpu_to_be32(self.qpn);
+        self.qkey = cpu_to_be32(self.qkey);
+        self.lid = cpu_to_be16(self.lid);
+        self.gid = IBA.GID(self.gid,raw=True);
+        self.flow_label = cpu_to_be32(self.flow_label);
+
+    def pack_into(self,buffer,offset=0):
+        assert len(buffer) == self.MAD_LENGTH;
+        buffer[:] = self.buf;
+
+def decode_umad(o,bytes):
+    """Assume bytes star ts with a umad header and parse accordingly."""
+    if o.verbosity >= 1:
+        UMADHdr(bytes).printer(sys.stdout);
+    return bytes[UMADHdr.MAD_LENGTH:];
+
 def cmd_decode_mad(argv,o):
     """Accept on stdin a hex dump of a MAD and pretty print it.
        Usage: %prog [-v]
@@ -428,6 +469,8 @@ def cmd_decode_mad(argv,o):
                  help="Start at this offest before decoding.")
     o.add_option("-l",dest="lrh",action="store_true",
                  help="The data starts at the LRH, not the MAD header");
+    o.add_option("--umad",dest="umad",action="store_true",
+                 help="The data includes a kernel umad header, eg it is from /dev/infiniband/umadX");
     (args,values) = o.parse_args(argv,expected_values = 0);
     o.verbosity = args.verbosity;
 
@@ -443,6 +486,9 @@ def cmd_decode_mad(argv,o):
     bytes = bytes[args.offset:];
     if o.verbosity >= 2:
         print bytes.encode("hex");
+
+    if args.umad:
+        bytes = decode_umad(o,bytes);
 
     if args.lrh:
         bytes = decode_link(o,bytes);
