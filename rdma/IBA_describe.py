@@ -267,11 +267,13 @@ def struct_dump(F,s,offset=0,name_prefix=''):
         if cur_dword+3 >= max_dword:
             return
 
-        print >> F, "%3u %02X%02X%02X%02X %s"%\
-              (offset + cur_dword,ord(buf[cur_dword]),ord(buf[cur_dword+1]),
-               ord(buf[cur_dword+2]),ord(buf[cur_dword+3]),
-               ",".join(mb));
-        cur_dword = cur_dword + 4;
+        while off > cur_dword*8:
+            print >> F, "%3u %02X%02X%02X%02X %s"%\
+                (offset + cur_dword,ord(buf[cur_dword]),ord(buf[cur_dword+1]),
+                 ord(buf[cur_dword+2]),ord(buf[cur_dword+3]),
+                 ",".join(mb));
+            del mb[:]
+            cur_dword = cur_dword + 4;
 
 def struct_dotted(F,s,name_prefix='',dump_list=False,skip_reserved=True,
                   column=33,colon=False,name_map=None):
