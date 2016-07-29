@@ -18,6 +18,17 @@ from contextlib import contextmanager;
 
 project = "python-rdma";
 
+def get_build_args():
+    """Return extra docker arguments for building. This is the system APT proxy."""
+    args = [];
+    if os.path.exists("/etc/apt/apt.conf.d/01proxy"):
+        # The line in this file must be 'Acquire::http { Proxy "http://dockerhub.edm.orcorp.ca:3142"; };'
+        with open("/etc/apt/apt.conf.d/01proxy") as F:
+            proxy = F.read().strip().split('"')[1];
+            args.append("--build-arg");
+            args.append('http_proxy="%s"'%(proxy))
+    return args;
+
 def get_version():
     return imp.load_source('__tmp__','rdma/__init__.py').__version__;
 
@@ -307,11 +318,12 @@ def cmd_build_images(args):
     else:
         args.env = environments;
     for I in args.env:
-        docker_cmd(args,
-                   "build",
+        opts = ["build"] + \
+               get_build_args() + [
                    "-f",I.dockerfile,
                    "-t",I.image_name(),
-                   "docker/");
+                   "docker/"];
+        docker_cmd(args,*opts);
 
 def args_rpm(parser):
     envs = set();
