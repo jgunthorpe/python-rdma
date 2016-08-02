@@ -20,6 +20,17 @@ def tmpl_node_guid(s):
 def tmpl_port_guid(s):
     return IBA.GUID(s);
 
+def _set_sa_path(option,opt,value,parser):
+    try:
+        path = rdma.path.from_string(value)
+        path.dqpn = 1
+        path.sqpn = 1
+        path.qkey = IBA.IB_DEFAULT_QP1_QKEY
+        parser.values.sa_path = path
+        parser.values.use_sa = True
+    except ValueError:
+        parser.error("invalid path: %s" % value)
+
 class LibIBOpts(object):
     """Emulate the commandline parsing of legacy tools."""
     debug = 0;
@@ -156,6 +167,8 @@ class LibIBOpts(object):
                      help="Use internal names for all the fields instead of libib compatible names.");
         o.add_option("--sa",dest="use_sa",action="store_true",
                      help="Instead of issuing SMPs, use corresponding record queries to the SA.");
+        o.add_option("--sa-path",action="callback",callback=_set_sa_path,type=str,dest="sa_path",
+                     help="Specify the path to the SA, implies --sa.");
 
         if address:
             try:
@@ -249,11 +262,11 @@ class LibIBOpts(object):
         self.debug_print_path("GMP",path);
         return path;
 
-    def get_umad(self,gmp=False):
+    def get_umad(self,gmp=False,local_sa=False):
         """Return a generic umad."""
-        return self.get_umad_for_target(gmp=gmp);
+        return self.get_umad_for_target(gmp=gmp,local_sa=local_sa);
 
-    def get_umad_for_target(self,path=False,gmp=False):
+    def get_umad_for_target(self,path=False,gmp=False,local_sa=False):
         """Return a UMAD suitable for use to talk to *path*. *path* is an
         :class:`rdma.path.IBPath`. If *path* is `None` then a loopback path is
         resolved, if *path* is `False` then no path is resolved.
@@ -270,7 +283,12 @@ class LibIBOpts(object):
             if self.args.use_sa:
                 __import__("rdma.satransactor");
                 import sys;
-                umad = sys.modules["rdma.satransactor"].SATransactor(umad);
+                if local_sa or self.args.sa_path is None:
+                    sa_path = self.end_port.sa_path
+                else:
+                    sa_path = self.args.sa_path
+                    rdma.path.resolve_path(umad, sa_path)
+                umad = sys.modules["rdma.satransactor"].SATransactor(umad,sa_path);
 
             if path is False:
                 self.path = None;
@@ -290,7 +308,7 @@ class LibIBOpts(object):
         if self.args.use_sa:
             if path is not None:
                 umad.get_path_lid(path);
-            return umad.__class__(rdma.sched.MADSchedule(umad._parent));
+            return umad.__class__(rdma.sched.MADSchedule(umad._parent), self.args.sa_path);
         return rdma.sched.MADSchedule(umad);
 
     def get_end_port(self):

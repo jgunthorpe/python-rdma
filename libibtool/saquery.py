@@ -429,8 +429,13 @@ def cmd_saquery(argv,o):
                 n,query.__class__.__name__,", ".join(query.COMPONENT_MASK.iterkeys())));
         set_mad_attr(query_cm,n,v);
 
+    path = None
+    if args.sa_path:
+        with lib.get_umad(gmp=True,local_sa=True) as umad:
+            path = args.sa_path
+            rdma.path.resolve_path(umad, path)
+
     with lib.get_umad(gmp=True) as umad:
-        path = umad.end_port.sa_path;
 
         # Special help for PathRecords, spec says SGID and numbPath are mandatory for GetTable.
         if args.kind == IBA.SAPathRecord and not args.use_get and not args.no_defaults:

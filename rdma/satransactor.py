@@ -25,11 +25,12 @@ class SATransactor(rdma.madtransactor.MADTransactor):
 
     It is also a context manager that wrappers the *parent*'s :meth:`close`."""
 
-    def __init__(self,parent):
+    def __init__(self,parent,sa_path=None):
         """*parent* is the :class:`~rdma.madtransactor.MADTransactor` we are
         wrappering."""
         self._parent = parent;
         self.end_port = parent.end_port;
+        self.sa_path = sa_path or self.end_port.sa_path;
 
     def get_path_lid(self,path):
         """Resolve *path* to a LID. This is only does something if *path*
@@ -115,6 +116,11 @@ class SATransactor(rdma.madtransactor.MADTransactor):
         self.req_path._cached_node_type = rpayload.nodeInfo.nodeType;
         return rpayload.nodeInfo;
 
+    def _subn_adm_do(self,payload,path,attributeModifier,method,completer=None):
+        if path is None:
+            path = self.sa_path
+        return rdma.madtransactor.MADTransactor._subn_adm_do(self,payload,path,attributeModifier,method,completer)
+
     def SubnGet(self,payload,path,attributeModifier=0):
         ID = payload.MAD_ATTRIBUTE_ID;
         meth = payload.MAD_SUBNGET;
@@ -122,14 +128,14 @@ class SATransactor(rdma.madtransactor.MADTransactor):
             req = IBA.ComponentMask(IBA.SAGUIDInfoRecord());
             req.LID = self.get_path_lid(path);
             req.blockNum = attributeModifier;
-            return self._subn_adm_do(req,self.end_port.sa_path,0,
+            return self._subn_adm_do(req,self.sa_path,0,
                                      req.MAD_SUBNADMGET,
                                      lambda x:x.GUIDInfo);
         if ID == IBA.SMPLinearForwardingTable.MAD_ATTRIBUTE_ID:
             req = IBA.ComponentMask(IBA.SALinearForwardingTableRecord());
             req.LID = self.get_path_lid(path);
             req.blockNum = attributeModifier;
-            return self._subn_adm_do(req,self.end_port.sa_path,0,
+            return self._subn_adm_do(req,self.sa_path,0,
                                      req.MAD_SUBNADMGET,
                                      (lambda x:x.linearForwardingTable,
                                       self._sa_error));
@@ -138,20 +144,20 @@ class SATransactor(rdma.madtransactor.MADTransactor):
             req.LID = self.get_path_lid(path);
             req.blockNum = attributeModifier & ((1<<9)-1);
             req.position = (attributeModifier >> 12) & 0xF;
-            return self._subn_adm_do(req,self.end_port.sa_path,0,
+            return self._subn_adm_do(req,self.sa_path,0,
                                      req.MAD_SUBNADMGET,
                                      (lambda x:x.multicastForwardingTable,
                                       self._sa_error));
         if ID == IBA.SMPNodeDescription.MAD_ATTRIBUTE_ID:
             req = IBA.ComponentMask(IBA.SANodeRecord());
             req.LID = self.get_path_lid(path);
-            return self._subn_adm_do(req,self.end_port.sa_path,0,
+            return self._subn_adm_do(req,self.sa_path,0,
                                      req.MAD_SUBNADMGET,
                                      self._finish_nodedesc);
         if ID == IBA.SMPNodeInfo.MAD_ATTRIBUTE_ID:
             req = IBA.ComponentMask(IBA.SANodeRecord());
             req.LID = self.get_path_lid(path);
-            return self._subn_adm_do(req,self.end_port.sa_path,0,
+            return self._subn_adm_do(req,self.sa_path,0,
                                      req.MAD_SUBNADMGET,
                                      self._finish_nodeinfo);
 
@@ -162,7 +168,7 @@ class SATransactor(rdma.madtransactor.MADTransactor):
             if nt is None or nt == IBA.NODE_SWITCH:
                 req.portNum = attributeModifier >> 16;
             req.blockNum = attributeModifier & 0xFFFF;
-            return self._subn_adm_do(req,self.end_port.sa_path,0,
+            return self._subn_adm_do(req,self.sa_path,0,
                                      req.MAD_SUBNADMGET,
                                      (lambda x:x.PKeyTable,
                                       self._sa_error));
@@ -175,12 +181,12 @@ class SATransactor(rdma.madtransactor.MADTransactor):
                 # This can mean 'whatever port' or it can mean 'switch port 0'
                 # If we don't know the node type then do a get table and
                 # figure it out.
-                return self._subn_adm_do(req,self.end_port.sa_path,0,
+                return self._subn_adm_do(req,self.sa_path,0,
                                          req.MAD_SUBNADMGETTABLE,
                                          self._finish_port_info_attr0);
 
             req.portNum = attributeModifier;
-            return self._subn_adm_do(req,self.end_port.sa_path,0,
+            return self._subn_adm_do(req,self.sa_path,0,
                                      req.MAD_SUBNADMGET,
                                      lambda x:x.portInfo);
         if ID == IBA.SMPSLToVLMappingTable.MAD_ATTRIBUTE_ID:
@@ -188,20 +194,20 @@ class SATransactor(rdma.madtransactor.MADTransactor):
             req.LID = self.get_path_lid(path);
             req.inputPortNum = (attributeModifier >> 8) & 0xFF;
             req.outputPortNum = attributeModifier & 0xFF;
-            return self._subn_adm_do(req,self.end_port.sa_path,0,
+            return self._subn_adm_do(req,self.sa_path,0,
                                      req.MAD_SUBNADMGET,
                                      (lambda x:x.SLToVLMappingTable,
                                       self._sa_error));
         if ID == IBA.SMPSMInfo.MAD_ATTRIBUTE_ID:
             req = IBA.ComponentMask(IBA.SASMInfoRecord());
             req.LID = self.get_path_lid(path);
-            return self._subn_adm_do(req,self.end_port.sa_path,0,
+            return self._subn_adm_do(req,self.sa_path,0,
                                      req.MAD_SUBNADMGET,
                                      lambda x:x.SMInfo);
         if ID == IBA.SMPSwitchInfo.MAD_ATTRIBUTE_ID:
             req = IBA.ComponentMask(IBA.SASwitchInfoRecord());
             req.LID = self.get_path_lid(path);
-            return self._subn_adm_do(req,self.end_port.sa_path,0,
+            return self._subn_adm_do(req,self.sa_path,0,
                                      req.MAD_SUBNADMGET,
                                      lambda x:x.switchInfo);
         if ID == IBA.SMPVLArbitrationTable.MAD_ATTRIBUTE_ID:
@@ -209,7 +215,7 @@ class SATransactor(rdma.madtransactor.MADTransactor):
             req.LID = self.get_path_lid(path);
             req.outputPortNum = attributeModifier & 0xFFFF;
             req.blockNum = (attributeModifier >> 16) & 0xFFFF;
-            return self._subn_adm_do(req,self.end_port.sa_path,0,
+            return self._subn_adm_do(req,self.sa_path,0,
                                      req.MAD_SUBNADMGET,
                                      (lambda x:x.VLArbitrationTable,
                                       self._sa_error));
