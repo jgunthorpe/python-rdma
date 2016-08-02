@@ -74,6 +74,15 @@ def link_speed(value):
         res.append("QDR");
     return ",".join(res);
 
+def link_speed_ext(value):
+    """Decode a Port Info linkSpeedExtActive value into a string."""
+    res = [];
+    if value & IBA.LINK_SPEED_EXT_14Gb0:
+        res.append("FDR");
+    if value & IBA.LINK_SPEED_EXT_25Gb7:
+        res.append("EDR");
+    return ",".join(res);
+
 def link_width(width):
     """Convert a link with constant into an integer number of lanes."""
     if width == IBA.LINK_WIDTH_1x:
@@ -95,36 +104,68 @@ def rate(value):
         return 500000000;
     if value == IBA.PR_RATE_10Gb0:
         return 1000000000;
+    if value == IBA.PR_RATE_14Gb0:
+        return 1400000000;
     if value == IBA.PR_RATE_20Gb0:
         return 2000000000;
+    if value == IBA.PR_RATE_25Gb0:
+        return 2500000000;
     if value == IBA.PR_RATE_30Gb0:
         return 3000000000;
     if value == IBA.PR_RATE_40Gb0:
         return 4000000000;
+    if value == IBA.PR_RATE_56Gb0:
+        return 5600000000;
     if value == IBA.PR_RATE_60Gb0:
         return 6000000000;
     if value == IBA.PR_RATE_80Gb0:
         return 8000000000;
+    if value == IBA.PR_RATE_100Gb0:
+        return 10000000000;
+    if value == IBA.PR_RATE_112Gb0:
+        return 11200000000;
     if value == IBA.PR_RATE_120Gb0:
         return 12000000000;
+    if value == IBA.PR_RATE_168Gb0:
+        return 16800000000;
+    if value == IBA.PR_RATE_200Gb0:
+        return 20000000000;
+    if value == IBA.PR_RATE_300Gb0:
+        return 30000000000;
     return 2499999999; # ???
 
 def to_rate(value):
     """Convert a rate in integer bits/sec to an IBA rate (eg a
     :attr:`rdma.IBA.SAPathRecord.rate`). The lowest matching rate constant
     is returned."""
+    if value >= 30000000000:
+        return IBA.PR_RATE_300Gb0
+    if value >= 20000000000:
+        return IBA.PR_RATE_200Gb0
+    if value >= 16800000000:
+        return IBA.PR_RATE_168Gb0
     if value >= 12000000000:
         return IBA.PR_RATE_120Gb0
+    if value >= 11200000000:
+        return IBA.PR_RATE_112Gb0
+    if value >= 10000000000:
+        return IBA.PR_RATE_100Gb0
     if value >= 8000000000:
         return IBA.PR_RATE_80Gb0
     if value >= 6000000000:
         return IBA.PR_RATE_60Gb0
+    if value >= 5600000000:
+        return IBA.PR_RATE_56Gb0
     if value >= 4000000000:
         return IBA.PR_RATE_40Gb0
     if value >= 3000000000:
         return IBA.PR_RATE_30Gb0
+    if value >= 2500000000:
+        return IBA.PR_RATE_25Gb0
     if value >= 2000000000:
         return IBA.PR_RATE_20Gb0
+    if value >= 1400000000:
+        return IBA.PR_RATE_14Gb0
     if value >= 1000000000:
         return IBA.PR_RATE_10Gb0
     if value >= 500000000:

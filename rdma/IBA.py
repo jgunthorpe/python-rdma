@@ -61,6 +61,10 @@ LINK_SPEED_2Gb5 = 0x1;
 LINK_SPEED_5Gb0 = 0x2;
 LINK_SPEED_10Gb0 = 0x4;
 
+#: PortInfo Link Speed Extended Constants
+LINK_SPEED_EXT_14Gb0 = 0x1;
+LINK_SPEED_EXT_25Gb7 = 0x2;
+
 #: PathRecord rate constants
 PR_RATE_2Gb5 = 2;
 PR_RATE_10Gb0 = 3;
@@ -71,6 +75,14 @@ PR_RATE_40Gb0 = 7;
 PR_RATE_60Gb0 = 8;
 PR_RATE_80Gb0 = 9;
 PR_RATE_120Gb0 = 10;
+PR_RATE_14Gb0 = 11;
+PR_RATE_56Gb0 = 12;
+PR_RATE_112Gb0 = 13;
+PR_RATE_168Gb0 = 14;
+PR_RATE_25Gb0 = 15;
+PR_RATE_100Gb0 = 16;
+PR_RATE_200Gb0 = 17;
+PR_RATE_300Gb0 = 18;
 
 #: PortInfo Port State Constants
 PORT_STATE_DOWN = 1;
@@ -164,6 +176,7 @@ isLEDInfoSupported = 1<<9;
 isSMdisabled = 1<<10;
 isSystemImageGUIDSupported = 1<<11;
 isPKeySwitchExternalPortTrapSupported = 1<<12;
+isExtendedSpeedsSupported = 1<<14;
 isCommunicationManagementSupported = 1<<16;
 isSNMPTunnelingSupported = 1<<17;
 isReinitSupported = 1<<18;

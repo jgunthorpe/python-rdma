@@ -201,19 +201,34 @@ Rt\t%u %s\t# "%s"'''%(ninf.nodeGUID,ninf.numPorts,as_node_name(node),
         if peer is None:
             continue;
 
-        if is_switch:
-            print '[%s]\t%s\t# "%s" lid %u %ux%s'%(
-                    idx,as_port_name(peer),IBA_describe.dstr(peer.parent.desc),
-                    peer.to_end_port().LID or 0,
+        if port.pinf.linkSpeedExtActive == 0:
+            if is_switch:
+                print '[%s]\t%s\t# "%s" lid %u %ux%s'%(
+                        idx,as_port_name(peer),IBA_describe.dstr(peer.parent.desc),
+                        peer.to_end_port().LID or 0,
+                        IBA_describe.link_width(port.pinf.linkWidthActive),
+                        IBA_describe.link_speed(port.pinf.linkSpeedActive));
+            else:
+                print '[%s](%s)\t%s\t# lid %u lmc %u "%s" %ux%s'%(
+                    idx,port.portGUID,as_port_name(peer),
+                    port.LID or 0,port.pinf.LMC,
+                    IBA_describe.dstr(peer.parent.desc),
                     IBA_describe.link_width(port.pinf.linkWidthActive),
                     IBA_describe.link_speed(port.pinf.linkSpeedActive));
         else:
-            print '[%s](%s)\t%s\t# lid %u lmc %u "%s" %ux%s'%(
-                idx,port.portGUID,as_port_name(peer),
-                port.LID or 0,port.pinf.LMC,
-                IBA_describe.dstr(peer.parent.desc),
-                IBA_describe.link_width(port.pinf.linkWidthActive),
-                IBA_describe.link_speed(port.pinf.linkSpeedActive));
+            if is_switch:
+                print '[%s]\t%s\t# "%s" lid %u %ux%s'%(
+                        idx,as_port_name(peer),IBA_describe.dstr(peer.parent.desc),
+                        peer.to_end_port().LID or 0,
+                        IBA_describe.link_width(port.pinf.linkWidthActive),
+                        IBA_describe.link_speed_ext(port.pinf.linkSpeedExtActive));
+            else:
+                print '[%s](%s)\t%s\t# lid %u lmc %u "%s" %ux%s'%(
+                    idx,port.portGUID,as_port_name(peer),
+                    port.LID or 0,port.pinf.LMC,
+                    IBA_describe.dstr(peer.parent.desc),
+                    IBA_describe.link_width(port.pinf.linkWidthActive),
+                    IBA_describe.link_speed_ext(port.pinf.linkSpeedExtActive));
 
 def print_ibnetdiscover_topology(sbn,root):
     """Usual ibnetdiscover output."""
@@ -310,18 +325,25 @@ def print_switch(sbn,args,switch):
                 IBA_describe.link_state(pinf.portState),
                 IBA_describe.phys_link_state(pinf.portPhysicalState));
         else:
-            link = "%2ux %s %s/%s"%(
-                IBA_describe.link_width(pinf.linkWidthActive),
-                IBA_describe.link_speed(pinf.linkSpeedActive),
-                IBA_describe.link_state(pinf.portState),
-                IBA_describe.phys_link_state(pinf.portPhysicalState));
+            if pinf.linkSpeedExtActive == 0:
+                link = "%2ux %s %s/%s"%(
+                    IBA_describe.link_width(pinf.linkWidthActive),
+                    IBA_describe.link_speed(pinf.linkSpeedActive),
+                    IBA_describe.link_state(pinf.portState),
+                    IBA_describe.phys_link_state(pinf.portPhysicalState));
+            else:
+                link = "%2ux %s %s/%s"%(
+                    IBA_describe.link_width(pinf.linkWidthActive),
+                    IBA_describe.link_speed_ext(pinf.linkSpeedExtActive),
+                    IBA_describe.link_state(pinf.portState),
+                    IBA_describe.phys_link_state(pinf.portPhysicalState));
         if args.additional:
             additional = " (HOQ:%u VL_Stall:%u)"%(pinf.HOQLife,pinf.VLStallCount);
         else:
             additional = "";
         lhs = "%3d %4d[  ] ==(%s)%s"%(port0.LID,idx,link,additional);
 
-	err = []
+        err = []
         peer_port = sbn.topology.get(port);
         if peer_port is None:
             rhs = '[  ] "" ( )';
@@ -329,17 +351,22 @@ def print_switch(sbn,args,switch):
             rhs = "%3d %4d[  ] %s"%(
                 peer_port.to_end_port().LID,peer_port.port_id,
                 IBA_describe.dstr(peer_port.parent.desc,True));
+            if better_possible(pinf.linkWidthSupported,peer_port.pinf.linkWidthSupported,
+                               pinf.linkWidthEnabled):
+                err.append("Could be %sx"%(
+                   IBA_describe.link_width(1<<int(math.floor(math.log(pinf.linkWidthSupported,2))))));
+            if (pinf.linkSpeedExtSupported != 0 and peer_port.pinf.linkSpeedExtSupported):
+                if better_possible(pinf.linkSpeedExtSupported,peer_port.pinf.linkSpeedExtSupported,
+                                   pinf.linkSpeedExtEnabled):
+                    err.append("Could be %s"%(
+                        IBA_describe.link_speed_ext(1<<int(math.floor(math.log(pinf.linkSpeedExtSupported,2))))));
+            else:
+                if better_possible(pinf.linkSpeedSupported,peer_port.pinf.linkSpeedSupported,
+                                   pinf.linkSpeedEnabled):
+                    err.append("Could be %s"%(
+                        IBA_describe.link_speed(1<<int(math.floor(math.log(pinf.linkSpeedSupported,2))))));
 
-	    if better_possible(pinf.linkWidthSupported,peer_port.pinf.linkWidthSupported,
-	                       pinf.linkWidthEnabled):
-	        err.append("Could be %sx"%(
-	            IBA_describe.link_width(1<<int(math.floor(math.log(pinf.linkWidthSupported,2))))));
-	    if better_possible(pinf.linkSpeedSupported,peer_port.pinf.linkSpeedSupported,
-	                       pinf.linkSpeedEnabled):
-	        err.append("Could be %s"%(
-	            IBA_describe.link_speed(1<<int(math.floor(math.log(pinf.linkSpeedSupported,2))))));
-
-        err = ",".join(err);
+            err = ",".join(err);
         if err:
             err = " (%s)"%(err);
 
