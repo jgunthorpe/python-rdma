@@ -3,7 +3,7 @@ import sys
 import os
 import os.path
 
-__version__ = "0.3";
+__version__ = "1.0";
 
 class RDMAError(Exception):
     '''General exception class for RDMA related errors.'''

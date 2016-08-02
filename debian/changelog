@@ -1,3 +1,9 @@
+python-rdma (1.0-1) unstable; urgency=low
+
+  * Various bug fixes
+
+ -- Jason Gunthorpe <jgunthorpe@obsidianresearch.com>  Mon, 1 Aug 2016 21:43:26 -0600
+
 python-rdma (0.3-1) unstable; urgency=low
 
   * Various bug fixes

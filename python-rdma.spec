@@ -1,5 +1,5 @@
 Name: python-rdma
-Version: 0.3
+Version: 1.0
 Release: 1el6
 Summary: RDMA functionality for python
 
