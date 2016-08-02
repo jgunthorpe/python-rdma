@@ -436,7 +436,7 @@ class LazyIBPath(IBPath):
         cls = self.__class__
         object.__setattr__(self,"__class__",rdma.path.IBPath);
         cls._unpack_rcv(self);
-        return rdma.path.IBPath.__repr__(self);
+        return rdma.path.IBPath.__str__(self);
 
 def get_mad_path(mad,ep_addr,**kwargs):
     """Query the SA and return a path for *ep_addr*.
