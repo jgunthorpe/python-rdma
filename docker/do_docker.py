@@ -73,10 +73,18 @@ class jessie(Environment):
 
     is_deb = True;
 
+class xenial(Environment):
+    dockerfile = "docker/build-ubuntu-16.04.Dockerfile";
+    name = "ubuntu-16.04";
+    aliases = {"xenial"};
+
+    is_deb = True;
+
 environments = [centos6(),
                 centos7(),
                 trusty(),
                 jessie(),
+                xenial(),
 ];
 
 class ToEnvAction(argparse.Action):
