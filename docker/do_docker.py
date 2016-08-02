@@ -140,6 +140,14 @@ def inDirectory(dir):
     finally:
         os.chdir(cdir);
 
+def get_image_id(args,image_name):
+    img = json.loads(docker_cmd_str(args,"inspect",image_name));
+    image_id = img[0]["Id"];
+    # Newer dockers put a prefix
+    if ":" in image_id:
+        image_id = image_id.partition(':')[2];
+    return image_id;
+
 def set_ccache(args,opts,tmpdir,home):
     if not args.ccache:
         return;
@@ -161,9 +169,7 @@ def run_rpm_build(args,spec_file,env):
                 tarfn = ln.strip().partition(' ')[2];
     tarfn = tarfn.replace("%{version}",get_version());
 
-    img = json.loads(docker_cmd_str(args,"inspect",env.image_name()));
-    image_id = img[0]["Id"];
-
+    image_id = get_image_id(args,env.image_name());
     with private_tmp(args) as tmpdir:
         os.mkdir(os.path.join(tmpdir,"SOURCES"));
         os.mkdir(os.path.join(tmpdir,"tmp"));
@@ -186,7 +192,7 @@ def run_rpm_build(args,spec_file,env):
             "--rm=true",
             "-v","%s:%s"%(tmpdir,vdir),
             "-w",vdir,
-            "-h","builder_%s"%(image_id[:12]),
+            "-h","builder-%s"%(image_id[:12]),
             "-e","HOME=%s"%(home),
             "-e","TMPDIR=%s"%(os.path.join(vdir,"tmp")),
         ];
@@ -239,9 +245,7 @@ os.setuid({uid:d});
                             os.path.join("..",I));
 
 def run_deb_build(args,env):
-    img = json.loads(docker_cmd_str(args,"inspect",env.image_name()));
-    image_id = img[0]["Id"];
-
+    image_id = get_image_id(args,env.image_name());
     with private_tmp(args) as tmpdir:
         os.mkdir(os.path.join(tmpdir,"src"));
         os.mkdir(os.path.join(tmpdir,"tmp"));
@@ -260,7 +264,7 @@ def run_deb_build(args,env):
             "--rm=true",
             "-v","%s:%s"%(tmpdir,home),
             "-w",os.path.join(home,"src"),
-            "-h","builder_%s"%(image_id[:12]),
+            "-h","builder-%s"%(image_id[:12]),
             "-e","HOME=%s"%(home),
             "-e","TMPDIR=%s"%(os.path.join(home,"tmp")),
             "-e","DEB_BUILD_OPTIONS=parallel=%u"%(multiprocessing.cpu_count()),
