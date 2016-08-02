@@ -81,9 +81,22 @@ environments = [centos6(),
 
 class ToEnvAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
+        if values == "all":
+            setattr(namespace, self.dest, sorted(environments,key=lambda x:x.name))
+            return;
+
         for I in environments:
             if I.name == values or values in I.aliases:
-                setattr(namespace, self.dest, I)
+                setattr(namespace, self.dest, [I])
+                return;
+
+def env_choices():
+    """All the names that can be used with ToEnvAction"""
+    envs = set(("all",));
+    for I in environments:
+        envs.add(I.name);
+        envs.update(I.aliases);
+    return envs;
 
 def sh_cmd(args,allowfail=False):
     """Invoke a command"""
@@ -309,18 +322,10 @@ os.execlp("debian/rules","debian/rules","binary");
                             os.path.join("..",I));
 
 def args_build_images(parser):
-    envs = set();
-    for I in environments:
-        envs.add(I.name);
-        envs.update(I.aliases);
-    parser.add_argument("--env",action=ToEnvAction,choices=envs);
+    parser.add_argument("--env",action=ToEnvAction,choices=env_choices(),default="all");
 def cmd_build_images(args):
     """Run from the top level source directory to make the docker images that are
     needed for building. This only needs to be run once."""
-    if args.env:
-        args.env = [args.env];
-    else:
-        args.env = environments;
     for I in args.env:
         opts = ["build"] + \
                get_build_args() + [
@@ -329,35 +334,19 @@ def cmd_build_images(args):
                    "docker/"];
         docker_cmd(args,*opts);
 
-def args_rpm(parser):
-    envs = set();
-    for I in environments:
-        if hasattr(I,"rpm_spec_xform"):
-            envs.add(I.name);
-            envs.update(I.aliases);
-    parser.add_argument("ENV",action=ToEnvAction,choices=envs);
+def args_pkg(parser):
+    parser.add_argument("ENV",action=ToEnvAction,choices=env_choices());
     parser.add_argument("--run-shell",default=False,action="store_true",
                         help="Instead of running the build, enter a shell");
     parser.add_argument("--ccache",default=False,action="store_true",
                         help="Turn on cc cache for building");
-def cmd_rpm(args):
-    """Build a RPM in the given environment."""
-    run_rpm_build(args,"%s.spec"%(project),args.ENV);
-
-def args_deb(parser):
-    envs = set();
-    for I in environments:
-        if hasattr(I,"is_deb"):
-            envs.add(I.name);
-            envs.update(I.aliases);
-    parser.add_argument("ENV",action=ToEnvAction,choices=envs);
-    parser.add_argument("--run-shell",default=False,action="store_true",
-                        help="Instead of running the build, enter a shell");
-    parser.add_argument("--ccache",default=False,action="store_true",
-                        help="Turn on cc cache for building");
-def cmd_deb(args):
-    """Build a DEB in the given environment."""
-    run_deb_build(args,args.ENV);
+def cmd_pkg(args):
+    """Build a package in the given environment."""
+    for env in args.ENV:
+        if hasattr(env,"is_deb"):
+            run_deb_build(args,env);
+        if hasattr(env,"rpm_spec_xform"):
+            run_rpm_build(args,"%s.spec"%(project),env);
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Operate docker for building this package')
