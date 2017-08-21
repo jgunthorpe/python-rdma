@@ -1,0 +1,478 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>3.1. rdma.devices module &mdash; python-rdma 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="0static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="0static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="0static/jquery.js"></script>
+    <script type="text/javascript" src="0static/underscore.js"></script>
+    <script type="text/javascript" src="0static/doctools.js"></script>
+    <link rel="top" title="python-rdma 1.0 documentation" href="index.html" />
+    <link rel="up" title="3. RDMA Module" href="rdma.html" />
+    <link rel="next" title="3.2. RDMA Path" href="path.html" />
+    <link rel="prev" title="3. RDMA Module" href="rdma.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="path.html" title="3.2. RDMA Path"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="rdma.html" title="3. RDMA Module"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">python-rdma 1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="rdma.html" accesskey="U">3. RDMA Module</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="rdma-devices-module">
+<h1>3.1. <a class="reference internal" href="#module-rdma.devices" title="rdma.devices"><code class="xref py py-mod docutils literal"><span class="pre">rdma.devices</span></code></a> module<a class="headerlink" href="#rdma-devices-module" title="Permalink to this headline">¶</a></h1>
+<p>The Linux RDMA discovery module determines the devices in the system by
+probing in sysfs. The objects returned all defer their sysfs operations
+until necessary and then cache the results. This means that none of the
+objects and properties track runtime changes to the sysfs files.
+Depending on the application this is either OK or disastrous.</p>
+<p>When using verbs, the integerated
+<a class="reference internal" href="ibverbs.html#rdma.ibverbs.Context.handle_async_event" title="rdma.ibverbs.Context.handle_async_event"><code class="xref py py-meth docutils literal"><span class="pre">rdma.ibverbs.Context.handle_async_event()</span></code></a> method will update the
+<a class="reference internal" href="#rdma.devices.EndPort" title="rdma.devices.EndPort"><code class="xref py py-class docutils literal"><span class="pre">rdma.devices.EndPort</span></code></a> in response to async events from the kernel
+indicating that the cached data is out of date.</p>
+<p>The <a class="reference internal" href="#rdma.devices.RDMADevice" title="rdma.devices.RDMADevice"><code class="xref py py-class docutils literal"><span class="pre">rdma.devices.RDMADevice</span></code></a> and <a class="reference internal" href="#rdma.devices.EndPort" title="rdma.devices.EndPort"><code class="xref py py-class docutils literal"><span class="pre">rdma.devices.EndPort</span></code></a> contain
+properties that return the various IBA defined quantities.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Currently this really only correctly supports IB devices. Other
+technologies will probably need subclasses that include appropriate
+properties. eg iWarp devices do not have PKeys.</p>
+</div>
+<span class="target" id="module-rdma.devices"></span><p>This module provides a list of IB devices pulled from from sysfs</p>
+<dl class="class">
+<dt id="rdma.devices.DemandList">
+<em class="property">class </em><code class="descclassname">rdma.devices.</code><code class="descname">DemandList</code><span class="sig-paren">(</span><em>path</em>, <em>conv</em>, <em>iconv=&lt;type 'int'&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.devices.DemandList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">_abcoll.Iterable</span></code></p>
+<p>Present an ordered list interface with a non-integer index for
+a set of values that are demand created. The list indexes must be known
+in advance.</p>
+<p>The indexes are computed as:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="nb">sorted</span><span class="p">(</span><span class="n">iconv</span><span class="p">(</span><span class="n">I</span><span class="p">)</span> <span class="k">for</span> <span class="n">I</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+</pre></div>
+</div>
+<p><em>conv</em> is called to convert the contents of each file in <em>path</em>
+to the python representation.</p>
+<dl class="method">
+<dt id="rdma.devices.DemandList.clear">
+<code class="descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.devices.DemandList.clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Drop the cache</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.devices.DemandList.first">
+<code class="descname">first</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.devices.DemandList.first" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the first element of the list</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.devices.DemandList.index">
+<code class="descname">index</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.devices.DemandList.index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the index idx such that <code class="docutils literal"><span class="pre">obj[idx]</span> <span class="pre">==</span> <span class="pre">value</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.devices.DemandList.iterkeys">
+<code class="descname">iterkeys</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.devices.DemandList.iterkeys" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rdma.devices.DemandList.itervalues">
+<code class="descname">itervalues</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.devices.DemandList.itervalues" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="rdma.devices.DemandList2">
+<em class="property">class </em><code class="descclassname">rdma.devices.</code><code class="descname">DemandList2</code><span class="sig-paren">(</span><em>path</em>, <em>conv</em>, <em>iconv=&lt;type 'int'&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.devices.DemandList2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rdma.devices.DemandList" title="rdma.devices.DemandList"><code class="xref py py-class docutils literal"><span class="pre">rdma.devices.DemandList</span></code></a></p>
+<p>Like <a class="reference internal" href="#rdma.devices.DemandList" title="rdma.devices.DemandList"><code class="xref py py-class docutils literal"><span class="pre">DemandList</span></code></a> but <em>conv</em> is a function to call with the idx,
+not file content. This is useful for cases where the <em>path</em> argument to
+<code class="xref py py-meth docutils literal"><span class="pre">__init__()</span></code> points to a list of directories.</p>
+<p>The indexes are computed as:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="nb">sorted</span><span class="p">(</span><span class="n">iconv</span><span class="p">(</span><span class="n">I</span><span class="p">)</span> <span class="k">for</span> <span class="n">I</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+</pre></div>
+</div>
+<p><em>conv</em> is called to convert the contents of each file in <em>path</em>
+to the python representation.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="rdma.devices.EndPort">
+<em class="property">class </em><code class="descclassname">rdma.devices.</code><code class="descname">EndPort</code><span class="sig-paren">(</span><em>parent</em>, <em>port_id</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.devices.EndPort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rdma.devices.SysFSCache" title="rdma.devices.SysFSCache"><code class="xref py py-class docutils literal"><span class="pre">rdma.devices.SysFSCache</span></code></a></p>
+<p>A RDMA end port. An end port can issue RDMA operations, has a port GID,
+LID, etc. For an IB switch this will be port 0, for a *CA it will be port
+1 or higher.</p>
+<p><em>parent</em> is the owning <a class="reference internal" href="#rdma.devices.RDMADevice" title="rdma.devices.RDMADevice"><code class="xref py py-class docutils literal"><span class="pre">RDMADevice</span></code></a> and port_id is the port
+ID number, 0 for switches and &gt; 1 for *CAs</p>
+<dl class="attribute">
+<dt id="rdma.devices.EndPort.cap_mask">
+<code class="descname">cap_mask</code><a class="headerlink" href="#rdma.devices.EndPort.cap_mask" title="Permalink to this definition">¶</a></dt>
+<dd><p>The value of <code class="xref py py-attr docutils literal"><span class="pre">rdma.IBA.SMPPortInfo.capabilityMask</span></code> for this
+end port.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.devices.EndPort.default_gid">
+<code class="descname">default_gid</code><a class="headerlink" href="#rdma.devices.EndPort.default_gid" title="Permalink to this definition">¶</a></dt>
+<dd><p>The default GID for this end port.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.devices.EndPort.enable_sa_capability">
+<code class="descname">enable_sa_capability</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.devices.EndPort.enable_sa_capability" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enable the SA capability mask. This returns an instance that
+supports the context manager protocol that should be closed once
+the SA is finished.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.devices.EndPort.gids">
+<code class="descname">gids</code><em class="property"> = None</em><a class="headerlink" href="#rdma.devices.EndPort.gids" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#rdma.devices.DemandList" title="rdma.devices.DemandList"><code class="xref py py-class docutils literal"><span class="pre">rdma.devices.DemandList</span></code></a> of all gids</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.devices.EndPort.lid">
+<code class="descname">lid</code><a class="headerlink" href="#rdma.devices.EndPort.lid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rdma.devices.EndPort.lid_change">
+<code class="descname">lid_change</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.devices.EndPort.lid_change" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called if the port&#8217;s LID has changed. Generally from
+<a class="reference internal" href="ibverbs.html#rdma.ibverbs.Context.handle_async_event" title="rdma.ibverbs.Context.handle_async_event"><code class="xref py py-meth docutils literal"><span class="pre">rdma.ibverbs.Context.handle_async_event()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.devices.EndPort.lmc">
+<code class="descname">lmc</code><a class="headerlink" href="#rdma.devices.EndPort.lmc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.devices.EndPort.phys_state">
+<code class="descname">phys_state</code><a class="headerlink" href="#rdma.devices.EndPort.phys_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>The port physical state, one of <cite>IBA.PHYS_PORT_STATE_*</cite></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.devices.EndPort.pkey_change">
+<code class="descname">pkey_change</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.devices.EndPort.pkey_change" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called if the port&#8217;s pkey list has changed. Generally from
+<a class="reference internal" href="ibverbs.html#rdma.ibverbs.Context.handle_async_event" title="rdma.ibverbs.Context.handle_async_event"><code class="xref py py-meth docutils literal"><span class="pre">rdma.ibverbs.Context.handle_async_event()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.devices.EndPort.pkey_index">
+<code class="descname">pkey_index</code><span class="sig-paren">(</span><em>pkey</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.devices.EndPort.pkey_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the <code class="docutils literal"><span class="pre">pkey</span> <span class="pre">index</span></code> for pkey value <em>pkey</em>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.devices.EndPort.pkeys">
+<code class="descname">pkeys</code><em class="property"> = None</em><a class="headerlink" href="#rdma.devices.EndPort.pkeys" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#rdma.devices.DemandList" title="rdma.devices.DemandList"><code class="xref py py-class docutils literal"><span class="pre">rdma.devices.DemandList</span></code></a> of all pkeys</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.devices.EndPort.port_guid">
+<code class="descname">port_guid</code><a class="headerlink" href="#rdma.devices.EndPort.port_guid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.devices.EndPort.port_id">
+<code class="descname">port_id</code><em class="property"> = None</em><a class="headerlink" href="#rdma.devices.EndPort.port_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Port number</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.devices.EndPort.rate">
+<code class="descname">rate</code><a class="headerlink" href="#rdma.devices.EndPort.rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>A string describing the speed of the port. eg &#8216;10 Gb/sec (4X)&#8217;.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.devices.EndPort.sa_path">
+<code class="descname">sa_path</code><a class="headerlink" href="#rdma.devices.EndPort.sa_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>The path to the SA. This path should only be used for GMPs of class
+<code class="xref py py-data docutils literal"><span class="pre">MAD_SUBNET_ADMIN</span></code> and it should never be changed.
+See IBA 15.4.2.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.devices.EndPort.sm_change">
+<code class="descname">sm_change</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.devices.EndPort.sm_change" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called if the port&#8217;s SM has changed. Generally from
+<a class="reference internal" href="ibverbs.html#rdma.ibverbs.Context.handle_async_event" title="rdma.ibverbs.Context.handle_async_event"><code class="xref py py-meth docutils literal"><span class="pre">rdma.ibverbs.Context.handle_async_event()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.devices.EndPort.sm_lid">
+<code class="descname">sm_lid</code><a class="headerlink" href="#rdma.devices.EndPort.sm_lid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.devices.EndPort.sm_sl">
+<code class="descname">sm_sl</code><a class="headerlink" href="#rdma.devices.EndPort.sm_sl" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.devices.EndPort.state">
+<code class="descname">state</code><a class="headerlink" href="#rdma.devices.EndPort.state" title="Permalink to this definition">¶</a></dt>
+<dd><p>The port state, one of <cite>IBA.PORT_STATE_*</cite></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.devices.EndPort.subnet_timeout">
+<code class="descname">subnet_timeout</code><a class="headerlink" href="#rdma.devices.EndPort.subnet_timeout" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="rdma.devices.RDMADevice">
+<em class="property">class </em><code class="descclassname">rdma.devices.</code><code class="descname">RDMADevice</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.devices.RDMADevice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rdma.devices.SysFSCache" title="rdma.devices.SysFSCache"><code class="xref py py-class docutils literal"><span class="pre">rdma.devices.SysFSCache</span></code></a></p>
+<p>A RDMA device. A device has at least one end port. The main significance of
+a RDMA device in the API is to indicate that multiple end ports can
+share a single protection domain.</p>
+<p><em>name</em> is the kernel&#8217;s name for this device in sysfs.</p>
+<dl class="attribute">
+<dt id="rdma.devices.RDMADevice.board_id">
+<code class="descname">board_id</code><a class="headerlink" href="#rdma.devices.RDMADevice.board_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Device board ID string.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.devices.RDMADevice.end_ports">
+<code class="descname">end_ports</code><em class="property"> = None</em><a class="headerlink" href="#rdma.devices.RDMADevice.end_ports" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#rdma.devices.DemandList" title="rdma.devices.DemandList"><code class="xref py py-class docutils literal"><span class="pre">rdma.devices.DemandList</span></code></a> of all end ports</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.devices.RDMADevice.fw_ver">
+<code class="descname">fw_ver</code><a class="headerlink" href="#rdma.devices.RDMADevice.fw_ver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Device firmware version string.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.devices.RDMADevice.hca_type">
+<code class="descname">hca_type</code><a class="headerlink" href="#rdma.devices.RDMADevice.hca_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>HCA type string.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.devices.RDMADevice.hw_ver">
+<code class="descname">hw_ver</code><a class="headerlink" href="#rdma.devices.RDMADevice.hw_ver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Device hardware version string.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.devices.RDMADevice.name">
+<code class="descname">name</code><em class="property"> = None</em><a class="headerlink" href="#rdma.devices.RDMADevice.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Device&#8217;s name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.devices.RDMADevice.node_desc">
+<code class="descname">node_desc</code><a class="headerlink" href="#rdma.devices.RDMADevice.node_desc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.devices.RDMADevice.node_guid">
+<code class="descname">node_guid</code><a class="headerlink" href="#rdma.devices.RDMADevice.node_guid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.devices.RDMADevice.node_type">
+<code class="descname">node_type</code><a class="headerlink" href="#rdma.devices.RDMADevice.node_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>The node type, one of <cite>IBA.NODE_*</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.devices.RDMADevice.phys_port_count">
+<code class="descname">phys_port_count</code><em class="property"> = 0</em><a class="headerlink" href="#rdma.devices.RDMADevice.phys_port_count" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of physical ports</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.devices.RDMADevice.sys_image_guid">
+<code class="descname">sys_image_guid</code><a class="headerlink" href="#rdma.devices.RDMADevice.sys_image_guid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="rdma.devices.SysFSCache">
+<em class="property">class </em><code class="descclassname">rdma.devices.</code><code class="descname">SysFSCache</code><span class="sig-paren">(</span><em>dir_</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.devices.SysFSCache" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Cache queries from sysfs attributes. This class is used to make
+the sysfs parsing demand load.</p>
+<p><em>dir_</em> is the directory the attributes reside in.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rdma.devices.find_node_guid">
+<code class="descclassname">rdma.devices.</code><code class="descname">find_node_guid</code><span class="sig-paren">(</span><em>devices</em>, <em>guid</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.devices.find_node_guid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search the list <em>devices</em> for the device with <em>guid</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">Device</span></code></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="rdma.html#rdma.RDMAError" title="rdma.RDMAError"><strong>rdma.RDMAError</strong></a> &#8211; If no matching device is found.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="rdma.devices.find_port_gid">
+<code class="descclassname">rdma.devices.</code><code class="descname">find_port_gid</code><span class="sig-paren">(</span><em>devices</em>, <em>gid</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.devices.find_port_gid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search the list <em>devices</em> for the end port with <em>gid</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(<a class="reference internal" href="#rdma.devices.EndPort" title="rdma.devices.EndPort"><code class="xref py py-class docutils literal"><span class="pre">EndPort</span></code></a>,gid_index)</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="rdma.html#rdma.RDMAError" title="rdma.RDMAError"><strong>rdma.RDMAError</strong></a> &#8211; If no matching device is found.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="rdma.devices.find_port_guid">
+<code class="descclassname">rdma.devices.</code><code class="descname">find_port_guid</code><span class="sig-paren">(</span><em>devices</em>, <em>guid</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.devices.find_port_guid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search the list <em>devices</em> for the end port with <em>guid</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#rdma.devices.EndPort" title="rdma.devices.EndPort"><code class="xref py py-class docutils literal"><span class="pre">EndPort</span></code></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="rdma.html#rdma.RDMAError" title="rdma.RDMAError"><strong>rdma.RDMAError</strong></a> &#8211; If no matching device is found.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="rdma.devices.find_port_name">
+<code class="descclassname">rdma.devices.</code><code class="descname">find_port_name</code><span class="sig-paren">(</span><em>devices</em>, <em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.devices.find_port_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search the list <em>devices</em> for the end port with <em>name</em> and <em>name</em> may
+be a device name in which case the first end port is returned, otherwise
+it may be device/port.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#rdma.devices.EndPort" title="rdma.devices.EndPort"><code class="xref py py-class docutils literal"><span class="pre">EndPort</span></code></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="rdma.html#rdma.RDMAError" title="rdma.RDMAError"><strong>rdma.RDMAError</strong></a> &#8211; If no matching device is found.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="rdma.html"
+                        title="previous chapter">3. RDMA Module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="path.html"
+                        title="next chapter">3.2. RDMA Path</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="0sources/devices.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="path.html" title="3.2. RDMA Path"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="rdma.html" title="3. RDMA Module"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">python-rdma 1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="rdma.html" >3. RDMA Module</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2011, Obsidian Research Corp.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

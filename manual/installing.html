@@ -1,0 +1,220 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>2. Installing &mdash; python-rdma 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="0static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="0static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="0static/jquery.js"></script>
+    <script type="text/javascript" src="0static/underscore.js"></script>
+    <script type="text/javascript" src="0static/doctools.js"></script>
+    <link rel="top" title="python-rdma 1.0 documentation" href="index.html" />
+    <link rel="next" title="3. RDMA Module" href="rdma.html" />
+    <link rel="prev" title="1. Foreword" href="intro.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="rdma.html" title="3. RDMA Module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="intro.html" title="1. Foreword"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">python-rdma 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="installing">
+<h1>2. Installing<a class="headerlink" href="#installing" title="Permalink to this headline">¶</a></h1>
+<p><cite>python-rdma</cite> relies on the standard Python <code class="xref py py-mod docutils literal"><span class="pre">distutils</span></code> functionality for
+building and includes a <cite>setup.py</cite> script. The following will be required to
+build the module:</p>
+<ul class="simple">
+<li><cite>Python</cite> 2.6 or later in the 2.x series. <cite>Python</cite> 3 is currently not
+supported.</li>
+<li>A working C compiler that distutils can find</li>
+<li><cite>infiniband/verbs.h</cite> must be in the compiler search path</li>
+<li>The C compiler must be able to link against <cite>libibverbs</cite></li>
+<li><cite>Python</cite> C development support must be installed (eg <cite>python-dev</cite> on Debian)</li>
+</ul>
+<p>The build process is simply:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ ./setup.py build
+[..]
+</pre></div>
+</div>
+<p>Once built the library can be tested without installation by setting
+<cite>PYTHONPATH</cite>:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ export PYTHONPATH=`pwd`/build/lib.*/
+$ ./ibtool help
+</pre></div>
+</div>
+<p>To install into <cite>/usr/local/</cite> use <cite>./setup.py install</cite>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Due to how Python searches for libraries the <em>PYTHONPATH</em>
+environment variable is still required to run the executable scripts, such as
+the test suite, included in the package.</p>
+</div>
+<p>If your system has IB libraries installed outside the system path, you need to
+create a setup.cfg similar to the following:</p>
+<div class="highlight-python"><div class="highlight"><pre>[build_ext]
+include-dirs=/opt/ofa64-1.5.1/include
+library-dirs=/opt/ofa64-1.5.1/lib
+rpath=/opt/ofa64-1.5.1/lib
+</pre></div>
+</div>
+<p>Prior to running <cite>./setup.py build</cite>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last"><cite>Python</cite> 2.6 packages are available for RHEL and related via the Fedora
+<a class="reference external" href="http://fedoraproject.org/wiki/EPEL">EPEL</a>. These packages perform a parallel install of <cite>Python</cite> and do not replace
+the system version. Eg
+<a class="reference external" href="http://download.fedora.redhat.com/pub/epel/5/x86_64/repoview/python26.html">http://download.fedora.redhat.com/pub/epel/5/x86_64/repoview/python26.html</a></p>
+</div>
+<div class="section" id="for-development">
+<h2>2.1. For Development<a class="headerlink" href="#for-development" title="Permalink to this headline">¶</a></h2>
+<p>The module ships with a few pre-built things, to do development work the
+following will also be required:</p>
+<ul class="simple">
+<li>Cython &gt;= 0.21</li>
+<li>Sphinx &gt;= 0.6.6</li>
+</ul>
+<p>To test the installation of the above tools do the following:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ rm rdma/ibverbs.c
+$ ./setup.py build docs
+</pre></div>
+</div>
+<p>To ease development I recommend installing the following symlink:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ (cd rdma ; ln -s ../build/lib.*/rdma/ibverbs.so .)
+</pre></div>
+</div>
+<p>After which running Python programs from the top of the source tree will
+automatically have the correct PYTHONPATH and changes to the source itself
+will immediately be picked up without having to run <cite>./setup.py build</cite></p>
+<p>However, be aware that changes to the extension module will still
+require running <cite>./setup.py build_ext</cite> to recompile.</p>
+<p>The two required modules are easily configured in a private user directory as
+follows:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ pip install --user Cython
+$ pip install --user Sphinx
+</pre></div>
+</div>
+<p>Other approaches are possible as well.</p>
+<div class="section" id="test-suite">
+<h3>2.1.1. Test Suite<a class="headerlink" href="#test-suite" title="Permalink to this headline">¶</a></h3>
+<p>The library includes a test suite built with <code class="xref py py-mod docutils literal"><span class="pre">unittest</span></code>. To run the test
+suite the end port returned by <a class="reference internal" href="rdma.html#rdma.get_end_port" title="rdma.get_end_port"><code class="xref py py-func docutils literal"><span class="pre">rdma.get_end_port()</span></code></a> must be connected to
+a small fabric. Some ways of running the suite:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ ./run-tests.py                # Run everything
+$ ./run-tests.py tests.verbs    # Only run the verbs test.
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The test suite exercises functionality that is known to make OpenSM crash.
+As of this writing OpenSM GIT has been fixed but the latest release (3.3.9)
+does not include the fix.</p>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">2. Installing</a><ul>
+<li><a class="reference internal" href="#for-development">2.1. For Development</a><ul>
+<li><a class="reference internal" href="#test-suite">2.1.1. Test Suite</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="intro.html"
+                        title="previous chapter">1. Foreword</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="rdma.html"
+                        title="next chapter">3. RDMA Module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="0sources/installing.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="rdma.html" title="3. RDMA Module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="intro.html" title="1. Foreword"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">python-rdma 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2011, Obsidian Research Corp.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

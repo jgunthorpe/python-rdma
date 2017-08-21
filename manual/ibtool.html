@@ -1,0 +1,648 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>8. The ibtool Program &mdash; python-rdma 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="0static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="0static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="0static/jquery.js"></script>
+    <script type="text/javascript" src="0static/underscore.js"></script>
+    <script type="text/javascript" src="0static/doctools.js"></script>
+    <link rel="top" title="python-rdma 1.0 documentation" href="index.html" />
+    <link rel="next" title="9. Software License" href="license.html" />
+    <link rel="prev" title="7. Verbs Interface" href="ibverbs.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="license.html" title="9. Software License"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="ibverbs.html" title="7. Verbs Interface"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">python-rdma 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="the-ibtool-program">
+<span id="ibtool"></span><h1>8. The <code class="docutils literal"><span class="pre">ibtool</span></code> Program<a class="headerlink" href="#the-ibtool-program" title="Permalink to this headline">¶</a></h1>
+<p><code class="docutils literal"><span class="pre">ibtool</span></code> collects a number of pre-existing diagnostic utilities, rewritten
+to use <code class="docutils literal"><span class="pre">python-rdma</span></code> under one program. The rewrites serve as both test cases
+for the library and programming examples for proper library usage. In general
+the programs strive to be close to the originals but there are many subtle
+differences.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">&#8216;libib&#8217; in the context of this document refers to the C/Bash/Perl/etc
+versions of the ibtools commands based on libib that are being cloned in
+this implementation.</p>
+</div>
+<div class="section" id="addressing">
+<h2>8.1. Addressing<a class="headerlink" href="#addressing" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal"><span class="pre">ibtool</span></code> uses the functions in <cite>python-rdma</cite> for processing address
+arguments, and removes much of the artificial specificity required by the
+original tools.</p>
+<div class="section" id="end-port-to-use">
+<h3>8.1.1. End Port to Use<a class="headerlink" href="#end-port-to-use" title="Permalink to this headline">¶</a></h3>
+<p>Most tools require an end port to operate on. The libib mechanism involves
+specifying the device name and port number with two separate arguments. This
+is still supported but the port argument now accepts a full end port
+specifier:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="23%" />
+<col width="77%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Format</th>
+<th class="head">Example</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>device</td>
+<td>mlx4_0  (defaults to the first port)</td>
+</tr>
+<tr class="row-odd"><td>device/port</td>
+<td>mlx4_0/1</td>
+</tr>
+<tr class="row-even"><td>Port GID</td>
+<td>fe80::2:c903:0:1491</td>
+</tr>
+<tr class="row-odd"><td>Port GUID</td>
+<td>0002:c903:0000:1491</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>So the device argument is not required, and its use discouraged. The device
+argument will also accept a node GUID to reference the device.</p>
+<p>As with the legacy tools the default end port is the first end port in the
+system.</p>
+</div>
+<div class="section" id="target-end-port-address">
+<h3>8.1.2. Target End Port Address<a class="headerlink" href="#target-end-port-address" title="Permalink to this headline">¶</a></h3>
+<p>Most of the commands will operate on a remote port, this requires doing a MAD
+RPC from the local end port to the remote. Commands accept a uniform format
+for specifying the target end port</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="26%" />
+<col width="74%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Format</th>
+<th class="head">Example</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Port GID</td>
+<td>fe80::2:c903:0:1491</td>
+</tr>
+<tr class="row-odd"><td>Scoped GID</td>
+<td>fe80::2:c903:0:1491%mlx4_0/1</td>
+</tr>
+<tr class="row-even"><td>Port GUID</td>
+<td>0002:c903:0000:1491</td>
+</tr>
+<tr class="row-odd"><td>LID</td>
+<td>12 (decimal)</td>
+</tr>
+<tr class="row-even"><td>DR Path</td>
+<td>0,1  (the thing connected to port 1)</td>
+</tr>
+<tr class="row-odd"><td>Path Spec</td>
+<td>IBPath(SLID=8,DLID=8,SL=2,pkey=0xFFF)</td>
+</tr>
+<tr class="row-even"><td>Hex Port GUID</td>
+<td>0x0002c90300001491
+(requires -G)</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>The directed route (DR) path option allows specifying a directed route path,
+the value <code class="docutils literal"><span class="pre">0,</span></code> is the local end port, <code class="docutils literal"><span class="pre">0,1</span></code> is the thing connected to port
+1 of the local end port, etc.</p>
+<p>The formats for each type are unambiguous, so the program simply determines
+the correct entry automatically, legacy options specifying the type are
+supported and the command fails if the provided argument does not match.</p>
+<p>When a directed route or LID is specified it is used as-is for sending SMPs.
+If a GMP is required then the address is resolved to a full path using the SA.
+Resolving a directed route to a GMP path is done using
+a series of <code class="xref py py-class docutils literal"><span class="pre">rdma.IBA.SALinkRecord</span></code> RPCs.</p>
+<p>When using a full path specification refer to the documentation for
+<a class="reference internal" href="path.html#rdma.path.IBPath" title="rdma.path.IBPath"><code class="xref py py-class docutils literal"><span class="pre">rdma.path.IBPath</span></code></a>, the format is the classes <code class="xref py py-func docutils literal"><span class="pre">repr()</span></code> format. If a
+complete path, with source and destination, is specified then it is used as
+is, otherwise the SA will be used to resolve it. This is true even for GMP
+paths. This extended format can be used to specify all parameters, including
+pkey, presence and content of a GRH, packet_life_time, etc.</p>
+</div>
+</div>
+<div class="section" id="error-handling">
+<h2>8.2. Error Handling<a class="headerlink" href="#error-handling" title="Permalink to this headline">¶</a></h2>
+<p>The tool relies on <cite>python-rdma</cite>&#8216;s exception system for end user error
+reporting. This system provides a great level of detail for most user visible
+errors. The -v option is used to increase the error diagnostic output,
+up to including packet dumps for failing MADs.</p>
+</div>
+<div class="section" id="discovery">
+<h2>8.3. Discovery<a class="headerlink" href="#discovery" title="Permalink to this headline">¶</a></h2>
+<p>Tools which require topology discovery use the <a class="reference internal" href="subnet.html#rdma.subnet.Subnet" title="rdma.subnet.Subnet"><code class="xref py py-class docutils literal"><span class="pre">rdma.subnet.Subnet</span></code></a>
+information database, which has several different methods for collecting the
+data, including DR, LID SMP and from the SA. Everything uses the parallel
+MAD scheduler for loading the databases.</p>
+<p>Currently the discovery has no error recovery, so it will blow up ungracefully
+if MADs can&#8217;t traverse links they are supposed to, or LIDs don&#8217;t work.</p>
+</div>
+<div class="section" id="notable-differences">
+<h2>8.4. Notable Differences<a class="headerlink" href="#notable-differences" title="Permalink to this headline">¶</a></h2>
+<p>Compared to the libib versions:</p>
+<ul>
+<li><p class="first">The internal library relies less on DR queries to the local port to get
+information - instead this comes from sysfs. This makes MKey enforcement more
+usable.</p>
+</li>
+<li><p class="first">Greater consistency. All GIDs are printed and accepted in IPv6 format, GUIDs
+are printed and accepted in three colon GUID format (eg
+0002:c903:0000:1492), and unicast LIDs are printed in decimal format. LIDs
+are accepted as explicit hex (0x1a) or decimal arguments. Hex is uniformly
+lower case and when zero justified the number of zeros used is correct for
+the width of the type.</p>
+</li>
+<li><p class="first">The output of some commands is subtly different, ie commands that used to
+print inconsistent output (hex LIDs, hex GUIDs, etc) print in canonical
+format</p>
+</li>
+<li><p class="first">Path record queries are always done for LID target end ports when using GMP,
+the correct SL to use is never assumed.</p>
+</li>
+<li><p class="first">A broader range of input is accepted for most arguments (ie GIDs, GUIDs, DR
+paths, etc) and the input argument type is unambiguously determined by
+format.</p>
+</li>
+<li><p class="first">Debug output is quite different and dramatically better.</p>
+</li>
+<li><p class="first">Error output is different and dramatically better. More -v&#8217;s provide more
+detail down to decoded packet dumps of the erroring MAD:</p>
+<div class="highlight-python"><div class="highlight"><pre>E: RPC MAD_METHOD_GET(1) SMPFormatDirected(129.1) SMPPortInfo(21) timed out to &#39;DR Path (0, 1, 4)&#39;
+</pre></div>
+</div>
+<p>vs:</p>
+<div class="highlight-python"><div class="highlight"><pre>ibwarn: [2018] mad_rpc: _do_madrpc failed; dport (DR path slid 65535; dlid 65535; 0,1,4)
+ibaddr: iberror: failed: can&#39;t resolve requested address
+</pre></div>
+</div>
+</li>
+<li><p class="first">All commands support the <cite>&#8211;sa</cite> option which causes SMPs to be converted
+into SA record queries and sent to the SA. (see
+<a class="reference internal" href="mads.html#rdma.satransactor.SATransactor" title="rdma.satransactor.SATransactor"><code class="xref py py-class docutils literal"><span class="pre">rdma.satransactor.SATransactor</span></code></a>) In <cite>&#8211;sa</cite> mode no SMPs are
+issued. Some commands have <cite>SubnAdmGetTable</cite> support when in <cite>&#8211;sa</cite> mode
+which makes them run faster. (Be warned, opensm has various bugs in its
+*Record support)</p>
+</li>
+<li><p class="first">None of the commands unconditionally write files into /var/cache/ or otherwise
+do file IO by default.</p>
+</li>
+</ul>
+<p>Discovery:</p>
+<ul>
+<li><p class="first">All the discovery shell scripts are native Python and integrate properly with
+the command line system and support all the standard common options.</p>
+</li>
+<li><p class="first">The builtin discovery engine supports <cite>&#8211;sa</cite> which will rely entirely on SA
+Record queries for the data.</p>
+</li>
+<li><p class="first">All discovery using commands support the <cite>&#8211;discovery</cite> argument which can be
+LID, SMP or DR. DR exclusively uses directed route SMPs and can discover and
+unconfigured subnet. LID primarily uses LID routed SMP packets, except for a
+few DR SMPs to determine the connectivity. SA exclusively uses record data
+from the SA.</p>
+</li>
+<li><p class="first">By default discovery is done using LID mode, unless the connected end port
+is not active, then DR is used.</p>
+</li>
+<li><p class="first">Discovery data is stored in memory and re-used during the tool run,
+redundant queries are not issued.</p>
+</li>
+<li><p class="first">Everything is built on the parallel MAD scheduler</p>
+</li>
+<li><p class="first">The node name map file isn&#8217;t implemented</p>
+</li>
+<li><p class="first">No chassis grouping functions are implemented</p>
+</li>
+<li><p class="first">Since no commands rely on frail text parsing, all node descriptions are
+supported in all tools, including putting &#8221; and other characters in them.</p>
+</li>
+<li><p class="first">All discovery commands support caching the result through the <cite>&#8211;cache</cite>
+option. The cache file is stored as a Python pickle and can be loaded
+by things other than <cite>ibtool</cite>. Use something like:</p>
+<div class="highlight-python"><div class="highlight"><pre>--cache ~/.ibtools.cache-$A
+</pre></div>
+</div>
+<p>(FIXME support a config file or environment var or something for this)</p>
+</li>
+</ul>
+<p>Specific commands:</p>
+<ul>
+<li><p class="first"><cite>sminfo</cite> gets the LID using a <cite>SMPPortInfo</cite> RPC when using directed route.</p>
+</li>
+<li><p class="first"><cite>sminfo</cite> has a <cite>&#8211;sminfo_smkey</cite> argument that is used for <cite>SubnSet()</cite> and
+<cite>SubnGet()</cite> RPCs. <cite>SubnSet()</cite> can send a 0 attribute modifier.</p>
+</li>
+<li><p class="first"><cite>ibroute</cite> uses the parallel MAD scheduler, displays LIDs in decimal and
+displays escaped node descriptions that are treated as UTF-8</p>
+</li>
+<li><p class="first"><cite>ibroute</cite> -M does not skip the last multicast LID.</p>
+</li>
+<li><p class="first"><cite>ibroute</cite> forgot how to limit by LID ranges (FIXME)</p>
+</li>
+<li><p class="first"><cite>dump_lfts.sh</cite> and <cite>dump_mfts.sh</cite> are internal commands that don&#8217;t do
+duplicative work and are much faster.</p>
+</li>
+<li><p class="first"><cite>ibhosts</cite>, <cite>ibswitches</cite>, <cite>ibrouters</cite> and <cite>ibnodes</cite> display their output
+sorted by nodeGUID.</p>
+</li>
+<li><p class="first"><cite>smpquery</cite> sl2vl on a CA shows the CA port number not 0.</p>
+</li>
+<li><p class="first"><cite>perfquery</cite> supports directed route as an argument. The DR path is resolved
+to a LID path via a <cite>SMPNodeInfo</cite> RPC and a PR lookup to the SA</p>
+</li>
+<li><p class="first"><cite>perfquery</cite> uses the SA to get the <cite>NodeInfo</cite> (if needed) rather than using a
+SMP. It also uses the parallel MAD scheduler when looping over ports.</p>
+</li>
+<li><p class="first"><cite>perfquery -l</cite> works like <cite>perfquery -a -l</cite> instead of trying to request
+port 0 and often failing.</p>
+</li>
+<li><p class="first"><cite>perfquery</cite> gives a failure message if it is asked to loop over ports on
+a CA (which can&#8217;t be done by simple port select) (FIXME: We could ask the SM
+how to reach the other ports)</p>
+</li>
+<li><p class="first"><cite>perfquery</cite> uses the <cite>SMPNodeInfo.localPortNum</cite> for the target as the default
+port number if none is given - this &#8216;does the right thing&#8217; for CA ports
+and returns a result instead of an error for switch ports.</p>
+</li>
+<li><p class="first"><cite>perfquery</cite> will also handle <cite>PMPortFlowCtlCounters</cite>, <cite>PMPortFlowCtlCounters</cite>,
+<cite>PMPortVLXmitFlowCtlUpdateErrors</cite>, <cite>PMPortVLXmitWaitCounters</cite>,
+and <cite>PMSwPortVLCongestion</cite></p>
+</li>
+<li><p class="first"><cite>smpdump</cite> has a <cite>&#8211;decode</cite> option to pretty print the MAD</p>
+</li>
+<li><p class="first"><cite>smpdump</cite> returns an error on timeout</p>
+</li>
+<li><p class="first"><cite>smpdump</cite> is joined by <cite>decode_mad</cite> which takes MADs in various formats
+and pretty prints them</p>
+</li>
+<li><p class="first"><cite>saquery</cite> supports all record types and supports all component masks via
+an enhanced syntax:</p>
+<div class="highlight-python"><div class="highlight"><pre>saquery NR nodeInfo.portGUID=0017:77ff:feb6:2ca4
+</pre></div>
+</div>
+<p>This is done using Python dynamic introspection and codegen of the component
+mask layout.</p>
+</li>
+<li><p class="first">The inconsistent names from <cite>saquery</cite> are less inconsistent but don&#8217;t match
+100% what <cite>saquery</cite> produces.  The <cite>&#8211;int-names</cite> option uses the names
+described in this document.</p>
+</li>
+<li><p class="first"><cite>saquery</cite> forgot how to do &#8211;node-name-map (FIXME)</p>
+</li>
+<li><p class="first"><cite>saquery</cite> options that have an associated Selector don&#8217;t set the selector.
+(FIXME)</p>
+</li>
+<li><p class="first"><cite>saquery</cite> -g and -m do not work, -g sets smkey to 0 (FIXME)</p>
+</li>
+<li><p class="first">The command <cite>query</cite> is added which can issue any RPC, with any packet
+content entirely using the symbolic names in this document. This is done
+with Python introspection. Eg:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ ibtool query SubnAdmGet MADClassPortInfo -d
+debug: GMP Path 8 -&gt; 8 SL=0 PKey=65535 DQPN=1
+debug: RPC MAD_METHOD_GET(1) SAFormat(3.2) MADClassPortInfo(1) completed to &#39;Path 8 -&gt; 8 SL=0 PKey=65535 DQPN=1&#39; len 256.
+BaseVersion......................1
+ClassVersion.....................2
+CapabilityMask...................0x2602
+CapabilityMask2..................0x0000000
+RespTimeValue....................16
+RedirectGID......................::
+RedirectTC.......................0x00
+RedirectSL.......................0
+RedirectFL.......................0
+RedirectLID......................0
+RedirectPKey.....................0x0000
+RedirectQP.......................0x000001
+RedirectQKey.....................0x80010000
+TrapGID..........................::
+TrapTC...........................0
+TrapSL...........................0
+TrapFL...........................0
+TrapLID..........................0
+TrapPKey.........................0x0000
+TrapHL...........................0
+TrapQP...........................0x000000
+TrapQKey.........................0x80010000
+</pre></div>
+</div>
+</li>
+<li><p class="first"><cite>ibnetdiscover</cite> prints the listing in a BFS order, not randomly.</p>
+</li>
+<li><p class="first"><cite>ibfindnodesusing</cite> only fetches subnet information actually used during
+output and supports more ways to specify the source switch.</p>
+</li>
+<li><p class="first"><cite>ibfindnodesusing</cite> learned the &#8211;all (show switches too) and -v (show
+LID and port GUID) options.</p>
+</li>
+<li><p class="first"><cite>ibprintca/rt/switch</cite> supports &#8211;sa which does limited SA queries to return
+the information instead of having to load a full topology.</p>
+</li>
+<li><p class="first"><cite>ibprintca/rt/switch</cite> displays the complete node stanza, instead of just a
+truncated version.</p>
+</li>
+<li><p class="first"><cite>ibportstate</cite> can work with CA ports if &#8211;sa is used (FIXME: Just do the
+&#8211;sa action for all CA ports..)</p>
+</li>
+<li><p class="first"><cite>set_nodedesc</cite> got the -C and -P options to set a single device. Also works
+with UTF-8 properly.</p>
+</li>
+<li><p class="first"><cite>ibtracert</cite> supports 1 or 2 arguments, with the single argument form
+meaning start at the current node, ala IP trace route</p>
+</li>
+<li><p class="first"><cite>ibtracert</cite> can resolve all address forms for the two arguments, and
+will use the SA to fill missing details.</p>
+</li>
+<li><p class="first"><cite>ibtracert</cite> supports all discovery options including caching and LID/SA
+discovery. When used with LID routing the tool is no longer bound by the
+64 hop DR limit.</p>
+</li>
+<li><p class="first"><cite>ibcheck*</cite> forgot how to colourize</p>
+</li>
+<li><p class="first"><cite>ibcheckport</cite> checks the localPortNum if it isn&#8217;t a switch, and
+checks that a port is not at a degraded speed and degraded width based
+on link*Supported.</p>
+</li>
+<li><p class="first"><cite>ibcheck*</cite> commands that iterate over the subnet are discovery commands
+and use the MAD parallelizer to do their checks. For this reason
+verbose output may be out of order, so we also show the end port LID
+and CA port number.</p>
+</li>
+<li><p class="first"><cite>ibcheck*</cite> discovery commands treat a &#8216;node check&#8217; as an <cite>end port check</cite>
+and checks all end ports on a CA. It also checks switch port 0.</p>
+</li>
+<li><p class="first"><cite>ibcheck*</cite> discovery commands can use the subnet discovery database
+to check peer ports for link speed and link width. No warnings
+are generated if the max capability is being used. (eg SDR connected
+to DDR).</p>
+</li>
+<li><p class="first"><cite>vendstat</cite> only supports -N (FIXME)</p>
+</li>
+<li><p class="first"><cite>ibsysstat</cite> has different output. This is a fairly pointless program,
+it is included to illustrate/test a vendor OUI MAD server.</p>
+</li>
+<li><p class="first"><cite>ibping</cite> uses <cite>ibsysstat</cite> as a server. I could not bring myself to implement
+another ping class particularly when it used an attribute ID of 0..</p>
+</li>
+<li><p class="first"><cite>ibswportwatch</cite> has all the same options as <cite>perfquery</cite> and can watch
+all kinds of counters. The output format is different, but
+much more complete.</p>
+</li>
+<li><p class="first"><cite>ibswportwatch</cite> by default does the <cite>-b</cite> option, since this is
+less surprising. To get the threshold checking behavior use
+<cite>&#8211;threshold</cite>. A limits file identical to <cite>ibcheckerrors</cite>
+is supported.</p>
+</li>
+<li><p class="first"><cite>ibidsverify</cite> works like the <cite>ibcheck*</cite> functions, not something
+unique. Doesn&#8217;t bother to check nodeGUIDs becuase discovery cannot create
+duplicates. Learned to check LIDs considering LMC as well.</p>
+</li>
+<li><p class="first"><cite>iblinkinfo</cite> formats the output with slightly more alignment. Forgot
+how to do <cite>&#8211;hops</cite></p>
+</li>
+<li><p class="first"><cite>ibdiscover.pl</cite> is aliased to <cite>subnet_diff</cite> because they do the same
+thing even if they work completely differently.</p>
+</li>
+<li><p class="first"><cite>subnet_diff</cite> will compare the set of end ports, nodes, and links between
+two subnet cache files. It also checks the link rates and LID to end port
+mapping for differences.</p>
+</li>
+</ul>
+</div>
+<div class="section" id="new-commands">
+<h2>8.5. New Commands<a class="headerlink" href="#new-commands" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><cite>query</cite> can issue nearly arbitrary SMPs and GMPs</li>
+<li><cite>subnet_diff</cite> can compute the differences between two subnets</li>
+<li><cite>set_port_state</cite> will disable or enable a group of ports intelligently
+selecting communication paths that don&#8217;t cross the affected links using
+directed route. This can be used to partition an IB network.</li>
+<li><cite>init_all_ports</cite> will set all ports in the network to the INIT state.
+This can be used to try and recover a network that may be locked up due
+to credit loop or otherwise.</li>
+</ul>
+</div>
+<div class="section" id="commands">
+<h2>8.6. Commands<a class="headerlink" href="#commands" title="Permalink to this headline">¶</a></h2>
+<p>Supported:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+<col width="25%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>dump_lfts.sh</td>
+<td>dump_mfts.sh</td>
+<td>ibaddr</td>
+<td>ibcheckerrors</td>
+</tr>
+<tr class="row-even"><td>bcheckerrs</td>
+<td>ibchecknet</td>
+<td>ibchecknode</td>
+<td>ibcheckport</td>
+</tr>
+<tr class="row-odd"><td>ibcheckportstate</td>
+<td>ibcheckportwidth</td>
+<td>ibcheckstate</td>
+<td>ibcheckwidth</td>
+</tr>
+<tr class="row-even"><td>ibclearcounters</td>
+<td>ibclearerrors</td>
+<td>ibdatacounters</td>
+<td>ibdatacounts</td>
+</tr>
+<tr class="row-odd"><td>ibdiscover.pl</td>
+<td>ibfindnodesusing.pl</td>
+<td>ibhosts</td>
+<td>ibidsverify.pl</td>
+</tr>
+<tr class="row-even"><td>iblinkinfo[.pl]</td>
+<td>ibnetdiscover</td>
+<td>ibnodes</td>
+<td>ibping</td>
+</tr>
+<tr class="row-odd"><td>ibportstate</td>
+<td>ibprintca.pl</td>
+<td>ibprintrt.pl</td>
+<td>ibprintswitch.pl</td>
+</tr>
+<tr class="row-even"><td>ibroute</td>
+<td>ibrouters</td>
+<td>ibstat</td>
+<td>ibstatus</td>
+</tr>
+<tr class="row-odd"><td>ibswitches</td>
+<td>ibswportwatch.pl</td>
+<td>ibsysstat</td>
+<td>ibtracert</td>
+</tr>
+<tr class="row-even"><td>ibv_devices</td>
+<td>perfquery</td>
+<td>rdma_bw</td>
+<td>saquery</td>
+</tr>
+<tr class="row-odd"><td>set_nodedesc.sh</td>
+<td>sminfo</td>
+<td>smpdump</td>
+<td>smpquery</td>
+</tr>
+<tr class="row-even"><td>vendstat</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+<td>&nbsp;</td>
+</tr>
+</tbody>
+</table>
+<p>To be completed:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="53%" />
+<col width="47%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>check_lft_balance.pl</td>
+<td>ibqueryerrors[.pl]</td>
+</tr>
+</tbody>
+</table>
+<ul class="simple">
+<li><cite>ibqueryerrors</cite> is nearly identical to <cite>ibcheckerrors</cite>, <cite>ibcheckerr</cite>,
+<cite>ibclearcounters</cite>, and <cite>ibclearcounters</cite>. The <cite>ibtool</cite> version of the
+<cite>ibcheck*</cite> programs already includes all the optimizations, plus more, that
+are in <cite>ibqueryerrors</cite>. Even though the output formatting is much better
+I have not re-implemented it. (FIXME)</li>
+<li>I&#8217;m not sure what <cite>check_lft_balance.pl</cite> does.</li>
+</ul>
+<p>Verbs examples/tests:</p>
+<ul class="simple">
+<li>Review test_??_loop in tests/verbs for an example of: <cite>ibv_rc_pingpong</cite>,
+<cite>ibv_uc_pingpong</cite>, <cite>ibv_ud_pingpong</cite>, <cite>ibv_srq_pingpong</cite></li>
+<li><cite>rdma_bw</cite> is similar to the same program in <cite>perftest</cite></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">8. The <code class="docutils literal"><span class="pre">ibtool</span></code> Program</a><ul>
+<li><a class="reference internal" href="#addressing">8.1. Addressing</a><ul>
+<li><a class="reference internal" href="#end-port-to-use">8.1.1. End Port to Use</a></li>
+<li><a class="reference internal" href="#target-end-port-address">8.1.2. Target End Port Address</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#error-handling">8.2. Error Handling</a></li>
+<li><a class="reference internal" href="#discovery">8.3. Discovery</a></li>
+<li><a class="reference internal" href="#notable-differences">8.4. Notable Differences</a></li>
+<li><a class="reference internal" href="#new-commands">8.5. New Commands</a></li>
+<li><a class="reference internal" href="#commands">8.6. Commands</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="ibverbs.html"
+                        title="previous chapter">7. Verbs Interface</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="license.html"
+                        title="next chapter">9. Software License</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="0sources/ibtool.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="license.html" title="9. Software License"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="ibverbs.html" title="7. Verbs Interface"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">python-rdma 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2011, Obsidian Research Corp.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

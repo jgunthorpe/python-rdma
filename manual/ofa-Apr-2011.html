@@ -1,0 +1,745 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Python RDMA &mdash; python-rdma 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="0static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="0static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="0static/jquery.js"></script>
+    <script type="text/javascript" src="0static/underscore.js"></script>
+    <script type="text/javascript" src="0static/doctools.js"></script>
+    <link rel="top" title="python-rdma 1.0 documentation" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">python-rdma 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="python-rdma">
+<h1>Python RDMA<a class="headerlink" href="#python-rdma" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="center">
+<em class="property">class </em><code class="descname">center</code><a class="headerlink" href="#center" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Management, Diagnostics and Testing</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Presented By:</th><td class="field-body">Jason Gunthorpe -
+CTO Obsidian Research</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Date:</th><td class="field-body">OFA Monterey 2011-04-05</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="what-is-in-it">
+<h2>What is in it?<a class="headerlink" href="#what-is-in-it" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p class="first">RDMA device discovery:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">for</span> <span class="n">I</span> <span class="ow">in</span> <span class="n">rdma</span><span class="o">.</span><span class="n">get_devices</span><span class="p">():</span> <span class="k">print</span> <span class="n">I</span><span class="o">.</span><span class="n">name</span><span class="p">;</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">RDMA Verbs:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">with</span> <span class="n">rdma</span><span class="o">.</span><span class="n">get_verbs</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">end_port</span><span class="p">)</span> <span class="k">as</span> <span class="n">ctx</span><span class="p">:</span>
+    <span class="k">print</span> <span class="n">ctx</span><span class="o">.</span><span class="n">query_device</span><span class="p">();</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">IB Management:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">cpi</span> <span class="o">=</span> <span class="n">umad</span><span class="o">.</span><span class="n">SubnAdmGet</span><span class="p">(</span><span class="n">IBA</span><span class="o">.</span><span class="n">MADClassPortInfo</span><span class="p">);</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>Plus more!</p>
+</div>
+<div class="section" id="what-is-python">
+<h2>What is Python?<a class="headerlink" href="#what-is-python" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="big">
+<em class="property">class </em><code class="descname">big</code><a class="headerlink" href="#big" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Python is a modern, very high level, multi-paradigm programming language:</p>
+<ul class="simple">
+<li>Emphasis on readability and clarity</li>
+<li>Modern high level features: exceptions, garbage collection, dynamic
+&#8216;duck&#8217; typing, closures</li>
+<li>Very popular for web development, finance, and for system administration.</li>
+<li>Included by default and used in major Linux distributions for many years</li>
+</ul>
+</div>
+<div class="section" id="cognitive-dissonance">
+<h2>Cognitive Dissonance<a class="headerlink" href="#cognitive-dissonance" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="descname">center</code></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="descname">big</code></dt>
+<dd></dd></dl>
+
+<p>Python is slow!</p>
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="descname">center</code></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="descname">big</code></dt>
+<dd></dd></dl>
+
+<p>RDMA is for high performance!</p>
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="descname">center</code></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="huge">
+<em class="property">class </em><code class="descname">huge</code><a class="headerlink" href="#huge" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Why!!?!?</p>
+<dl class="class">
+<dt id="incremental">
+<em class="property">class </em><code class="descname">incremental</code><a class="headerlink" href="#incremental" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="descname">big</code></dt>
+<dd></dd></dl>
+
+<p>Sometimes correct and simple is more important than fast..</p>
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="descname">incremental</code></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="descname">big</code></dt>
+<dd></dd></dl>
+
+<p>... and good algorithms can help.</p>
+</div>
+<div class="section" id="package-contents">
+<h2>Package Contents<a class="headerlink" href="#package-contents" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>RDMA Device Discovery</li>
+<li>Definitions from the IBA</li>
+<li>IB MAD RPC handling and parallelism</li>
+<li>IB subnet topology database</li>
+<li><em>libibverbs</em> interface (<em>Pyrex</em>)</li>
+<li>ibtool command line program</li>
+<li>Codegen&#8217;d and hand written documentation</li>
+<li>Test suite</li>
+</ul>
+<p>Pure Python except for <em>rdma.ibverbs</em>!</p>
+<p>GPL licensed</p>
+</div>
+<div class="section" id="package-contents-2">
+<h2>Package Contents (2)<a class="headerlink" href="#package-contents-2" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="small">
+<em class="property">class </em><code class="descname">small</code><a class="headerlink" href="#small" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<table border="1" class="docutils">
+<colgroup>
+<col width="23%" />
+<col width="77%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">OFA Module</th>
+<th class="head">Python-rdma</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>libibmad</td>
+<td>Near 100% coverage via <em>rdma.madtransactor</em> and
+<em>rdma.IBA</em></td>
+</tr>
+<tr class="row-odd"><td>libibumad</td>
+<td>100% coverage via <em>rdma.umad</em></td>
+</tr>
+<tr class="row-even"><td>libibverbs</td>
+<td>100% coverage via <em>rdma.ibverbs</em> (through Pyrex)</td>
+</tr>
+<tr class="row-odd"><td>libibnetdisc</td>
+<td>~80% coverage. No support for switch chassis grouping.</td>
+</tr>
+<tr class="row-even"><td>librdmacm</td>
+<td>Not covered</td>
+</tr>
+<tr class="row-odd"><td>libibcm</td>
+<td>Not covered</td>
+</tr>
+<tr class="row-even"><td>infiniband-diags</td>
+<td>45 commands re-implemented, 2 un-implemented.
+Review <em>ibtool</em></td>
+</tr>
+<tr class="row-odd"><td>ibutils</td>
+<td>Good coverage of the internal APIs but no
+coverage for the user tools.</td>
+</tr>
+<tr class="row-even"><td>perftest</td>
+<td><em>rdma_bw</em> is implemented as an example.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="it-works">
+<h2>It works!<a class="headerlink" href="#it-works" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre>$ ibtool rdma_bw 127.0.0.1
+path to peer IBPath(end_port=&#39;mlx4_0/1&#39;,
+    DGID=GID(&#39;fe80::2:c903:9:1edd&#39;),
+    DLID=1, MTU=4, packet_life_time=0,
+    SGID=GID(&#39;fe80::2:c903:9:1edd&#39;),
+    SLID=1, dack_resp_time=15L, dqpn=524361L,
+    dqpsn=6645404, drdatomic=0,
+    rate=3, sack_resp_time=15L, sqpn=524360L,
+    sqpsn=1754047, srdatomic=0)
+MR peer raddr=7fd268a9c000 peer rkey=8002200
+1000 iterations of 1048576 is 1048576000 bytes
+3065.7 MB/sec
+</pre></div>
+</div>
+<p>MT26428 using internal loopback, 2.8GHz i5-2300</p>
+</div>
+<div class="section" id="ibtool">
+<h2>ibtool<a class="headerlink" href="#ibtool" title="Permalink to this headline">¶</a></h2>
+<p>Re-implementation of <em>infiniband-diags</em> using Python as the implementation
+language:</p>
+<ul class="simple">
+<li>One language</li>
+<li>Greater consistency</li>
+<li>Higher performance</li>
+</ul>
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="descname">small</code></dt>
+<dd><p>Also:</p>
+<ul class="simple">
+<li>Test the Python RDMA core library</li>
+<li>Access the unique features of the Python RDMA via the command line</li>
+<li>Serve as programming examples</li>
+</ul>
+</dd></dl>
+
+<p>45 commands are implemented, &gt; 90% complete</p>
+</div>
+<div class="section" id="ibtool-2">
+<h2>ibtool (2)<a class="headerlink" href="#ibtool-2" title="Permalink to this headline">¶</a></h2>
+<p>Mostly looks the same:</p>
+<dl class="class">
+<dt id="tiny">
+<em class="property">class </em><code class="descname">tiny</code><a class="headerlink" href="#tiny" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="highlight-python"><div class="highlight"><pre>$ ibtool ibaddr 7
+GID fe80::17:77ff:feb6:2ca4 LID start 7 end 7
+$ ibtool ibswitches
+Switch  : 0017:77ff:feb6:2ca4 ports 2 &quot;Obsidian Longbow X100 - LBXR43D1FF&quot; base port 0 lid 7 lmc 0
+Switch  : 0017:77ff:fef9:6e79 ports 2 &quot;Obsidian Longbow X100 - LBXREAF28B&quot; base port 0 lid 9 lmc 0
+$ ibtool smpquery -P 2 NI -D 0,2
+# Node info: DR Path (0, 2)
+BaseVers:........................1
+ClassVers:.......................1
+NodeType:........................2
+NumPorts:........................2
+SystemGuid:......................0017:77ff:fef9:6e79
+Guid:............................0017:77ff:fef9:6e79
+PortGuid:........................0017:77ff:fef9:6e79
+PartCap:.........................1
+DevId:...........................0x0009
+Revision:........................0x00010001
+LocalPort:.......................1
+VendorId:........................0x001777
+</pre></div>
+</div>
+</div>
+<div class="section" id="ibtool-3">
+<h2>ibtool (3)<a class="headerlink" href="#ibtool-3" title="Permalink to this headline">¶</a></h2>
+<p>Some are new:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ ibtool perfquery --vl-xmit-wait  9
+# Port counters: Lid 9 (fe80::17:77ff:fef9:6e79) port 1
+PortSelect:......................1
+CounterSelect:...................0x0000
+PortVLXmitWait[0]:...............606
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre>$ ibtool subnet_diff ref
+Current subnet has 4 end ports, reference subnet has 4 end ports
+ All end ports in the current subnet are in the reference subnet.
+ All end ports in the reference subnet are in the current subnet.
+Current subnet has 3 nodes, reference subnet has 3 nodes
+ All nodes in the current subnet are in the reference subnet.
+ All nodes in the reference subnet are in the current subnet.
+Current subnet has 3 links, reference subnet has 3 links
+ All links in the current subnet are in the reference subnet.
+ All links in the reference subnet are in the current subnet.
+ All links in the current subnet have the same rate in the reference subnet.
+Current subnet has 4 LIDs, reference subnet has 4 LIDs
+ All LIDs in the current subnet are the same as the reference subnet.
+</pre></div>
+</div>
+</div>
+<div class="section" id="ibtool-4">
+<h2>ibtool (4)<a class="headerlink" href="#ibtool-4" title="Permalink to this headline">¶</a></h2>
+<p>Section 8 of the Python RDMA manual details the various differences between
+<em>ibtool</em> and <em>infiniband-diags</em>:</p>
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="descname">small</code></dt>
+<dd></dd></dl>
+
+<ul class="simple">
+<li>Greater alignment with the IBA, PR usage, timeout computations, support
+for routed GIDs, etc</li>
+<li>Everything supports GID/GUID/LID/DR path as a TARGET</li>
+<li>Better diagnostics and debug output, including packet decodes</li>
+<li><em>&#8211;sa</em> and support for GMP over verbs lets <em>ibtool</em> return info without
+access to /dev/umad</li>
+<li>LID and SA based subnet discovery options</li>
+<li>Consistent support for a discovery caching file</li>
+</ul>
+</div>
+<div class="section" id="library-tour-device-discovery">
+<h2>Library Tour - Device Discovery<a class="headerlink" href="#library-tour-device-discovery" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="descname">small</code></dt>
+<dd></dd></dl>
+
+<ul class="simple">
+<li><em>rdma.devices</em> module - trundles through sysfs and gets devices, end ports.</li>
+<li>Common basis for all other modules - <em>umad</em> and <em>ibverbs</em> are all opened
+based on these objects.</li>
+<li>Find devices by string:</li>
+</ul>
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="descname">tiny</code></dt>
+<dd></dd></dl>
+
+<table border="1" class="docutils">
+<colgroup>
+<col width="37%" />
+<col width="63%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Format</th>
+<th class="head">Example</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>device</td>
+<td>mlx4_0</td>
+</tr>
+<tr class="row-odd"><td>Node GUID</td>
+<td>0002:c903:0000:1491</td>
+</tr>
+</tbody>
+</table>
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="descname">small</code></dt>
+<dd></dd></dl>
+
+<ul class="simple">
+<li>Find ports by string:</li>
+</ul>
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="descname">tiny</code></dt>
+<dd></dd></dl>
+
+<table border="1" class="docutils">
+<colgroup>
+<col width="23%" />
+<col width="77%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Format</th>
+<th class="head">Example</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>device</td>
+<td>mlx4_0  (defaults to the first port)</td>
+</tr>
+<tr class="row-odd"><td>device/port</td>
+<td>mlx4_0/1</td>
+</tr>
+<tr class="row-even"><td>Port GID</td>
+<td>fe80::2:c903:0:1491</td>
+</tr>
+<tr class="row-odd"><td>Port GUID</td>
+<td>0002:c903:0000:1491</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="library-tour-device-discovery-2">
+<h2>Library Tour - Device Discovery (2)<a class="headerlink" href="#library-tour-device-discovery-2" title="Permalink to this headline">¶</a></h2>
+<p>Library features flow into <em>ibtool</em>:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ ibtool ibaddr -P fe80::2:c903:0:14a6 9 -d
+D: Using end port mlx4_0/2 fe80::2:c903:0:14a6
+D: SMP Path 10 -&gt; 9 SL=0 PKey=0xffff DQPN=0
+      IBPath(end_port=&#39;mlx4_0/2&#39;, DLID=10,
+             SLID=10, dqpn=0, qkey=0x0,
+             sqpn=0)
+D: RPC MAD_METHOD_GET(1) SMPFormat(1.1)
+   SMPNodeInfo(17) completed to
+   &#39;Path 10 -&gt; 9 SL=0 PKey=0xffff DQPN=0&#39;
+   len 256.
+D: RPC MAD_METHOD_GET(1) SMPFormat(1.1)
+   SMPPortInfo(21) completed to
+   &#39;Path 10 -&gt; 9 SL=0 PKey=0xffff DQPN=0&#39;
+   len 256.
+GID fe80::17:77ff:fef9:6e79 LID start 9 end 9
+</pre></div>
+</div>
+</div>
+<div class="section" id="library-tour-iba">
+<h2>Library Tour - IBA<a class="headerlink" href="#library-tour-iba" title="Permalink to this headline">¶</a></h2>
+<p>Structures and constants from the IBA:</p>
+<ul class="simple">
+<li>Starts out as XML describing the precise on-the-wire structure layout</li>
+<li>Processed via script into Python classes with <em>pack</em>, <em>unpack</em> and <em>printer</em>
+functions</li>
+<li>106 structures from IBA</li>
+<li>Useful constants, value to string and string to value are hand written</li>
+<li>Auto generate tricky things like <em>SAFormat.componentMask</em></li>
+</ul>
+</div>
+<div class="section" id="library-tour-iba-2">
+<h2>Library Tour - IBA (2)<a class="headerlink" href="#library-tour-iba-2" title="Permalink to this headline">¶</a></h2>
+<p>Everything can be decoded and dumped:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ ibtool ibaddr 9 -dd
+D: Reply MAD_METHOD_GET_RESP(129) SMPFormat(1.1) SMPNodeInfo(17)
+  0 01010181 baseVersion=1,mgmtClass=1,classVersion=1,method=129
+  4 00000000 status=0,classSpecific=0
+  8 000079FF transactionID=134139628569652
+ 12 D0E94434
+   + data SMPNodeInfo
+ 64 01010202 baseVersion=1,classVersion=1,nodeType=2,numPorts=2
+ 68 001777FF systemImageGUID=GUID(&#39;0017:77ff:fef9:6e79&#39;)
+ 72 FEF96E79
+ 76 001777FF nodeGUID=GUID(&#39;0017:77ff:fef9:6e79&#39;)
+ 80 FEF96E79
+ 84 001777FF portGUID=GUID(&#39;0017:77ff:fef9:6e79&#39;)
+ 88 FEF96E79
+ 92 00010009 partitionCap=1,deviceID=9
+ 96 00010001 revision=65537
+100 02001777 localPortNum=2,vendorID=6007
+</pre></div>
+</div>
+</div>
+<div class="section" id="library-tour-iba-3">
+<h2>Library Tour - IBA (3)<a class="headerlink" href="#library-tour-iba-3" title="Permalink to this headline">¶</a></h2>
+<p>Dynamic language with introspection makes this dead easy:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ ibtool query SubnAdmGetTable SANodeRecord \
+  -f nodeInfo.systemImageGUID=0017:77ff:fef9:6e79
+Reply structure #0
+  LID..............................9
+  nodeInfo.NumPorts................2
+  nodeInfo.SystemImageGUID.........0017:77ff:fef9:6e79
+  nodeInfo.PortGUID................0017:77ff:fef9:6e79
+  nodeInfo.VendorID................0x001777
+  nodeDescription.NodeString.......&#39;Obsidian Longbow X100 - LBXREAF28B&#39;
+</pre></div>
+</div>
+<p>45 LOC! - perform any RPC, with any arguments and pretty print the
+result. Widely used in implementing <em>ibtool</em>.</p>
+</div>
+<div class="section" id="library-tour-mad-handling">
+<h2>Library Tour - MAD Handling<a class="headerlink" href="#library-tour-mad-handling" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Two MAD QP interfaces - <em>rdma.umad</em> (SMP and GMP) and <em>rdma.vmad</em> (only GMP)</li>
+<li>Simplified programming model for issuing RPC MADs, RPC errors are
+converted into exceptions. checks, parsing and RMPP are centralized.</li>
+<li><em>rdma.SATransactor</em> transparently converts SMP RPCs into SA RPCs - enables
+all tools to use <em>VMAD</em> and return data from the SA.</li>
+<li><em>rdma.sched</em> parallelizes MAD RPCs - extremely easy to use, major performance
+win. Used extensively in <em>ibtool</em></li>
+</ul>
+</div>
+<div class="section" id="library-tour-mad-handling-2">
+<h2>Library Tour - MAD Handling (2)<a class="headerlink" href="#library-tour-mad-handling-2" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre>$ ibtool ibaddr 10 --sa -d
+D: RPC MAD_METHOD_GET(1) SAFormat(3.2)
+     SANodeRecord(17) completed to &#39;Path 8 -&gt; 8 SL=0 PKey=0xffff DQPN=1&#39; len 256.
+D: RPC MAD_METHOD_GET(1) SAFormat(3.2)
+     SAPortInfoRecord(18) completed to &#39;Path 8 -&gt; 8 SL=0 PKey=0xffff DQPN=1&#39; len 256.
+GID fe80::2:c903:0:14a6 LID start 10 end 10
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre>$ ibtool ibnetdiscover --sa -d
+D: Performing discovery using mode &#39;SA&#39;
+D: RPC MAD_METHOD_GET_TABLE(18) SAFormat(3.2)
+    SANodeRecord(17) completed to &#39;Path 8 -&gt; 8 SL=0 PKey=0xffff DQPN=1&#39; len 504.
+D: RPC MAD_METHOD_GET_TABLE(18) SAFormat(3.2)
+    SAPortInfoRecord(18) completed to &#39;Path 8 -&gt; 8 SL=0 PKey=0xffff DQPN=1&#39; len 568.
+D: RPC MAD_METHOD_GET_TABLE(18) SAFormat(3.2)
+    SALinkRecord(32) completed to &#39;Path 8 -&gt; 8 SL=0 PKey=0xffff DQPN=1&#39; len 104.
+</pre></div>
+</div>
+</div>
+<div class="section" id="library-tour-mad-parallelism">
+<h2>Library Tour - MAD Parallelism<a class="headerlink" href="#library-tour-mad-parallelism" title="Permalink to this headline">¶</a></h2>
+<p>Python Co-Routines - one thread, multiple execution contexts:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">get_pinf</span><span class="p">(</span><span class="n">sched</span><span class="p">,</span><span class="n">path</span><span class="p">,</span><span class="n">idx</span><span class="p">):</span>
+  <span class="n">pinf</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">sched</span><span class="o">.</span><span class="n">SubnGet</span><span class="p">(</span><span class="n">IBA</span><span class="o">.</span><span class="n">SMPPortInfo</span><span class="p">,</span>
+                 <span class="n">path</span><span class="p">,</span><span class="n">idx</span><span class="p">);</span>
+<span class="n">sched</span><span class="o">.</span><span class="n">mqueue</span><span class="p">(</span><span class="n">get_pinf</span><span class="p">(</span><span class="n">sched</span><span class="p">,</span><span class="n">path</span><span class="p">,</span><span class="n">idx</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">I</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">ninf</span><span class="o">.</span><span class="n">numPorts</span><span class="o">+</span><span class="mi">1</span><span class="p">));</span>
+</pre></div>
+</div>
+<p>Run <em>numPorts</em> copies of <em>get_pinf</em> in parallel. Automatically limits
+outstanding RPCs, tracks completion, manages timeouts, etc.</p>
+</div>
+<div class="section" id="library-tour-ib-subnet">
+<h2>Library Tour - IB Subnet<a class="headerlink" href="#library-tour-ib-subnet" title="Permalink to this headline">¶</a></h2>
+<p>Fetch, store and manipulate an IB subnet:</p>
+<ul class="simple">
+<li>Discovery via DR SMP, LID SMP or SA <em>SubnAdmGetTable</em></li>
+<li>Incremental out of order loading</li>
+<li>Save/Load to a Python pickle</li>
+<li>Iterate, BFS iterate, lookup by GUID, etc.</li>
+</ul>
+</div>
+<div class="section" id="library-tour-ib-subnet-2">
+<h2>Library Tour - IB Subnet (2)<a class="headerlink" href="#library-tour-ib-subnet-2" title="Permalink to this headline">¶</a></h2>
+<p>All <em>ibtool</em> discovery using functions support common options
+and caching:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ ibtool ibnetdiscover --cache disc \
+        --refresh-cache
+$ ibtool ibcheckerrors --cache disc
+## Summary: 4 nodes checked, 0 bad nodes found
+##          8 ports checked, 0 ports with bad state found
+##          4 ports checked, 0 ports have errors beyond threshold
+</pre></div>
+</div>
+<p>No MADs will be issued by <em>ibcheckerrors</em></p>
+</div>
+<div class="section" id="library-tour-verbs">
+<h2>Library Tour - Verbs<a class="headerlink" href="#library-tour-verbs" title="Permalink to this headline">¶</a></h2>
+<p>Easy to use wrappers around verbs:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">with</span> <span class="n">get_verbs</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">end_port</span><span class="p">)</span> <span class="k">as</span> <span class="n">ctx</span><span class="p">:</span>
+    <span class="n">cq</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">cq</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span><span class="n">ctx</span><span class="o">.</span><span class="n">comp_channel</span><span class="p">());</span>
+    <span class="n">pd</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">pd</span><span class="p">();</span>
+    <span class="n">qp</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">qp</span><span class="p">(</span><span class="n">ibv</span><span class="o">.</span><span class="n">IBV_QPT_UD</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="mi">100</span><span class="p">,</span><span class="n">cq</span><span class="p">);</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>Errors are raised as exceptions</li>
+<li><em>libibverbs</em> functions cast into objects</li>
+<li>Reference counting and Python context managers ensure correct resource
+cleanup</li>
+</ul>
+</div>
+<div class="section" id="library-tour-verbs-2">
+<h2>Library Tour - Verbs (2)<a class="headerlink" href="#library-tour-verbs-2" title="Permalink to this headline">¶</a></h2>
+<p>Simplifications for WC processing:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">poller</span> <span class="o">=</span> <span class="n">CQPoller</span><span class="p">(</span><span class="n">cq</span><span class="p">);</span>
+<span class="k">for</span> <span class="n">wc</span> <span class="ow">in</span> <span class="n">poller</span><span class="o">.</span><span class="n">iterwc</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+ <span class="k">if</span> <span class="n">wc</span><span class="o">.</span><span class="n">status</span> <span class="o">!=</span> <span class="n">ibv</span><span class="o">.</span><span class="n">IBV_WC_SUCCESS</span><span class="p">:</span>
+   <span class="k">raise</span> <span class="n">ibv</span><span class="o">.</span><span class="n">WCError</span><span class="p">(</span><span class="n">wc</span><span class="p">,</span><span class="n">cq</span><span class="p">,</span><span class="n">obj</span><span class="o">=</span><span class="n">qp</span><span class="p">);</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>Iterate over WC&#8217;s, block with <em>poll</em></li>
+<li>Transparently handle async events</li>
+<li>Place a timeout around the entire for loop</li>
+<li>Messy details to prevent races are hidden</li>
+<li>WC errors raise as exceptions and pretty print</li>
+</ul>
+</div>
+<div class="section" id="library-tour-verbs-3">
+<h2>Library Tour - Verbs (3)<a class="headerlink" href="#library-tour-verbs-3" title="Permalink to this headline">¶</a></h2>
+<p>Tight integration with <em>IBPath</em> concept:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">path</span> <span class="o">=</span> <span class="n">get_mad_path</span><span class="p">(</span><span class="n">umad</span><span class="p">,</span><span class="s2">&quot;10&quot;</span><span class="p">);</span>
+<span class="n">qp</span><span class="o">.</span><span class="n">establish</span><span class="p">(</span><span class="n">path</span><span class="p">);</span>
+<span class="n">qp</span><span class="o">.</span><span class="n">post_send</span><span class="p">(</span><span class="n">ibv</span><span class="o">.</span><span class="n">send_wr</span><span class="p">(</span>
+   <span class="n">opcode</span><span class="o">=</span><span class="n">ibv</span><span class="o">.</span><span class="n">IBV_WR_SEND</span><span class="p">,</span><span class="n">ah</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">ah</span><span class="p">(</span><span class="n">path</span><span class="p">),</span>
+   <span class="n">remote_qpn</span><span class="o">=</span><span class="n">path</span><span class="o">.</span><span class="n">dqpn</span><span class="p">,</span><span class="n">remote_qkey</span><span class="o">=</span><span class="n">path</span><span class="o">.</span><span class="n">qkey</span><span class="p">));</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li>Caches AH construction</li>
+<li>Verbs modify_qp draws information from the path (eg pkey, qkey,
+psn, etc)</li>
+<li>Works for UD, UC and RC,</li>
+<li>Can also get a path from a WC</li>
+</ul>
+</div>
+<div class="section" id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="descname">big</code></dt>
+<dd></dd></dl>
+
+<ul class="simple">
+<li>Great for writing management tools</li>
+<li>Very time efficient for test development, training and prototyping</li>
+<li><em>ibtool</em> is an improved, simpler and more maintainable version of
+the diags programs</li>
+</ul>
+</div>
+<div class="section" id="thanks">
+<h2>Thanks!<a class="headerlink" href="#thanks" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="descname">center</code></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="descname">big</code></dt>
+<dd></dd></dl>
+
+<div class="line-block">
+<div class="line">Get it at GitHub <a class="reference external" href="http://github.com/jgunthorpe/python-rdma">http://github.com/jgunthorpe/python-rdma</a></div>
+<div class="line">Read the manual!</div>
+<div class="line">Try it out!</div>
+</div>
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="descname">incremental</code></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="descname">center</code></dt>
+<dd></dd></dl>
+
+<div class="highlight-python"><div class="highlight"><pre>          (__)
+          (oo)
+   /------\/
+ / |    ||
+*  /\---/\
+   ~~   ~~
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Python RDMA</a><ul>
+<li><a class="reference internal" href="#what-is-in-it">What is in it?</a></li>
+<li><a class="reference internal" href="#what-is-python">What is Python?</a></li>
+<li><a class="reference internal" href="#cognitive-dissonance">Cognitive Dissonance</a></li>
+<li><a class="reference internal" href="#package-contents">Package Contents</a></li>
+<li><a class="reference internal" href="#package-contents-2">Package Contents (2)</a></li>
+<li><a class="reference internal" href="#it-works">It works!</a></li>
+<li><a class="reference internal" href="#ibtool">ibtool</a></li>
+<li><a class="reference internal" href="#ibtool-2">ibtool (2)</a></li>
+<li><a class="reference internal" href="#ibtool-3">ibtool (3)</a></li>
+<li><a class="reference internal" href="#ibtool-4">ibtool (4)</a></li>
+<li><a class="reference internal" href="#library-tour-device-discovery">Library Tour - Device Discovery</a></li>
+<li><a class="reference internal" href="#library-tour-device-discovery-2">Library Tour - Device Discovery (2)</a></li>
+<li><a class="reference internal" href="#library-tour-iba">Library Tour - IBA</a></li>
+<li><a class="reference internal" href="#library-tour-iba-2">Library Tour - IBA (2)</a></li>
+<li><a class="reference internal" href="#library-tour-iba-3">Library Tour - IBA (3)</a></li>
+<li><a class="reference internal" href="#library-tour-mad-handling">Library Tour - MAD Handling</a></li>
+<li><a class="reference internal" href="#library-tour-mad-handling-2">Library Tour - MAD Handling (2)</a></li>
+<li><a class="reference internal" href="#library-tour-mad-parallelism">Library Tour - MAD Parallelism</a></li>
+<li><a class="reference internal" href="#library-tour-ib-subnet">Library Tour - IB Subnet</a></li>
+<li><a class="reference internal" href="#library-tour-ib-subnet-2">Library Tour - IB Subnet (2)</a></li>
+<li><a class="reference internal" href="#library-tour-verbs">Library Tour - Verbs</a></li>
+<li><a class="reference internal" href="#library-tour-verbs-2">Library Tour - Verbs (2)</a></li>
+<li><a class="reference internal" href="#library-tour-verbs-3">Library Tour - Verbs (3)</a></li>
+<li><a class="reference internal" href="#summary">Summary</a></li>
+<li><a class="reference internal" href="#thanks">Thanks!</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="0sources/ofa-Apr-2011.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">python-rdma 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2011, Obsidian Research Corp.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

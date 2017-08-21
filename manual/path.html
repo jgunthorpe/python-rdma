@@ -1,0 +1,769 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>3.2. RDMA Path &mdash; python-rdma 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="0static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="0static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="0static/jquery.js"></script>
+    <script type="text/javascript" src="0static/underscore.js"></script>
+    <script type="text/javascript" src="0static/doctools.js"></script>
+    <link rel="top" title="python-rdma 1.0 documentation" href="index.html" />
+    <link rel="up" title="3. RDMA Module" href="rdma.html" />
+    <link rel="next" title="3.3. rdma.tools module" href="tools.html" />
+    <link rel="prev" title="3.1. rdma.devices module" href="devices.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tools.html" title="3.3. rdma.tools module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="devices.html" title="3.1. rdma.devices module"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">python-rdma 1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="rdma.html" accesskey="U">3. RDMA Module</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="rdma-path">
+<h1>3.2. RDMA Path<a class="headerlink" href="#rdma-path" title="Permalink to this headline">¶</a></h1>
+<p>Several general objects are provides for storing paths. In RDMA a path is the
+connection between two end ports. The path representation used in this library
+holds the full connection description, including all the necessary header
+fields. These fields will be used as necessary, depending on the context that
+the path is used in.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">For efficiency the path caches certain expensive information. In the
+current implementation the cache is imperfect and does not clear
+automatically. For this reason users should treat path records as write
+once. This is also good practice since a path may be held onto for a time
+when working with the parallel MAD scheduler or other cases.</p>
+</div>
+<div class="section" id="ib-paths">
+<h2>3.2.1. IB Paths<a class="headerlink" href="#ib-paths" title="Permalink to this headline">¶</a></h2>
+<p>In the IBA a path is unidirectional, but it may have the special property of
+being <em>reversible</em>. For reversible paths the return path is computed by
+calling <a class="reference internal" href="#rdma.path.IBPath.reverse" title="rdma.path.IBPath.reverse"><code class="xref py py-meth docutils literal"><span class="pre">rdma.path.IBPath.reverse()</span></code></a>. Further, the path may be a &#8216;forward&#8217;
+or &#8216;reverse&#8217; path relative to the associated <a class="reference internal" href="devices.html#rdma.devices.EndPort" title="rdma.devices.EndPort"><code class="xref py py-class docutils literal"><span class="pre">rdma.devices.EndPort</span></code></a> -
+the exact direction will depend on context - send paths are &#8216;forward&#8217; while
+receive paths are &#8216;reverse&#8217;.</p>
+<p>The attributes for a <a class="reference internal" href="#rdma.path.IBPath" title="rdma.path.IBPath"><code class="xref py py-class docutils literal"><span class="pre">IBPath</span></code></a> as associated with packet headers are:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="37%" />
+<col width="63%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Path Attribute</th>
+<th class="head">Header Field</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>SL</td>
+<td><cite>rdma.IBA.HdrLRH.SL</cite></td>
+</tr>
+<tr class="row-odd"><td>has_grh</td>
+<td><cite>rdma.IBA.HdrLRH.LNH</cite> [0]</td>
+</tr>
+<tr class="row-even"><td>DLID</td>
+<td><cite>rdma.IBA.HdrLRH.DLID</cite></td>
+</tr>
+<tr class="row-odd"><td>SLID</td>
+<td><cite>rdma.IBA.HdrLRH.SLID</cite></td>
+</tr>
+<tr class="row-even"><td>traffic_class</td>
+<td><cite>rdma.IBA.HdrGRH.TClass</cite></td>
+</tr>
+<tr class="row-odd"><td>flow_label</td>
+<td><cite>rdma.IBA.HdrGRH.flowLabel</cite></td>
+</tr>
+<tr class="row-even"><td>hop_limit</td>
+<td><cite>rdma.IBA.HdrGRH.hopLmt</cite></td>
+</tr>
+<tr class="row-odd"><td>SGID</td>
+<td><cite>rdma.IBA.HdrGRH.SGID</cite></td>
+</tr>
+<tr class="row-even"><td>DGID</td>
+<td><cite>rdma.IBA.HdrGRH.DGID</cite></td>
+</tr>
+<tr class="row-odd"><td>pkey</td>
+<td><cite>rdma.IBA.HdrBTH.PKey</cite></td>
+</tr>
+<tr class="row-even"><td>dqpn</td>
+<td><cite>rdma.IBA.HdrBTH.destQP</cite></td>
+</tr>
+<tr class="row-odd"><td>sqpsn</td>
+<td><cite>rdma.IBA.HdrBTH.PSN</cite></td>
+</tr>
+<tr class="row-even"><td>qkey</td>
+<td><cite>rdma.IBA.HdrDETH.QKey</cite></td>
+</tr>
+<tr class="row-odd"><td>sqpn</td>
+<td><cite>rdma.IBA.HdrDETH.srcQP</cite></td>
+</tr>
+<tr class="row-even"><td>min_rnr_timer</td>
+<td><cite>rdma.IBA.HdrAETH.syndrome</cite></td>
+</tr>
+</tbody>
+</table>
+<p>The rule for this class is that it represents the packet headers in the context it is
+used/created. Eg when sending a packet it represents the packet header to be sent. When
+receiving a packet it represents the packet headers as received.</p>
+<p>There are additional fields for use by verbs, review <a class="reference internal" href="ibverbs.html#ibverbs-path"><span>Verbs and rdma.path.IBPath</span></a>.</p>
+<p>To make the use of paths simpler in some common cases there are get/set
+properties that access end port GID indexes, PKey indexes, and LID bits. When
+used as a <cite>setattr</cite> the property will update the full version. When used as a
+<cite>getattr</cite> the property will use the end port to compute the index. The
+properties are able to cache the results of these searches. For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c1"># Use pkey index 0</span>
+<span class="n">IBPath</span><span class="p">(</span><span class="n">end_port</span><span class="p">,</span><span class="n">pkey_index</span><span class="o">=</span><span class="mi">0</span><span class="p">);</span>
+<span class="n">IBPath</span><span class="p">(</span><span class="n">end_port</span><span class="p">,</span><span class="n">pkey</span><span class="o">=</span><span class="n">end_port</span><span class="o">.</span><span class="n">pkeys</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+
+<span class="c1"># Use the default PKEY</span>
+<span class="n">IBPath</span><span class="p">(</span><span class="n">end_port</span><span class="p">,</span><span class="n">pkey</span><span class="o">=</span><span class="n">IBA</span><span class="o">.</span><span class="n">PKEY_DEFAULT</span><span class="p">);</span>
+<span class="n">IBPath</span><span class="p">(</span><span class="n">end_port</span><span class="p">,</span><span class="n">end_port</span><span class="o">.</span><span class="n">pkeys</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">IBA</span><span class="o">.</span><span class="n">PKEY_DEFAULT</span><span class="p">));</span>
+</pre></div>
+</div>
+<p>Do the same things.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The usage of asymmetric paths hasn&#8217;t been implemented yet. My feeling for this is
+that the path itself should be a reversible path and have additional attributes for
+the asymmetric paths. Depending on context the asymmetric attributes could then be
+used.</p>
+</div>
+<p>Directed route paths are supported through the <a class="reference internal" href="#rdma.path.IBDRPath" title="rdma.path.IBDRPath"><code class="xref py py-class docutils literal"><span class="pre">rdma.path.IBDRPath</span></code></a>
+subclass that includes additional information for use in the
+<code class="xref py py-class docutils literal"><span class="pre">rdma.IBA.SMPFormatDirected</span></code> MAD.</p>
+</div>
+<div class="section" id="module-rdma.path">
+<span id="rdma-path-module"></span><h2>3.2.2. <a class="reference internal" href="#module-rdma.path" title="rdma.path"><code class="xref py py-mod docutils literal"><span class="pre">rdma.path</span></code></a> module<a class="headerlink" href="#module-rdma.path" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="rdma.path.IBDRPath">
+<em class="property">class </em><code class="descclassname">rdma.path.</code><code class="descname">IBDRPath</code><span class="sig-paren">(</span><em>end_port</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.path.IBDRPath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rdma.path.IBPath" title="rdma.path.IBPath"><code class="xref py py-class docutils literal"><span class="pre">rdma.path.IBPath</span></code></a></p>
+<p>Describe a directed route path in an IB network using a VL15 QP0 packet,
+a LRH and <code class="xref py py-class docutils literal"><span class="pre">rdma.IBA.SMPFormatDirected</span></code> MADs.</p>
+<p><em>end_port</em> is the <a class="reference internal" href="devices.html#rdma.devices.EndPort" title="rdma.devices.EndPort"><code class="xref py py-class docutils literal"><span class="pre">rdma.devices.EndPort</span></code></a> this path is
+associated with. <em>kwargs</em> is applied to set attributes of the
+instance during initialization.</p>
+<p>By default this class construct a DR path to the local port.</p>
+<dl class="attribute">
+<dt id="rdma.path.IBDRPath.SGID_index">
+<code class="descname">SGID_index</code><a class="headerlink" href="#rdma.path.IBDRPath.SGID_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>raises <code class="xref py py-exc docutils literal"><span class="pre">AttributeError</span></code>, GID addressing is not possible for DR paths.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.path.IBDRPath.complete">
+<code class="descname">complete</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.path.IBDRPath.complete" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.IBDRPath.drDLID">
+<code class="descname">drDLID</code><em class="property"> = 65535</em><a class="headerlink" href="#rdma.path.IBDRPath.drDLID" title="Permalink to this definition">¶</a></dt>
+<dd><p>Holds <code class="xref py py-attr docutils literal"><span class="pre">rdma.IBA.SMPFormatDirected.drDLID</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.IBDRPath.drPath">
+<code class="descname">drPath</code><em class="property"> = None</em><a class="headerlink" href="#rdma.path.IBDRPath.drPath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Holds <code class="xref py py-attr docutils literal"><span class="pre">rdma.IBA.SMPFormatDirected.drPath</span></code>. len(<a class="reference internal" href="#rdma.path.IBDRPath.drPath" title="rdma.path.IBDRPath.drPath"><code class="xref py py-attr docutils literal"><span class="pre">drPath</span></code></a>) is used to set <em>hopCount</em>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.IBDRPath.drSLID">
+<code class="descname">drSLID</code><em class="property"> = 65535</em><a class="headerlink" href="#rdma.path.IBDRPath.drSLID" title="Permalink to this definition">¶</a></dt>
+<dd><p>Holds <code class="xref py py-attr docutils literal"><span class="pre">rdma.IBA.SMPFormatDirected.drSLID</span></code>. Should be the same as SLID.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.IBDRPath.has_grh">
+<code class="descname">has_grh</code><a class="headerlink" href="#rdma.path.IBDRPath.has_grh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns False, GID addressing is not possible for DR paths.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="rdma.path.IBPath">
+<em class="property">class </em><code class="descclassname">rdma.path.</code><code class="descname">IBPath</code><span class="sig-paren">(</span><em>end_port</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.path.IBPath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rdma.path.Path" title="rdma.path.Path"><code class="xref py py-class docutils literal"><span class="pre">rdma.path.Path</span></code></a></p>
+<p>Describe a path in an IB network with a LRH and GRH and BTH</p>
+<p>Our convention is that a path describes the LRH/GRH/BTH header fields on
+the wire. So a packet being sent from here should have a path with
+<a class="reference internal" href="#rdma.path.IBPath.SGID" title="rdma.path.IBPath.SGID"><code class="xref py py-attr docutils literal"><span class="pre">SGID</span></code></a> == self and the path for a received packet should have
+<a class="reference internal" href="#rdma.path.IBPath.DGID" title="rdma.path.IBPath.DGID"><code class="xref py py-attr docutils literal"><span class="pre">DGID</span></code></a> == self.  Ditto for <em>[ds]qpn</em> and <em>[DS]LID</em>. Paths for packets
+received will thus have reversed semantics, <a class="reference internal" href="#rdma.path.IBPath.SGID" title="rdma.path.IBPath.SGID"><code class="xref py py-attr docutils literal"><span class="pre">SGID</span></code></a> == remote.</p>
+<p>This includes all relevant addressing information as well as any
+method specific information (ie a UMAD agent_id) required to use
+it with the method in question. Since this includes the BTH information
+it must also include the DQPN if that is required (eg for unconnected
+communication)</p>
+<p><em>end_port</em> is the <a class="reference internal" href="devices.html#rdma.devices.EndPort" title="rdma.devices.EndPort"><code class="xref py py-class docutils literal"><span class="pre">rdma.devices.EndPort</span></code></a> this path is
+associated with. <em>kwargs</em> is applied to set attributes of the
+instance during initialization.</p>
+<dl class="attribute">
+<dt id="rdma.path.IBPath.DGID">
+<code class="descname">DGID</code><em class="property"> = None</em><a class="headerlink" href="#rdma.path.IBPath.DGID" title="Permalink to this definition">¶</a></dt>
+<dd><p>Holds <code class="xref py py-attr docutils literal"><span class="pre">rdma.IBA.HdrGRH.DGID</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.IBPath.DLID">
+<code class="descname">DLID</code><em class="property"> = 0</em><a class="headerlink" href="#rdma.path.IBPath.DLID" title="Permalink to this definition">¶</a></dt>
+<dd><p>Holds <code class="xref py py-attr docutils literal"><span class="pre">rdma.IBA.HdrLRH.DLID</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.IBPath.DLID_bits">
+<code class="descname">DLID_bits</code><a class="headerlink" href="#rdma.path.IBPath.DLID_bits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cache and return the LMC portion of the
+<a class="reference internal" href="#rdma.path.IBPath.DLID" title="rdma.path.IBPath.DLID"><code class="xref py py-attr docutils literal"><span class="pre">DLID</span></code></a>. Assignment updates the <a class="reference internal" href="#rdma.path.IBPath.DLID" title="rdma.path.IBPath.DLID"><code class="xref py py-attr docutils literal"><span class="pre">DLID</span></code></a> using the value from
+<a class="reference internal" href="devices.html#rdma.devices.EndPort.lid" title="rdma.devices.EndPort.lid"><code class="xref py py-attr docutils literal"><span class="pre">rdma.devices.EndPort.lid</span></code></a>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.IBPath.MTU">
+<code class="descname">MTU</code><em class="property"> = 1</em><a class="headerlink" href="#rdma.path.IBPath.MTU" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maximum MTU to use on this path</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.IBPath.SGID">
+<code class="descname">SGID</code><em class="property"> = None</em><a class="headerlink" href="#rdma.path.IBPath.SGID" title="Permalink to this definition">¶</a></dt>
+<dd><p>Holds <code class="xref py py-attr docutils literal"><span class="pre">rdma.IBA.HdrGRH.SGID</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.IBPath.SGID_index">
+<code class="descname">SGID_index</code><a class="headerlink" href="#rdma.path.IBPath.SGID_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cache and return the index of the SGID for the associated
+<a class="reference internal" href="devices.html#rdma.devices.EndPort" title="rdma.devices.EndPort"><code class="xref py py-class docutils literal"><span class="pre">EndPort</span></code></a>. Assignment updates the <a class="reference internal" href="#rdma.path.IBPath.SGID" title="rdma.path.IBPath.SGID"><code class="xref py py-attr docutils literal"><span class="pre">SGID</span></code></a>
+value.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.IBPath.SL">
+<code class="descname">SL</code><em class="property"> = 0</em><a class="headerlink" href="#rdma.path.IBPath.SL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Holds <code class="xref py py-attr docutils literal"><span class="pre">rdma.IBA.HdrLRH.SL</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.IBPath.SLID">
+<code class="descname">SLID</code><em class="property"> = 0</em><a class="headerlink" href="#rdma.path.IBPath.SLID" title="Permalink to this definition">¶</a></dt>
+<dd><p>Holds <code class="xref py py-attr docutils literal"><span class="pre">rdma.IBA.HdrLRH.SLID</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.IBPath.SLID_bits">
+<code class="descname">SLID_bits</code><a class="headerlink" href="#rdma.path.IBPath.SLID_bits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cache and return the LMC portion of the
+<a class="reference internal" href="#rdma.path.IBPath.SLID" title="rdma.path.IBPath.SLID"><code class="xref py py-attr docutils literal"><span class="pre">SLID</span></code></a>. Assignment updates the <a class="reference internal" href="#rdma.path.IBPath.SLID" title="rdma.path.IBPath.SLID"><code class="xref py py-attr docutils literal"><span class="pre">SLID</span></code></a> using the value from
+<a class="reference internal" href="devices.html#rdma.devices.EndPort.lid" title="rdma.devices.EndPort.lid"><code class="xref py py-attr docutils literal"><span class="pre">rdma.devices.EndPort.lid</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.path.IBPath.complete">
+<code class="descname">complete</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.path.IBPath.complete" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rdma.path.IBPath.copy_qp_params">
+<code class="descname">copy_qp_params</code><span class="sig-paren">(</span><em>rhs</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.path.IBPath.copy_qp_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copy the QP related parameters from <em>rhs</em></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.IBPath.dack_resp_time">
+<code class="descname">dack_resp_time</code><em class="property"> = 20</em><a class="headerlink" href="#rdma.path.IBPath.dack_resp_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Destination ack response time. Used to compute <a class="reference internal" href="#rdma.path.IBPath.qp_timeout" title="rdma.path.IBPath.qp_timeout"><code class="xref py py-attr docutils literal"><span class="pre">qp_timeout</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.IBPath.dqpn">
+<code class="descname">dqpn</code><em class="property"> = None</em><a class="headerlink" href="#rdma.path.IBPath.dqpn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Holds <code class="xref py py-attr docutils literal"><span class="pre">rdma.IBA.HdrBTH.destQP</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.IBPath.dqpsn">
+<code class="descname">dqpsn</code><em class="property"> = 0</em><a class="headerlink" href="#rdma.path.IBPath.dqpsn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Destination queue PSN, holds the initial value for the remote <a class="reference internal" href="#rdma.path.IBPath.sqpsn" title="rdma.path.IBPath.sqpsn"><code class="xref py py-attr docutils literal"><span class="pre">sqpsn</span></code></a>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.IBPath.drdatomic">
+<code class="descname">drdatomic</code><em class="property"> = 255</em><a class="headerlink" href="#rdma.path.IBPath.drdatomic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Destination issuable RD atomic</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.IBPath.flow_label">
+<code class="descname">flow_label</code><em class="property"> = 0</em><a class="headerlink" href="#rdma.path.IBPath.flow_label" title="Permalink to this definition">¶</a></dt>
+<dd><p>Holds <code class="xref py py-attr docutils literal"><span class="pre">rdma.IBA.HdrGRH.flowLabel</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.IBPath.forward_path">
+<code class="descname">forward_path</code><a class="headerlink" href="#rdma.path.IBPath.forward_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a forwards direction path</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.IBPath.has_grh">
+<code class="descname">has_grh</code><em class="property"> = False</em><a class="headerlink" href="#rdma.path.IBPath.has_grh" title="Permalink to this definition">¶</a></dt>
+<dd><p>True if a <code class="xref py py-class docutils literal"><span class="pre">rdma.IBA.HdrGRH</span></code> is present</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.IBPath.hop_limit">
+<code class="descname">hop_limit</code><em class="property"> = 0</em><a class="headerlink" href="#rdma.path.IBPath.hop_limit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Holds <code class="xref py py-attr docutils literal"><span class="pre">rdma.IBA.HdrGRH.hopLmt</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.IBPath.mad_timeout">
+<code class="descname">mad_timeout</code><a class="headerlink" href="#rdma.path.IBPath.mad_timeout" title="Permalink to this definition">¶</a></dt>
+<dd><p>The timeout to use for MADs on this path. Expressed
+as float seconds.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.IBPath.min_rnr_timer">
+<code class="descname">min_rnr_timer</code><em class="property"> = 0</em><a class="headerlink" href="#rdma.path.IBPath.min_rnr_timer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Minimum value for <cite>rdma.IBA.HdrAETH.syndrome</cite> for
+RNR NAK. (FIXME: Where does this come from??)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.IBPath.packet_life_time">
+<code class="descname">packet_life_time</code><a class="headerlink" href="#rdma.path.IBPath.packet_life_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>The packet lifetime value for this path. The lifetime value for the
+path is the expected uni-directional transit time.  If a value has not
+been provided then the port&#8217;s
+<a class="reference internal" href="devices.html#rdma.devices.EndPort.subnet_timeout" title="rdma.devices.EndPort.subnet_timeout"><code class="xref py py-attr docutils literal"><span class="pre">rdma.devices.EndPort.subnet_timeout</span></code></a> is used. To convert
+to seconds use 4.096 uS * 2**(packet_life_time)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.IBPath.pkey">
+<code class="descname">pkey</code><em class="property"> = 65535</em><a class="headerlink" href="#rdma.path.IBPath.pkey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Holds <code class="xref py py-attr docutils literal"><span class="pre">rdma.IBA.HdrBTH.PKey</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.IBPath.pkey_index">
+<code class="descname">pkey_index</code><a class="headerlink" href="#rdma.path.IBPath.pkey_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cache and return the index of the PKey for the associated
+<a class="reference internal" href="devices.html#rdma.devices.EndPort" title="rdma.devices.EndPort"><code class="xref py py-class docutils literal"><span class="pre">EndPort</span></code></a>. Assignment updates the <a class="reference internal" href="#rdma.path.IBPath.pkey" title="rdma.path.IBPath.pkey"><code class="xref py py-attr docutils literal"><span class="pre">pkey</span></code></a>
+value.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.IBPath.qkey">
+<code class="descname">qkey</code><em class="property"> = None</em><a class="headerlink" href="#rdma.path.IBPath.qkey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Holds <code class="xref py py-attr docutils literal"><span class="pre">rdma.IBA.HdrDETH.QKey</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.IBPath.qp_timeout">
+<code class="descname">qp_timeout</code><a class="headerlink" href="#rdma.path.IBPath.qp_timeout" title="Permalink to this definition">¶</a></dt>
+<dd><p>The timeout to use for RC/RD connections. This is 2 *
+packet_life_time + target_ack_delay. Expressed as float seconds.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.IBPath.rate">
+<code class="descname">rate</code><em class="property"> = 2</em><a class="headerlink" href="#rdma.path.IBPath.rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maximum injection rate for this path</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.IBPath.resp_time">
+<code class="descname">resp_time</code><em class="property"> = 20</em><a class="headerlink" href="#rdma.path.IBPath.resp_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used to compute <a class="reference internal" href="#rdma.path.IBPath.mad_timeout" title="rdma.path.IBPath.mad_timeout"><code class="xref py py-attr docutils literal"><span class="pre">mad_timeout</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.IBPath.return_path">
+<code class="descname">return_path</code><a class="headerlink" href="#rdma.path.IBPath.return_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a return direction path</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.path.IBPath.reverse">
+<code class="descname">reverse</code><span class="sig-paren">(</span><em>for_reply=True</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.path.IBPath.reverse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reverse this path in-place according to IBA 13.5.4. If <em>for_reply</em>
+is <cite>True</cite> then the reversed path will be usable as a MAD reply,
+otherwise it is simply reversed (the only difference is that reply paths
+have the hop_limit set to 255). Returns <cite>self</cite></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.IBPath.sack_resp_time">
+<code class="descname">sack_resp_time</code><em class="property"> = 20</em><a class="headerlink" href="#rdma.path.IBPath.sack_resp_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Source RC ack response time. Value is from <a class="reference internal" href="ibverbs.html#rdma.ibverbs.Context.query_device" title="rdma.ibverbs.Context.query_device"><code class="xref py py-meth docutils literal"><span class="pre">rdma.ibverbs.Context.query_device()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.path.IBPath.set_end_port">
+<code class="descname">set_end_port</code><span class="sig-paren">(</span><em>node</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.path.IBPath.set_end_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set self.end_port to the end port on node that matches the source
+description in this path</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.IBPath.sqpn">
+<code class="descname">sqpn</code><em class="property"> = None</em><a class="headerlink" href="#rdma.path.IBPath.sqpn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Holds <code class="xref py py-attr docutils literal"><span class="pre">rdma.IBA.HdrDETH.srcQP</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.IBPath.sqpsn">
+<code class="descname">sqpsn</code><em class="property"> = 0</em><a class="headerlink" href="#rdma.path.IBPath.sqpsn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Source queue PSN, holds the initial value for <code class="xref py py-attr docutils literal"><span class="pre">rdma.IBA.HdrBTH.PSN</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.IBPath.srdatomic">
+<code class="descname">srdatomic</code><em class="property"> = 255</em><a class="headerlink" href="#rdma.path.IBPath.srdatomic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Source issuable RD atomic</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.IBPath.traffic_class">
+<code class="descname">traffic_class</code><em class="property"> = 0</em><a class="headerlink" href="#rdma.path.IBPath.traffic_class" title="Permalink to this definition">¶</a></dt>
+<dd><p>Holds <code class="xref py py-attr docutils literal"><span class="pre">rdma.IBA.HdrGRH.TClass</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.IBPath.umad_agent_id">
+<code class="descname">umad_agent_id</code><em class="property"> = None</em><a class="headerlink" href="#rdma.path.IBPath.umad_agent_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method specific - override the <em>agent_id</em> for <a class="reference internal" href="mads.html#rdma.umad.UMAD" title="rdma.umad.UMAD"><code class="xref py py-class docutils literal"><span class="pre">rdma.umad.UMAD</span></code></a></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="rdma.path.LazyIBPath">
+<em class="property">class </em><code class="descclassname">rdma.path.</code><code class="descname">LazyIBPath</code><span class="sig-paren">(</span><em>end_port</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.path.LazyIBPath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rdma.path.IBPath" title="rdma.path.IBPath"><code class="xref py py-class docutils literal"><span class="pre">rdma.path.IBPath</span></code></a></p>
+<p>Similar to <a class="reference internal" href="#rdma.path.IBPath" title="rdma.path.IBPath"><code class="xref py py-class docutils literal"><span class="pre">rdma.path.IBPath</span></code></a> but the unpack of the actual data
+deferred until necessary since most of the time we do not care.</p>
+<p><em>end_port</em> is the <a class="reference internal" href="devices.html#rdma.devices.EndPort" title="rdma.devices.EndPort"><code class="xref py py-class docutils literal"><span class="pre">rdma.devices.EndPort</span></code></a> this path is
+associated with. <em>kwargs</em> is applied to set attributes of the
+instance during initialization.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="rdma.path.Path">
+<em class="property">class </em><code class="descclassname">rdma.path.</code><code class="descname">Path</code><span class="sig-paren">(</span><em>end_port</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.path.Path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Describe an RDMA path. This also serves to cache the path for cases
+that need it in an AH or other format. Paths should be considered final,
+once construction is finished their content must never change. This is to
+prevent cached data in the path from becoming stale.</p>
+<p>The <code class="xref py py-func docutils literal"><span class="pre">repr()</span></code> format will produce a string that is valid Python and is also
+compatible with <a class="reference internal" href="#rdma.path.from_spec_string" title="rdma.path.from_spec_string"><code class="xref py py-func docutils literal"><span class="pre">from_spec_string()</span></code></a>.</p>
+<p><em>end_port</em> is the <a class="reference internal" href="devices.html#rdma.devices.EndPort" title="rdma.devices.EndPort"><code class="xref py py-class docutils literal"><span class="pre">rdma.devices.EndPort</span></code></a> this path is
+associated with. <em>kwargs</em> is applied to set attributes of the
+instance during initialization.</p>
+<dl class="method">
+<dt id="rdma.path.Path.complete">
+<code class="descname">complete</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.path.Path.complete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return <cite>True</cite> if the path is complete and usable.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.path.Path.copy">
+<code class="descname">copy</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.path.Path.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new path object that is a copy of this one. This takes
+care of the internal caching mechanism.  <em>kwargs</em> is applied to set
+attributes of the instance after copying.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.path.Path.drop_cache">
+<code class="descname">drop_cache</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.path.Path.drop_cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>Release any cached information.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.Path.end_port">
+<code class="descname">end_port</code><em class="property"> = None</em><a class="headerlink" href="#rdma.path.Path.end_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>End Port this path is associated with</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.path.Path.retries">
+<code class="descname">retries</code><em class="property"> = 0</em><a class="headerlink" href="#rdma.path.Path.retries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of times a MAD will be resent, or the value of retry_cnt for a
+RC QP.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="rdma.path.SAPathNotFoundError">
+<em class="property">exception </em><code class="descclassname">rdma.path.</code><code class="descname">SAPathNotFoundError</code><span class="sig-paren">(</span><em>fmt</em>, <em>err=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.path.SAPathNotFoundError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="rdma.html#rdma.MADClassError" title="rdma.MADClassError"><code class="xref py py-class docutils literal"><span class="pre">rdma.MADClassError</span></code></a></p>
+<p>Thrown when a path record query fails with a no records error
+from the SM.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rdma.path.fill_path">
+<code class="descclassname">rdma.path.</code><code class="descname">fill_path</code><span class="sig-paren">(</span><em>qp</em>, <em>path</em>, <em>max_rd_atomic=255</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.path.fill_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fill in fields in path assuming <em>path</em> will be used with a QP. The
+filled fields are used to establish the QP parameters.</p>
+<p>If <em>max_rd_atomic</em> is set then that at most that many responder resources
+for RDMA READ and ATOMICs will be provisioned.  Since HCAs have limited
+responder resources this value should always be limited if possible. If
+RDMA READ and ATOMICs will not be used then it should be set to 0. Otherwise
+at least set to the sendq depth.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rdma.path.from_spec_string">
+<code class="descclassname">rdma.path.</code><code class="descname">from_spec_string</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.path.from_spec_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a <em>Path</em> (or derived) instance from it&#8217;s <cite>repr</cite> string.</p>
+<p>This parser is safe to use with untrusted data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><strong>ValueError</strong> &#8211; If the string can not be parsed.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="rdma.path.from_string">
+<code class="descclassname">rdma.path.</code><code class="descname">from_string</code><span class="sig-paren">(</span><em>s</em>, <em>default_end_port=None</em>, <em>require_dev=None</em>, <em>require_ep=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.path.from_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the string <em>s</em> into an instance of <a class="reference internal" href="#rdma.path.Path" title="rdma.path.Path"><code class="xref py py-class docutils literal"><span class="pre">Path</span></code></a> or
+derived.</p>
+<dl class="docutils">
+<dt>Supported formats for <em>s</em> are:</dt>
+<dd><table border="1" class="first last docutils">
+<colgroup>
+<col width="17%" />
+<col width="43%" />
+<col width="40%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Format</th>
+<th class="head">Example</th>
+<th class="head">Creates</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Port GID</td>
+<td>fe80::2:c903:0:1491</td>
+<td>IBPath.DGID = s</td>
+</tr>
+<tr class="row-odd"><td>Scope&#8217;d GID</td>
+<td>fe80::2:c903:0:1491%mlx4_0/1</td>
+<td>IBPath.DGID = s</td>
+</tr>
+<tr class="row-even"><td>Port GUID</td>
+<td>0002:c903:0000:1491</td>
+<td>IBPath.DGID = fe80:: + s</td>
+</tr>
+<tr class="row-odd"><td>LID</td>
+<td>12</td>
+<td>IBPath.DLID = 12</td>
+</tr>
+<tr class="row-even"><td>Hex LID</td>
+<td>0xc</td>
+<td>IBPath.DLID = 12</td>
+</tr>
+<tr class="row-odd"><td>DR Path</td>
+<td>0,1,</td>
+<td>IBDRPath.drPath = &#8216;\0\1&#8217;</td>
+</tr>
+<tr class="row-even"><td>Path Spec</td>
+<td>IBPath(DLID=2,SL=2)</td>
+<td>IBPath.{DLID=2,SL=2}</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+<p>If the format unambiguously specifies an end port, eg due to a provided
+scope or by specifying the subnet prefix then the result will have <cite>end_port</cite>
+set appropriately. Otherwise <cite>end_port</cite> is set to <cite>default_end_port</cite>.</p>
+<p><em>require_dev</em> and <em>require_ep</em> will restrict the lookup to returning
+a path for those conditions. If a scoped address is given that doesn&#8217;t
+match then <code class="xref py py-exc docutils literal"><span class="pre">ValueError</span></code> is raised. These options should be used when
+a path is being parsed for use with an existing bound resource (eg
+a <a class="reference internal" href="ibverbs.html#rdma.ibverbs.Context" title="rdma.ibverbs.Context"><code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.Context</span></code></a> or <code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.</span></code>)</p>
+<p>FUTURE: This may return paths other than IB for other technologies.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><strong>ValueError</strong> &#8211; If the string can not be parsed.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="rdma.path.get_mad_path">
+<code class="descclassname">rdma.path.</code><code class="descname">get_mad_path</code><span class="sig-paren">(</span><em>mad</em>, <em>ep_addr</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.path.get_mad_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query the SA and return a path for <em>ep_addr</em>.</p>
+<p>This is a simplified query function to return MAD paths from the end port
+associated with <em>mad</em> to the destination <em>ep_addr</em>.  If <em>ep_addr</em> is a
+string then <a class="reference internal" href="#rdma.path.from_string" title="rdma.path.from_string"><code class="xref py py-func docutils literal"><span class="pre">from_string()</span></code></a> is called automatically, otherwise
+<a class="reference internal" href="IBA.html#rdma.IBA.conv_ep_addr" title="rdma.IBA.conv_ep_addr"><code class="xref py py-func docutils literal"><span class="pre">rdma.IBA.conv_ep_addr()</span></code></a> is used. Thus this will accept a destination
+address string, an integer (DLID), <a class="reference internal" href="IBA.html#rdma.IBA.GID" title="rdma.IBA.GID"><code class="xref py py-class docutils literal"><span class="pre">GID</span></code></a> (DGID) and
+<a class="reference internal" href="IBA.html#rdma.IBA.GUID" title="rdma.IBA.GUID"><code class="xref py py-class docutils literal"><span class="pre">GUID</span></code></a> (DGID).</p>
+<p>This returns a single reversible path.</p>
+<p>If <em>mad</em> is an async instance then this routine returns a coroutine that
+will do the resolution, otherwise the new path is returned.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ValueError</strong> &#8211; If dest is not appropriate.</li>
+<li><a class="reference internal" href="#rdma.path.SAPathNotFoundError" title="rdma.path.SAPathNotFoundError"><strong>rdma.path.SAPathNotFoundError</strong></a> &#8211; If <em>ep_addr</em> was not found at the SA.</li>
+<li><a class="reference internal" href="rdma.html#rdma.MADError" title="rdma.MADError"><strong>rdma.MADError</strong></a> &#8211; If the RPC failed in some way.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="rdma.path.resolve_path">
+<code class="descclassname">rdma.path.</code><code class="descname">resolve_path</code><span class="sig-paren">(</span><em>mad</em>, <em>path</em>, <em>reversible=True</em>, <em>properties=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.path.resolve_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resolve <em>path</em> to a full path for use with a QP. <em>path</em> must have at
+least a DGID or DLID set.</p>
+<p><em>properties</em> is a dictionary of additional PR fields to set in the query.</p>
+<p>If <em>mad</em> is an async instance then this routine returns a coroutine that
+will do the resolution, otherwise the new path is returned.</p>
+<p>FUTURE: This routine may populate path with up to 3 full path records, one
+for GMPs, one for the forward direction and one for the return direction.
+If the path is being used for UD then it should probably set the
+<em>reversible</em> argument to True.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li><a class="reference internal" href="#rdma.path.SAPathNotFoundError" title="rdma.path.SAPathNotFoundError"><strong>rdma.path.SAPathNotFoundError</strong></a> &#8211; If <em>ep_addr</em> was not found at the SA.</li>
+<li><a class="reference internal" href="rdma.html#rdma.MADError" title="rdma.MADError"><strong>rdma.MADError</strong></a> &#8211; If the RPC failed in some way.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">3.2. RDMA Path</a><ul>
+<li><a class="reference internal" href="#ib-paths">3.2.1. IB Paths</a></li>
+<li><a class="reference internal" href="#module-rdma.path">3.2.2. <code class="docutils literal"><span class="pre">rdma.path</span></code> module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="devices.html"
+                        title="previous chapter">3.1. <code class="docutils literal"><span class="pre">rdma.devices</span></code> module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="tools.html"
+                        title="next chapter">3.3. <code class="docutils literal"><span class="pre">rdma.tools</span></code> module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="0sources/path.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tools.html" title="3.3. rdma.tools module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="devices.html" title="3.1. rdma.devices module"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">python-rdma 1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="rdma.html" >3. RDMA Module</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2011, Obsidian Research Corp.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

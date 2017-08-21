@@ -1,0 +1,853 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>5. MAD RPC Processing &mdash; python-rdma 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="0static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="0static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="0static/jquery.js"></script>
+    <script type="text/javascript" src="0static/underscore.js"></script>
+    <script type="text/javascript" src="0static/doctools.js"></script>
+    <link rel="top" title="python-rdma 1.0 documentation" href="index.html" />
+    <link rel="next" title="6. IB Subnet Database" href="subnet.html" />
+    <link rel="prev" title="4. InfiniBand Architecture (IBA) Definitions" href="IBA.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="subnet.html" title="6. IB Subnet Database"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="IBA.html" title="4. InfiniBand Architecture (IBA) Definitions"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">python-rdma 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="mad-rpc-processing">
+<h1>5. MAD RPC Processing<a class="headerlink" href="#mad-rpc-processing" title="Permalink to this headline">¶</a></h1>
+<p>The python-rdma package includes a simplified system for processing MAD
+based RPCs defined in the InfiniBand Architecture. Most of the tedious
+processing is taken care of automatically and the user sees only the
+actual RPC payload they are interested in.</p>
+<p>For example, this displays the <code class="xref py py-class docutils literal"><span class="pre">SMPPortInfo</span></code> for the local
+port:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">end_port</span> <span class="o">=</span> <span class="n">rdma</span><span class="o">.</span><span class="n">get_end_port</span><span class="p">();</span>
+<span class="n">path</span> <span class="o">=</span> <span class="n">rdma</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">IBDRPath</span><span class="p">(</span><span class="n">end_port</span><span class="p">);</span>
+<span class="k">with</span> <span class="n">rdma</span><span class="o">.</span><span class="n">get_umad</span><span class="p">(</span><span class="n">end_port</span><span class="p">)</span> <span class="k">as</span> <span class="n">umad</span><span class="p">:</span>
+    <span class="n">pinf</span> <span class="o">=</span> <span class="n">umad</span><span class="o">.</span><span class="n">SubnGet</span><span class="p">(</span><span class="n">IBA</span><span class="o">.</span><span class="n">SMPPortInfo</span><span class="p">,</span><span class="n">path</span><span class="p">);</span>
+    <span class="n">pinf</span><span class="o">.</span><span class="n">printer</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">);</span>
+</pre></div>
+</div>
+<div class="section" id="rdma-madtransactor-mad-rpc-mixin">
+<h2>5.1. <a class="reference internal" href="#module-rdma.madtransactor" title="rdma.madtransactor"><code class="xref py py-mod docutils literal"><span class="pre">rdma.madtransactor</span></code></a> MAD RPC Mixin<a class="headerlink" href="#rdma-madtransactor-mad-rpc-mixin" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="#rdma.madtransactor.MADTransactor" title="rdma.madtransactor.MADTransactor"><code class="xref py py-class docutils literal"><span class="pre">MADTransactor</span></code></a> provides the base set of methods for doing MAD
+RPC. Derived classes uses this as a mixin to provide the basic API.</p>
+<p>The user visible API is the IBA defined RPC names, eg
+<a class="reference internal" href="#rdma.madtransactor.MADTransactor.SubnGet" title="rdma.madtransactor.MADTransactor.SubnGet"><code class="xref py py-meth docutils literal"><span class="pre">SubnGet()</span></code></a> which performs that named RPC.</p>
+<p>Two modes of operation are possible, synchronous and asynchronous. In
+synchronous mode the RPC API will return the decoded reply payload. In
+asynchronous mode the RPC API will return the request message details. The
+mode in use is determined by the derived class.</p>
+<p>The API is quite simplified:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c1"># Return the SMPPortInfo for port 1</span>
+<span class="n">pinf</span> <span class="o">=</span> <span class="n">mad</span><span class="o">.</span><span class="n">SubnGet</span><span class="p">(</span><span class="n">IBA</span><span class="o">.</span><span class="n">SMPPortInfo</span><span class="p">,</span><span class="n">path</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
+<span class="k">print</span> <span class="n">pinf</span><span class="o">.</span><span class="n">masterSMLID</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Under the covers the <a class="reference internal" href="#rdma.madtransactor.MADTransactor" title="rdma.madtransactor.MADTransactor"><code class="xref py py-class docutils literal"><span class="pre">MADTransactor</span></code></a> produces a
+<code class="xref py py-class docutils literal"><span class="pre">rdma.IBA.SMPFormat</span></code> or <code class="xref py py-class docutils literal"><span class="pre">rdma.IBA.SMPFormatDirected</span></code> that
+contains as a payload a zero <code class="xref py py-class docutils literal"><span class="pre">rdma.IBA.SMPPortInfo</span></code>. The
+<code class="docutils literal"><span class="pre">attributeID</span></code> is set to <code class="docutils literal"><span class="pre">IBA.SMPPortInfo.MAD_ATTRIBUTE_ID</span></code> and
+the argument is tested to ensure that <code class="docutils literal"><span class="pre">SubnGet</span></code> is a legal RPC.</p>
+<p>When a valid reply is received the generic MAD header is processed and errors
+are converted into exceptions. The payload is unpacked and a new
+<code class="xref py py-class docutils literal"><span class="pre">rdma.IBA.SMPPortInfo</span></code> is returned.</p>
+<p>All RPC functions have a similar signature:</p>
+<dl class="function">
+<dt id="RPC">
+<code class="descname">RPC</code><span class="sig-paren">(</span><em>payload</em>, <em>path</em>, <em>attributeModifier=0</em><span class="sig-paren">)</span><a class="headerlink" href="#RPC" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>payload</strong> (<a class="reference internal" href="IBA.html#rdma.binstruct.BinStruct" title="rdma.binstruct.BinStruct"><code class="xref py py-class docutils literal"><span class="pre">rdma.binstruct.BinStruct</span></code></a> derived class adhering to the MAD protocol) &#8211; The RPC type to execute. If it is a class then the request payload is zero, otherwise the content of the instance is sent as the request.</li>
+<li><strong>path</strong> (<a class="reference internal" href="path.html#rdma.path.IBPath" title="rdma.path.IBPath"><code class="xref py py-class docutils literal"><span class="pre">rdma.path.IBPath</span></code></a>) &#8211; A reversible path specifying the target node.</li>
+<li><strong>attributeModifier</strong> (<code class="xref py py-class docutils literal"><span class="pre">int</span></code>) &#8211; The value of the generic MAD <code class="xref py py-attr docutils literal"><span class="pre">rdma.IBA.MADHeader.attributeModifier</span></code> field</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">If <em>payload</em> is class then an instance of that class, otherwise a new instance of <em>payload.__class__</em>.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li><a class="reference internal" href="rdma.html#rdma.MADError" title="rdma.MADError"><strong>rdma.MADError</strong></a> &#8211; If an error MAD is returned.</li>
+<li><a class="reference internal" href="rdma.html#rdma.MADTimeoutError" title="rdma.MADTimeoutError"><strong>rdma.MADTimeoutError</strong></a> &#8211; If the MAD timed out.</li>
+<li><strong>AttributeError</strong> &#8211; If payload or path are invalid.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>Support is also provided for processing incoming MADs as a server. The basic
+template is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">try</span><span class="p">:</span>
+    <span class="n">fmt</span><span class="p">,</span><span class="n">req</span> <span class="o">=</span> <span class="n">umad</span><span class="o">.</span><span class="n">parse_request</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span><span class="n">path</span><span class="p">);</span>
+    <span class="k">raise</span> <span class="n">rdma</span><span class="o">.</span><span class="n">MADError</span><span class="p">(</span><span class="n">req</span><span class="o">=</span><span class="n">fmt</span><span class="p">,</span><span class="n">req_buf</span><span class="o">=</span><span class="n">buf</span><span class="p">,</span><span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span>
+        <span class="n">reply_status</span><span class="o">=</span><span class="n">IBA</span><span class="o">.</span><span class="n">MAD_STATUS_UNSUP_METHOD_ATTR_COMBO</span><span class="p">,</span>
+        <span class="n">msg</span><span class="o">=</span><span class="s2">&quot;Unsupported attribute ID </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span>
+            <span class="n">fmt</span><span class="o">.</span><span class="n">describe</span><span class="p">()));</span>
+<span class="k">except</span> <span class="n">rdma</span><span class="o">.</span><span class="n">MADError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+    <span class="n">err</span><span class="o">.</span><span class="n">dump_detailed</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span><span class="s2">&quot;E:&quot;</span><span class="p">,</span><span class="n">level</span><span class="o">=</span><span class="mi">1</span><span class="p">);</span>
+    <span class="n">umad</span><span class="o">.</span><span class="n">send_error_exc</span><span class="p">(</span><span class="n">err</span><span class="p">);</span>
+</pre></div>
+</div>
+<p><em>fmt</em> will be an instance of the appropriate class format structure, and <em>req</em>
+will be an instance of the appropriate payload structure. Continued parsing of
+the request should happen within the try block and errors raised as
+<a class="reference internal" href="rdma.html#rdma.MADError" title="rdma.MADError"><code class="xref py py-exc docutils literal"><span class="pre">rdma.MADError</span></code></a> with <em>reply_status</em> set appropriately. Once a reply is
+prepared use <a class="reference internal" href="#rdma.madtransactor.MADTransactor.send_reply" title="rdma.madtransactor.MADTransactor.send_reply"><code class="xref py py-meth docutils literal"><span class="pre">rdma.madtransactor.MADTransactor.send_reply()</span></code></a>.</p>
+<span class="target" id="module-rdma.madtransactor"></span><dl class="class">
+<dt id="rdma.madtransactor.MADTransactor">
+<em class="property">class </em><code class="descclassname">rdma.madtransactor.</code><code class="descname">MADTransactor</code><a class="headerlink" href="#rdma.madtransactor.MADTransactor" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class is a mixin for everything that implements a MAD RPC
+transaction interface. Derived classes must provide the <code class="xref py py-meth docutils literal"><span class="pre">_execute()</span></code>
+method which sends the MAD and gets the reply.</p>
+<p>By design instances of this interface cannot be multi-threaded. For
+multi-threaded applications each thread must have a separate
+<a class="reference internal" href="#rdma.madtransactor.MADTransactor" title="rdma.madtransactor.MADTransactor"><code class="xref py py-class docutils literal"><span class="pre">MADTransactor</span></code></a> instance.  Simple MAD request/reply transactors
+return payload, other attributes for the last processed reply are
+available via instance attributes.</p>
+<p>Paths used with this object can have a MKey (for SMPs) and SMKey (for
+SA GMPs) attribute.</p>
+<dl class="method">
+<dt id="rdma.madtransactor.MADTransactor.PerformanceGet">
+<code class="descname">PerformanceGet</code><span class="sig-paren">(</span><em>payload</em>, <em>path</em>, <em>attributeModifier=0</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.madtransactor.MADTransactor.PerformanceGet" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rdma.madtransactor.MADTransactor.PerformanceSet">
+<code class="descname">PerformanceSet</code><span class="sig-paren">(</span><em>payload</em>, <em>path</em>, <em>attributeModifier=0</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.madtransactor.MADTransactor.PerformanceSet" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rdma.madtransactor.MADTransactor.SubnAdmGet">
+<code class="descname">SubnAdmGet</code><span class="sig-paren">(</span><em>payload</em>, <em>path=None</em>, <em>attributeModifier=0</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.madtransactor.MADTransactor.SubnAdmGet" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rdma.madtransactor.MADTransactor.SubnAdmGetTable">
+<code class="descname">SubnAdmGetTable</code><span class="sig-paren">(</span><em>payload</em>, <em>path=None</em>, <em>attributeModifier=0</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.madtransactor.MADTransactor.SubnAdmGetTable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rdma.madtransactor.MADTransactor.SubnAdmSet">
+<code class="descname">SubnAdmSet</code><span class="sig-paren">(</span><em>payload</em>, <em>path=None</em>, <em>attributeModifier=0</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.madtransactor.MADTransactor.SubnAdmSet" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rdma.madtransactor.MADTransactor.SubnGet">
+<code class="descname">SubnGet</code><span class="sig-paren">(</span><em>payload</em>, <em>path</em>, <em>attributeModifier=0</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.madtransactor.MADTransactor.SubnGet" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rdma.madtransactor.MADTransactor.SubnSet">
+<code class="descname">SubnSet</code><span class="sig-paren">(</span><em>payload</em>, <em>path</em>, <em>attributeModifier=0</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.madtransactor.MADTransactor.SubnSet" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rdma.madtransactor.MADTransactor.VendGet">
+<code class="descname">VendGet</code><span class="sig-paren">(</span><em>payload</em>, <em>path</em>, <em>attributeModifier=0</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.madtransactor.MADTransactor.VendGet" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rdma.madtransactor.MADTransactor.VendSet">
+<code class="descname">VendSet</code><span class="sig-paren">(</span><em>payload</em>, <em>path</em>, <em>attributeModifier=0</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.madtransactor.MADTransactor.VendSet" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rdma.madtransactor.MADTransactor.do_async">
+<code class="descname">do_async</code><span class="sig-paren">(</span><em>op</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.madtransactor.MADTransactor.do_async" title="Permalink to this definition">¶</a></dt>
+<dd><p>This runs a simple async work coroutine against a synchronous
+instance. In this case the coroutine yields its own next result.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.madtransactor.MADTransactor.end_port">
+<code class="descname">end_port</code><em class="property"> = None</em><a class="headerlink" href="#rdma.madtransactor.MADTransactor.end_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>The end_port this is associated with</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="rdma.madtransactor.MADTransactor.get_request_match_key">
+<em class="property">static </em><code class="descname">get_request_match_key</code><span class="sig-paren">(</span><em>buf</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.madtransactor.MADTransactor.get_request_match_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a <code class="xref py py-class docutils literal"><span class="pre">tuple</span></code> for matching a request MAD buf. The <code class="xref py py-class docutils literal"><span class="pre">tuple</span></code>
+is <cite>((oui &lt;&lt; 8) | mgmtClass,(baseVersion &lt;&lt; 8) | classVersion,attributeID)</cite>. Where <em>oui</em> is 0
+if this is not a vendor OUI MAD.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.madtransactor.MADTransactor.is_async">
+<code class="descname">is_async</code><a class="headerlink" href="#rdma.madtransactor.MADTransactor.is_async" title="Permalink to this definition">¶</a></dt>
+<dd><p>True if this is an async MADTransactor interface.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.madtransactor.MADTransactor.parse_request">
+<code class="descname">parse_request</code><span class="sig-paren">(</span><em>rbuf</em>, <em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.madtransactor.MADTransactor.parse_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a request packet into a format and data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="rdma.html#rdma.MADError" title="rdma.MADError"><strong>rdma.MADError</strong></a> &#8211; If the packet could not be parsed.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.madtransactor.MADTransactor.reply_fmt">
+<code class="descname">reply_fmt</code><em class="property"> = None</em><a class="headerlink" href="#rdma.madtransactor.MADTransactor.reply_fmt" title="Permalink to this definition">¶</a></dt>
+<dd><p>The MADFormat for the last reply packet processed</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.madtransactor.MADTransactor.reply_path">
+<code class="descname">reply_path</code><em class="property"> = None</em><a class="headerlink" href="#rdma.madtransactor.MADTransactor.reply_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>The path for the last reply packet processed</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.madtransactor.MADTransactor.result">
+<code class="descname">result</code><em class="property"> = None</em><a class="headerlink" href="#rdma.madtransactor.MADTransactor.result" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rdma.madtransactor.MADTransactor.send_error_exc">
+<code class="descname">send_error_exc</code><span class="sig-paren">(</span><em>exc</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.madtransactor.MADTransactor.send_error_exc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call <a class="reference internal" href="#rdma.madtransactor.MADTransactor.send_error_reply" title="rdma.madtransactor.MADTransactor.send_error_reply"><code class="xref py py-meth docutils literal"><span class="pre">send_error_reply()</span></code></a> with the arguments derived from
+the <a class="reference internal" href="rdma.html#rdma.MADError" title="rdma.MADError"><code class="xref py py-exc docutils literal"><span class="pre">rdma.MADError</span></code></a> exception passed in.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.madtransactor.MADTransactor.send_error_reply">
+<code class="descname">send_error_reply</code><span class="sig-paren">(</span><em>buf</em>, <em>path</em>, <em>status</em>, <em>class_code=0</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.madtransactor.MADTransactor.send_error_reply" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate an error reply for a MAD. <em>buf</em> is the full original
+packet. This entire packet is returned with an appropriate error code
+set. <em>status</em> and <em>class_code</em> should be set to the appropriate result
+code.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.madtransactor.MADTransactor.send_reply">
+<code class="descname">send_reply</code><span class="sig-paren">(</span><em>ofmt</em>, <em>payload</em>, <em>path</em>, <em>attributeModifier=0</em>, <em>status=0</em>, <em>class_code=0</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.madtransactor.MADTransactor.send_reply" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a reply packet. <em>ofmt</em> should be the request format.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.madtransactor.MADTransactor.send_rmpp_reply">
+<code class="descname">send_rmpp_reply</code><span class="sig-paren">(</span><em>ofmt</em>, <em>attrClass</em>, <em>payload</em>, <em>path</em>, <em>attributeModifier=0</em>, <em>status=0</em>, <em>class_code=0</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.madtransactor.MADTransactor.send_rmpp_reply" title="Permalink to this definition">¶</a></dt>
+<dd><p>Like send_reply, but generates an RMPP reply packet.
+<em>ofmt</em> should be the request format.
+<em>attrClass</em> is the class of the attribute, eg. IBA.SANodeRecord.
+<em>payload</em> is a list or tuple of type attrClass, potentially with zero elements.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.madtransactor.MADTransactor.trace_func">
+<code class="descname">trace_func</code><em class="property"> = None</em><a class="headerlink" href="#rdma.madtransactor.MADTransactor.trace_func" title="Permalink to this definition">¶</a></dt>
+<dd><p>A function to call for tracing.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="rdma.madtransactor.dumper_tracer">
+<code class="descclassname">rdma.madtransactor.</code><code class="descname">dumper_tracer</code><span class="sig-paren">(</span><em>mt</em>, <em>kind</em>, <em>fmt=None</em>, <em>path=None</em>, <em>ret=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.madtransactor.dumper_tracer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Logs full decoded packet dumps of what is happening to
+<code class="xref py py-data docutils literal"><span class="pre">sys.stdout</span></code>.  Assign to
+<a class="reference internal" href="#rdma.madtransactor.MADTransactor.trace_func" title="rdma.madtransactor.MADTransactor.trace_func"><code class="xref py py-attr docutils literal"><span class="pre">rdma.madtransactor.MADTransactor.trace_func</span></code></a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rdma.madtransactor.simple_tracer">
+<code class="descclassname">rdma.madtransactor.</code><code class="descname">simple_tracer</code><span class="sig-paren">(</span><em>mt</em>, <em>kind</em>, <em>fmt=None</em>, <em>path=None</em>, <em>ret=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.madtransactor.simple_tracer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simply logs summaries of what is happening to <code class="xref py py-data docutils literal"><span class="pre">sys.stdout</span></code>.
+Assign to <a class="reference internal" href="#rdma.madtransactor.MADTransactor.trace_func" title="rdma.madtransactor.MADTransactor.trace_func"><code class="xref py py-attr docutils literal"><span class="pre">rdma.madtransactor.MADTransactor.trace_func</span></code></a>.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="rdma-umad-userspace-mad-interface">
+<h2>5.2. <a class="reference internal" href="#module-rdma.umad" title="rdma.umad"><code class="xref py py-mod docutils literal"><span class="pre">rdma.umad</span></code></a> Userspace MAD Interface<a class="headerlink" href="#rdma-umad-userspace-mad-interface" title="Permalink to this headline">¶</a></h2>
+<p>The userspace MAD interface is normally instantiated by <a class="reference internal" href="rdma.html#rdma.get_umad" title="rdma.get_umad"><code class="xref py py-func docutils literal"><span class="pre">rdma.get_umad()</span></code></a>
+which will select the appropriate implementation for the platform.</p>
+<span class="target" id="module-rdma.umad"></span><dl class="class">
+<dt id="rdma.umad.LazyIBPath">
+<em class="property">class </em><code class="descclassname">rdma.umad.</code><code class="descname">LazyIBPath</code><span class="sig-paren">(</span><em>end_port</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.umad.LazyIBPath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="path.html#rdma.path.LazyIBPath" title="rdma.path.LazyIBPath"><code class="xref py py-class docutils literal"><span class="pre">rdma.path.LazyIBPath</span></code></a></p>
+<p>Similar to <a class="reference internal" href="path.html#rdma.path.IBPath" title="rdma.path.IBPath"><code class="xref py py-class docutils literal"><span class="pre">rdma.path.IBPath</span></code></a> but the unpack of the UMAD AH is
+deferred until necessary since most of the time we do not care.</p>
+<p><em>end_port</em> is the <a class="reference internal" href="devices.html#rdma.devices.EndPort" title="rdma.devices.EndPort"><code class="xref py py-class docutils literal"><span class="pre">rdma.devices.EndPort</span></code></a> this path is
+associated with. <em>kwargs</em> is applied to set attributes of the
+instance during initialization.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="rdma.umad.UMAD">
+<em class="property">class </em><code class="descclassname">rdma.umad.</code><code class="descname">UMAD</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.umad.UMAD" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="tools.html#rdma.tools.SysFSDevice" title="rdma.tools.SysFSDevice"><code class="xref py py-class docutils literal"><span class="pre">rdma.tools.SysFSDevice</span></code></a>, <a class="reference internal" href="#rdma.madtransactor.MADTransactor" title="rdma.madtransactor.MADTransactor"><code class="xref py py-class docutils literal"><span class="pre">rdma.madtransactor.MADTransactor</span></code></a></p>
+<p>Handle to a UMAD kernel interface. This class supports the context
+manager protocol.</p>
+<p><em>parent</em> is the owning <a class="reference internal" href="devices.html#rdma.devices.EndPort" title="rdma.devices.EndPort"><code class="xref py py-class docutils literal"><span class="pre">rdma.devices.EndPort</span></code></a>.</p>
+<dl class="attribute">
+<dt id="rdma.umad.UMAD.IB_IOCTL_MAGIC">
+<code class="descname">IB_IOCTL_MAGIC</code><em class="property"> = 27</em><a class="headerlink" href="#rdma.umad.UMAD.IB_IOCTL_MAGIC" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.umad.UMAD.IB_USER_MAD_ENABLE_PKEY">
+<code class="descname">IB_USER_MAD_ENABLE_PKEY</code><em class="property"> = 6915</em><a class="headerlink" href="#rdma.umad.UMAD.IB_USER_MAD_ENABLE_PKEY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.umad.UMAD.IB_USER_MAD_REGISTER_AGENT">
+<code class="descname">IB_USER_MAD_REGISTER_AGENT</code><em class="property"> = 3223067393</em><a class="headerlink" href="#rdma.umad.UMAD.IB_USER_MAD_REGISTER_AGENT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.umad.UMAD.IB_USER_MAD_UNREGISTER_AGENT">
+<code class="descname">IB_USER_MAD_UNREGISTER_AGENT</code><em class="property"> = 1074010882</em><a class="headerlink" href="#rdma.umad.UMAD.IB_USER_MAD_UNREGISTER_AGENT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.umad.UMAD.ib_mad_addr_local_t">
+<code class="descname">ib_mad_addr_local_t</code><em class="property"> = &lt;Struct object&gt;</em><a class="headerlink" href="#rdma.umad.UMAD.ib_mad_addr_local_t" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.umad.UMAD.ib_mad_addr_t">
+<code class="descname">ib_mad_addr_t</code><em class="property"> = &lt;Struct object&gt;</em><a class="headerlink" href="#rdma.umad.UMAD.ib_mad_addr_t" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.umad.UMAD.ib_user_mad_t">
+<code class="descname">ib_user_mad_t</code><em class="property"> = &lt;Struct object&gt;</em><a class="headerlink" href="#rdma.umad.UMAD.ib_user_mad_t" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rdma.umad.UMAD.recvfrom">
+<code class="descname">recvfrom</code><span class="sig-paren">(</span><em>wakeat</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.umad.UMAD.recvfrom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receive a MAD packet. If the value of
+<a class="reference internal" href="tools.html#rdma.tools.clock_monotonic" title="rdma.tools.clock_monotonic"><code class="xref py py-func docutils literal"><span class="pre">rdma.tools.clock_monotonic()</span></code></a> exceeds <em>wakeat</em> then <code class="xref py py-class docutils literal"><span class="pre">None</span></code>
+is returned.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">tuple(buf,path)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.umad.UMAD.register_client">
+<code class="descname">register_client</code><span class="sig-paren">(</span><em>mgmt_class</em>, <em>class_version</em>, <em>oui=0</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.umad.UMAD.register_client" title="Permalink to this definition">¶</a></dt>
+<dd><p>Manually register a MAD agent. This is done automatically for
+sending MADs, this API is mainly intended for special cases..</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.umad.UMAD.register_server">
+<code class="descname">register_server</code><span class="sig-paren">(</span><em>mgmt_class</em>, <em>class_version</em>, <em>oui=0</em>, <em>method_mask=0</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.umad.UMAD.register_server" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register to receive MADs that match the given
+pattern. <em>method_mask</em> is a bitmask of the method ID to match, <em>oui</em>
+is only used for <code class="xref py py-class docutils literal"><span class="pre">rdma.IBA.VendOUIFormat</span></code> MADs.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.umad.UMAD.register_server_fmt">
+<code class="descname">register_server_fmt</code><span class="sig-paren">(</span><em>fmt</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.umad.UMAD.register_server_fmt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Same as <a class="reference internal" href="#rdma.umad.UMAD.register_server" title="rdma.umad.UMAD.register_server"><code class="xref py py-meth docutils literal"><span class="pre">register_server()</span></code></a> except the arguments are deduced
+from <em>fmt</em> which should be derived from
+<a class="reference internal" href="IBA.html#rdma.binstruct.BinFormat" title="rdma.binstruct.BinFormat"><code class="xref py py-class docutils literal"><span class="pre">rdma.binstruct.BinFormat</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.umad.UMAD.sendto">
+<code class="descname">sendto</code><span class="sig-paren">(</span><em>buf</em>, <em>path</em>, <em>agent_id=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.umad.UMAD.sendto" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send a MAD packet. <em>buf</em> is the raw MAD to send, starting with the first
+byte of <code class="xref py py-class docutils literal"><span class="pre">rdma.IBA.MADHeader</span></code>. <em>path</em> is the destination.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="rdma-vmad-verbs-mad-interface">
+<h2>5.3. <a class="reference internal" href="#module-rdma.vmad" title="rdma.vmad"><code class="xref py py-mod docutils literal"><span class="pre">rdma.vmad</span></code></a> Verbs MAD Interface<a class="headerlink" href="#rdma-vmad-verbs-mad-interface" title="Permalink to this headline">¶</a></h2>
+<p>The verbs MAD interface can be used to send GMP MADs (eg to QPN 1), which is
+useful for SA communication. This class creates a UD QP using verbs and uses
+that to send all GMPs. This means the the source QPN of the GMP will not be 1,
+which is a configuration supported by IBA.</p>
+<span class="target" id="module-rdma.vmad"></span><dl class="class">
+<dt id="rdma.vmad.VMAD">
+<em class="property">class </em><code class="descclassname">rdma.vmad.</code><code class="descname">VMAD</code><span class="sig-paren">(</span><em>parent</em>, <em>path</em>, <em>depth=16</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.vmad.VMAD" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rdma.madtransactor.MADTransactor" title="rdma.madtransactor.MADTransactor"><code class="xref py py-class docutils literal"><span class="pre">rdma.madtransactor.MADTransactor</span></code></a></p>
+<p>Provide a UMAD style interface that runs on ibverbs. This can be
+used with GMP (eg QPN=1) traffic.</p>
+<p><em>path</em> is used to set the PKey and QKey for all MADs sent through
+this interface.</p>
+<dl class="method">
+<dt id="rdma.vmad.VMAD.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.vmad.VMAD.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Free the resources held by the object.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.vmad.VMAD.end_port">
+<code class="descname">end_port</code><em class="property"> = None</em><a class="headerlink" href="#rdma.vmad.VMAD.end_port" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="devices.html#rdma.devices.EndPort" title="rdma.devices.EndPort"><code class="xref py py-class docutils literal"><span class="pre">rdma.devices.EndPort</span></code></a> this is associated with.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.vmad.VMAD.recvfrom">
+<code class="descname">recvfrom</code><span class="sig-paren">(</span><em>wakeat</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.vmad.VMAD.recvfrom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receive a MAD packet. If the value of
+<a class="reference internal" href="tools.html#rdma.tools.clock_monotonic" title="rdma.tools.clock_monotonic"><code class="xref py py-func docutils literal"><span class="pre">rdma.tools.clock_monotonic()</span></code></a> exceeds <em>wakeat</em> then <code class="xref py py-class docutils literal"><span class="pre">None</span></code>
+is returned.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">tuple(buf,path)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.vmad.VMAD.sendto">
+<code class="descname">sendto</code><span class="sig-paren">(</span><em>buf</em>, <em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.vmad.VMAD.sendto" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send a MAD packet. <em>buf</em> is the raw MAD to send, starting with the first
+byte of <code class="xref py py-class docutils literal"><span class="pre">rdma.IBA.MADHeader</span></code>. <em>path</em> is the destination.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="rdma-sched-parallel-mad-scheduler">
+<h2>5.4. <a class="reference internal" href="#module-rdma.sched" title="rdma.sched"><code class="xref py py-mod docutils literal"><span class="pre">rdma.sched</span></code></a> Parallel MAD Scheduler<a class="headerlink" href="#rdma-sched-parallel-mad-scheduler" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="#rdma.sched.MADSchedule" title="rdma.sched.MADSchedule"><code class="xref py py-class docutils literal"><span class="pre">MADSchedule</span></code></a> is a parallel MAD scheduling system built
+using Python coroutines as the scheduling element. It provides for very
+simplified programming of parallel MAD operations.</p>
+<p>A simple use of the class to fetch <code class="xref py py-class docutils literal"><span class="pre">rdma.IBA.SMPNodeInfo</span></code> for a list of
+paths:</p>
+<div class="highlight-python"><div class="highlight"><pre>def get_nodeinfo(sched,node):
+    node.ninf = yield sched.SubGet(IBA.SMPNodeInfo,node.path);
+
+nodes = [..];
+sched = rdma.sched.MADSchedual(umad);
+sched.run(mqueue=(get_nodeinfo(sched,I) for I in nodes));
+</pre></div>
+</div>
+<p>The scheduler will pull coroutines from the <em>mqueue</em> argument and runs them to
+return MADs to send, bounding the total outstanding MAD count and returning
+replies as the result of <code class="docutils literal"><span class="pre">yield</span></code>.</p>
+<p>Simplified, <a class="reference internal" href="#rdma.sched.MADSchedule" title="rdma.sched.MADSchedule"><code class="xref py py-class docutils literal"><span class="pre">MADSchedule</span></code></a> manages a set of generators
+and coroutines and schedules when each is running. Generators <code class="docutils literal"><span class="pre">yield</span></code>
+coroutines and coroutines <code class="docutils literal"><span class="pre">yield</span></code> MADs to execute. Generators are started
+by calling <a class="reference internal" href="#rdma.sched.MADSchedule.mqueue" title="rdma.sched.MADSchedule.mqueue"><code class="xref py py-meth docutils literal"><span class="pre">mqueue()</span></code></a>. Typically this
+would be done using a generator expression as an argument, but this is not
+required.</p>
+<p>Coroutines are the functions that actually process the MADs. They are started
+either by being yielded from a generator or via the
+<a class="reference internal" href="#rdma.sched.MADSchedule.queue" title="rdma.sched.MADSchedule.queue"><code class="xref py py-meth docutils literal"><span class="pre">queue()</span></code></a> call. The typical format of a coroutine
+is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">get_nodeinfo</span><span class="p">(</span><span class="n">sched</span><span class="p">,</span><span class="n">node</span><span class="p">):</span>
+    <span class="n">node</span><span class="o">.</span><span class="n">ninf</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">sched</span><span class="o">.</span><span class="n">SubGet</span><span class="p">(</span><span class="n">IBA</span><span class="o">.</span><span class="n">SMPNodeInfo</span><span class="p">,</span><span class="n">node</span><span class="o">.</span><span class="n">path</span><span class="p">);</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="#rdma.sched.MADSchedule" title="rdma.sched.MADSchedule"><code class="xref py py-class docutils literal"><span class="pre">MADSchedule</span></code></a> implements the asynchronous interface for
+<a class="reference internal" href="#rdma.madtransactor.MADTransactor" title="rdma.madtransactor.MADTransactor"><code class="xref py py-class docutils literal"><span class="pre">MADTransactor</span></code></a>, so the RPC functions return the
+MAD to send. The coroutine yields these MADs back to the scheduler which
+issues them on the network and waits for a reply. When a reply (or exception)
+is returned for the MAD the <code class="docutils literal"><span class="pre">yield</span></code> statement will return that exactly as
+though the synchronous interface to <a class="reference internal" href="#rdma.madtransactor.MADTransactor" title="rdma.madtransactor.MADTransactor"><code class="xref py py-class docutils literal"><span class="pre">MADTransactor</span></code></a>
+was being used.</p>
+<p>While a coroutine is yielded other coroutines can execute until
+<a class="reference internal" href="#rdma.sched.MADSchedule.max_outstanding" title="rdma.sched.MADSchedule.max_outstanding"><code class="xref py py-attr docutils literal"><span class="pre">rdma.sched.MADSchedule.max_outstanding</span></code></a> MADs are issued, at which point
+the scheduler waits for MADs on the network to complete. As coroutines exit
+queued generators are called to produce more coroutines until there is no more
+work to do.</p>
+<p>A coroutine may also <code class="docutils literal"><span class="pre">yield</span></code> another coroutine. In this instance the
+scheduler treats it as a function call and runs the returned coroutine to
+completion before returning from <code class="docutils literal"><span class="pre">yield</span></code>. If the coroutine produces an
+exception then it will pass through the <code class="docutils literal"><span class="pre">yield</span></code> statement as well. The
+called coroutine can return a result to the parent by setting the
+<a class="reference internal" href="#rdma.sched.MADSchedule.result" title="rdma.sched.MADSchedule.result"><code class="xref py py-attr docutils literal"><span class="pre">result</span></code></a> attribute before returning.</p>
+<p>This example shows how to perform directed route discovery of a network
+using parallel MAD scheduling:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">get_port_info</span><span class="p">(</span><span class="n">sched</span><span class="p">,</span><span class="n">path</span><span class="p">,</span><span class="n">port</span><span class="p">,</span><span class="n">follow</span><span class="p">):</span>
+    <span class="n">pinf</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">sched</span><span class="o">.</span><span class="n">SubnGet</span><span class="p">(</span><span class="n">IBA</span><span class="o">.</span><span class="n">SMPPortInfo</span><span class="p">,</span><span class="n">path</span><span class="p">,</span><span class="n">port</span><span class="p">);</span>
+    <span class="k">if</span> <span class="n">follow</span> <span class="ow">and</span> <span class="n">pinf</span><span class="o">.</span><span class="n">portState</span> <span class="o">!=</span> <span class="n">IBA</span><span class="o">.</span><span class="n">PORT_STATE_DOWN</span><span class="p">:</span>
+        <span class="n">npath</span> <span class="o">=</span> <span class="n">rdma</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">IBDRPath</span><span class="p">(</span><span class="n">end_port</span><span class="p">,</span><span class="n">drPath</span><span class="o">=</span><span class="n">path</span><span class="o">.</span><span class="n">drPath</span> <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="n">port</span><span class="p">));</span>
+        <span class="k">yield</span> <span class="n">get_node_info</span><span class="p">(</span><span class="n">sched</span><span class="p">,</span><span class="n">npath</span><span class="p">);</span>
+
+<span class="k">def</span> <span class="nf">get_node_info</span><span class="p">(</span><span class="n">sched</span><span class="p">,</span><span class="n">path</span><span class="p">):</span>
+    <span class="n">ninf</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">sched</span><span class="o">.</span><span class="n">SubnGet</span><span class="p">(</span><span class="n">IBA</span><span class="o">.</span><span class="n">SMPNodeInfo</span><span class="p">,</span><span class="n">path</span><span class="p">);</span>
+    <span class="k">if</span> <span class="n">ninf</span><span class="o">.</span><span class="n">nodeGUID</span> <span class="ow">in</span> <span class="n">guids</span><span class="p">:</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="n">guids</span><span class="p">[</span><span class="n">ninf</span><span class="o">.</span><span class="n">nodeGUID</span><span class="p">]</span> <span class="o">=</span> <span class="n">ninf</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="n">ninf</span><span class="o">.</span><span class="n">nodeType</span> <span class="o">==</span> <span class="n">IBA</span><span class="o">.</span><span class="n">NODE_SWITCH</span><span class="p">:</span>
+        <span class="n">sched</span><span class="o">.</span><span class="n">mqueue</span><span class="p">(</span><span class="n">get_port_info</span><span class="p">(</span><span class="n">sched</span><span class="p">,</span><span class="n">path</span><span class="p">,</span><span class="n">I</span><span class="p">,</span><span class="bp">True</span><span class="p">)</span>
+                     <span class="k">for</span> <span class="n">I</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">ninf</span><span class="o">.</span><span class="n">numPorts</span><span class="o">+</span><span class="mi">1</span><span class="p">));</span>
+        <span class="n">pinf</span> <span class="o">=</span> <span class="k">yield</span> <span class="n">sched</span><span class="o">.</span><span class="n">SubnGet</span><span class="p">(</span><span class="n">IBA</span><span class="o">.</span><span class="n">SMPPortInfo</span><span class="p">,</span><span class="n">path</span><span class="p">,</span><span class="mi">0</span><span class="p">);</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">get_port_info</span><span class="p">(</span><span class="n">sched</span><span class="p">,</span><span class="n">path</span><span class="p">,</span><span class="n">ninf</span><span class="o">.</span><span class="n">localPortNum</span><span class="p">,</span>
+                            <span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">drPath</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">);</span>
+
+<span class="n">guids</span> <span class="o">=</span> <span class="p">{};</span>
+<span class="k">with</span> <span class="n">rdma</span><span class="o">.</span><span class="n">get_umad</span><span class="p">(</span><span class="n">endport</span><span class="p">)</span> <span class="k">as</span> <span class="n">umad</span><span class="p">:</span>
+    <span class="n">sched</span> <span class="o">=</span> <span class="n">rdma</span><span class="o">.</span><span class="n">sched</span><span class="o">.</span><span class="n">MADSchedule</span><span class="p">(</span><span class="n">umad</span><span class="p">);</span>
+    <span class="n">local_path</span> <span class="o">=</span> <span class="n">rdma</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">IBDRPath</span><span class="p">(</span><span class="n">end_port</span><span class="p">);</span>
+    <span class="n">sched</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">get_node_info</span><span class="p">(</span><span class="n">sched</span><span class="p">,</span><span class="n">local_path</span><span class="p">));</span>
+</pre></div>
+</div>
+<div class="section" id="what-can-be-yielded">
+<h3>5.4.1. What can be Yielded<a class="headerlink" href="#what-can-be-yielded" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>A generator can yield:</dt>
+<dd><ul class="first last simple">
+<li>A coroutine. The coroutine is scheduled to run as though
+<code class="xref py py-meth docutils literal"><span class="pre">rmda.madschedule.MADSchedule.queue()</span></code> had been called. The generator
+does not wait for the coroutine to finish.</li>
+<li>The result of <a class="reference internal" href="#rdma.sched.MADSchedule.queue" title="rdma.sched.MADSchedule.queue"><code class="xref py py-meth docutils literal"><span class="pre">queue()</span></code></a>, or the result of
+yield&#8217;ing a coroutine. Yield will return once the thing queued is
+finished.</li>
+<li>The result of <a class="reference internal" href="#rdma.sched.MADSchedule.mqueue" title="rdma.sched.MADSchedule.mqueue"><code class="xref py py-meth docutils literal"><span class="pre">mqueue()</span></code></a> - yield will return
+once the generator is exhausted and all the coroutines it spawned are finished.</li>
+</ul>
+</dd>
+<dt>A coroutine can yield:</dt>
+<dd><ul class="first last simple">
+<li>The result of a RPC call function (a tuple describing the MAD to send). The
+yield result will be the MAD reply.</li>
+<li>A coroutine. The yield result will be value of
+<a class="reference internal" href="#rdma.sched.MADSchedule.result" title="rdma.sched.MADSchedule.result"><code class="xref py py-attr docutils literal"><span class="pre">result</span></code></a> when the coroutine raises
+<code class="xref py py-exc docutils literal"><span class="pre">StopIteration</span></code> or <cite>True</cite> if it is None, once the coroutine exits.
+Exceptions raised by the coroutine will propagate through the yield as
+though the yield was a function call.</li>
+<li>A generator. This is identical to yielding a coroutine - the generator runs
+sequentially through its work and blocks at each yield.</li>
+<li>The result of <a class="reference internal" href="#rdma.sched.MADSchedule.queue" title="rdma.sched.MADSchedule.queue"><code class="xref py py-meth docutils literal"><span class="pre">queue()</span></code></a> - yield will return
+once the thing queued is finished.</li>
+<li>The result of <a class="reference internal" href="#rdma.sched.MADSchedule.mqueue" title="rdma.sched.MADSchedule.mqueue"><code class="xref py py-meth docutils literal"><span class="pre">mqueue()</span></code></a> - yield will return
+once the generator is exhausted and all the coroutines it spawned are finished.</li>
+<li><cite>None</cite> - yield immediately returns. This is useful for calling something
+that might be a coroutine or a normal function that returns <cite>None</cite>.</li>
+</ul>
+</dd>
+</dl>
+<span class="target" id="module-rdma.sched"></span><dl class="class">
+<dt id="rdma.sched.Context">
+<em class="property">class </em><code class="descclassname">rdma.sched.</code><code class="descname">Context</code><span class="sig-paren">(</span><em>op</em>, <em>gengen</em>, <em>parent=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.sched.Context" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="rdma.sched.MADSchedule">
+<em class="property">class </em><code class="descclassname">rdma.sched.</code><code class="descname">MADSchedule</code><span class="sig-paren">(</span><em>umad</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.sched.MADSchedule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rdma.madtransactor.MADTransactor" title="rdma.madtransactor.MADTransactor"><code class="xref py py-class docutils literal"><span class="pre">rdma.madtransactor.MADTransactor</span></code></a></p>
+<p>This class provides a MADTransactor interface suitable for use by
+python coroutines. The implementation gets MAD parallelism by running
+multiple coroutines at once. coroutines are implemented as generators.</p>
+<p><em>umad</em> is a <a class="reference internal" href="#rdma.umad.UMAD" title="rdma.umad.UMAD"><code class="xref py py-class docutils literal"><span class="pre">rdma.umad.UMAD</span></code></a> instance which will be used to
+issue the MADs.</p>
+<dl class="class">
+<dt id="rdma.sched.MADSchedule.Work">
+<em class="property">class </em><code class="descname">Work</code><span class="sig-paren">(</span><em>buf</em>, <em>fmt</em>, <em>path</em>, <em>newer</em>, <em>completer</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.sched.MADSchedule.Work" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></p>
+<dl class="attribute">
+<dt id="rdma.sched.MADSchedule.Work.buf">
+<code class="descname">buf</code><a class="headerlink" href="#rdma.sched.MADSchedule.Work.buf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.sched.MADSchedule.Work.completer">
+<code class="descname">completer</code><a class="headerlink" href="#rdma.sched.MADSchedule.Work.completer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 4</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.sched.MADSchedule.Work.fmt">
+<code class="descname">fmt</code><a class="headerlink" href="#rdma.sched.MADSchedule.Work.fmt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.sched.MADSchedule.Work.newer">
+<code class="descname">newer</code><a class="headerlink" href="#rdma.sched.MADSchedule.Work.newer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 3</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.sched.MADSchedule.Work.path">
+<code class="descname">path</code><a class="headerlink" href="#rdma.sched.MADSchedule.Work.path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.sched.MADSchedule.is_async">
+<code class="descclassname">MADSchedule.</code><code class="descname">is_async</code><a class="headerlink" href="#rdma.sched.MADSchedule.is_async" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.sched.MADSchedule.max_outstanding">
+<code class="descclassname">MADSchedule.</code><code class="descname">max_outstanding</code><em class="property"> = 4</em><a class="headerlink" href="#rdma.sched.MADSchedule.max_outstanding" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maximum number of outstanding MADs at any time.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.sched.MADSchedule.mqueue">
+<code class="descclassname">MADSchedule.</code><code class="descname">mqueue</code><span class="sig-paren">(</span><em>works</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.sched.MADSchedule.mqueue" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>works</em> is a generator returning coroutines. All coroutines
+can run in parallel.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">An opaque context reference.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.sched.MADSchedule.queue">
+<code class="descclassname">MADSchedule.</code><code class="descname">queue</code><span class="sig-paren">(</span><em>work</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.sched.MADSchedule.queue" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>work</em> is a single coroutine, or <em>work</em> is a tuple of coroutines.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">An opaque context reference.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.sched.MADSchedule.result">
+<code class="descclassname">MADSchedule.</code><code class="descname">result</code><em class="property"> = None</em><a class="headerlink" href="#rdma.sched.MADSchedule.result" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set to return a result from a coroutine</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.sched.MADSchedule.run">
+<code class="descclassname">MADSchedule.</code><code class="descname">run</code><span class="sig-paren">(</span><em>queue=None</em>, <em>mqueue=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.sched.MADSchedule.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Schedule MADs. Exits once all the work has been completed.
+<em>queue</em> and <em>mqueue</em> arguments as passed straight to the
+<a class="reference internal" href="#rdma.sched.MADSchedule.queue" title="rdma.sched.MADSchedule.queue"><code class="xref py py-meth docutils literal"><span class="pre">queue()</span></code></a> and <a class="reference internal" href="#rdma.sched.MADSchedule.mqueue" title="rdma.sched.MADSchedule.mqueue"><code class="xref py py-meth docutils literal"><span class="pre">mqueue()</span></code></a> methods.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="rdma-satransactor-automatic-subnget-to-subnadmget-conversion">
+<h2>5.5. <a class="reference internal" href="#module-rdma.satransactor" title="rdma.satransactor"><code class="xref py py-mod docutils literal"><span class="pre">rdma.satransactor</span></code></a> Automatic SubnGet to SubnAdmGet Conversion<a class="headerlink" href="#rdma-satransactor-automatic-subnget-to-subnadmget-conversion" title="Permalink to this headline">¶</a></h2>
+<p>IBA provides two ways to get information about objects manages by a SMA - the
+first is a <cite>SubnGet</cite> SMP RPC to the end port, the second is a <cite>SubnAdmGet</cite>
+GMP RPC to the SA. These should return the same information and are generally
+interchangeable.</p>
+<p>This class provides an easy way for tools to access the information either
+using <cite>SubnGet</cite> or using <cite>SubnAdmGet</cite> without really affecting the source
+code.  The <cite>SubnGet</cite> is transparently recoded into a <cite>SubnAdmGet</cite> with the
+proper query components set from the path and attribute ID and proper
+unwrapping of the SA reply.</p>
+<p>The class can wrapper both synchronous and asynchronous
+<a class="reference internal" href="#rdma.madtransactor.MADTransactor" title="rdma.madtransactor.MADTransactor"><code class="xref py py-class docutils literal"><span class="pre">MADTransactor</span></code></a> instances. When wrappering a
+synchronous instance the class can also automatically resolve a DR path to a
+LID for use with the SA.</p>
+<p>I highly recommend that all tools with the cabability to perform <cite>SubnGet</cite>
+provide an option to use this class to rely on the SA. IBA defines operation
+modes that would deny all <cite>SubnGet</cite> operations without a valid <cite>MKey</cite>.</p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">end_port</span> <span class="o">=</span> <span class="n">rdma</span><span class="o">.</span><span class="n">get_end_port</span><span class="p">();</span>
+<span class="n">path</span> <span class="o">=</span> <span class="n">rdma</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">IBDRPath</span><span class="p">(</span><span class="n">end_port</span><span class="p">);</span>
+<span class="k">with</span> <span class="n">rdma</span><span class="o">.</span><span class="n">satransactor</span><span class="o">.</span><span class="n">SATransactor</span><span class="p">(</span><span class="n">rdma</span><span class="o">.</span><span class="n">get_gmp_mad</span><span class="p">(</span><span class="n">end_port</span><span class="p">))</span> <span class="k">as</span> <span class="n">umad</span><span class="p">:</span>
+    <span class="n">pinf</span> <span class="o">=</span> <span class="n">umad</span><span class="o">.</span><span class="n">SubnGet</span><span class="p">(</span><span class="n">IBA</span><span class="o">.</span><span class="n">SMPPortInfo</span><span class="p">,</span><span class="n">path</span><span class="p">);</span>
+    <span class="n">pinf</span><span class="o">.</span><span class="n">printer</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">);</span>
+</pre></div>
+</div>
+<span class="target" id="module-rdma.satransactor"></span><dl class="class">
+<dt id="rdma.satransactor.SATransactor">
+<em class="property">class </em><code class="descclassname">rdma.satransactor.</code><code class="descname">SATransactor</code><span class="sig-paren">(</span><em>parent</em>, <em>sa_path=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.satransactor.SATransactor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rdma.madtransactor.MADTransactor" title="rdma.madtransactor.MADTransactor"><code class="xref py py-class docutils literal"><span class="pre">rdma.madtransactor.MADTransactor</span></code></a></p>
+<p>This class wrappers another MADTransactor and transparently changes SMP
+queries into corrisponding SA queries. It is useful to write applications
+that need to support both methods.</p>
+<p>There are some limitations due to how the SA interface is
+defined. <code class="xref py py-class docutils literal"><span class="pre">SMPPortInfo</span></code> requires the port number, which is
+often 0. This requires extra work unless the node type is known since the
+SA does not support the same port 0 semantics. Generally using
+<cite>ninf.localPortNum</cite> as the attributeModifier works around this.</p>
+<p>When using the async interface it is not possible to use a
+<a class="reference internal" href="path.html#rdma.path.IBDRPath" title="rdma.path.IBDRPath"><code class="xref py py-class docutils literal"><span class="pre">IBDRPath</span></code></a> since that requires multiple MADs to resolve
+the DR path to a LID through the SA.</p>
+<p>The class will collect and cache information in the path to try and work
+around some of these issues.</p>
+<p>It is also a context manager that wrappers the <em>parent</em>&#8216;s <a class="reference internal" href="#rdma.satransactor.SATransactor.close" title="rdma.satransactor.SATransactor.close"><code class="xref py py-meth docutils literal"><span class="pre">close()</span></code></a>.</p>
+<p><em>parent</em> is the <a class="reference internal" href="#rdma.madtransactor.MADTransactor" title="rdma.madtransactor.MADTransactor"><code class="xref py py-class docutils literal"><span class="pre">MADTransactor</span></code></a> we are
+wrappering.</p>
+<dl class="method">
+<dt id="rdma.satransactor.SATransactor.SubnGet">
+<code class="descname">SubnGet</code><span class="sig-paren">(</span><em>payload</em>, <em>path</em>, <em>attributeModifier=0</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.satransactor.SATransactor.SubnGet" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rdma.satransactor.SATransactor.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.satransactor.SATransactor.close" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rdma.satransactor.SATransactor.get_path_lid">
+<code class="descname">get_path_lid</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.satransactor.SATransactor.get_path_lid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resolve <em>path</em> to a LID. This is only does something if <em>path</em>
+is directed route.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.satransactor.SATransactor.is_async">
+<code class="descname">is_async</code><a class="headerlink" href="#rdma.satransactor.SATransactor.is_async" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rdma.satransactor.SATransactor.prepare_path_lid">
+<code class="descname">prepare_path_lid</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.satransactor.SATransactor.prepare_path_lid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coroutine to resolve <em>path</em> to a LID. This only does something if
+<em>path</em> is directed route. This must be performed when using directed
+route paths with asynchronous MAD transactors.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.satransactor.SATransactor.result">
+<code class="descname">result</code><a class="headerlink" href="#rdma.satransactor.SATransactor.result" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">5. MAD RPC Processing</a><ul>
+<li><a class="reference internal" href="#rdma-madtransactor-mad-rpc-mixin">5.1. <code class="docutils literal"><span class="pre">rdma.madtransactor</span></code> MAD RPC Mixin</a></li>
+<li><a class="reference internal" href="#rdma-umad-userspace-mad-interface">5.2. <code class="docutils literal"><span class="pre">rdma.umad</span></code> Userspace MAD Interface</a></li>
+<li><a class="reference internal" href="#rdma-vmad-verbs-mad-interface">5.3. <code class="docutils literal"><span class="pre">rdma.vmad</span></code> Verbs MAD Interface</a></li>
+<li><a class="reference internal" href="#rdma-sched-parallel-mad-scheduler">5.4. <code class="docutils literal"><span class="pre">rdma.sched</span></code> Parallel MAD Scheduler</a><ul>
+<li><a class="reference internal" href="#what-can-be-yielded">5.4.1. What can be Yielded</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rdma-satransactor-automatic-subnget-to-subnadmget-conversion">5.5. <code class="docutils literal"><span class="pre">rdma.satransactor</span></code> Automatic SubnGet to SubnAdmGet Conversion</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="IBA.html"
+                        title="previous chapter">4. InfiniBand Architecture (IBA) Definitions</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="subnet.html"
+                        title="next chapter">6. IB Subnet Database</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="0sources/mads.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="subnet.html" title="6. IB Subnet Database"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="IBA.html" title="4. InfiniBand Architecture (IBA) Definitions"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">python-rdma 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2011, Obsidian Research Corp.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

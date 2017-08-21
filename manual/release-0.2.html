@@ -1,0 +1,147 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Version 0.2 &mdash; python-rdma 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="0static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="0static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="0static/jquery.js"></script>
+    <script type="text/javascript" src="0static/underscore.js"></script>
+    <script type="text/javascript" src="0static/doctools.js"></script>
+    <link rel="top" title="python-rdma 1.0 documentation" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">python-rdma 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="version-0-2">
+<h1>Version 0.2<a class="headerlink" href="#version-0-2" title="Permalink to this headline">¶</a></h1>
+<p>Notable Bug Fixes:</p>
+<ul class="simple">
+<li><a class="reference internal" href="devices.html#rdma.devices.RDMADevice.node_desc" title="rdma.devices.RDMADevice.node_desc"><code class="xref py py-attr docutils literal"><span class="pre">rdma.devices.RDMADevice.node_desc</span></code></a> had a trailing \n</li>
+<li><cite>ibverbs</cite> tracks multicast joins in QPs so they can be undone during closing,
+fixs up a failure to clean up during exceptions in some cases.</li>
+<li><a class="reference internal" href="mads.html#rdma.sched.MADSchedule" title="rdma.sched.MADSchedule"><code class="xref py py-class docutils literal"><span class="pre">MADSchedule</span></code></a> could loose the RPC result if it got too busy.</li>
+<li><a class="reference internal" href="subnet.html#rdma.discovery.topo_SMP" title="rdma.discovery.topo_SMP"><code class="xref py py-func docutils literal"><span class="pre">rdma.discovery.topo_SMP()</span></code></a> did not strictly enforce BFS order and
+could overrun the hop limit.</li>
+<li>Non-end ports were ending up some of the subnet structures</li>
+<li>Ignore pkey index for QP0 packets (work around a kernel/driver bug)</li>
+<li>Fix parsing of Node Description [Chas Williams]</li>
+<li>Incorrect calculation of COMP_MASK bit positions for SAInformInfoRecord and
+SAServiceRecord</li>
+</ul>
+<p>Notable Features/Improvements:</p>
+<ul class="simple">
+<li><a class="reference internal" href="path.html#rdma.path.from_string" title="rdma.path.from_string"><code class="xref py py-func docutils literal"><span class="pre">rdma.path.from_string()</span></code></a> is a very general string to
+<a class="reference internal" href="path.html#module-rdma.path" title="rdma.path"><code class="xref py py-class docutils literal"><span class="pre">path</span></code></a> parser. Includes support for parsing the <code class="xref py py-func docutils literal"><span class="pre">repr()</span></code>
+format of <a class="reference internal" href="path.html#rdma.path.IBPath" title="rdma.path.IBPath"><code class="xref py py-class docutils literal"><span class="pre">IBPath</span></code></a>, which basically makes everything possible
+from the command line.</li>
+<li><a class="reference internal" href="subnet.html#rdma.subnet.Subnet.advance_dr" title="rdma.subnet.Subnet.advance_dr"><code class="xref py py-meth docutils literal"><span class="pre">rdma.subnet.Subnet.advance_dr()</span></code></a> is used to advance a DR path, and it
+understands how to deal with trying to DR from a non switch port.</li>
+<li><a class="reference internal" href="subnet.html#rdma.subnet.Port.port_id" title="rdma.subnet.Port.port_id"><code class="xref py py-attr docutils literal"><span class="pre">rdma.subnet.Port.port_id</span></code></a></li>
+<li><a class="reference internal" href="path.html#rdma.path.resolve_path" title="rdma.path.resolve_path"><code class="xref py py-func docutils literal"><span class="pre">rdma.path.resolve_path()</span></code></a> and <a class="reference internal" href="path.html#rdma.path.get_mad_path" title="rdma.path.get_mad_path"><code class="xref py py-func docutils literal"><span class="pre">rdma.path.get_mad_path()</span></code></a> can be
+used with <a class="reference internal" href="mads.html#rdma.sched.MADSchedule" title="rdma.sched.MADSchedule"><code class="xref py py-class docutils literal"><span class="pre">MADSchedule</span></code></a>, or synchronously.</li>
+<li>Support for acting as a GMP server, including vendor MADs and vendor
+MADs with OUIs. See <a class="reference internal" href="mads.html#rdma.madtransactor.MADTransactor.parse_request" title="rdma.madtransactor.MADTransactor.parse_request"><code class="xref py py-meth docutils literal"><span class="pre">rdma.madtransactor.MADTransactor.parse_request()</span></code></a></li>
+<li>DEB and RPM packaging</li>
+</ul>
+<p>ibtool:</p>
+<ul class="simple">
+<li>Default to use the first port with a link if no specific port is specified.</li>
+<li>Better target address parsing using <a class="reference internal" href="path.html#rdma.path.from_string" title="rdma.path.from_string"><code class="xref py py-func docutils literal"><span class="pre">rdma.path.from_string()</span></code></a></li>
+<li>Add <cite>set_nodedesc[.sh]</cite></li>
+<li>Add <cite>ibtracert</cite></li>
+<li>Add <cite>ibswportwatch</cite></li>
+<li>Add <cite>iblinkinfo</cite></li>
+<li>Add <cite>subnet_diff</cite> (aka <cite>ibdiscover.pl</cite>)</li>
+<li>Single node fabric check functions: <cite>ibchecknode</cite>, <cite>ibcheckportstate</cite>,
+<cite>ibcheckportwidth</cite>, <cite>ibcheckerrs</cite>, and <cite>ibdatacounts</cite></li>
+<li>Full topology check functions: <cite>ibcheckstate</cite>, <cite>ibcheckwidth</cite>, <cite>ibchecknet</cite>,
+<cite>ibcheckerrors</cite>, <cite>ibclearcounters</cite>, <cite>ibclearerrors</cite>, <cite>ibdatacounters</cite>, and
+<cite>ibidsverify</cite>.</li>
+<li>MAD server functions <cite>vendstat</cite>, <cite>ibsysstat</cite> and <cite>ibping</cite></li>
+<li>New <cite>set_port_state</cite> and <cite>init_all_ports</cite> commands</li>
+<li><cite>&#8211;get</cite> option for <cite>saquery</cite></li>
+<li><cite>dump_mfts</cite> shows the default routing too</li>
+<li>Add <cite>smpquerty lft</cite></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="0sources/release-0.2.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">python-rdma 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2011, Obsidian Research Corp.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

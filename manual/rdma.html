@@ -1,0 +1,406 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>3. RDMA Module &mdash; python-rdma 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="0static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="0static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="0static/jquery.js"></script>
+    <script type="text/javascript" src="0static/underscore.js"></script>
+    <script type="text/javascript" src="0static/doctools.js"></script>
+    <link rel="top" title="python-rdma 1.0 documentation" href="index.html" />
+    <link rel="next" title="3.1. rdma.devices module" href="devices.html" />
+    <link rel="prev" title="2. Installing" href="installing.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="devices.html" title="3.1. rdma.devices module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="installing.html" title="2. Installing"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">python-rdma 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="rdma-module">
+<h1>3. RDMA Module<a class="headerlink" href="#rdma-module" title="Permalink to this headline">¶</a></h1>
+<p>The RDMA grouping of functionality applies to general RDMA devices and is
+not specific to the IBA.</p>
+<p>Programs that use a single port should use <a class="reference internal" href="#rdma.get_end_port" title="rdma.get_end_port"><code class="xref py py-func docutils literal"><span class="pre">rdma.get_end_port()</span></code></a>
+to find the port, passing in a command line argument to specify the port. The
+library provides standardized parsing of an end port description. Users are
+encouraged to use end port GIDs.</p>
+<p>A list of RDMA devices is available through the <a class="reference internal" href="#rdma.get_devices" title="rdma.get_devices"><code class="xref py py-func docutils literal"><span class="pre">rdma.get_devices()</span></code></a>
+call.</p>
+<p>Related modules:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="devices.html">3.1. <code class="docutils literal"><span class="pre">rdma.devices</span></code> module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="path.html">3.2. RDMA Path</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="path.html#ib-paths">3.2.1. IB Paths</a></li>
+<li class="toctree-l2"><a class="reference internal" href="path.html#module-rdma.path">3.2.2. <code class="docutils literal"><span class="pre">rdma.path</span></code> module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tools.html">3.3. <code class="docutils literal"><span class="pre">rdma.tools</span></code> module</a></li>
+</ul>
+</div>
+<div class="section" id="exceptions">
+<h2>3.4. Exceptions<a class="headerlink" href="#exceptions" title="Permalink to this headline">¶</a></h2>
+<p>The root exception for things thrown by this module is <a class="reference internal" href="#rdma.RDMAError" title="rdma.RDMAError"><code class="xref py py-exc docutils literal"><span class="pre">rdma.RDMAError</span></code></a>.</p>
+<p>Usage guidelines:</p>
+<ul class="simple">
+<li><a class="reference internal" href="#rdma.RDMAError" title="rdma.RDMAError"><code class="xref py py-exc docutils literal"><span class="pre">rdma.RDMAError</span></code></a> is thrown for general error conditions, like &#8216;Device
+Not Found&#8217;. The single argument is a string containing the failure message.
+This are either system failure messages with no possible recovery, or sane
+context localized failures - ie <a class="reference internal" href="#rdma.get_end_port" title="rdma.get_end_port"><code class="xref py py-func docutils literal"><span class="pre">get_end_port()</span></code></a> throws
+<a class="reference internal" href="#rdma.RDMAError" title="rdma.RDMAError"><code class="xref py py-exc docutils literal"><span class="pre">rdma.RDMAError</span></code></a> if it cannot return a port.</li>
+<li><a class="reference internal" href="#rdma.MADError" title="rdma.MADError"><code class="xref py py-exc docutils literal"><span class="pre">rdma.MADError</span></code></a> is thrown for error conditions that arise from MAD
+RPC processing, including error status MADs and malformed replies.</li>
+<li><a class="reference internal" href="#rdma.MADTimeoutError" title="rdma.MADTimeoutError"><code class="xref py py-exc docutils literal"><span class="pre">rdma.MADTimeoutError</span></code></a> is thrown when a MAD RPC call times out.</li>
+<li><a class="reference internal" href="#rdma.MADClassError" title="rdma.MADClassError"><code class="xref py py-exc docutils literal"><span class="pre">rdma.MADClassError</span></code></a> is thrown when a MAD RPC call errors out with
+a class specific error.</li>
+<li><a class="reference internal" href="#rdma.SysError" title="rdma.SysError"><code class="xref py py-exc docutils literal"><span class="pre">rdma.SysError</span></code></a> for kernel syscalls that fail.</li>
+<li><a class="reference internal" href="path.html#rdma.path.SAPathNotFoundError" title="rdma.path.SAPathNotFoundError"><code class="xref py py-exc docutils literal"><span class="pre">rdma.path.SAPathNotFoundError</span></code></a> when a path cannot be resolved due to the
+SA reporting it was not found.</li>
+<li><a class="reference internal" href="ibverbs.html#rdma.ibverbs.WRError" title="rdma.ibverbs.WRError"><code class="xref py py-exc docutils literal"><span class="pre">rdma.ibverbs.WRError</span></code></a> when a verbs work request fails to post.</li>
+<li><a class="reference internal" href="ibverbs.html#rdma.ibverbs.WCError" title="rdma.ibverbs.WCError"><code class="xref py py-exc docutils literal"><span class="pre">rdma.ibverbs.WCError</span></code></a> when a verbs work completion indicates an error.</li>
+<li><a class="reference internal" href="ibverbs.html#rdma.ibverbs.AsyncError" title="rdma.ibverbs.AsyncError"><code class="xref py py-exc docutils literal"><span class="pre">rdma.ibverbs.AsyncError</span></code></a> when a error case verbs async event is received.</li>
+</ul>
+<p>Python&#8217;s exception processing is somewhat limited in how it deals with
+complicated layering, for instance if a RPC is performed to resolve a path the
+exception may appear as a simple timeout error. This is generally pretty
+useless. The <a class="reference internal" href="#rdma.MADError" title="rdma.MADError"><code class="xref py py-exc docutils literal"><span class="pre">rdma.MADError</span></code></a> class includes a mechanism to stack error
+messages, the lowest layer puts a layer appropriate message and higher layers
+stack their layer appropriate messages. To process this extra information any
+application using the library should use a try block as follows:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">try</span><span class="p">:</span>
+   <span class="n">do_stuff</span><span class="p">();</span>
+<span class="k">except</span> <span class="n">rdma</span><span class="o">.</span><span class="n">MADError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+   <span class="n">err</span><span class="o">.</span><span class="n">dump_detailed</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span><span class="s2">&quot;E:&quot;</span><span class="p">,</span><span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Where level is a verbosity level set by the user. The resulting dumps will
+look something like this at level 1:</p>
+<div class="highlight-python"><div class="highlight"><pre>E: Failed getting MAD path record for end port GID(&#39;fe80::2:c903:0:1492&#39;).
+E: +RPC MAD_METHOD_GET(1) SAFormat(3.2) SAPathRecord(53) got class specific error 3
+</pre></div>
+</div>
+<p>Level 2 will include dumps of the request and reply packet that caused the
+error.  Naturally raising the exception again will produce a traceback - which
+is generally less interesting for network-related RPC errors.</p>
+</div>
+<div class="section" id="id1">
+<h2>3.5. <a class="reference internal" href="#module-rdma" title="rdma"><code class="xref py py-mod docutils literal"><span class="pre">rdma</span></code></a> module<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>The top level import for the rdma module provides the exception types used in
+the package as well as the basic accessors for accessing the device list and
+instantiating access classes.</p>
+<span class="target" id="module-rdma"></span><dl class="exception">
+<dt id="rdma.MADClassError">
+<em class="property">exception </em><code class="descclassname">rdma.</code><code class="descname">MADClassError</code><span class="sig-paren">(</span><em>req</em>, <em>code</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.MADClassError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Thrown when a MAD RPC returns with a class specific error code.</p>
+<dl class="attribute">
+<dt id="rdma.MADClassError.code">
+<code class="descname">code</code><em class="property"> = None</em><a class="headerlink" href="#rdma.MADClassError.code" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decoded error code</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="rdma.MADError">
+<em class="property">exception </em><code class="descclassname">rdma.</code><code class="descname">MADError</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.MADError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Thrown when a MAD RPC fails in some way. The throw site includes as
+much information about the error context as possible. Depending on the
+throw context not all members may be available.</p>
+<p>If the RPC is an incoming request then this exception contains enough information
+for the catch to generate an error reply MAD.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>req</strong> (derived from <a class="reference internal" href="IBA.html#rdma.binstruct.BinStruct" title="rdma.binstruct.BinStruct"><code class="xref py py-class docutils literal"><span class="pre">BinStruct</span></code></a>) &#8211; The MAD&#8217;s <cite>*Format</cite> that was originally sent.</li>
+<li><strong>req_buf</strong> (<code class="xref py py-class docutils literal"><span class="pre">bytearray</span></code>) &#8211; The entire raw request MAD data, if <em>fmt</em> is not present.</li>
+<li><strong>reply_status</strong> (<code class="xref py py-class docutils literal"><span class="pre">int</span></code>) &#8211; The status value to use when generating an error reply for <em>req_buf</em>.</li>
+<li><strong>path</strong> (<a class="reference internal" href="path.html#rdma.path.IBPath" title="rdma.path.IBPath"><code class="xref py py-class docutils literal"><span class="pre">IBPath</span></code></a>) &#8211; The destination path for the request.</li>
+<li><strong>rep</strong> (derived from <a class="reference internal" href="IBA.html#rdma.binstruct.BinStruct" title="rdma.binstruct.BinStruct"><code class="xref py py-class docutils literal"><span class="pre">BinStruct</span></code></a>) &#8211; The MAD&#8217;s <cite>*Format</cite> reply.</li>
+<li><strong>rep_buf</strong> (<code class="xref py py-class docutils literal"><span class="pre">bytearray</span></code>) &#8211; The entire raw reply MAD data.</li>
+<li><strong>status</strong> (<code class="xref py py-class docutils literal"><span class="pre">int</span></code>) &#8211; The entire 16 bit status value.</li>
+<li><strong>exc_info</strong> &#8211; Result of <code class="xref py py-func docutils literal"><span class="pre">sys.exc_info()</span></code> if MAD processing failed due to an unexpected exception.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="rdma.MADError.dump_detailed">
+<code class="descname">dump_detailed</code><span class="sig-paren">(</span><em>F=None</em>, <em>prefix=''</em>, <em>level=1</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.MADError.dump_detailed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Display detailed information about the exception. This prints
+a multi-line description to <em>F</em>. Many lines are prefixed with
+the text <em>prefix</em>. If <em>level</em> is 0 then the default summary
+line is displayed. If <em>level</em> is 1 then all summary information
+is shown. If <em>level</em> is 2 then request and reply packets are dumped.</p>
+<p>If the <a class="reference internal" href="#rdma.MADError" title="rdma.MADError"><code class="xref py py-exc docutils literal"><span class="pre">MADError</span></code></a> includes a captured exception then
+dump_detailed will re-throw it after printing our information.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.MADError.message">
+<code class="descname">message</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.MADError.message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used to annotate additional messages onto the exception. For
+instance the library function issuing the RPC can call this with a
+short version of what the RPC actually was trying to do.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="rdma.MADTimeoutError">
+<em class="property">exception </em><code class="descclassname">rdma.</code><code class="descname">MADTimeoutError</code><span class="sig-paren">(</span><em>req</em>, <em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.MADTimeoutError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Thrown when a MAD RPC times out.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="rdma.RDMAError">
+<em class="property">exception </em><code class="descclassname">rdma.</code><code class="descname">RDMAError</code><a class="headerlink" href="#rdma.RDMAError" title="Permalink to this definition">¶</a></dt>
+<dd><p>General exception class for RDMA related errors.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="rdma.SysError">
+<em class="property">exception </em><code class="descclassname">rdma.</code><code class="descname">SysError</code><span class="sig-paren">(</span><em>errno</em>, <em>func</em>, <em>msg=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.SysError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Thrown when a system call fails. Inclues errno</p>
+<p><em>errno</em> is the positive errno code, <em>func</em> is the system call that
+failed and msg is more information, if applicable.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rdma.get_device">
+<code class="descclassname">rdma.</code><code class="descname">get_device</code><span class="sig-paren">(</span><em>name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.get_device" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a <code class="xref py py-class docutils literal"><span class="pre">rdma.devices.Device</span></code> for the default device if name
+is <code class="docutils literal"><span class="pre">None</span></code>, or for the device described by name.</p>
+<dl class="docutils">
+<dt>The device string format is one of:</dt>
+<dd><table border="1" class="first last docutils">
+<colgroup>
+<col width="37%" />
+<col width="63%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Format</th>
+<th class="head">Example</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>device</td>
+<td>mlx4_0</td>
+</tr>
+<tr class="row-odd"><td>Node GUID</td>
+<td>0002:c903:0000:1491</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">rdma.devices.device</span></code></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="#rdma.RDMAError" title="rdma.RDMAError"><strong>rdma.RDMAError</strong></a> &#8211; If no matching device is found or name is invalid.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="rdma.get_devices">
+<code class="descclassname">rdma.</code><code class="descname">get_devices</code><span class="sig-paren">(</span><em>refresh=False</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.get_devices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a container of <a class="reference internal" href="devices.html#rdma.devices.RDMADevice" title="rdma.devices.RDMADevice"><code class="xref py py-class docutils literal"><span class="pre">rdma.devices.RDMADevice</span></code></a> objects for all devices in the system.</p>
+<p>The return result is an object that looks like an ordered list of
+<a class="reference internal" href="devices.html#rdma.devices.RDMADevice" title="rdma.devices.RDMADevice"><code class="xref py py-class docutils literal"><span class="pre">rdma.devices.RDMADevice</span></code></a> objects. However, indexing the list is
+done by device name not by index. If the length of the returned object is
+0 then no devices were detected. Programs are encouraged to use
+<a class="reference internal" href="#rdma.get_end_port" title="rdma.get_end_port"><code class="xref py py-func docutils literal"><span class="pre">rdma.get_end_port()</span></code></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="devices.html#rdma.devices.DemandList" title="rdma.devices.DemandList"><code class="xref py py-class docutils literal"><span class="pre">DemandList</span></code></a> but this is an implementation detail.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="rdma.get_end_port">
+<code class="descclassname">rdma.</code><code class="descname">get_end_port</code><span class="sig-paren">(</span><em>name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.get_end_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a <a class="reference internal" href="devices.html#rdma.devices.EndPort" title="rdma.devices.EndPort"><code class="xref py py-class docutils literal"><span class="pre">rdma.devices.EndPort</span></code></a> for the default end port if name
+is <code class="docutils literal"><span class="pre">None</span></code>, or for the end port described by name.</p>
+<dl class="docutils">
+<dt>The end port string format is one of:</dt>
+<dd><table border="1" class="first last docutils">
+<colgroup>
+<col width="23%" />
+<col width="77%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Format</th>
+<th class="head">Example</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>device</td>
+<td>mlx4_0  (defaults to the first port)</td>
+</tr>
+<tr class="row-odd"><td>device/port</td>
+<td>mlx4_0/1</td>
+</tr>
+<tr class="row-even"><td>Port GID</td>
+<td>fe80::2:c903:0:1491</td>
+</tr>
+<tr class="row-odd"><td>Port GUID</td>
+<td>0002:c903:0000:1491</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="devices.html#rdma.devices.EndPort" title="rdma.devices.EndPort"><code class="xref py py-class docutils literal"><span class="pre">rdma.devices.EndPort</span></code></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="#rdma.RDMAError" title="rdma.RDMAError"><strong>rdma.RDMAError</strong></a> &#8211; If no matching device is found or name is invalid.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="rdma.get_gmp_mad">
+<code class="descclassname">rdma.</code><code class="descname">get_gmp_mad</code><span class="sig-paren">(</span><em>port</em>, <em>path=None</em>, <em>verbs=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.get_gmp_mad" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a subclass instace of <a class="reference internal" href="mads.html#rdma.madtransactor.MADTransactor" title="rdma.madtransactor.MADTransactor"><code class="xref py py-class docutils literal"><span class="pre">rdma.madtransactor.MADTransactor</span></code></a>
+for the associated <a class="reference internal" href="devices.html#rdma.devices.EndPort" title="rdma.devices.EndPort"><code class="xref py py-class docutils literal"><span class="pre">rdma.devices.EndPort</span></code></a>. If a verbs instance is already
+open then it should be passed in as verbs</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rdma.get_umad">
+<code class="descclassname">rdma.</code><code class="descname">get_umad</code><span class="sig-paren">(</span><em>port</em>, <em>path=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.get_umad" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a <a class="reference internal" href="mads.html#rdma.umad.UMAD" title="rdma.umad.UMAD"><code class="xref py py-class docutils literal"><span class="pre">rdma.umad.UMAD</span></code></a> instance for the associated
+<a class="reference internal" href="devices.html#rdma.devices.EndPort" title="rdma.devices.EndPort"><code class="xref py py-class docutils literal"><span class="pre">rdma.devices.EndPort</span></code></a>. UMAD instances can issue SMPs and GMPs.
+If only GMP is required then use <a class="reference internal" href="#rdma.get_gmp_mad" title="rdma.get_gmp_mad"><code class="xref py py-func docutils literal"><span class="pre">get_gmp_mad()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rdma.get_verbs">
+<code class="descclassname">rdma.</code><code class="descname">get_verbs</code><span class="sig-paren">(</span><em>port</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.get_verbs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a <code class="xref py py-class docutils literal"><span class="pre">rdma.uverbs.UVerbs</span></code> instance for the associated
+<a class="reference internal" href="devices.html#rdma.devices.RDMADevice" title="rdma.devices.RDMADevice"><code class="xref py py-class docutils literal"><span class="pre">rdma.devices.RDMADevice</span></code></a>/<a class="reference internal" href="devices.html#rdma.devices.EndPort" title="rdma.devices.EndPort"><code class="xref py py-class docutils literal"><span class="pre">rdma.devices.EndPort</span></code></a>.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">3. RDMA Module</a><ul>
+<li><a class="reference internal" href="#exceptions">3.4. Exceptions</a></li>
+<li><a class="reference internal" href="#id1">3.5. <code class="docutils literal"><span class="pre">rdma</span></code> module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="installing.html"
+                        title="previous chapter">2. Installing</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="devices.html"
+                        title="next chapter">3.1. <code class="docutils literal"><span class="pre">rdma.devices</span></code> module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="0sources/rdma.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="devices.html" title="3.1. rdma.devices module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="installing.html" title="2. Installing"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">python-rdma 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2011, Obsidian Research Corp.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,1271 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>7. Verbs Interface &mdash; python-rdma 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="0static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="0static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="0static/jquery.js"></script>
+    <script type="text/javascript" src="0static/underscore.js"></script>
+    <script type="text/javascript" src="0static/doctools.js"></script>
+    <link rel="top" title="python-rdma 1.0 documentation" href="index.html" />
+    <link rel="next" title="8. The ibtool Program" href="ibtool.html" />
+    <link rel="prev" title="6. IB Subnet Database" href="subnet.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ibtool.html" title="8. The ibtool Program"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="subnet.html" title="6. IB Subnet Database"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">python-rdma 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="verbs-interface">
+<h1>7. Verbs Interface<a class="headerlink" href="#verbs-interface" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference internal" href="#module-rdma.ibverbs" title="rdma.ibverbs"><code class="xref py py-mod docutils literal"><span class="pre">rdma.ibverbs</span></code></a> implements a set of Python extension objects and
+functions that provide a wrapper around the OFA verbs interface from
+<cite>libibverbs</cite>. The wrapper puts the verbs interface into an OOP methodology and
+generally exposes most functionality to Python.</p>
+<p>A basic example for getting a verbs instance and a protection domain is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">rdma</span>
+<span class="kn">import</span> <span class="nn">rdma.ibverbs</span> <span class="kn">as</span> <span class="nn">ibv</span>
+
+<span class="n">end_port</span> <span class="o">=</span> <span class="n">rdma</span><span class="o">.</span><span class="n">get_end_port</span><span class="p">()</span>
+<span class="k">with</span> <span class="n">rdma</span><span class="o">.</span><span class="n">get_verbs</span><span class="p">(</span><span class="n">end_port</span><span class="p">)</span> <span class="k">as</span> <span class="n">ctx</span><span class="p">:</span>
+    <span class="n">pd</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">pd</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>Verbs objects that have an underlying kernel allocation are all context
+managers and have a <code class="xref py py-meth docutils literal"><span class="pre">close()</span></code> method, but the objects also keep track of
+their own children. Ie closing a <a class="reference internal" href="#rdma.ibverbs.Context" title="rdma.ibverbs.Context"><code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.Context</span></code></a> will close all
+<a class="reference internal" href="#rdma.ibverbs.PD" title="rdma.ibverbs.PD"><code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.PD</span></code></a> and <a class="reference internal" href="#rdma.ibverbs.CQ" title="rdma.ibverbs.CQ"><code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.CQ</span></code></a> objects created by it.
+This makes resource clean up quite straightforward in most cases.</p>
+<p>Like with <code class="xref py py-class docutils literal"><span class="pre">file</span></code> objects users should be careful to call the
+<code class="xref py py-meth docutils literal"><span class="pre">close()</span></code> method once the instance is no longer needed. Generally
+focusing on the <a class="reference internal" href="#rdma.ibverbs.Context" title="rdma.ibverbs.Context"><code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.Context</span></code></a> and <a class="reference internal" href="#rdma.ibverbs.PD" title="rdma.ibverbs.PD"><code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.PD</span></code></a>
+is sufficient due to the built in resource clean up.</p>
+<p>The IB verbs structures (eg ibv_qp_attr) are mapped into Python objects, (eg
+<code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.ibv_qp_attr</span></code>). As Python objects they work similarly to the C
+syntax with structure member assignment, but they can also be initialized with
+a keyword argument list to the constructor. This can save a considerable number of lines.</p>
+<p>There are efficient wrapper functions that create
+<code class="xref py py-class docutils literal"><span class="pre">qp_attr</span></code>, <code class="xref py py-class docutils literal"><span class="pre">ah_attr</span></code> and
+<code class="xref py py-class docutils literal"><span class="pre">sge</span></code> objects with a reduced number of arguments.</p>
+<p>Errors from verbs are raised as a <a class="reference internal" href="rdma.html#rdma.SysError" title="rdma.SysError"><code class="xref py py-exc docutils literal"><span class="pre">rdma.SysError</span></code></a> which includes
+the <cite>libibverb</cite> function that failed and the associated errno.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Despite the name &#8216;ibverbs&#8217; the verbs interface is a generic interface
+that is supported by all RDMA devices. Different technologies have various
+limitations and support for anything but IB through this library is not
+completed.</p>
+</div>
+<div class="section" id="verbs-and-rdma-path-ibpath">
+<span id="ibverbs-path"></span><h2>7.1. Verbs and <a class="reference internal" href="path.html#rdma.path.IBPath" title="rdma.path.IBPath"><code class="xref py py-class docutils literal"><span class="pre">rdma.path.IBPath</span></code></a><a class="headerlink" href="#verbs-and-rdma-path-ibpath" title="Permalink to this headline">¶</a></h2>
+<p>The raw verbs interface for creating QPs is simplified to rely on the standard
+<a class="reference internal" href="path.html#rdma.path.IBPath" title="rdma.path.IBPath"><code class="xref py py-class docutils literal"><span class="pre">IBPath</span></code></a> structure which should be filled in with all the
+necessary parameters. The wrapper QP modify methods
+<a class="reference internal" href="#rdma.ibverbs.QP.modify_to_init" title="rdma.ibverbs.QP.modify_to_init"><code class="xref py py-meth docutils literal"><span class="pre">modify_to_init()</span></code></a>,
+<a class="reference internal" href="#rdma.ibverbs.QP.modify_to_rtr" title="rdma.ibverbs.QP.modify_to_rtr"><code class="xref py py-meth docutils literal"><span class="pre">modify_to_rtr()</span></code></a>, and
+<a class="reference internal" href="#rdma.ibverbs.QP.modify_to_rts" title="rdma.ibverbs.QP.modify_to_rts"><code class="xref py py-meth docutils literal"><span class="pre">modify_to_rts()</span></code></a> can setup a QP without additional
+information.</p>
+<p>The attributes in an <a class="reference internal" href="path.html#rdma.path.IBPath" title="rdma.path.IBPath"><code class="xref py py-class docutils literal"><span class="pre">IBPath</span></code></a> are used as follows when modifying
+a QP:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="38%" />
+<col width="62%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Path Attribute</th>
+<th class="head">Usage</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>end_port.port_id</td>
+<td>qp_attr.port_num</td>
+</tr>
+<tr class="row-odd"><td>pkey</td>
+<td>qp_attr.pkey_index</td>
+</tr>
+<tr class="row-even"><td>qkey</td>
+<td>qp_attr.qkey</td>
+</tr>
+<tr class="row-odd"><td>MTU</td>
+<td>qp_attr.path_mtu</td>
+</tr>
+<tr class="row-even"><td>retries</td>
+<td>qp_attr.retry_cnt</td>
+</tr>
+<tr class="row-odd"><td>min_rnr_timer</td>
+<td>qp_attr.min_rnr_timer</td>
+</tr>
+<tr class="row-even"><td>packet_life_time</td>
+<td>qp_attr.timeout</td>
+</tr>
+<tr class="row-odd"><td>dack_resp_time</td>
+<td>qp_attr.timeout</td>
+</tr>
+<tr class="row-even"><td>sack_resp_time</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="row-odd"><td>dqpn</td>
+<td>qp_attr.dest_qp_num</td>
+</tr>
+<tr class="row-even"><td>sqpn</td>
+<td>&nbsp;</td>
+</tr>
+<tr class="row-odd"><td>dqpsn</td>
+<td>qp_attr.rq_psn</td>
+</tr>
+<tr class="row-even"><td>sqpsn</td>
+<td>qp_attr.sq_psn</td>
+</tr>
+<tr class="row-odd"><td>drdatomic</td>
+<td>qp_attr.max_dest_rd_atomic</td>
+</tr>
+<tr class="row-even"><td>srdatomic</td>
+<td>qp_attr.max_rd_atomic</td>
+</tr>
+</tbody>
+</table>
+<p><a class="reference internal" href="path.html#rdma.path.IBPath" title="rdma.path.IBPath"><code class="xref py py-class docutils literal"><span class="pre">IBPath</span></code></a> structures can also be used any place where an
+<code class="xref py py-class docutils literal"><span class="pre">ah_attr</span></code> could be used, including for creating
+<a class="reference internal" href="#rdma.ibverbs.AH" title="rdma.ibverbs.AH"><code class="xref py py-class docutils literal"><span class="pre">AH</span></code></a> instances and with
+<a class="reference internal" href="#rdma.ibverbs.QP.modify" title="rdma.ibverbs.QP.modify"><code class="xref py py-meth docutils literal"><span class="pre">modify()</span></code></a>. With this usage the
+<a class="reference internal" href="path.html#rdma.path.IBPath" title="rdma.path.IBPath"><code class="xref py py-class docutils literal"><span class="pre">IBPath</span></code></a> caches the created AH, so getting the AH for a path
+the second time does not rebuild the AH. This means callers generally don&#8217;t
+have to worry about creating and maintaining AH&#8217;s explicitly.</p>
+<p>The attributes in an <a class="reference internal" href="path.html#rdma.path.IBPath" title="rdma.path.IBPath"><code class="xref py py-class docutils literal"><span class="pre">IBPath</span></code></a> are used as follows when creating
+an AH:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="38%" />
+<col width="62%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Path Attribute</th>
+<th class="head">Usage</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>has_grh</td>
+<td>ah_attr.is_global</td>
+</tr>
+<tr class="row-odd"><td>DGID</td>
+<td>ah_attr.grh.dgid</td>
+</tr>
+<tr class="row-even"><td>SGID</td>
+<td>ah_attr.grh.sgid_index</td>
+</tr>
+<tr class="row-odd"><td>flow_label</td>
+<td>ah_attr.grh.flow_label</td>
+</tr>
+<tr class="row-even"><td>hop_limit</td>
+<td>ah_attr.grh.hop_limit</td>
+</tr>
+<tr class="row-odd"><td>traffic_class</td>
+<td>ah_attr.grh.traffic_class</td>
+</tr>
+<tr class="row-even"><td>DLID</td>
+<td>ah_attr.dlid</td>
+</tr>
+<tr class="row-odd"><td>SLID</td>
+<td>ah_attr.SLID_bits</td>
+</tr>
+<tr class="row-even"><td>SL</td>
+<td>ah_attr.SL</td>
+</tr>
+<tr class="row-odd"><td>rate</td>
+<td>ah_attr.static_rate</td>
+</tr>
+<tr class="row-even"><td>end_port.port_id</td>
+<td>ah_attr.port_num</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="usage-examples">
+<h2>7.2. Usage Examples<a class="headerlink" href="#usage-examples" title="Permalink to this headline">¶</a></h2>
+<p>This is not intended to be a verbs primer. Generally the API follows that of
+the normal OFA verbs (with <cite>ibv_</cite> prefixes removed) , which in turn follows
+the API documented by the IBA specification. Many helper functions are
+provided to handle common situations in a standard way, generally these are
+preferred.</p>
+<div class="section" id="ud-qp-setup">
+<h3>7.2.1. UD QP Setup<a class="headerlink" href="#ud-qp-setup" title="Permalink to this headline">¶</a></h3>
+<p>Setting up a QP for UD communication is very simple. There are two major
+cases, for communication with a single end port, and for communication with
+multiple. The single case is:</p>
+<div class="highlight-python"><div class="highlight"><pre>path = IBPath(end_port,dpqn=1,qkey=IBA.IB_DEFAULT_QP1_QKEY,DGID=...);
+with rdma.get_gmp_mad(path.end_port,verbs=ctx) as umad:
+    rdma.path.resolve_path(umad,path,reversible=True);
+with ctx.pd() as pd:
+    depth = 16;
+    cq = pd.cq(2*depth);
+    qp = pd.qp(ibv.IBV_QPT_UD,depth,cq,depth,cq)
+    path.sqpn = qp.qp_num;
+    # Post receive work requests to qp here
+    qp.establish(path);
+
+    qp.post_send(ibv.send_wr(opcode=ibv.IBV_WR_SEND,
+                             send_flags=ibv.IBV_SEND_SIGNALED,
+                             ah=pd.ah(path),
+                             remote_qpn=path.dpqn,
+                             remote_qkey=path.qkey,
+                             ...));
+</pre></div>
+</div>
+<p>Notice that the path is used to configure the pkey and qkey values of the UD
+QP during initialization, and is also used to create the AH for the send work
+request.</p>
+<p>The case for multiple destinations is very similar, however all destinations
+must share the same PKey and QKey. For instance, assuming there is a list of
+DGIDs:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">with</span> <span class="n">rdma</span><span class="o">.</span><span class="n">get_gmp_mad</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">end_port</span><span class="p">)</span> <span class="k">as</span> <span class="n">umad</span><span class="p">:</span>
+    <span class="n">paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">rdma</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">resolve_path</span><span class="p">(</span><span class="n">umad</span><span class="p">,</span><span class="n">IBPath</span><span class="p">(</span><span class="n">end_port</span><span class="p">,</span><span class="n">DGID</span><span class="o">=</span><span class="n">I</span><span class="p">,</span>
+                                                <span class="n">qkey</span><span class="o">=</span><span class="n">IBA</span><span class="o">.</span><span class="n">IB_DEFAULT_QP1_QKEY</span><span class="p">),</span>
+                                    <span class="n">reversible</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                    <span class="n">properties</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;PKey&#39;</span><span class="p">:</span> <span class="n">IBA</span><span class="o">.</span><span class="n">DEFAULT_PKEY</span><span class="p">})</span>
+             <span class="k">for</span> <span class="n">I</span> <span class="ow">in</span> <span class="n">destinations</span><span class="p">];</span>
+</pre></div>
+</div>
+<p>Will resolve all the DGIDs into paths with the same QKey and PKey. paths[-1]
+can be used to setup the QP and all the paths can be used interchangeably
+in work requests.</p>
+</div>
+<div class="section" id="ud-response-path">
+<h3>7.2.2. UD response path<a class="headerlink" href="#ud-response-path" title="Permalink to this headline">¶</a></h3>
+<p>Constructing the reply path and generating a send WR from a UD WC is very
+straightforward:</p>
+<div class="highlight-python"><div class="highlight"><pre>wcs = cq.poll():
+for wc in wcs:
+    path = ibv.WCPath(self.end_port,wc,
+                      buf,0,
+                      pkey=qp_pkey,
+                      qkey=qp_qkey);
+    path.reverse();
+    ah = pd.ah(path);
+    wr = ibv.send_wr(opcode=ibv.IBV_WR_SEND,
+                     ah=ah,
+                     remote_qpn=path.dpqn,
+                     remote_qkey=path.qkey,
+                     ...);
+</pre></div>
+</div>
+<p><cite>buf,0</cite> is the buffer and offset of the memory posted in the recv
+request. Remember that on UD QPs the first 40 bytes of the receive buffer are
+reserved for a GRH, which is accessed by <a class="reference internal" href="#rdma.ibverbs.WCPath" title="rdma.ibverbs.WCPath"><code class="xref py py-func docutils literal"><span class="pre">rdma.ibverbs.WCPath()</span></code></a>.</p>
+</div>
+<div class="section" id="no-cm-qp-setup">
+<h3>7.2.3. No CM QP Setup<a class="headerlink" href="#no-cm-qp-setup" title="Permalink to this headline">¶</a></h3>
+<p>The library has built in support for correctly establishing IB connections
+without using a CM by exchanging information over a side channel (eg a TCP
+socket). Side A would do this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">qp</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">qp</span><span class="p">(</span><span class="n">ibv</span><span class="o">.</span><span class="n">IBV_QPT_RC</span><span class="p">,</span><span class="o">...</span><span class="p">);</span>
+<span class="n">path</span> <span class="o">=</span> <span class="n">rdma</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">IBPath</span><span class="p">(</span><span class="n">end_port</span><span class="p">,</span><span class="n">SGID</span><span class="o">=</span><span class="n">end_port</span><span class="o">.</span><span class="n">default_gid</span><span class="p">);</span>
+<span class="n">rdma</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">fill_path</span><span class="p">(</span><span class="n">qp</span><span class="p">,</span><span class="n">path</span><span class="p">);</span>
+<span class="n">path</span><span class="o">.</span><span class="n">reverse</span><span class="p">(</span><span class="n">for_reply</span><span class="o">=</span><span class="bp">False</span><span class="p">);</span>
+<span class="n">send_to_side_b</span><span class="p">(</span><span class="n">pickle</span><span class="o">.</span><span class="n">pickle</span><span class="p">(</span><span class="n">path</span><span class="p">));</span>
+<span class="n">path</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">unpickle</span><span class="p">(</span><span class="n">recv_from_side_b</span><span class="p">());</span>
+<span class="n">path</span><span class="o">.</span><span class="n">reverse</span><span class="p">(</span><span class="n">for_reply</span><span class="o">=</span><span class="bp">False</span><span class="p">);</span>
+<span class="n">path</span><span class="o">.</span><span class="n">set_end_port</span><span class="p">(</span><span class="n">end_port</span><span class="o">.</span><span class="n">parent</span><span class="p">);</span>
+
+<span class="n">qp</span><span class="o">.</span><span class="n">establish</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">forward_path</span><span class="p">,</span><span class="n">ibv</span><span class="o">.</span><span class="n">IBV_ACCESS_REMOTE_WRITE</span><span class="p">);</span>
+
+<span class="c1"># Synchronize transition to RTS</span>
+<span class="n">send_to_side_b</span><span class="p">(</span><span class="bp">True</span><span class="p">);</span>
+<span class="n">recv_from_side_b</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>Side B would do this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">qp</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">qp</span><span class="p">(</span><span class="n">ibv</span><span class="o">.</span><span class="n">IBV_QPT_RC</span><span class="p">,</span><span class="o">...</span><span class="p">);</span>
+<span class="n">path</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">unpickle</span><span class="p">(</span><span class="n">recv_from_side_a</span><span class="p">());</span>
+<span class="n">path</span><span class="o">.</span><span class="n">end_port</span> <span class="o">=</span> <span class="n">end_port</span><span class="p">;</span>
+<span class="n">rdma</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">fill_path</span><span class="p">(</span><span class="n">qp</span><span class="p">,</span><span class="n">path</span><span class="p">);</span>
+<span class="k">with</span> <span class="n">rdma</span><span class="o">.</span><span class="n">get_gmp_mad</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">end_port</span><span class="p">)</span> <span class="k">as</span> <span class="n">umad</span><span class="p">:</span>
+   <span class="n">rdma</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">resolve_path</span><span class="p">(</span><span class="n">umad</span><span class="p">,</span><span class="n">path</span><span class="p">);</span>
+<span class="n">send_to_side_a</span><span class="p">(</span><span class="n">pickle</span><span class="o">.</span><span class="n">pickle</span><span class="p">(</span><span class="n">path</span><span class="p">));</span>
+
+<span class="n">qp</span><span class="o">.</span><span class="n">establish</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">forward_path</span><span class="p">,</span><span class="n">ibv</span><span class="o">.</span><span class="n">IBV_ACCESS_REMOTE_WRITE</span><span class="p">);</span>
+
+<span class="c1"># Synchronize transition to RTS</span>
+<span class="n">recv_from_side_a</span><span class="p">();</span>
+<span class="n">send_to_side_a</span><span class="p">(</span><span class="bp">True</span><span class="p">);</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="path.html#rdma.path.fill_path" title="rdma.path.fill_path"><code class="xref py py-func docutils literal"><span class="pre">rdma.path.fill_path()</span></code></a> sets up most of the the QP related path parameters
+and <a class="reference internal" href="path.html#rdma.path.resolve_path" title="rdma.path.resolve_path"><code class="xref py py-func docutils literal"><span class="pre">rdma.path.resolve_path()</span></code></a> gets the path record(s) from the SA.</p>
+<p>This procedure implements the same process and information exchange that the
+normal IB CM would do, including negotiating responder resources and having
+the capability to setup asymmetric paths.</p>
+<p>Any QP type is supported by this basic procedure, the extra information
+exchanged is simply not used.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Pickle is only used as an easy example here. Real cases should do something
+else as unpickling untrusted data is dangerous. The
+<a class="reference internal" href="path.html#rdma.path.Path" title="rdma.path.Path"><code class="xref py py-class docutils literal"><span class="pre">Path</span></code></a> object has a <code class="xref py py-meth docutils literal"><span class="pre">__reduce__()</span></code>
+method which can be used to implement a protocol appropriate encoding.</p>
+</div>
+</div>
+<div class="section" id="wc-error-handling">
+<h3>7.2.4. WC Error handling<a class="headerlink" href="#wc-error-handling" title="Permalink to this headline">¶</a></h3>
+<p>The class <a class="reference internal" href="#rdma.ibverbs.WCError" title="rdma.ibverbs.WCError"><code class="xref py py-exc docutils literal"><span class="pre">rdma.ibverbs.WCError</span></code></a> is an exception that can be thrown
+when a WC error is detected. It formats the information in the WC and provides
+a way for the catcher to determine the failed QP:</p>
+<div class="highlight-python"><div class="highlight"><pre>wcs = cq.poll():
+for wc in wcs:
+    if wc.status != ibv.IBV_WC_SUCCESS:
+        raise ibv.WCError(wc,cq);
+</pre></div>
+</div>
+<p>Depending on the situation QP errors may not be recoverable so the whole QP
+should be torn down.</p>
+</div>
+<div class="section" id="completion-channels">
+<h3>7.2.5. Completion Channels<a class="headerlink" href="#completion-channels" title="Permalink to this headline">¶</a></h3>
+<p>Additional helpers are provided to simplify completion channel processing,
+suitable for single threaded applications. The basic usage for a completion
+channel is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c1"># To setup the completion channel</span>
+<span class="n">cc</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">comp_channel</span><span class="p">();</span>
+<span class="n">poll</span> <span class="o">=</span> <span class="n">select</span><span class="o">.</span><span class="n">poll</span><span class="p">();</span>
+<span class="n">cc</span><span class="o">.</span><span class="n">register_poll</span><span class="p">(</span><span class="n">poll</span><span class="p">);</span>
+<span class="n">cq</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">cq</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">depth</span><span class="p">,</span><span class="n">cc</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">get_wcs</span><span class="p">():</span>
+    <span class="n">cq</span><span class="o">.</span><span class="n">req_notify</span><span class="p">();</span>
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">poll</span><span class="o">.</span><span class="n">poll</span><span class="p">();</span>
+        <span class="k">for</span> <span class="n">I</span> <span class="ow">in</span> <span class="n">ret</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">cc</span><span class="o">.</span><span class="n">check_poll</span><span class="p">(</span><span class="n">I</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">wcs</span> <span class="o">=</span> <span class="n">cq</span><span class="o">.</span><span class="n">poll</span><span class="p">();</span>
+                <span class="k">if</span> <span class="n">wcs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">wcs</span><span class="p">;</span>
+
+<span class="n">wcs</span> <span class="o">=</span> <span class="n">get_wcs</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>Obviously the methodology becomes more complex if additional things are polled
+for. The basic idea is that <a class="reference internal" href="#rdma.ibverbs.CompChannel.check_poll" title="rdma.ibverbs.CompChannel.check_poll"><code class="xref py py-meth docutils literal"><span class="pre">rdma.ibverbs.CompChannel.check_poll()</span></code></a> takes
+care of all the details and returns the CQ that has available work
+completions.</p>
+<p>Using <a class="reference internal" href="#rdma.vtools.CQPoller" title="rdma.vtools.CQPoller"><code class="xref py py-class docutils literal"><span class="pre">CQPoller</span></code></a> the above example can be further simplified:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">cc</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">comp_channel</span><span class="p">();</span>
+<span class="n">cq</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">cq</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">depth</span><span class="p">,</span><span class="n">cc</span><span class="p">)</span>
+<span class="n">poller</span> <span class="o">=</span> <span class="n">rdma</span><span class="o">.</span><span class="n">vtools</span><span class="o">.</span><span class="n">CQPoller</span><span class="p">(</span><span class="n">cq</span><span class="p">);</span>
+
+<span class="k">for</span> <span class="n">wc</span> <span class="ow">in</span> <span class="n">poller</span><span class="o">.</span><span class="n">iterwc</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="k">print</span> <span class="n">wc</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="#rdma.vtools.CQPoller" title="rdma.vtools.CQPoller"><code class="xref py py-class docutils literal"><span class="pre">CQPoller</span></code></a> also monitors for asynchronous events and will
+call <a class="reference internal" href="#rdma.ibverbs.Context.handle_async_event" title="rdma.ibverbs.Context.handle_async_event"><code class="xref py py-meth docutils literal"><span class="pre">rdma.ibverbs.Context.handle_async_event()</span></code></a> which will produce exceptions
+for failure conditions and update the end port cache as necessary.</p>
+</div>
+<div class="section" id="memory">
+<h3>7.2.6. Memory<a class="headerlink" href="#memory" title="Permalink to this headline">¶</a></h3>
+<p>Memory registrations are made explicit, as with verbs everything that is passed
+into a work request must have an associated memory registration. A MR object
+can be created for anything that supports the Python buffer protocol, and
+writable MRs require a mutable Python buffer. Some useful examples:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;Hello&quot;</span><span class="p">;</span>
+<span class="n">mr</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">mr</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">ibv</span><span class="o">.</span><span class="n">IBV_ACCESS_REMOTE_READ</span><span class="p">);</span>
+<span class="n">s</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="mi">256</span><span class="p">);</span>
+<span class="n">mr</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">mr</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">ibv</span><span class="o">.</span><span class="n">IBV_ACCESS_REMOTE_WRITE</span><span class="p">);</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">mmap</span><span class="o">.</span><span class="n">mmap</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">256</span><span class="p">);</span>
+<span class="n">mr</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">mr</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">ibv</span><span class="o">.</span><span class="n">IBV_ACCESS_REMOTE_WRITE</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>SGEs are constructed through the MR:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">sge</span> <span class="o">=</span> <span class="n">mr</span><span class="o">.</span><span class="n">sge</span><span class="p">();</span>
+<span class="n">sge</span> <span class="o">=</span> <span class="n">mr</span><span class="o">.</span><span class="n">sge</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span><span class="n">off</span><span class="o">=</span><span class="mi">10</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>A tool is provided for managing a finite pool of fixed size buffers. This construct
+is very useful for applications using the SEND verb:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">pool</span> <span class="o">=</span> <span class="n">rdma</span><span class="o">.</span><span class="n">vtools</span><span class="o">.</span><span class="n">BufferPool</span><span class="p">(</span><span class="n">pd</span><span class="p">,</span><span class="n">count</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span><span class="n">size</span><span class="o">=</span><span class="mi">1024</span><span class="p">);</span>
+<span class="n">pool</span><span class="o">.</span><span class="n">post_recvs</span><span class="p">(</span><span class="n">qp</span><span class="p">,</span><span class="mi">50</span><span class="p">);</span>
+
+<span class="n">buf_idx</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">pop</span><span class="p">();</span>
+<span class="n">pool</span><span class="o">.</span><span class="n">copy_to</span><span class="p">(</span><span class="s2">&quot;Hello message!&quot;</span><span class="p">,</span><span class="n">buf_idx</span><span class="p">);</span>
+<span class="n">qp</span><span class="o">.</span><span class="n">post_send</span><span class="p">(</span><span class="n">pool</span><span class="o">.</span><span class="n">make_send_wr</span><span class="p">(</span><span class="n">buf_idx</span><span class="p">,</span><span class="n">pool</span><span class="o">.</span><span class="n">size</span><span class="p">,</span><span class="n">path</span><span class="p">));</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="rdma-vtools-module">
+<h2>7.3. <a class="reference internal" href="#module-rdma.vtools" title="rdma.vtools"><code class="xref py py-mod docutils literal"><span class="pre">rdma.vtools</span></code></a> module<a class="headerlink" href="#rdma-vtools-module" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="#module-rdma.vtools" title="rdma.vtools"><code class="xref py py-mod docutils literal"><span class="pre">rdma.vtools</span></code></a> provides various support functions to make verbs
+programming easier.</p>
+<span class="target" id="module-rdma.vtools"></span><dl class="class">
+<dt id="rdma.vtools.BufferPool">
+<em class="property">class </em><code class="descclassname">rdma.vtools.</code><code class="descname">BufferPool</code><span class="sig-paren">(</span><em>pd</em>, <em>count</em>, <em>size</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.vtools.BufferPool" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Hold onto a block of fixed size buffers and provide some helpers for
+using them as send and receive buffers with a QP.</p>
+<p>This can be used to provide send buffers for a QP, as well as receive
+buffers for a QP or a SRQ. Generally the <em>qp</em> argument to methods of this
+class can be a <a class="reference internal" href="#rdma.ibverbs.QP" title="rdma.ibverbs.QP"><code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.QP</span></code></a> or <a class="reference internal" href="#rdma.ibverbs.SRQ" title="rdma.ibverbs.SRQ"><code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.SRQ</span></code></a>.</p>
+<p>A <a class="reference internal" href="#rdma.ibverbs.MR" title="rdma.ibverbs.MR"><code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.MR</span></code></a> is created in <em>pd</em> with <em>count</em> buffers of
+<em>size</em> bytes.</p>
+<dl class="attribute">
+<dt id="rdma.vtools.BufferPool.BUF_ID_MASK">
+<code class="descname">BUF_ID_MASK</code><em class="property"> = 0</em><a class="headerlink" href="#rdma.vtools.BufferPool.BUF_ID_MASK" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mask to convert a <em>wr_id</em> back into a <em>buf_idx</em>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.vtools.BufferPool.NO_WR_ID">
+<code class="descname">NO_WR_ID</code><em class="property"> = 4294967295</em><a class="headerlink" href="#rdma.vtools.BufferPool.NO_WR_ID" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constant value to set <em>wr_id</em> to when it is not being used.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.vtools.BufferPool.RECV_FLAG">
+<code class="descname">RECV_FLAG</code><em class="property"> = 0</em><a class="headerlink" href="#rdma.vtools.BufferPool.RECV_FLAG" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constant value to or into <em>wr_id</em> to indicate it was posted as a recv.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.vtools.BufferPool.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.vtools.BufferPool.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Close held objects</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.vtools.BufferPool.copy_from">
+<code class="descname">copy_from</code><span class="sig-paren">(</span><em>buf_idx</em>, <em>offset=0</em>, <em>length=4294967295</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.vtools.BufferPool.copy_from" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a copy of buffer <em>buf_idx</em>. <em>buf_idx</em> may be a <em>wr_id</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">bytearray</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.vtools.BufferPool.copy_to">
+<code class="descname">copy_to</code><span class="sig-paren">(</span><em>buf</em>, <em>buf_idx</em>, <em>offset=0</em>, <em>length=4294967295</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.vtools.BufferPool.copy_to" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copy <em>buf</em> into the buffer <em>buf_idx</em></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.vtools.BufferPool.count">
+<code class="descname">count</code><em class="property"> = 0</em><a class="headerlink" href="#rdma.vtools.BufferPool.count" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of buffers.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.vtools.BufferPool.finish_wcs">
+<code class="descname">finish_wcs</code><span class="sig-paren">(</span><em>qp</em>, <em>wcs</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.vtools.BufferPool.finish_wcs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process work completion list <em>wcs</em> to recover buffers attached to
+completed work and re-post recv buffers to qp. Every work request with
+an attached buffer must have a signaled completion to recover the
+buffer.</p>
+<p><em>wcs</em> may be a single wc.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="#rdma.ibverbs.WCError" title="rdma.ibverbs.WCError"><strong>rdma.ibverbs.WCError</strong></a> &#8211; For WC&#8217;s marked as error.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.vtools.BufferPool.make_send_wr">
+<code class="descname">make_send_wr</code><span class="sig-paren">(</span><em>buf_idx</em>, <em>buf_len</em>, <em>path=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.vtools.BufferPool.make_send_wr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a <code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.send_wr</span></code> for <em>buf_idx</em> and path.
+If <em>path</em> is <cite>None</cite> then the wr does not contain path information
+(eg for connected QPs)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.vtools.BufferPool.make_sge">
+<code class="descname">make_sge</code><span class="sig-paren">(</span><em>buf_idx</em>, <em>buf_len</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.vtools.BufferPool.make_sge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a <code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.SGE</span></code> for <em>buf_idx</em>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.vtools.BufferPool.pop">
+<code class="descname">pop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.vtools.BufferPool.pop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new buffer index.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.vtools.BufferPool.post_recvs">
+<code class="descname">post_recvs</code><span class="sig-paren">(</span><em>qp</em>, <em>count</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.vtools.BufferPool.post_recvs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Post <em>count</em> buffers for receive to <em>qp</em>, which may be any object
+with a <cite>post_recv</cite> method.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.vtools.BufferPool.size">
+<code class="descname">size</code><em class="property"> = 0</em><a class="headerlink" href="#rdma.vtools.BufferPool.size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Size of a single buffer.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="rdma.vtools.CQPoller">
+<em class="property">class </em><code class="descclassname">rdma.vtools.</code><code class="descname">CQPoller</code><span class="sig-paren">(</span><em>cq</em>, <em>async_events=True</em>, <em>solicited_only=False</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.vtools.CQPoller" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Simple wrapper for a <a class="reference internal" href="#rdma.ibverbs.CQ" title="rdma.ibverbs.CQ"><code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.CQ</span></code></a> and
+<a class="reference internal" href="#rdma.ibverbs.CompChannel" title="rdma.ibverbs.CompChannel"><code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.CompChannel</span></code></a> to provide a blocking API for getting
+work completions.</p>
+<p><em>cq</em> is the completion queue to read work completions from.
+If the <em>cq</em> does not have a completion channel then this will
+spin loop on <em>cq</em> otherwise it sleeps on the completion channel.</p>
+<p>If <em>async_events</em> is <cite>True</cite> then the async event queue will be
+monitored while sleeping.</p>
+<dl class="method">
+<dt id="rdma.vtools.CQPoller.iterwc">
+<code class="descname">iterwc</code><span class="sig-paren">(</span><em>count=None</em>, <em>timeout=None</em>, <em>wakeat=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.vtools.CQPoller.iterwc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generator that returns work completions from the CQ. If not <cite>None</cite>
+at most <em>count</em> wcs will be returned. <em>timeout</em> is the number of
+seconds this function can run for, and <em>wakeat</em> is the value of
+<a class="reference internal" href="tools.html#rdma.tools.clock_monotonic" title="rdma.tools.clock_monotonic"><code class="xref py py-func docutils literal"><span class="pre">rdma.tools.clock_monotonic()</span></code></a> after which iteration stops.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.wc</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.vtools.CQPoller.sleep">
+<code class="descname">sleep</code><span class="sig-paren">(</span><em>wakeat</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.vtools.CQPoller.sleep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Go to sleep until the cq gets a completion. <em>wakeat</em> is the
+value of <a class="reference internal" href="tools.html#rdma.tools.clock_monotonic" title="rdma.tools.clock_monotonic"><code class="xref py py-func docutils literal"><span class="pre">rdma.tools.clock_monotonic()</span></code></a> after which the function
+returns <cite>None</cite>. Returns <cite>True</cite> if the completion channel triggered.</p>
+<p>If no completion channel is in use this just returns <cite>True</cite>.</p>
+<p>Note: It is necessary to call <a class="reference internal" href="#rdma.ibverbs.CQ.req_notify" title="rdma.ibverbs.CQ.req_notify"><code class="xref py py-meth docutils literal"><span class="pre">rdma.ibverbs.CQ.req_notify()</span></code></a>
+on the CQ, then poll the CQ before calling <a class="reference internal" href="#rdma.vtools.CQPoller.sleep" title="rdma.vtools.CQPoller.sleep"><code class="xref py py-meth docutils literal"><span class="pre">sleep()</span></code></a>. Otherwise
+the edge triggered nature of the completion channels can cause
+deadlock.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.vtools.CQPoller.timedout">
+<code class="descname">timedout</code><em class="property"> = False</em><a class="headerlink" href="#rdma.vtools.CQPoller.timedout" title="Permalink to this definition">¶</a></dt>
+<dd><p><cite>True</cite> if iteration was stopped due to a timeout</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.vtools.CQPoller.wakeat">
+<code class="descname">wakeat</code><em class="property"> = None</em><a class="headerlink" href="#rdma.vtools.CQPoller.wakeat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Value of <a class="reference internal" href="tools.html#rdma.tools.clock_monotonic" title="rdma.tools.clock_monotonic"><code class="xref py py-func docutils literal"><span class="pre">rdma.tools.clock_monotonic()</span></code></a> to stop iterating. This can
+be altered while iterating.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="rdma-ibverbs-module">
+<h2>7.4. <a class="reference internal" href="#module-rdma.ibverbs" title="rdma.ibverbs"><code class="xref py py-mod docutils literal"><span class="pre">rdma.ibverbs</span></code></a> module<a class="headerlink" href="#rdma-ibverbs-module" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Unfortunately Sphinx does not do a very good job auto documenting extension
+modules, and all the function arguments are stripped out. Until this is
+resolved the documentation after this point is incomplete.</p>
+</div>
+<p>The <a class="reference internal" href="#module-rdma.ibverbs" title="rdma.ibverbs"><code class="xref py py-mod docutils literal"><span class="pre">rdma.ibverbs</span></code></a> module wrappers all of the functions in <cite>libibverbs</cite>
+that are not duplicated elsewhere in the library, for instance, device
+discovery uses the <a class="reference internal" href="devices.html#module-rdma.devices" title="rdma.devices"><code class="xref py py-mod docutils literal"><span class="pre">rdma.devices</span></code></a> module, not the functions from
+<cite>libibverbs</cite>.</p>
+<span class="target" id="module-rdma.ibverbs"></span><dl class="class">
+<dt id="rdma.ibverbs.AH">
+<em class="property">class </em><code class="descclassname">rdma.ibverbs.</code><code class="descname">AH</code><a class="headerlink" href="#rdma.ibverbs.AH" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Address handle, this is a context manager.</p>
+<dl class="method">
+<dt id="rdma.ibverbs.AH.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.AH.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Free the verbs AH handle.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="rdma.ibverbs.AsyncError">
+<em class="property">exception </em><code class="descclassname">rdma.ibverbs.</code><code class="descname">AsyncError</code><a class="headerlink" href="#rdma.ibverbs.AsyncError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="rdma.html#rdma.RDMAError" title="rdma.RDMAError"><code class="xref py py-class docutils literal"><span class="pre">rdma.RDMAError</span></code></a></p>
+<p>Raised when an asynchronous error event is received.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="rdma.ibverbs.CQ">
+<em class="property">class </em><code class="descclassname">rdma.ibverbs.</code><code class="descname">CQ</code><a class="headerlink" href="#rdma.ibverbs.CQ" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Completion queue, this is a context manager.</p>
+<dl class="method">
+<dt id="rdma.ibverbs.CQ.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.CQ.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Free the verbs CQ handle.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.ibverbs.CQ.comp_chan">
+<code class="descname">comp_chan</code><a class="headerlink" href="#rdma.ibverbs.CQ.comp_chan" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.ibverbs.CQ.comp_events">
+<code class="descname">comp_events</code><a class="headerlink" href="#rdma.ibverbs.CQ.comp_events" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.ibverbs.CQ.ctx">
+<code class="descname">ctx</code><a class="headerlink" href="#rdma.ibverbs.CQ.ctx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.CQ.poll">
+<code class="descname">poll</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.CQ.poll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform the poll_cq operation, return a list of work requests.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.CQ.req_notify">
+<code class="descname">req_notify</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.CQ.req_notify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Request event notification for CQEs added to the CQ.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.CQ.resize">
+<code class="descname">resize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.CQ.resize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resize the CQ to have at least <em>cqes</em> entries.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="rdma.ibverbs.CompChannel">
+<em class="property">class </em><code class="descclassname">rdma.ibverbs.</code><code class="descname">CompChannel</code><a class="headerlink" href="#rdma.ibverbs.CompChannel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Completion channel, this is a context manager.</p>
+<dl class="method">
+<dt id="rdma.ibverbs.CompChannel.check_poll">
+<code class="descname">check_poll</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.CompChannel.check_poll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a <a class="reference internal" href="#rdma.ibverbs.CQ" title="rdma.ibverbs.CQ"><code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.CQ</span></code></a> that got at least one completion
+event, or <cite>None</cite>. This updates the comp channel and keeps track of
+received events, and appropriately calls ibv_ack_cq_events
+internally. After this call the CQ must be re-armed via
+<a class="reference internal" href="#rdma.ibverbs.CQ.req_notify" title="rdma.ibverbs.CQ.req_notify"><code class="xref py py-meth docutils literal"><span class="pre">rdma.ibverbs.CQ.req_notify()</span></code></a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.CompChannel.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.CompChannel.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Free the verbs completion channel handle.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.ibverbs.CompChannel.ctx">
+<code class="descname">ctx</code><a class="headerlink" href="#rdma.ibverbs.CompChannel.ctx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.CompChannel.fileno">
+<code class="descname">fileno</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.CompChannel.fileno" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the FD associated with this completion channel.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.CompChannel.register_poll">
+<code class="descname">register_poll</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.CompChannel.register_poll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add the FD associated with this object to <code class="xref py py-class docutils literal"><span class="pre">select.poll</span></code>
+object <em>poll</em>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="rdma.ibverbs.Context">
+<em class="property">class </em><code class="descclassname">rdma.ibverbs.</code><code class="descname">Context</code><a class="headerlink" href="#rdma.ibverbs.Context" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Verbs context handle, this is a context manager. Call <a class="reference internal" href="rdma.html#rdma.get_verbs" title="rdma.get_verbs"><code class="xref py py-func docutils literal"><span class="pre">rdma.get_verbs()</span></code></a> to get
+an instance of this.</p>
+<dl class="method">
+<dt id="rdma.ibverbs.Context.check_poll">
+<code class="descname">check_poll</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.Context.check_poll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return <cite>True</cite> if <em>pevent</em> indicates that <a class="reference internal" href="#rdma.ibverbs.Context.get_async_event" title="rdma.ibverbs.Context.get_async_event"><code class="xref py py-meth docutils literal"><span class="pre">get_async_event()</span></code></a>
+will return data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.Context.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.Context.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Free the verbs context handle and all resources allocated by it.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.Context.comp_channel">
+<code class="descname">comp_channel</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.Context.comp_channel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new <a class="reference internal" href="#rdma.ibverbs.CompChannel" title="rdma.ibverbs.CompChannel"><code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.CompChannel</span></code></a> for this context.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.Context.cq">
+<code class="descname">cq</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.Context.cq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new <a class="reference internal" href="#rdma.ibverbs.CQ" title="rdma.ibverbs.CQ"><code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.CQ</span></code></a> for this context.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.ibverbs.Context.end_port">
+<code class="descname">end_port</code><a class="headerlink" href="#rdma.ibverbs.Context.end_port" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.Context.from_qp_num">
+<code class="descname">from_qp_num</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.Context.from_qp_num" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a <a class="reference internal" href="#rdma.ibverbs.QP" title="rdma.ibverbs.QP"><code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.QP</span></code></a> for the qp number <em>num</em> or <cite>None</cite>
+if one was not found.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.Context.get_async_event">
+<code class="descname">get_async_event</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.Context.get_async_event" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a single async event for this context. The return result is a
+<code class="xref py py-class docutils literal"><span class="pre">namedtuple</span></code> of <cite>(event_type,obj</cite> where <em>obj</em> will be the
+<a class="reference internal" href="#rdma.ibverbs.CQ" title="rdma.ibverbs.CQ"><code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.CQ</span></code></a>, <a class="reference internal" href="#rdma.ibverbs.QP" title="rdma.ibverbs.QP"><code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.QP</span></code></a>,
+<a class="reference internal" href="#rdma.ibverbs.SRQ" title="rdma.ibverbs.SRQ"><code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.SRQ</span></code></a>, <a class="reference internal" href="devices.html#rdma.devices.EndPort" title="rdma.devices.EndPort"><code class="xref py py-class docutils literal"><span class="pre">rdma.devices.EndPort</span></code></a> or
+<a class="reference internal" href="devices.html#rdma.devices.RDMADevice" title="rdma.devices.RDMADevice"><code class="xref py py-class docutils literal"><span class="pre">rdma.devices.RDMADevice</span></code></a> associated with the event.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.Context.handle_async_event">
+<code class="descname">handle_async_event</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.Context.handle_async_event" title="Permalink to this definition">¶</a></dt>
+<dd><p>This provides a generic handler for async events. Depending
+on the event it will:
+- Raise a <a class="reference internal" href="#rdma.ibverbs.AsyncError" title="rdma.ibverbs.AsyncError"><code class="xref py py-exc docutils literal"><span class="pre">rdma.ibverbs.AsyncError</span></code></a> exception
+- Reload cached information in the end port</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.ibverbs.Context.node">
+<code class="descname">node</code><a class="headerlink" href="#rdma.ibverbs.Context.node" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.Context.pd">
+<code class="descname">pd</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.Context.pd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new <a class="reference internal" href="#rdma.ibverbs.PD" title="rdma.ibverbs.PD"><code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.PD</span></code></a> for this context.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.Context.query_device">
+<code class="descname">query_device</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.Context.query_device" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a <code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.device_attr</span></code> for the device.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.device_attr</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.Context.query_port">
+<code class="descname">query_port</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.Context.query_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a <code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.port_attr</span></code> for the <em>port_id</em>. If
+<em>port_id</em> is none then the port info is returned for the end port this
+context was created against.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.port_attr</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.Context.register_poll">
+<code class="descname">register_poll</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.Context.register_poll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add the async event FD associated with this object to
+<code class="xref py py-class docutils literal"><span class="pre">select.poll</span></code> object <em>poll</em>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="rdma.ibverbs.MR">
+<em class="property">class </em><code class="descclassname">rdma.ibverbs.</code><code class="descname">MR</code><a class="headerlink" href="#rdma.ibverbs.MR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Memory registration, this is a context manager.</p>
+<dl class="attribute">
+<dt id="rdma.ibverbs.MR.addr">
+<code class="descname">addr</code><a class="headerlink" href="#rdma.ibverbs.MR.addr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.MR.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.MR.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Free the verbs MR handle.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.ibverbs.MR.ctx">
+<code class="descname">ctx</code><a class="headerlink" href="#rdma.ibverbs.MR.ctx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.ibverbs.MR.length">
+<code class="descname">length</code><a class="headerlink" href="#rdma.ibverbs.MR.length" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.ibverbs.MR.lkey">
+<code class="descname">lkey</code><a class="headerlink" href="#rdma.ibverbs.MR.lkey" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.ibverbs.MR.pd">
+<code class="descname">pd</code><a class="headerlink" href="#rdma.ibverbs.MR.pd" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.ibverbs.MR.rkey">
+<code class="descname">rkey</code><a class="headerlink" href="#rdma.ibverbs.MR.rkey" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.MR.sge">
+<code class="descname">sge</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.MR.sge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a <code class="xref py py-class docutils literal"><span class="pre">rdma.ibv.sge</span></code> referring to <em>length</em> bytes of this MR
+starting at <em>off</em>. If <em>length</em> is -1 (default) then the entire MR from <em>off</em>
+to the end is used.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="rdma.ibverbs.PD">
+<em class="property">class </em><code class="descclassname">rdma.ibverbs.</code><code class="descname">PD</code><a class="headerlink" href="#rdma.ibverbs.PD" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Protection domain handle, this is a context manager.</p>
+<dl class="method">
+<dt id="rdma.ibverbs.PD.ah">
+<code class="descname">ah</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.PD.ah" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new <a class="reference internal" href="#rdma.ibverbs.AH" title="rdma.ibverbs.AH"><code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.AH</span></code></a> for this protection domain.
+<em>attr</em> may be a <code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.ah_attr</span></code> or
+<a class="reference internal" href="path.html#rdma.path.IBPath" title="rdma.path.IBPath"><code class="xref py py-class docutils literal"><span class="pre">rdma.path.IBPath</span></code></a>. When used with a <a class="reference internal" href="path.html#rdma.path.IBPath" title="rdma.path.IBPath"><code class="xref py py-class docutils literal"><span class="pre">IBPath</span></code></a>
+this function will cache the AH in the
+<cite>IBPath</cite>. <a class="reference internal" href="path.html#rdma.path.Path.drop_cache" title="rdma.path.Path.drop_cache"><code class="xref py py-meth docutils literal"><span class="pre">rdma.path.Path.drop_cache()</span></code></a> must be called to release
+all references to the AH.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.PD.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.PD.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Free the verbs pd handle.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.ibverbs.PD.ctx">
+<code class="descname">ctx</code><a class="headerlink" href="#rdma.ibverbs.PD.ctx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.PD.from_qp_num">
+<code class="descname">from_qp_num</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.PD.from_qp_num" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a <a class="reference internal" href="#rdma.ibverbs.QP" title="rdma.ibverbs.QP"><code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.QP</span></code></a> for the qp number <em>num</em> or <cite>None</cite>
+if one was not found.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.PD.mr">
+<code class="descname">mr</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.PD.mr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new <a class="reference internal" href="#rdma.ibverbs.MR" title="rdma.ibverbs.MR"><code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.MR</span></code></a> for this protection domain.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.PD.qp">
+<code class="descname">qp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.PD.qp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new <a class="reference internal" href="#rdma.ibverbs.QP" title="rdma.ibverbs.QP"><code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.QP</span></code></a> for this protection domain.
+This version expresses the QP creation attributes as keyword
+arguments.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.PD.qp_raw">
+<code class="descname">qp_raw</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.PD.qp_raw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new <a class="reference internal" href="#rdma.ibverbs.QP" title="rdma.ibverbs.QP"><code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.QP</span></code></a> for this protection
+domain. <em>init</em> is a <code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.qp_init_attr</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.PD.srq">
+<code class="descname">srq</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.PD.srq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new <a class="reference internal" href="#rdma.ibverbs.SRQ" title="rdma.ibverbs.SRQ"><code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.SRQ</span></code></a> for this protection
+domain. <em>init</em> is a <code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.srq_init_attr</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="rdma.ibverbs.QP">
+<em class="property">class </em><code class="descclassname">rdma.ibverbs.</code><code class="descname">QP</code><a class="headerlink" href="#rdma.ibverbs.QP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Queue pair, this is a context manager.</p>
+<dl class="method">
+<dt id="rdma.ibverbs.QP.attach_mcast">
+<code class="descname">attach_mcast</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.QP.attach_mcast" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attach this QP to receive the multicast group described by
+<em>path.DGID</em> and <em>path.DLID</em>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.QP.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.QP.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Free the verbs QP handle.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.ibverbs.QP.ctx">
+<code class="descname">ctx</code><a class="headerlink" href="#rdma.ibverbs.QP.ctx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.QP.detach_mcast">
+<code class="descname">detach_mcast</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.QP.detach_mcast" title="Permalink to this definition">¶</a></dt>
+<dd><p>Detach this QP from the multicast group described by
+<em>path.DGID</em> and <em>path.DLID</em>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.QP.establish">
+<code class="descname">establish</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.QP.establish" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform <a class="reference internal" href="#rdma.ibverbs.QP.modify_to_init" title="rdma.ibverbs.QP.modify_to_init"><code class="xref py py-meth docutils literal"><span class="pre">modify_to_init()</span></code></a>, <a class="reference internal" href="#rdma.ibverbs.QP.modify_to_rtr" title="rdma.ibverbs.QP.modify_to_rtr"><code class="xref py py-meth docutils literal"><span class="pre">modify_to_rtr()</span></code></a> and
+:meth`modify_to_rts`.  This function is most useful for UD QPs which
+do not require any external sequencing.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.ibverbs.QP.max_recv_sge">
+<code class="descname">max_recv_sge</code><a class="headerlink" href="#rdma.ibverbs.QP.max_recv_sge" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.ibverbs.QP.max_recv_wr">
+<code class="descname">max_recv_wr</code><a class="headerlink" href="#rdma.ibverbs.QP.max_recv_wr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.ibverbs.QP.max_send_sge">
+<code class="descname">max_send_sge</code><a class="headerlink" href="#rdma.ibverbs.QP.max_send_sge" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.ibverbs.QP.max_send_wr">
+<code class="descname">max_send_wr</code><a class="headerlink" href="#rdma.ibverbs.QP.max_send_wr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.QP.modify">
+<code class="descname">modify</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.QP.modify" title="Permalink to this definition">¶</a></dt>
+<dd><p>When modifying a QP the value <em>attr.ah_attr</em> may be a
+<code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.ah_attr</span></code> or <a class="reference internal" href="path.html#rdma.path.IBPath" title="rdma.path.IBPath"><code class="xref py py-class docutils literal"><span class="pre">rdma.path.IBPath</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.QP.modify_to_init">
+<code class="descname">modify_to_init</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.QP.modify_to_init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Modify the QP to the INIT state.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.QP.modify_to_rtr">
+<code class="descname">modify_to_rtr</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.QP.modify_to_rtr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Modify the QP to the RTR state.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.QP.modify_to_rts">
+<code class="descname">modify_to_rts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.QP.modify_to_rts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Modify the QP to the RTS state.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.ibverbs.QP.pd">
+<code class="descname">pd</code><a class="headerlink" href="#rdma.ibverbs.QP.pd" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.QP.post_recv">
+<code class="descname">post_recv</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.QP.post_recv" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>wrlist</em> may be a single <code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.recv_wr</span></code> or
+a list of them.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.QP.post_send">
+<code class="descname">post_send</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.QP.post_send" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>wrlist</em> may be a single <code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.send_wr</span></code> or
+a list of them.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.ibverbs.QP.qp_num">
+<code class="descname">qp_num</code><a class="headerlink" href="#rdma.ibverbs.QP.qp_num" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.ibverbs.QP.qp_type">
+<code class="descname">qp_type</code><a class="headerlink" href="#rdma.ibverbs.QP.qp_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.QP.query">
+<code class="descname">query</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.QP.query" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return information about the QP. <em>mask</em> selects which fields
+to return.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tuple(<code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.qp_attr</span></code>,:class:<cite>rdma.ibverbs.qp_init_attr</cite>)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.ibverbs.QP.state">
+<code class="descname">state</code><a class="headerlink" href="#rdma.ibverbs.QP.state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="rdma.ibverbs.SRQ">
+<em class="property">class </em><code class="descclassname">rdma.ibverbs.</code><code class="descname">SRQ</code><a class="headerlink" href="#rdma.ibverbs.SRQ" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Shared Receive queue, this is a context manager.</p>
+<dl class="method">
+<dt id="rdma.ibverbs.SRQ.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.SRQ.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Free the verbs SRQ handle.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.ibverbs.SRQ.ctx">
+<code class="descname">ctx</code><a class="headerlink" href="#rdma.ibverbs.SRQ.ctx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.SRQ.modify">
+<code class="descname">modify</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.SRQ.modify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Modify the <em>srq_limit</em> and <em>max_wr</em> values of SRQ. If the
+argument is <cite>None</cite> it is not changed.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.ibverbs.SRQ.pd">
+<code class="descname">pd</code><a class="headerlink" href="#rdma.ibverbs.SRQ.pd" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.SRQ.post_recv">
+<code class="descname">post_recv</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.SRQ.post_recv" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>wrlist</em> may be a single <code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.recv_wr</span></code> or
+a list of them.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.ibverbs.SRQ.query">
+<code class="descname">query</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.SRQ.query" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a <code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.srq_attr</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="rdma.ibverbs.WCError">
+<em class="property">exception </em><code class="descclassname">rdma.ibverbs.</code><code class="descname">WCError</code><a class="headerlink" href="#rdma.ibverbs.WCError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="rdma.html#rdma.RDMAError" title="rdma.RDMAError"><code class="xref py py-class docutils literal"><span class="pre">rdma.RDMAError</span></code></a></p>
+<p>Raised when a WC is completed with error. Note: Not all adaptors
+support returning the <cite>opcode</cite> and <cite>qp_num</cite> in an error WC. For those that
+do the values are decoded.</p>
+<p><em>wc</em> is the error wc, <em>msg</em> is an additional descriptive message,
+<em>cq</em> is the CQ the error WC was received on and <em>obj</em> is a
+<a class="reference internal" href="#rdma.ibverbs.SRQ" title="rdma.ibverbs.SRQ"><code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.SRQ</span></code></a> or <a class="reference internal" href="#rdma.ibverbs.QP" title="rdma.ibverbs.QP"><code class="xref py py-class docutils literal"><span class="pre">rdma.ibverbs.QP</span></code></a> if one is
+known. <em>is_rq</em> is <cite>True</cite> if the WC is known to apply to the receive of
+the QP, and <cite>False</cite> if the WC is known the apply to the send queue of
+the QP. <cite>None</cite> if unknown</p>
+<dl class="attribute">
+<dt id="rdma.ibverbs.WCError.cq">
+<code class="descname">cq</code><em class="property"> = None</em><a class="headerlink" href="#rdma.ibverbs.WCError.cq" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.ibverbs.WCError.is_rq">
+<code class="descname">is_rq</code><em class="property"> = None</em><a class="headerlink" href="#rdma.ibverbs.WCError.is_rq" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.ibverbs.WCError.qp">
+<code class="descname">qp</code><em class="property"> = None</em><a class="headerlink" href="#rdma.ibverbs.WCError.qp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.ibverbs.WCError.srq">
+<code class="descname">srq</code><em class="property"> = None</em><a class="headerlink" href="#rdma.ibverbs.WCError.srq" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="rdma.ibverbs.WCPath">
+<code class="descclassname">rdma.ibverbs.</code><code class="descname">WCPath</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.WCPath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a <a class="reference internal" href="path.html#rdma.path.IBPath" title="rdma.path.IBPath"><code class="xref py py-class docutils literal"><span class="pre">rdma.path.IBPath</span></code></a> from a work completion. <em>buf</em> should
+be the receive buffer when this is used with a UD QP, the first 40 bytes
+of that buffer could be a GRH. <em>off</em> is the offset into <em>buf</em>. <em>kwargs</em>
+are applied to <a class="reference internal" href="path.html#rdma.path.IBPath" title="rdma.path.IBPath"><code class="xref py py-class docutils literal"><span class="pre">rdma.path.IBPath</span></code></a></p>
+<p>Note: wc.pkey_index is not used, if the WC is associated witha GSI QP
+(unlikely) then the caller can pass <cite>pkey_index=wc.pkey_index</cite> as an
+argument.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="rdma.ibverbs.WRError">
+<em class="property">exception </em><code class="descclassname">rdma.ibverbs.</code><code class="descname">WRError</code><a class="headerlink" href="#rdma.ibverbs.WRError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="rdma.html#rdma.SysError" title="rdma.SysError"><code class="xref py py-class docutils literal"><span class="pre">rdma.SysError</span></code></a></p>
+<p>Raised when an error occurs posting work requests. <code class="xref py py-attr docutils literal"><span class="pre">bad_index</span></code>
+is the index into the work request list what failed to post.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rdma.ibverbs.wc_status_str">
+<code class="descclassname">rdma.ibverbs.</code><code class="descname">wc_status_str</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.ibverbs.wc_status_str" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a <code class="xref py py-attr docutils literal"><span class="pre">rdma.ibverbs.wc.status</span></code> value into a string.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">7. Verbs Interface</a><ul>
+<li><a class="reference internal" href="#verbs-and-rdma-path-ibpath">7.1. Verbs and <code class="docutils literal"><span class="pre">rdma.path.IBPath</span></code></a></li>
+<li><a class="reference internal" href="#usage-examples">7.2. Usage Examples</a><ul>
+<li><a class="reference internal" href="#ud-qp-setup">7.2.1. UD QP Setup</a></li>
+<li><a class="reference internal" href="#ud-response-path">7.2.2. UD response path</a></li>
+<li><a class="reference internal" href="#no-cm-qp-setup">7.2.3. No CM QP Setup</a></li>
+<li><a class="reference internal" href="#wc-error-handling">7.2.4. WC Error handling</a></li>
+<li><a class="reference internal" href="#completion-channels">7.2.5. Completion Channels</a></li>
+<li><a class="reference internal" href="#memory">7.2.6. Memory</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rdma-vtools-module">7.3. <code class="docutils literal"><span class="pre">rdma.vtools</span></code> module</a></li>
+<li><a class="reference internal" href="#rdma-ibverbs-module">7.4. <code class="docutils literal"><span class="pre">rdma.ibverbs</span></code> module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="subnet.html"
+                        title="previous chapter">6. IB Subnet Database</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="ibtool.html"
+                        title="next chapter">8. The <code class="docutils literal"><span class="pre">ibtool</span></code> Program</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="0sources/ibverbs.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ibtool.html" title="8. The ibtool Program"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="subnet.html" title="6. IB Subnet Database"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">python-rdma 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2011, Obsidian Research Corp.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

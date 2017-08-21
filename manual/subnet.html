@@ -1,0 +1,856 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>6. IB Subnet Database &mdash; python-rdma 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="0static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="0static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="0static/jquery.js"></script>
+    <script type="text/javascript" src="0static/underscore.js"></script>
+    <script type="text/javascript" src="0static/doctools.js"></script>
+    <link rel="top" title="python-rdma 1.0 documentation" href="index.html" />
+    <link rel="next" title="7. Verbs Interface" href="ibverbs.html" />
+    <link rel="prev" title="5. MAD RPC Processing" href="mads.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ibverbs.html" title="7. Verbs Interface"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="mads.html" title="5. MAD RPC Processing"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">python-rdma 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="ib-subnet-database">
+<h1>6. IB Subnet Database<a class="headerlink" href="#ib-subnet-database" title="Permalink to this headline">¶</a></h1>
+<p>The library has a general storage database for holding information for an IB
+subnet. Support is provided for partial population, eg the database can
+sometimes store a <code class="xref py py-class docutils literal"><span class="pre">SMPPortInfo</span></code> without first having a
+<code class="xref py py-class docutils literal"><span class="pre">SMPNodeInfo</span></code> and the like.</p>
+<p>The design is careful to separate the notion of an <cite>end port</cite> compared
+to an <cite>arbitrary port</cite>. Only switches can have <cite>arbitrary ports</cite>! Most
+functions work with and return <cite>end ports</cite> which will always correspond
+to switch port 0.</p>
+<div class="section" id="module-rdma.subnet">
+<span id="rdma-subnet-store-ib-subnet-data"></span><h2>6.1. <a class="reference internal" href="#module-rdma.subnet" title="rdma.subnet"><code class="xref py py-mod docutils literal"><span class="pre">rdma.subnet</span></code></a> Store IB Subnet Data<a class="headerlink" href="#module-rdma.subnet" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="rdma.subnet.CA">
+<em class="property">class </em><code class="descclassname">rdma.subnet.</code><code class="descname">CA</code><a class="headerlink" href="#rdma.subnet.CA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rdma.subnet.Node" title="rdma.subnet.Node"><code class="xref py py-class docutils literal"><span class="pre">rdma.subnet.Node</span></code></a></p>
+<p>Hold onto information about a single CA node in the network.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="rdma.subnet.Node">
+<em class="property">class </em><code class="descclassname">rdma.subnet.</code><code class="descname">Node</code><a class="headerlink" href="#rdma.subnet.Node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Hold onto information about a single node in the network. A node is a
+switch, *CA, or router with multiple end ports. A node has a single
+<cite>nodeGUID</cite> and there can not be duplicate nodeGUID&#8217;s. The port information
+in the <a class="reference internal" href="#rdma.subnet.Node.ninf" title="rdma.subnet.Node.ninf"><code class="xref py py-attr docutils literal"><span class="pre">ninf</span></code></a> stores a random port.</p>
+<dl class="attribute">
+<dt id="rdma.subnet.Node.desc">
+<code class="descname">desc</code><em class="property"> = None</em><a class="headerlink" href="#rdma.subnet.Node.desc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Result of <a class="reference internal" href="IBA.html#rdma.IBA_describe.description" title="rdma.IBA_describe.description"><code class="xref py py-func docutils literal"><span class="pre">rdma.IBA_describe.description()</span></code></a> on the nodeString.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.subnet.Node.get_desc">
+<code class="descname">get_desc</code><span class="sig-paren">(</span><em>sched</em>, <em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.subnet.Node.get_desc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coroutine to fetch the node description</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.subnet.Node.get_port">
+<code class="descname">get_port</code><span class="sig-paren">(</span><em>portIdx</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.subnet.Node.get_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the port for index <em>portIdx</em>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.subnet.Node.get_port_nc">
+<code class="descname">get_port_nc</code><span class="sig-paren">(</span><em>portIdx</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.subnet.Node.get_port_nc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the port for index <em>portIdx</em>, or <cite>None</cite> if it does not
+exist.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.subnet.Node.iterend_ports">
+<code class="descname">iterend_ports</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.subnet.Node.iterend_ports" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate over all end ports. This only returns ports that are in the
+network, ie ports on a CA that are not reachable are not returned.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">generator of <a class="reference internal" href="#rdma.subnet.Port" title="rdma.subnet.Port"><code class="xref py py-class docutils literal"><span class="pre">Port</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.subnet.Node.iterports">
+<code class="descname">iterports</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.subnet.Node.iterports" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate over all ports. This only returns ports that are in the
+network, ie ports on a CA that are not reachable are not returned.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">generator of tuple(<a class="reference internal" href="#rdma.subnet.Port" title="rdma.subnet.Port"><code class="xref py py-class docutils literal"><span class="pre">Port</span></code></a>,portIdx)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.subnet.Node.ninf">
+<code class="descname">ninf</code><em class="property"> = None</em><a class="headerlink" href="#rdma.subnet.Node.ninf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Instance of <code class="xref py py-class docutils literal"><span class="pre">rdma.IBA.SMPNodeInfo</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.subnet.Node.ports">
+<code class="descname">ports</code><em class="property"> = None</em><a class="headerlink" href="#rdma.subnet.Node.ports" title="Permalink to this definition">¶</a></dt>
+<dd><p>Array of :class`Port`. Note: CA port 1 is stored in index 1.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.subnet.Node.set_desc">
+<code class="descname">set_desc</code><span class="sig-paren">(</span><em>nodeString</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.subnet.Node.set_desc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the description from a <em>nodeString</em> type value.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.subnet.Node.set_port">
+<code class="descname">set_port</code><span class="sig-paren">(</span><em>portIdx</em>, <em>port</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.subnet.Node.set_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>Store <em>port</em> in <em>portIdx</em> for <a class="reference internal" href="#rdma.subnet.Node.ports" title="rdma.subnet.Node.ports"><code class="xref py py-attr docutils literal"><span class="pre">ports</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.subnet.Node.to_end_port">
+<code class="descname">to_end_port</code><span class="sig-paren">(</span><em>port</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.subnet.Node.to_end_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the end port that is associated with <em>port</em>.
+For switches this returns port 0, otherwise it returns <em>port</em>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="rdma.subnet.Port">
+<em class="property">class </em><code class="descclassname">rdma.subnet.</code><code class="descname">Port</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.subnet.Port" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="attribute">
+<dt id="rdma.subnet.Port.LID">
+<code class="descname">LID</code><em class="property"> = None</em><a class="headerlink" href="#rdma.subnet.Port.LID" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base LID if it is an end port</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.subnet.Port.parent">
+<code class="descname">parent</code><em class="property"> = None</em><a class="headerlink" href="#rdma.subnet.Port.parent" title="Permalink to this definition">¶</a></dt>
+<dd><p><a class="reference internal" href="#rdma.subnet.Node" title="rdma.subnet.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a> this port belongs to</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.subnet.Port.pinf">
+<code class="descname">pinf</code><em class="property"> = None</em><a class="headerlink" href="#rdma.subnet.Port.pinf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Instance of <code class="xref py py-class docutils literal"><span class="pre">rdma.IBA.SMPPortInfo</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.subnet.Port.portGUID">
+<code class="descname">portGUID</code><em class="property"> = None</em><a class="headerlink" href="#rdma.subnet.Port.portGUID" title="Permalink to this definition">¶</a></dt>
+<dd><p>GUID for the port</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.subnet.Port.port_id">
+<code class="descname">port_id</code><a class="headerlink" href="#rdma.subnet.Port.port_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>The port number for this port.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.subnet.Port.to_end_port">
+<code class="descname">to_end_port</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.subnet.Port.to_end_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the end port that is associated with this port.
+For switches this returns port 0, otherwise it returns itself.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="rdma.subnet.Router">
+<em class="property">class </em><code class="descclassname">rdma.subnet.</code><code class="descname">Router</code><a class="headerlink" href="#rdma.subnet.Router" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rdma.subnet.Node" title="rdma.subnet.Node"><code class="xref py py-class docutils literal"><span class="pre">rdma.subnet.Node</span></code></a></p>
+<p>Hold onto information about a single router node in the network.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="rdma.subnet.Subnet">
+<em class="property">class </em><code class="descclassname">rdma.subnet.</code><code class="descname">Subnet</code><a class="headerlink" href="#rdma.subnet.Subnet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Stores information about an entire IB subnet.</p>
+<p>The database is organized around <a class="reference internal" href="#rdma.subnet.Port" title="rdma.subnet.Port"><code class="xref py py-class docutils literal"><span class="pre">Port</span></code></a> and <a class="reference internal" href="#rdma.subnet.Node" title="rdma.subnet.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a>
+objects. The database can be sparse, a node may not have any associated
+<a class="reference internal" href="#rdma.subnet.Port" title="rdma.subnet.Port"><code class="xref py py-class docutils literal"><span class="pre">Port</span></code></a> objects and <a class="reference internal" href="#rdma.subnet.Port" title="rdma.subnet.Port"><code class="xref py py-class docutils literal"><span class="pre">Port</span></code></a> objects may be missing nodes. Thus
+it is important to use the accessors to get new objects which properly
+join things together. The storage system is intended to support
+automatically filling in data no matter what the order is.</p>
+<p>To support the discovery module and caching the <a class="reference internal" href="#rdma.subnet.Subnet.loaded" title="rdma.subnet.Subnet.loaded"><code class="xref py py-attr docutils literal"><span class="pre">loaded</span></code></a> attribute
+contains a listing of what discovery actions have been performed.</p>
+<p>This class can be efficiently pickled.</p>
+<dl class="class">
+<dt id="rdma.subnet.Subnet.DRCacher">
+<em class="property">class </em><code class="descname">DRCacher</code><span class="sig-paren">(</span><em>sbn</em>, <em>end_port</em>, <em>start</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.subnet.Subnet.DRCacher" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Instances of this are returned by
+<a class="reference internal" href="#rdma.subnet.Subnet.get_dr_cache" title="rdma.subnet.Subnet.get_dr_cache"><code class="xref py py-meth docutils literal"><span class="pre">rdma.subnet.Subnet.get_dr_cache()</span></code></a>.</p>
+<dl class="method">
+<dt id="rdma.subnet.Subnet.DRCacher.get_links">
+<code class="descname">get_links</code><span class="sig-paren">(</span><em>target</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.subnet.Subnet.DRCacher.get_links" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterates over the ports from <em>target</em> to <em>start</em> (eg reversed).
+The ports selected are the egress ports on the path from <em>start</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">generator of <a class="reference internal" href="#rdma.subnet.Port" title="rdma.subnet.Port"><code class="xref py py-class docutils literal"><span class="pre">Port</span></code></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><strong>ValueError</strong> &#8211; If there is no path.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.subnet.Subnet.DRCacher.get_path">
+<code class="descname">get_path</code><span class="sig-paren">(</span><em>target</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.subnet.Subnet.DRCacher.get_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a DR path from <em>start</em> to <em>target</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><strong>ValueError</strong> &#8211; If there is no path.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.subnet.Subnet.advance_dr">
+<code class="descclassname">Subnet.</code><code class="descname">advance_dr</code><span class="sig-paren">(</span><em>path</em>, <em>portIdx</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.subnet.Subnet.advance_dr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new <a class="reference internal" href="path.html#rdma.path.IBDRPath" title="rdma.path.IBDRPath"><code class="xref py py-class docutils literal"><span class="pre">IBDRPath</span></code></a> that goes to the
+device connected to <em>port_idx</em> of <em>path</em>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.subnet.Subnet.all_nodes">
+<code class="descclassname">Subnet.</code><code class="descname">all_nodes</code><em class="property"> = None</em><a class="headerlink" href="#rdma.subnet.Subnet.all_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-class docutils literal"><span class="pre">set</span></code> of all <a class="reference internal" href="#rdma.subnet.Node" title="rdma.subnet.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.subnet.Subnet.get_dr_cache">
+<code class="descclassname">Subnet.</code><code class="descname">get_dr_cache</code><span class="sig-paren">(</span><em>end_port</em>, <em>start=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.subnet.Subnet.get_dr_cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a <a class="reference internal" href="#rdma.subnet.Subnet.DRCacher" title="rdma.subnet.Subnet.DRCacher"><code class="xref py py-class docutils literal"><span class="pre">DRCacher</span></code></a> instance with a
+<a class="reference internal" href="#rdma.subnet.Subnet.DRCacher.get_path" title="rdma.subnet.Subnet.DRCacher.get_path"><code class="xref py py-meth docutils literal"><span class="pre">DRCacher.get_path()</span></code></a> method that will return a DR path from
+<em>start</em> to <em>target</em>. If <em>start</em> is not specified then it defaults to
+the port described by <em>end_port</em>. Computing DR paths is very expensive
+and this API returns an object that can be used to compute multiple DR
+paths.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.subnet.Subnet.get_node">
+<code class="descclassname">Subnet.</code><code class="descname">get_node</code><span class="sig-paren">(</span><em>type_</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.subnet.Subnet.get_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an existing or new <a class="reference internal" href="#rdma.subnet.Node" title="rdma.subnet.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a> and <a class="reference internal" href="#rdma.subnet.Port" title="rdma.subnet.Port"><code class="xref py py-class docutils literal"><span class="pre">Port</span></code></a> instance
+associated with the end port described by <em>kwargs</em>.  <em>kwargs</em> is the
+same signature as for <code class="xref py py-meth docutils literal"><span class="pre">search_port()</span></code>. <em>kwargs</em> must include
+enough information to link a <a class="reference internal" href="#rdma.subnet.Port" title="rdma.subnet.Port"><code class="xref py py-class docutils literal"><span class="pre">Port</span></code></a> to the <a class="reference internal" href="#rdma.subnet.Node" title="rdma.subnet.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tuple(<a class="reference internal" href="#rdma.subnet.Node" title="rdma.subnet.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a>, <a class="reference internal" href="#rdma.subnet.Port" title="rdma.subnet.Port"><code class="xref py py-class docutils literal"><span class="pre">Port</span></code></a>)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.subnet.Subnet.get_node_ninf">
+<code class="descclassname">Subnet.</code><code class="descname">get_node_ninf</code><span class="sig-paren">(</span><em>ninf</em>, <em>path=None</em>, <em>LID=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.subnet.Subnet.get_node_ninf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the <a class="reference internal" href="#rdma.subnet.Node" title="rdma.subnet.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a> object that holds the associated <em>ninf</em>. If
+none exists then one is created. If <em>path</em> or <em>LID</em> are specified then
+the appropriate information from both is integrated into the database.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">tuple(<a class="reference internal" href="#rdma.subnet.Node" title="rdma.subnet.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a>, <a class="reference internal" href="#rdma.subnet.Port" title="rdma.subnet.Port"><code class="xref py py-class docutils literal"><span class="pre">Port</span></code></a>)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.subnet.Subnet.get_path_smp">
+<code class="descclassname">Subnet.</code><code class="descname">get_path_smp</code><span class="sig-paren">(</span><em>sched</em>, <em>end_port</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.subnet.Subnet.get_path_smp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a VL15 SMP path to <em>end_port</em>. If directed routing is being
+used then this must be used to get paths. <em>sched</em> is an object with an
+<cite>end_port</cite> attribute.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.subnet.Subnet.get_port">
+<code class="descclassname">Subnet.</code><code class="descname">get_port</code><span class="sig-paren">(</span><em>port_select=None</em>, <em>localPortNum=None</em>, <em>portIdx=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.subnet.Subnet.get_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the <a class="reference internal" href="#rdma.subnet.Port" title="rdma.subnet.Port"><code class="xref py py-class docutils literal"><span class="pre">Port</span></code></a> object for an arbitrary port (ie a non-end
+port on a switch).  This is designed to be used with information
+available during MAD processing, the main purpose of this function is
+to disambiguate what requested port 0 means.</p>
+<p>If at all possible call this with <em>portIdx</em> set correctly and nothing
+else. Otherwise set <em>localPortNum</em> to the value returned by the MAD.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#rdma.subnet.Port" title="rdma.subnet.Port"><code class="xref py py-class docutils literal"><span class="pre">Port</span></code></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><strong>ValueError</strong> &#8211; If the node type is needed but not known.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.subnet.Subnet.get_port_pinf">
+<code class="descclassname">Subnet.</code><code class="descname">get_port_pinf</code><span class="sig-paren">(</span><em>pinf</em>, <em>port_select=None</em>, <em>portIdx=None</em>, <em>path=None</em>, <em>LID=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.subnet.Subnet.get_port_pinf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the <a class="reference internal" href="#rdma.subnet.Port" title="rdma.subnet.Port"><code class="xref py py-class docutils literal"><span class="pre">Port</span></code></a> object that holds the associated <em>pinf</em>. This
+function requires a correct <em>portIdx</em> if the node type is not known.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#rdma.subnet.Port" title="rdma.subnet.Port"><code class="xref py py-class docutils literal"><span class="pre">Port</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.subnet.Subnet.iterbfs">
+<code class="descclassname">Subnet.</code><code class="descname">iterbfs</code><span class="sig-paren">(</span><em>start</em>, <em>priors=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.subnet.Subnet.iterbfs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate over all end ports in a BFS order. If <em>priors</em> is
+set to a <code class="xref py py-class docutils literal"><span class="pre">dict</span></code> then it will be populated with
+a mapping of end port to ingress port.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">generator of <a class="reference internal" href="#rdma.subnet.Port" title="rdma.subnet.Port"><code class="xref py py-class docutils literal"><span class="pre">Port</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.subnet.Subnet.iterend_ports">
+<code class="descclassname">Subnet.</code><code class="descname">iterend_ports</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.subnet.Subnet.iterend_ports" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate over all end ports. This only returns ports that are in the
+network, ie ports on a CA that are not reachable are not returned.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">generator of <a class="reference internal" href="#rdma.subnet.Port" title="rdma.subnet.Port"><code class="xref py py-class docutils literal"><span class="pre">Port</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.subnet.Subnet.iternodes">
+<code class="descclassname">Subnet.</code><code class="descname">iternodes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.subnet.Subnet.iternodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate over all nodes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">generator of <a class="reference internal" href="#rdma.subnet.Node" title="rdma.subnet.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.subnet.Subnet.iterpeers">
+<code class="descclassname">Subnet.</code><code class="descname">iterpeers</code><span class="sig-paren">(</span><em>start</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.subnet.Subnet.iterpeers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate over all ports connected to <em>start</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">generator of (<a class="reference internal" href="#rdma.subnet.Port" title="rdma.subnet.Port"><code class="xref py py-class docutils literal"><span class="pre">Port</span></code></a>,:class:<cite>Port</cite>) (peer,prior)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.subnet.Subnet.iterports">
+<code class="descclassname">Subnet.</code><code class="descname">iterports</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.subnet.Subnet.iterports" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate over all ports. This only returns ports that are in the network,
+ie ports on a CA that are not reachable are not returned.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">generator of tuple(<a class="reference internal" href="#rdma.subnet.Port" title="rdma.subnet.Port"><code class="xref py py-class docutils literal"><span class="pre">Port</span></code></a>,portIdx)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.subnet.Subnet.iterswitches">
+<code class="descclassname">Subnet.</code><code class="descname">iterswitches</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.subnet.Subnet.iterswitches" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate over all switches.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">generator of <a class="reference internal" href="#rdma.subnet.Node" title="rdma.subnet.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.subnet.Subnet.lid_routed">
+<code class="descclassname">Subnet.</code><code class="descname">lid_routed</code><em class="property"> = True</em><a class="headerlink" href="#rdma.subnet.Subnet.lid_routed" title="Permalink to this definition">¶</a></dt>
+<dd><p><cite>True</cite> if routes are done via LID not DR</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.subnet.Subnet.lids">
+<code class="descclassname">Subnet.</code><code class="descname">lids</code><em class="property"> = None</em><a class="headerlink" href="#rdma.subnet.Subnet.lids" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-class docutils literal"><span class="pre">list</span></code> of unicast LID to <a class="reference internal" href="#rdma.subnet.Port" title="rdma.subnet.Port"><code class="xref py py-class docutils literal"><span class="pre">Port</span></code></a> objects</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.subnet.Subnet.link_end_port">
+<code class="descclassname">Subnet.</code><code class="descname">link_end_port</code><span class="sig-paren">(</span><em>port</em>, <em>portIdx=None</em>, <em>nodeGUID=None</em>, <em>portGUID=None</em>, <em>path=None</em>, <em>LID=None</em>, <em>LMC=0</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.subnet.Subnet.link_end_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use the provided information about <em>port</em> to update the database.</p>
+<p>Note: For switches <em>portIdx</em> must be 0.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.subnet.Subnet.loaded">
+<code class="descclassname">Subnet.</code><code class="descname">loaded</code><em class="property"> = None</em><a class="headerlink" href="#rdma.subnet.Subnet.loaded" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-class docutils literal"><span class="pre">set</span></code> of strings indicating what discovery has been performed.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.subnet.Subnet.nodes">
+<code class="descclassname">Subnet.</code><code class="descname">nodes</code><em class="property"> = None</em><a class="headerlink" href="#rdma.subnet.Subnet.nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-class docutils literal"><span class="pre">dict</span></code> of nodeGUID to <a class="reference internal" href="#rdma.subnet.Node" title="rdma.subnet.Node"><code class="xref py py-class docutils literal"><span class="pre">Node</span></code></a> objects</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.subnet.Subnet.path_to_port">
+<code class="descclassname">Subnet.</code><code class="descname">path_to_port</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.subnet.Subnet.path_to_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a <a class="reference internal" href="#rdma.subnet.Port" title="rdma.subnet.Port"><code class="xref py py-class docutils literal"><span class="pre">Port</span></code></a> instance for <em>path</em> or <cite>None</cite> if one does not
+exist.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.subnet.Subnet.paths">
+<code class="descclassname">Subnet.</code><code class="descname">paths</code><em class="property"> = None</em><a class="headerlink" href="#rdma.subnet.Subnet.paths" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-class docutils literal"><span class="pre">dict</span></code> of <a class="reference internal" href="#rdma.subnet.Port" title="rdma.subnet.Port"><code class="xref py py-class docutils literal"><span class="pre">Port</span></code></a> to <a class="reference internal" href="path.html#rdma.path.IBPath" title="rdma.path.IBPath"><code class="xref py py-class docutils literal"><span class="pre">rdma.path.IBPath</span></code></a> indicating paths.
+This should be accessed via get_path_smp as it will probably be
+converted into a DR route cache.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.subnet.Subnet.ports">
+<code class="descclassname">Subnet.</code><code class="descname">ports</code><em class="property"> = None</em><a class="headerlink" href="#rdma.subnet.Subnet.ports" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-class docutils literal"><span class="pre">dict</span></code> of portGUID to <a class="reference internal" href="#rdma.subnet.Port" title="rdma.subnet.Port"><code class="xref py py-class docutils literal"><span class="pre">Port</span></code></a> objects</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.subnet.Subnet.search_end_port">
+<code class="descclassname">Subnet.</code><code class="descname">search_end_port</code><span class="sig-paren">(</span><em>portIdx=None</em>, <em>portGUID=None</em>, <em>nodeGUID=None</em>, <em>path=None</em>, <em>LID=None</em>, <em>LMC=0</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.subnet.Subnet.search_end_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a <a class="reference internal" href="#rdma.subnet.Port" title="rdma.subnet.Port"><code class="xref py py-class docutils literal"><span class="pre">Port</span></code></a> instance associated with the supplied
+information if it exists or <cite>None</cite>.</p>
+<p>Note: For switches <em>portIdx</em> must be 0.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.subnet.Subnet.set_max_lid">
+<code class="descclassname">Subnet.</code><code class="descname">set_max_lid</code><span class="sig-paren">(</span><em>max_lid</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.subnet.Subnet.set_max_lid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make <a class="reference internal" href="#rdma.subnet.Subnet.lids" title="rdma.subnet.Subnet.lids"><code class="xref py py-attr docutils literal"><span class="pre">lids</span></code></a> sufficiently big to store <em>max_lid</em>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.subnet.Subnet.topology">
+<code class="descclassname">Subnet.</code><code class="descname">topology</code><em class="property"> = None</em><a class="headerlink" href="#rdma.subnet.Subnet.topology" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-class docutils literal"><span class="pre">dict</span></code> of <a class="reference internal" href="#rdma.subnet.Port" title="rdma.subnet.Port"><code class="xref py py-class docutils literal"><span class="pre">Port</span></code></a> to <a class="reference internal" href="#rdma.subnet.Port" title="rdma.subnet.Port"><code class="xref py py-class docutils literal"><span class="pre">Port</span></code></a> indicating links.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="rdma.subnet.Switch">
+<em class="property">class </em><code class="descclassname">rdma.subnet.</code><code class="descname">Switch</code><a class="headerlink" href="#rdma.subnet.Switch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#rdma.subnet.Node" title="rdma.subnet.Node"><code class="xref py py-class docutils literal"><span class="pre">rdma.subnet.Node</span></code></a></p>
+<p>Hold onto information about a single switch node in the network. Switches
+have several unique bits of information.</p>
+<dl class="method">
+<dt id="rdma.subnet.Switch.get_switch_fdb">
+<code class="descname">get_switch_fdb</code><span class="sig-paren">(</span><em>sched</em>, <em>do_lfdb</em>, <em>do_mfdb</em>, <em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.subnet.Switch.get_switch_fdb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generator to fetch switch forwarding database.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.subnet.Switch.get_switch_inf">
+<code class="descname">get_switch_inf</code><span class="sig-paren">(</span><em>sched</em>, <em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.subnet.Switch.get_switch_inf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coroutine to fetch a switch info and then can schedual a LFDB/MFDB
+load.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">via sched a contex t</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.subnet.Switch.iterend_ports">
+<code class="descname">iterend_ports</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.subnet.Switch.iterend_ports" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate over all end ports.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">generator of <a class="reference internal" href="#rdma.subnet.Port" title="rdma.subnet.Port"><code class="xref py py-class docutils literal"><span class="pre">Port</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.subnet.Switch.iterports">
+<code class="descname">iterports</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.subnet.Switch.iterports" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate over all ports. This only returns ports that are in the
+network, ie ports on a CA that are not reachable are not returned.  For
+switches all ports are always in the network.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">generator of tuple(<a class="reference internal" href="#rdma.subnet.Port" title="rdma.subnet.Port"><code class="xref py py-class docutils literal"><span class="pre">Port</span></code></a>,portIdx)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.subnet.Switch.lfdb">
+<code class="descname">lfdb</code><em class="property"> = None</em><a class="headerlink" href="#rdma.subnet.Switch.lfdb" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-class docutils literal"><span class="pre">list</span></code> starting at LID 0 holding the linear forwarding databse.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.subnet.Switch.mfdb">
+<code class="descname">mfdb</code><em class="property"> = None</em><a class="headerlink" href="#rdma.subnet.Switch.mfdb" title="Permalink to this definition">¶</a></dt>
+<dd><p>class:<cite>list</cite> starting at LID <code class="xref py py-data docutils literal"><span class="pre">rmda.IBA.LID_MULTICAST</span></code> holding the multicast
+forwarding database.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.subnet.Switch.swinf">
+<code class="descname">swinf</code><em class="property"> = None</em><a class="headerlink" href="#rdma.subnet.Switch.swinf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Instance of <code class="xref py py-class docutils literal"><span class="pre">rdma.IBA.SMPSwitchInfo</span></code></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.subnet.Switch.to_end_port">
+<code class="descname">to_end_port</code><span class="sig-paren">(</span><em>port</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.subnet.Switch.to_end_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the end port that is associated with <em>port</em>.
+For switches this returns port 0, otherwise it returns <em>port</em>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="rdma.subnet.Switch.top_unicast_lid">
+<code class="descname">top_unicast_lid</code><a class="headerlink" href="#rdma.subnet.Switch.top_unicast_lid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Top unicast lid in the switch forwarding database.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="rdma.subnet.Switch.trim_db">
+<code class="descname">trim_db</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rdma.subnet.Switch.trim_db" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove unnecessary entries from the end of the LFDB and MFDB.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="rdma-discovery-retrieve-ib-subnet-data">
+<h2>6.2. <a class="reference internal" href="#module-rdma.discovery" title="rdma.discovery"><code class="xref py py-mod docutils literal"><span class="pre">rdma.discovery</span></code></a> Retrieve IB Subnet Data<a class="headerlink" href="#rdma-discovery-retrieve-ib-subnet-data" title="Permalink to this headline">¶</a></h2>
+<p>Functions that end in <cite>_SA</cite> collect information using SA
+<a class="reference internal" href="mads.html#rdma.madtransactor.MADTransactor.SubnAdmGetTable" title="rdma.madtransactor.MADTransactor.SubnAdmGetTable"><code class="xref py py-meth docutils literal"><span class="pre">SubnAdmGetTable()</span></code></a> RPCs, while <cite>_SMP</cite>
+functions collect information using VL15
+<a class="reference internal" href="mads.html#rdma.madtransactor.MADTransactor.SubnGet" title="rdma.madtransactor.MADTransactor.SubnGet"><code class="xref py py-meth docutils literal"><span class="pre">SubnGet()</span></code></a> RPCs. These are all helper
+data collection functions to fill in a <a class="reference internal" href="#rdma.subnet.Subnet" title="rdma.subnet.Subnet"><code class="xref py py-class docutils literal"><span class="pre">rdma.subnet.Subnet</span></code></a> instance.</p>
+<p><cite>topo_</cite> functions collect information on the subnet by walking it using directed route, while
+<cite>subnet_</cite> functions collect information from LID routing.</p>
+<p>Generally the <a class="reference internal" href="#rdma.discovery.load" title="rdma.discovery.load"><code class="xref py py-func docutils literal"><span class="pre">rdma.discovery.load()</span></code></a> function should be used as the entry
+point for this module.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The functions have some assumption about the state of the
+<a class="reference internal" href="#rdma.subnet.Subnet" title="rdma.subnet.Subnet"><code class="xref py py-class docutils literal"><span class="pre">rdma.subnet.Subnet</span></code></a> instance. Often they will not re-fetch
+data they already have. Some care must be taken to wipe out existing
+information before doing a discovery if the desire is to get new
+information.</p>
+</div>
+<span class="target" id="module-rdma.discovery"></span><dl class="function">
+<dt id="rdma.discovery.load">
+<code class="descclassname">rdma.discovery.</code><code class="descname">load</code><span class="sig-paren">(</span><em>sched</em>, <em>sbn</em>, <em>stuff</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.discovery.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fill <em>sbn</em> with the discovery items in <em>stuff</em>. <em>stuff</em> may be a list
+of strings where each string is one of:</p>
+<ul class="simple">
+<li><cite>all_LIDs</cite> fill in <em>sbn.lids</em> completely.</li>
+<li><cite>all_NodeInfo</cite> may be followed by a space and then a node type number.</li>
+<li><cite>all_PortInfo</cite></li>
+<li><cite>all_NodeDescription</cite> may be followed by a space and then a node type number.</li>
+<li><cite>all_SwitchInfo</cite></li>
+<li><cite>all_topology</cite></li>
+</ul>
+</dd></dl>
+
+<dl class="function">
+<dt id="rdma.discovery.subnet_fill_LIDs_SA">
+<code class="descclassname">rdma.discovery.</code><code class="descname">subnet_fill_LIDs_SA</code><span class="sig-paren">(</span><em>sched</em>, <em>sbn</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.discovery.subnet_fill_LIDs_SA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coroutine to fill in the LID mapping in <em>sbn</em> to compensate for LMC.
+This should be called after <a class="reference internal" href="#rdma.discovery.subnet_ninf_SA" title="rdma.discovery.subnet_ninf_SA"><code class="xref py py-func docutils literal"><span class="pre">subnet_ninf_SA()</span></code></a> if desired.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rdma.discovery.subnet_fill_port">
+<code class="descclassname">rdma.discovery.</code><code class="descname">subnet_fill_port</code><span class="sig-paren">(</span><em>sched</em>, <em>sbn</em>, <em>port</em>, <em>path=None</em>, <em>get_desc=True</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.discovery.subnet_fill_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generator to fill in the <cite>pinf</cite>, <cite>ninf</cite>, and <cite>desc</cite> for
+<em>port</em>. This will also collect the end port <cite>pinf</cite> as well as the
+<cite>pinf</cite> for <em>port</em> if they are different.</p>
+<p>This does nothing if the information is already loaded.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rdma.discovery.subnet_get_port">
+<code class="descclassname">rdma.discovery.</code><code class="descname">subnet_get_port</code><span class="sig-paren">(</span><em>sched</em>, <em>sbn</em>, <em>path</em>, <em>get_desc=True</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.discovery.subnet_get_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coroutine to associate <em>path</em> with a <a class="reference internal" href="#rdma.subnet.Port" title="rdma.subnet.Port"><code class="xref py py-class docutils literal"><span class="pre">rdma.subnet.Port</span></code></a>
+structure with a filled in <cite>pinf</cite>, <cite>ninf</cite> and <cite>desc</cite>. The
+<a class="reference internal" href="#rdma.subnet.Port" title="rdma.subnet.Port"><code class="xref py py-class docutils literal"><span class="pre">Port</span></code></a> can be retrieved through
+<a class="reference internal" href="#rdma.subnet.Subnet.path_to_port" title="rdma.subnet.Subnet.path_to_port"><code class="xref py py-meth docutils literal"><span class="pre">rdma.subnet.Subnet.path_to_port()</span></code></a>.</p>
+<p>This does nothing if the information is already loaded.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rdma.discovery.subnet_ninf_GUID">
+<code class="descclassname">rdma.discovery.</code><code class="descname">subnet_ninf_GUID</code><span class="sig-paren">(</span><em>sched</em>, <em>sbn</em>, <em>node_guid</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.discovery.subnet_ninf_GUID" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coroutine to fetch a <code class="xref py py-class docutils literal"><span class="pre">SMPNodeInfo</span></code> record from the
+SA for a specific GUID and store it in <em>sbn</em>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rdma.discovery.subnet_ninf_LIDS_SMP">
+<code class="descclassname">rdma.discovery.</code><code class="descname">subnet_ninf_LIDS_SMP</code><span class="sig-paren">(</span><em>sched</em>, <em>sbn</em>, <em>LIDs</em>, <em>get_desc=True</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.discovery.subnet_ninf_LIDS_SMP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generator to fetch <code class="xref py py-class docutils literal"><span class="pre">SMPNodeInfo</span></code> and
+<code class="xref py py-class docutils literal"><span class="pre">SMPNodeDescription</span></code> for every LID in <em>LIDs</em> and store
+them in <em>sbn</em>. This does not refetch existing info.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rdma.discovery.subnet_ninf_SA">
+<code class="descclassname">rdma.discovery.</code><code class="descname">subnet_ninf_SA</code><span class="sig-paren">(</span><em>sched</em>, <em>sbn</em>, <em>node_type=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.discovery.subnet_ninf_SA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coroutine to fetch all <code class="xref py py-class docutils literal"><span class="pre">SMPNodeInfo</span></code> records from the
+SA and store them in <em>sbn</em>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rdma.discovery.subnet_ninf_SMP">
+<code class="descclassname">rdma.discovery.</code><code class="descname">subnet_ninf_SMP</code><span class="sig-paren">(</span><em>sched</em>, <em>sbn</em>, <em>path</em>, <em>get_desc=True</em>, <em>use_sa=None</em>, <em>done_desc=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.discovery.subnet_ninf_SMP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coroutine to send SMPs to get <code class="xref py py-class docutils literal"><span class="pre">SMPNodeInfo</span></code> and
+<code class="xref py py-class docutils literal"><span class="pre">SMPNodeDescription</span></code>. The result of the co-routine
+is the same as <a class="reference internal" href="#rdma.subnet.Subnet.get_node_ninf" title="rdma.subnet.Subnet.get_node_ninf"><code class="xref py py-meth docutils literal"><span class="pre">rdma.subnet.Subnet.get_node_ninf()</span></code></a>. If <em>sched</em>
+is a <a class="reference internal" href="mads.html#rdma.satransactor.SATransactor" title="rdma.satransactor.SATransactor"><code class="xref py py-class docutils literal"><span class="pre">rdma.satransactor.SATransactor</span></code></a> then the query is optimized
+into a combined node info/node description SA query.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rdma.discovery.subnet_pinf_SA">
+<code class="descclassname">rdma.discovery.</code><code class="descname">subnet_pinf_SA</code><span class="sig-paren">(</span><em>sched</em>, <em>sbn</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.discovery.subnet_pinf_SA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coroutine to ask the SA for all <code class="xref py py-class docutils literal"><span class="pre">SMPPortInfo</span></code>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rdma.discovery.subnet_pinf_SMP">
+<code class="descclassname">rdma.discovery.</code><code class="descname">subnet_pinf_SMP</code><span class="sig-paren">(</span><em>sched</em>, <em>sbn</em>, <em>sel</em>, <em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.discovery.subnet_pinf_SMP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coroutine to send SMPs to get <code class="xref py py-class docutils literal"><span class="pre">SMPPortInfo</span></code>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rdma.discovery.subnet_swinf_SA">
+<code class="descclassname">rdma.discovery.</code><code class="descname">subnet_swinf_SA</code><span class="sig-paren">(</span><em>sched</em>, <em>sbn</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.discovery.subnet_swinf_SA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coroutine to fetch all <code class="xref py py-class docutils literal"><span class="pre">SMPSwitchInfo</span></code> records
+from the SA and store them in <em>sbn</em>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rdma.discovery.subnet_swinf_SMP">
+<code class="descclassname">rdma.discovery.</code><code class="descname">subnet_swinf_SMP</code><span class="sig-paren">(</span><em>sched</em>, <em>sbn</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.discovery.subnet_swinf_SMP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coroutine to fetch all <code class="xref py py-class docutils literal"><span class="pre">rdma.IBA.SMPSwitchInfo</span></code>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rdma.discovery.subnet_topology_SA">
+<code class="descclassname">rdma.discovery.</code><code class="descname">subnet_topology_SA</code><span class="sig-paren">(</span><em>sched</em>, <em>sbn</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.discovery.subnet_topology_SA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coroutine to fill in the topology in <em>sbn</em>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rdma.discovery.topo_SMP">
+<code class="descclassname">rdma.discovery.</code><code class="descname">topo_SMP</code><span class="sig-paren">(</span><em>sched</em>, <em>sbn</em>, <em>get_desc=True</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.discovery.topo_SMP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generator to fetch an entire subnet topology using SMPs.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rdma.discovery.topo_peer_SMP">
+<code class="descclassname">rdma.discovery.</code><code class="descname">topo_peer_SMP</code><span class="sig-paren">(</span><em>sched</em>, <em>sbn</em>, <em>port</em>, <em>get_desc=True</em>, <em>path=None</em>, <em>peer_path=None</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.discovery.topo_peer_SMP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coroutine to fetch a single connected peer. This updates
+<a class="reference internal" href="#rdma.subnet.Subnet.topology" title="rdma.subnet.Subnet.topology"><code class="xref py py-attr docutils literal"><span class="pre">rdma.subnet.Subnet.topology</span></code></a>. It also fetches a port info to setup
+LID routing.</p>
+<dl class="docutils">
+<dt><em>peer_path</em> is the path out <em>port</em>, created by</dt>
+<dd><a class="reference internal" href="#rdma.subnet.Subnet.advance_dr" title="rdma.subnet.Subnet.advance_dr"><code class="xref py py-meth docutils literal"><span class="pre">rdma.subnet.Subnet.advance_dr()</span></code></a>.</dd>
+</dl>
+<p>This does nothing if the information is already loaded.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="rdma.discovery.topo_surround_SMP">
+<code class="descclassname">rdma.discovery.</code><code class="descname">topo_surround_SMP</code><span class="sig-paren">(</span><em>sched</em>, <em>sbn</em>, <em>node</em>, <em>get_desc=True</em><span class="sig-paren">)</span><a class="headerlink" href="#rdma.discovery.topo_surround_SMP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coroutine to fetch everything connected to all end ports on <em>node</em>.  This
+updates <a class="reference internal" href="#rdma.subnet.Subnet.topology" title="rdma.subnet.Subnet.topology"><code class="xref py py-attr docutils literal"><span class="pre">rdma.subnet.Subnet.topology</span></code></a>. It also fetches a port info
+to setup LID routing.</p>
+<p>This does nothing if the information is already loaded.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">6. IB Subnet Database</a><ul>
+<li><a class="reference internal" href="#module-rdma.subnet">6.1. <code class="docutils literal"><span class="pre">rdma.subnet</span></code> Store IB Subnet Data</a></li>
+<li><a class="reference internal" href="#rdma-discovery-retrieve-ib-subnet-data">6.2. <code class="docutils literal"><span class="pre">rdma.discovery</span></code> Retrieve IB Subnet Data</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="mads.html"
+                        title="previous chapter">5. MAD RPC Processing</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="ibverbs.html"
+                        title="next chapter">7. Verbs Interface</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="0sources/subnet.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ibverbs.html" title="7. Verbs Interface"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="mads.html" title="5. MAD RPC Processing"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">python-rdma 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2011, Obsidian Research Corp.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>

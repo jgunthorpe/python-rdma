@@ -1,0 +1,141 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Version 0.1 Initial Release &mdash; python-rdma 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="0static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="0static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="0static/jquery.js"></script>
+    <script type="text/javascript" src="0static/underscore.js"></script>
+    <script type="text/javascript" src="0static/doctools.js"></script>
+    <link rel="top" title="python-rdma 1.0 documentation" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">python-rdma 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="version-0-1-initial-release">
+<h1>Version 0.1 Initial Release<a class="headerlink" href="#version-0-1-initial-release" title="Permalink to this headline">¶</a></h1>
+<p><cite>March 15, 2011</cite></p>
+<p>I am pleased to announce the initial release of <cite>python-rdma</cite> a package to
+provide a Python API for the Linux RDMA stack. This initial release is mainly
+focused on IB specific management APIs, but the package also covers ibverbs.</p>
+<p>A new API was developed for this library that is designed to take advantage of
+Python features and provides a very uniform, integrated design across all
+the different aspects of IB and RDMA programming. It has a particular focus on
+ease of use and correct operation of the IB and RDMA protocol stacks.</p>
+<p>Included is a re-implementation of a substantial portion of the
+<cite>infinband-diags</cite> package. This re-implementation is functionally very similar
+to <cite>infiniband-diags</cite> but also gains a number of new features:</p>
+<ul class="simple">
+<li>Uniform end port addressing. All commands support GID, port GUID, LID and DR
+path, even commands that are GMP based (like perfquery).</li>
+<li>Support for collecting information entirely from the SA via the <cite>&#8211;sa</cite>
+option.</li>
+<li>Consistently fetches path records for GMP communication (eg in perfquery) to
+support topologies with special requirements.</li>
+<li>Extensive MAD parallelization provides very good performance.</li>
+<li>All commands support a discovery cache file, which stores information in
+an efficient binary format.</li>
+<li>Much better debugging, including packet tracing down to full field decode.</li>
+<li>Minor new features to many tools, review section 8 of the manual for
+details.</li>
+</ul>
+<p>The library itself is intended mainly for applications where quick development
+is more important that the highest performance, such as:</p>
+<ul class="simple">
+<li>IB manamagent software development</li>
+<li>RDMA test development</li>
+<li>Training and problem exploration</li>
+</ul>
+<p>Although already quite complete there are a few obvious areas that I hope
+to have finished in the future:</p>
+<ul class="simple">
+<li>Integration of IB and RDMA CMs</li>
+<li>Support for RMPP when using verbs to issue GMPs - this will enable
+all diags to function in <cite>&#8211;sa</cite> mode without access to /dev/umad.</li>
+<li>Completion of missing <cite>infinband-diags</cite> commands</li>
+</ul>
+<p>It is my hope this work will be of use to the wider InfiniBand community.</p>
+<p>Extensive prebuilt documentation for the module can be reviewed <a class="reference external" href="http://www.obsidianresearch.com/python-rdma/doc/index.html">online</a>, and the source
+code is available on <a class="reference external" href="http://github.com/jgunthorpe/python-rdma">GitHub</a>.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="0sources/release-0.1.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">python-rdma 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2011, Obsidian Research Corp.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.6.
+    </div>
+  </body>
+</html>
