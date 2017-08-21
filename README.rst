@@ -16,8 +16,8 @@ The module is written entirely in Python and only relies on external
 system libraries to provide ibverbs functionality.
 
 Prebuilt documentation for the module can be reviewed `online
-<http://www.obsidianresearch.com/python-rdma/doc/index.html>`_, and the source
-code is available on `GitHub <http://github.com/jgunthorpe/python-rdma>`_.
+<https://jgunthorpe.github.io/python-rdma/manual/>`_, and the source
+code is available on `GitHub <https://github.com/jgunthorpe/python-rdma>`_.
 
 `python-rdma` is maintained by Obsidian Research Corp. and the main contact
 for the package is Jason Gunthorpe <jgunthorpe@obsidianresearch.com>

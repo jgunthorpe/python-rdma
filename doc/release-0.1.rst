@@ -47,5 +47,5 @@ to have finished in the future:
 It is my hope this work will be of use to the wider InfiniBand community.
 
 Extensive prebuilt documentation for the module can be reviewed `online
-<http://www.obsidianresearch.com/python-rdma/doc/index.html>`_, and the source
+<https://jgunthorpe.github.io/python-rdma/manual/>`_, and the source
 code is available on `GitHub <http://github.com/jgunthorpe/python-rdma>`_.
