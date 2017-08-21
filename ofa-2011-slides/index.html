@@ -1,0 +1,850 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.6: http://docutils.sourceforge.net/" />
+<meta name="version" content="S5 1.1" />
+<title>Python RDMA</title>
+<style type="text/css">
+
+/*
+:Author: David Goodger (goodger@python.org)
+:Id: $Id: html4css1.css 5951 2009-05-18 18:03:10Z milde $
+:Copyright: This stylesheet has been placed in the public domain.
+
+Default cascading style sheet for the HTML output of Docutils.
+
+See http://docutils.sf.net/docs/howto/html-stylesheets.html for how to
+customize this style sheet.
+*/
+
+/* used to remove borders from tables and images */
+.borderless, table.borderless td, table.borderless th {
+  border: 0 }
+
+table.borderless td, table.borderless th {
+  /* Override padding for "table.docutils td" with "! important".
+     The right padding separates the table cells. */
+  padding: 0 0.5em 0 0 ! important }
+
+.first {
+  /* Override more specific margin styles with "! important". */
+  margin-top: 0 ! important }
+
+.last, .with-subtitle {
+  margin-bottom: 0 ! important }
+
+.hidden {
+  display: none }
+
+a.toc-backref {
+  text-decoration: none ;
+  color: black }
+
+blockquote.epigraph {
+  margin: 2em 5em ; }
+
+dl.docutils dd {
+  margin-bottom: 0.5em }
+
+/* Uncomment (and remove this text!) to get bold-faced definition list terms
+dl.docutils dt {
+  font-weight: bold }
+*/
+
+div.abstract {
+  margin: 2em 5em }
+
+div.abstract p.topic-title {
+  font-weight: bold ;
+  text-align: center }
+
+div.admonition, div.attention, div.caution, div.danger, div.error,
+div.hint, div.important, div.note, div.tip, div.warning {
+  margin: 2em ;
+  border: medium outset ;
+  padding: 1em }
+
+div.admonition p.admonition-title, div.hint p.admonition-title,
+div.important p.admonition-title, div.note p.admonition-title,
+div.tip p.admonition-title {
+  font-weight: bold ;
+  font-family: sans-serif }
+
+div.attention p.admonition-title, div.caution p.admonition-title,
+div.danger p.admonition-title, div.error p.admonition-title,
+div.warning p.admonition-title {
+  color: red ;
+  font-weight: bold ;
+  font-family: sans-serif }
+
+/* Uncomment (and remove this text!) to get reduced vertical space in
+   compound paragraphs.
+div.compound .compound-first, div.compound .compound-middle {
+  margin-bottom: 0.5em }
+
+div.compound .compound-last, div.compound .compound-middle {
+  margin-top: 0.5em }
+*/
+
+div.dedication {
+  margin: 2em 5em ;
+  text-align: center ;
+  font-style: italic }
+
+div.dedication p.topic-title {
+  font-weight: bold ;
+  font-style: normal }
+
+div.figure {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+div.footer, div.header {
+  clear: both;
+  font-size: smaller }
+
+div.line-block {
+  display: block ;
+  margin-top: 1em ;
+  margin-bottom: 1em }
+
+div.line-block div.line-block {
+  margin-top: 0 ;
+  margin-bottom: 0 ;
+  margin-left: 1.5em }
+
+div.sidebar {
+  margin: 0 0 0.5em 1em ;
+  border: medium outset ;
+  padding: 1em ;
+  background-color: #ffffee ;
+  width: 40% ;
+  float: right ;
+  clear: right }
+
+div.sidebar p.rubric {
+  font-family: sans-serif ;
+  font-size: medium }
+
+div.system-messages {
+  margin: 5em }
+
+div.system-messages h1 {
+  color: red }
+
+div.system-message {
+  border: medium outset ;
+  padding: 1em }
+
+div.system-message p.system-message-title {
+  color: red ;
+  font-weight: bold }
+
+div.topic {
+  margin: 2em }
+
+h1.section-subtitle, h2.section-subtitle, h3.section-subtitle,
+h4.section-subtitle, h5.section-subtitle, h6.section-subtitle {
+  margin-top: 0.4em }
+
+h1.title {
+  text-align: center }
+
+h2.subtitle {
+  text-align: center }
+
+hr.docutils {
+  width: 75% }
+
+img.align-left, .figure.align-left{
+  clear: left ;
+  float: left ;
+  margin-right: 1em }
+
+img.align-right, .figure.align-right {
+  clear: right ;
+  float: right ;
+  margin-left: 1em }
+
+.align-left {
+  text-align: left }
+
+.align-center {
+  clear: both ;
+  text-align: center }
+
+.align-right {
+  text-align: right }
+
+/* reset inner alignment in figures */
+div.align-right {
+  text-align: left }
+
+/* div.align-center * { */
+/*   text-align: left } */
+
+ol.simple, ul.simple {
+  margin-bottom: 1em }
+
+ol.arabic {
+  list-style: decimal }
+
+ol.loweralpha {
+  list-style: lower-alpha }
+
+ol.upperalpha {
+  list-style: upper-alpha }
+
+ol.lowerroman {
+  list-style: lower-roman }
+
+ol.upperroman {
+  list-style: upper-roman }
+
+p.attribution {
+  text-align: right ;
+  margin-left: 50% }
+
+p.caption {
+  font-style: italic }
+
+p.credits {
+  font-style: italic ;
+  font-size: smaller }
+
+p.label {
+  white-space: nowrap }
+
+p.rubric {
+  font-weight: bold ;
+  font-size: larger ;
+  color: maroon ;
+  text-align: center }
+
+p.sidebar-title {
+  font-family: sans-serif ;
+  font-weight: bold ;
+  font-size: larger }
+
+p.sidebar-subtitle {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+p.topic-title {
+  font-weight: bold }
+
+pre.address {
+  margin-bottom: 0 ;
+  margin-top: 0 ;
+  font: inherit }
+
+pre.literal-block, pre.doctest-block {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+span.classifier {
+  font-family: sans-serif ;
+  font-style: oblique }
+
+span.classifier-delimiter {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+span.interpreted {
+  font-family: sans-serif }
+
+span.option {
+  white-space: nowrap }
+
+span.pre {
+  white-space: pre }
+
+span.problematic {
+  color: red }
+
+span.section-subtitle {
+  /* font-size relative to parent (h1..h6 element) */
+  font-size: 80% }
+
+table.citation {
+  border-left: solid 1px gray;
+  margin-left: 1px }
+
+table.docinfo {
+  margin: 2em 4em }
+
+table.docutils {
+  margin-top: 0.5em ;
+  margin-bottom: 0.5em }
+
+table.footnote {
+  border-left: solid 1px black;
+  margin-left: 1px }
+
+table.docutils td, table.docutils th,
+table.docinfo td, table.docinfo th {
+  padding-left: 0.5em ;
+  padding-right: 0.5em ;
+  vertical-align: top }
+
+table.docutils th.field-name, table.docinfo th.docinfo-name {
+  font-weight: bold ;
+  text-align: left ;
+  white-space: nowrap ;
+  padding-left: 0 }
+
+h1 tt.docutils, h2 tt.docutils, h3 tt.docutils,
+h4 tt.docutils, h5 tt.docutils, h6 tt.docutils {
+  font-size: 100% }
+
+ul.auto-toc {
+  list-style-type: none }
+
+</style>
+<!-- configuration parameters -->
+<meta name="defaultView" content="slideshow" />
+<meta name="controlVis" content="hidden" />
+<!-- style sheet links -->
+<script src="ui/default/slides.js" type="text/javascript"></script>
+<link rel="stylesheet" href="ui/default/slides.css"
+      type="text/css" media="projection" id="slideProj" />
+<link rel="stylesheet" href="ui/default/outline.css"
+      type="text/css" media="screen" id="outlineStyle" />
+<link rel="stylesheet" href="ui/default/print.css"
+      type="text/css" media="print" id="slidePrint" />
+<link rel="stylesheet" href="ui/default/opera.css"
+      type="text/css" media="projection" id="operaFix" />
+
+<style type="text/css">
+#currentSlide {display: none;}
+</style>
+</head>
+<body>
+<div class="layout">
+<div id="controls"></div>
+<div id="currentSlide"></div>
+<div id="header">
+
+</div>
+<div id="footer">
+<h1>Python RDMA</h1>
+<h2>Obsidian Research Corp.</h2>
+</div>
+</div>
+<div class="presentation">
+<div class="slide" id="slide0">
+<h1 class="title">Python RDMA</h1>
+
+<!-- Definitions of interpreted text roles (classes) for S5/HTML data. -->
+<!-- This data file has been placed in the public domain. -->
+<!-- Colours
+======= -->
+<!-- Text Sizes
+========== -->
+<!-- Display in Slides (Presentation Mode) Only
+========================================== -->
+<!-- Display in Outline Mode Only
+============================ -->
+<!-- Display in Print Only
+===================== -->
+<!-- Display in Handout Mode Only
+============================ -->
+<!-- Incremental Display
+=================== -->
+<p class="center">Management, Diagnostics and Testing</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Presented By:</th><td class="field-body">Jason Gunthorpe -
+CTO Obsidian Research</td>
+</tr>
+<tr class="field"><th class="field-name">Date:</th><td class="field-body">OFA Monterey 2011-04-05</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+<div class="slide" id="what-is-in-it">
+<h1>What is in it?</h1>
+<ul>
+<li><p class="first">RDMA device discovery:</p>
+<pre class="literal-block">
+for I in rdma.get_devices(): print I.name;
+</pre>
+</li>
+<li><p class="first">RDMA Verbs:</p>
+<pre class="literal-block">
+with rdma.get_verbs(path.end_port) as ctx:
+    print ctx.query_device();
+</pre>
+</li>
+<li><p class="first">IB Management:</p>
+<pre class="literal-block">
+cpi = umad.SubnAdmGet(IBA.MADClassPortInfo);
+</pre>
+</li>
+</ul>
+<p>Plus more!</p>
+</div>
+<div class="slide" id="what-is-python">
+<h1>What is Python?</h1>
+<p class="big">Python is a modern, very high level, multi-paradigm programming language:</p>
+<ul class="simple">
+<li>Emphasis on readability and clarity</li>
+<li>Modern high level features: exceptions, garbage collection, dynamic
+'duck' typing, closures</li>
+<li>Very popular for web development, finance, and for system administration.</li>
+<li>Included by default and used in major Linux distributions for many years</li>
+</ul>
+</div>
+<div class="slide" id="cognitive-dissonance">
+<h1>Cognitive Dissonance</h1>
+<p class="center big">Python is slow!</p>
+<p class="center big">RDMA is for high performance!</p>
+<p class="center huge">Why!!?!?</p>
+<p class="incremental big">Sometimes correct and simple is more important than fast..</p>
+<p class="incremental big">... and good algorithms can help.</p>
+</div>
+<div class="slide" id="package-contents">
+<h1>Package Contents</h1>
+<ul class="simple">
+<li>RDMA Device Discovery</li>
+<li>Definitions from the IBA</li>
+<li>IB MAD RPC handling and parallelism</li>
+<li>IB subnet topology database</li>
+<li><em>libibverbs</em> interface (<em>Pyrex</em>)</li>
+<li>ibtool command line program</li>
+<li>Codegen'd and hand written documentation</li>
+<li>Test suite</li>
+</ul>
+<p>Pure Python except for <em>rdma.ibverbs</em>!</p>
+<p>GPL licensed</p>
+</div>
+<div class="slide" id="package-contents-2">
+<h1>Package Contents (2)</h1>
+<table border="1" class="small docutils">
+<colgroup>
+<col width="23%" />
+<col width="77%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">OFA Module</th>
+<th class="head">Python-rdma</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>libibmad</td>
+<td>Near 100% coverage via <em>rdma.madtransactor</em> and
+<em>rdma.IBA</em></td>
+</tr>
+<tr><td>libibumad</td>
+<td>100% coverage via <em>rdma.umad</em></td>
+</tr>
+<tr><td>libibverbs</td>
+<td>100% coverage via <em>rdma.ibverbs</em> (through Pyrex)</td>
+</tr>
+<tr><td>libibnetdisc</td>
+<td>~80% coverage. No support for switch chassis grouping.</td>
+</tr>
+<tr><td>librdmacm</td>
+<td>Not covered</td>
+</tr>
+<tr><td>libibcm</td>
+<td>Not covered</td>
+</tr>
+<tr><td>infiniband-diags</td>
+<td>45 commands re-implemented, 2 un-implemented.
+Review <em>ibtool</em></td>
+</tr>
+<tr><td>ibutils</td>
+<td>Good coverage of the internal APIs but no
+coverage for the user tools.</td>
+</tr>
+<tr><td>perftest</td>
+<td><em>rdma_bw</em> is implemented as an example.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="slide" id="it-works">
+<h1>It works!</h1>
+<pre class="literal-block">
+$ ibtool rdma_bw 127.0.0.1
+path to peer IBPath(end_port='mlx4_0/1',
+    DGID=GID('fe80::2:c903:9:1edd'),
+    DLID=1, MTU=4, packet_life_time=0,
+    SGID=GID('fe80::2:c903:9:1edd'),
+    SLID=1, dack_resp_time=15L, dqpn=524361L,
+    dqpsn=6645404, drdatomic=0,
+    rate=3, sack_resp_time=15L, sqpn=524360L,
+    sqpsn=1754047, srdatomic=0)
+MR peer raddr=7fd268a9c000 peer rkey=8002200
+1000 iterations of 1048576 is 1048576000 bytes
+3065.7 MB/sec
+</pre>
+<p>MT26428 using internal loopback, 2.8GHz i5-2300</p>
+</div>
+<div class="slide" id="ibtool">
+<h1>ibtool</h1>
+<p>Re-implementation of <em>infiniband-diags</em> using Python as the implementation
+language:</p>
+<ul class="simple">
+<li>One language</li>
+<li>Greater consistency</li>
+<li>Higher performance</li>
+</ul>
+<p class="small">Also:</p>
+<ul class="small simple">
+<li>Test the Python RDMA core library</li>
+<li>Access the unique features of the Python RDMA via the command line</li>
+<li>Serve as programming examples</li>
+</ul>
+<p>45 commands are implemented, &gt; 90% complete</p>
+</div>
+<div class="slide" id="ibtool-2">
+<h1>ibtool (2)</h1>
+<p>Mostly looks the same:</p>
+<pre class="tiny literal-block">
+$ ibtool ibaddr 7
+GID fe80::17:77ff:feb6:2ca4 LID start 7 end 7
+$ ibtool ibswitches
+Switch  : 0017:77ff:feb6:2ca4 ports 2 &quot;Obsidian Longbow X100 - LBXR43D1FF&quot; base port 0 lid 7 lmc 0
+Switch  : 0017:77ff:fef9:6e79 ports 2 &quot;Obsidian Longbow X100 - LBXREAF28B&quot; base port 0 lid 9 lmc 0
+$ ibtool smpquery -P 2 NI -D 0,2
+# Node info: DR Path (0, 2)
+BaseVers:........................1
+ClassVers:.......................1
+NodeType:........................2
+NumPorts:........................2
+SystemGuid:......................0017:77ff:fef9:6e79
+Guid:............................0017:77ff:fef9:6e79
+PortGuid:........................0017:77ff:fef9:6e79
+PartCap:.........................1
+DevId:...........................0x0009
+Revision:........................0x00010001
+LocalPort:.......................1
+VendorId:........................0x001777
+</pre>
+</div>
+<div class="slide" id="ibtool-3">
+<h1>ibtool (3)</h1>
+<p>Some are new:</p>
+<pre class="literal-block">
+$ ibtool perfquery --vl-xmit-wait  9
+# Port counters: Lid 9 (fe80::17:77ff:fef9:6e79) port 1
+PortSelect:......................1
+CounterSelect:...................0x0000
+PortVLXmitWait[0]:...............606
+</pre>
+<pre class="literal-block">
+$ ibtool subnet_diff ref
+Current subnet has 4 end ports, reference subnet has 4 end ports
+ All end ports in the current subnet are in the reference subnet.
+ All end ports in the reference subnet are in the current subnet.
+Current subnet has 3 nodes, reference subnet has 3 nodes
+ All nodes in the current subnet are in the reference subnet.
+ All nodes in the reference subnet are in the current subnet.
+Current subnet has 3 links, reference subnet has 3 links
+ All links in the current subnet are in the reference subnet.
+ All links in the reference subnet are in the current subnet.
+ All links in the current subnet have the same rate in the reference subnet.
+Current subnet has 4 LIDs, reference subnet has 4 LIDs
+ All LIDs in the current subnet are the same as the reference subnet.
+</pre>
+</div>
+<div class="slide" id="ibtool-4">
+<h1>ibtool (4)</h1>
+<p>Section 8 of the Python RDMA manual details the various differences between
+<em>ibtool</em> and <em>infiniband-diags</em>:</p>
+<ul class="small simple">
+<li>Greater alignment with the IBA, PR usage, timeout computations, support
+for routed GIDs, etc</li>
+<li>Everything supports GID/GUID/LID/DR path as a TARGET</li>
+<li>Better diagnostics and debug output, including packet decodes</li>
+<li><em>--sa</em> and support for GMP over verbs lets <em>ibtool</em> return info without
+access to /dev/umad</li>
+<li>LID and SA based subnet discovery options</li>
+<li>Consistent support for a discovery caching file</li>
+</ul>
+</div>
+<div class="slide" id="library-tour-device-discovery">
+<h1>Library Tour - Device Discovery</h1>
+<ul class="small simple">
+<li><em>rdma.devices</em> module - trundles through sysfs and gets devices, end ports.</li>
+<li>Common basis for all other modules - <em>umad</em> and <em>ibverbs</em> are all opened
+based on these objects.</li>
+<li>Find devices by string:</li>
+</ul>
+<table border="1" class="tiny docutils">
+<colgroup>
+<col width="37%" />
+<col width="63%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Format</th>
+<th class="head">Example</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>device</td>
+<td>mlx4_0</td>
+</tr>
+<tr><td>Node GUID</td>
+<td>0002:c903:0000:1491</td>
+</tr>
+</tbody>
+</table>
+<ul class="small simple">
+<li>Find ports by string:</li>
+</ul>
+<table border="1" class="tiny docutils">
+<colgroup>
+<col width="23%" />
+<col width="77%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Format</th>
+<th class="head">Example</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>device</td>
+<td>mlx4_0  (defaults to the first port)</td>
+</tr>
+<tr><td>device/port</td>
+<td>mlx4_0/1</td>
+</tr>
+<tr><td>Port GID</td>
+<td>fe80::2:c903:0:1491</td>
+</tr>
+<tr><td>Port GUID</td>
+<td>0002:c903:0000:1491</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="slide" id="library-tour-device-discovery-2">
+<h1>Library Tour - Device Discovery (2)</h1>
+<p>Library features flow into <em>ibtool</em>:</p>
+<pre class="literal-block">
+$ ibtool ibaddr -P fe80::2:c903:0:14a6 9 -d
+D: Using end port mlx4_0/2 fe80::2:c903:0:14a6
+D: SMP Path 10 -&gt; 9 SL=0 PKey=0xffff DQPN=0
+      IBPath(end_port='mlx4_0/2', DLID=10,
+             SLID=10, dqpn=0, qkey=0x0,
+             sqpn=0)
+D: RPC MAD_METHOD_GET(1) SMPFormat(1.1)
+   SMPNodeInfo(17) completed to
+   'Path 10 -&gt; 9 SL=0 PKey=0xffff DQPN=0'
+   len 256.
+D: RPC MAD_METHOD_GET(1) SMPFormat(1.1)
+   SMPPortInfo(21) completed to
+   'Path 10 -&gt; 9 SL=0 PKey=0xffff DQPN=0'
+   len 256.
+GID fe80::17:77ff:fef9:6e79 LID start 9 end 9
+</pre>
+</div>
+<div class="slide" id="library-tour-iba">
+<h1>Library Tour - IBA</h1>
+<p>Structures and constants from the IBA:</p>
+<ul class="simple">
+<li>Starts out as XML describing the precise on-the-wire structure layout</li>
+<li>Processed via script into Python classes with <em>pack</em>, <em>unpack</em> and <em>printer</em>
+functions</li>
+<li>106 structures from IBA</li>
+<li>Useful constants, value to string and string to value are hand written</li>
+<li>Auto generate tricky things like <em>SAFormat.componentMask</em></li>
+</ul>
+</div>
+<div class="slide" id="library-tour-iba-2">
+<h1>Library Tour - IBA (2)</h1>
+<p>Everything can be decoded and dumped:</p>
+<pre class="literal-block">
+$ ibtool ibaddr 9 -dd
+D: Reply MAD_METHOD_GET_RESP(129) SMPFormat(1.1) SMPNodeInfo(17)
+  0 01010181 baseVersion=1,mgmtClass=1,classVersion=1,method=129
+  4 00000000 status=0,classSpecific=0
+  8 000079FF transactionID=134139628569652
+ 12 D0E94434
+   + data SMPNodeInfo
+ 64 01010202 baseVersion=1,classVersion=1,nodeType=2,numPorts=2
+ 68 001777FF systemImageGUID=GUID('0017:77ff:fef9:6e79')
+ 72 FEF96E79
+ 76 001777FF nodeGUID=GUID('0017:77ff:fef9:6e79')
+ 80 FEF96E79
+ 84 001777FF portGUID=GUID('0017:77ff:fef9:6e79')
+ 88 FEF96E79
+ 92 00010009 partitionCap=1,deviceID=9
+ 96 00010001 revision=65537
+100 02001777 localPortNum=2,vendorID=6007
+</pre>
+</div>
+<div class="slide" id="library-tour-iba-3">
+<h1>Library Tour - IBA (3)</h1>
+<p>Dynamic language with introspection makes this dead easy:</p>
+<pre class="literal-block">
+$ ibtool query SubnAdmGetTable SANodeRecord \
+  -f nodeInfo.systemImageGUID=0017:77ff:fef9:6e79
+Reply structure #0
+  LID..............................9
+  nodeInfo.NumPorts................2
+  nodeInfo.SystemImageGUID.........0017:77ff:fef9:6e79
+  nodeInfo.PortGUID................0017:77ff:fef9:6e79
+  nodeInfo.VendorID................0x001777
+  nodeDescription.NodeString.......'Obsidian Longbow X100 - LBXREAF28B'
+</pre>
+<p>45 LOC! - perform any RPC, with any arguments and pretty print the
+result. Widely used in implementing <em>ibtool</em>.</p>
+</div>
+<div class="slide" id="library-tour-mad-handling">
+<h1>Library Tour - MAD Handling</h1>
+<ul class="simple">
+<li>Two MAD QP interfaces - <em>rdma.umad</em> (SMP and GMP) and <em>rdma.vmad</em> (only GMP)</li>
+<li>Simplified programming model for issuing RPC MADs, RPC errors are
+converted into exceptions. checks, parsing and RMPP are centralized.</li>
+<li><em>rdma.SATransactor</em> transparently converts SMP RPCs into SA RPCs - enables
+all tools to use <em>VMAD</em> and return data from the SA.</li>
+<li><em>rdma.sched</em> parallelizes MAD RPCs - extremely easy to use, major performance
+win. Used extensively in <em>ibtool</em></li>
+</ul>
+</div>
+<div class="slide" id="library-tour-mad-handling-2">
+<h1>Library Tour - MAD Handling (2)</h1>
+<pre class="literal-block">
+$ ibtool ibaddr 10 --sa -d
+D: RPC MAD_METHOD_GET(1) SAFormat(3.2)
+     SANodeRecord(17) completed to 'Path 8 -&gt; 8 SL=0 PKey=0xffff DQPN=1' len 256.
+D: RPC MAD_METHOD_GET(1) SAFormat(3.2)
+     SAPortInfoRecord(18) completed to 'Path 8 -&gt; 8 SL=0 PKey=0xffff DQPN=1' len 256.
+GID fe80::2:c903:0:14a6 LID start 10 end 10
+</pre>
+<pre class="literal-block">
+$ ibtool ibnetdiscover --sa -d
+D: Performing discovery using mode 'SA'
+D: RPC MAD_METHOD_GET_TABLE(18) SAFormat(3.2)
+    SANodeRecord(17) completed to 'Path 8 -&gt; 8 SL=0 PKey=0xffff DQPN=1' len 504.
+D: RPC MAD_METHOD_GET_TABLE(18) SAFormat(3.2)
+    SAPortInfoRecord(18) completed to 'Path 8 -&gt; 8 SL=0 PKey=0xffff DQPN=1' len 568.
+D: RPC MAD_METHOD_GET_TABLE(18) SAFormat(3.2)
+    SALinkRecord(32) completed to 'Path 8 -&gt; 8 SL=0 PKey=0xffff DQPN=1' len 104.
+</pre>
+</div>
+<div class="slide" id="library-tour-mad-parallelism">
+<h1>Library Tour - MAD Parallelism</h1>
+<p>Python Co-Routines - one thread, multiple execution contexts:</p>
+<pre class="literal-block">
+def get_pinf(sched,path,idx):
+  pinf = yield sched.SubnGet(IBA.SMPPortInfo,
+                 path,idx);
+sched.mqueue(get_pinf(sched,path,idx)
+        for I in range(1,ninf.numPorts+1));
+</pre>
+<p>Run <em>numPorts</em> copies of <em>get_pinf</em> in parallel. Automatically limits
+outstanding RPCs, tracks completion, manages timeouts, etc.</p>
+</div>
+<div class="slide" id="library-tour-ib-subnet">
+<h1>Library Tour - IB Subnet</h1>
+<p>Fetch, store and manipulate an IB subnet:</p>
+<ul class="simple">
+<li>Discovery via DR SMP, LID SMP or SA <em>SubnAdmGetTable</em></li>
+<li>Incremental out of order loading</li>
+<li>Save/Load to a Python pickle</li>
+<li>Iterate, BFS iterate, lookup by GUID, etc.</li>
+</ul>
+</div>
+<div class="slide" id="library-tour-ib-subnet-2">
+<h1>Library Tour - IB Subnet (2)</h1>
+<p>All <em>ibtool</em> discovery using functions support common options
+and caching:</p>
+<pre class="literal-block">
+$ ibtool ibnetdiscover --cache disc \
+        --refresh-cache
+$ ibtool ibcheckerrors --cache disc
+## Summary: 4 nodes checked, 0 bad nodes found
+##          8 ports checked, 0 ports with bad state found
+##          4 ports checked, 0 ports have errors beyond threshold
+</pre>
+<p>No MADs will be issued by <em>ibcheckerrors</em></p>
+</div>
+<div class="slide" id="library-tour-verbs">
+<h1>Library Tour - Verbs</h1>
+<p>Easy to use wrappers around verbs:</p>
+<pre class="literal-block">
+with get_verbs(path.end_port) as ctx:
+    cq = ctx.cq(100,ctx.comp_channel());
+    pd = ctx.pd();
+    qp = pd.qp(ibv.IBV_QPT_UD,100,100,cq);
+</pre>
+<ul class="simple">
+<li>Errors are raised as exceptions</li>
+<li><em>libibverbs</em> functions cast into objects</li>
+<li>Reference counting and Python context managers ensure correct resource
+cleanup</li>
+</ul>
+</div>
+<div class="slide" id="library-tour-verbs-2">
+<h1>Library Tour - Verbs (2)</h1>
+<p>Simplifications for WC processing:</p>
+<pre class="literal-block">
+poller = CQPoller(cq);
+for wc in poller.iterwc(timeout=1):
+ if wc.status != ibv.IBV_WC_SUCCESS:
+   raise ibv.WCError(wc,cq,obj=qp);
+</pre>
+<ul class="simple">
+<li>Iterate over WC's, block with <em>poll</em></li>
+<li>Transparently handle async events</li>
+<li>Place a timeout around the entire for loop</li>
+<li>Messy details to prevent races are hidden</li>
+<li>WC errors raise as exceptions and pretty print</li>
+</ul>
+</div>
+<div class="slide" id="library-tour-verbs-3">
+<h1>Library Tour - Verbs (3)</h1>
+<p>Tight integration with <em>IBPath</em> concept:</p>
+<pre class="literal-block">
+path = get_mad_path(umad,&quot;10&quot;);
+qp.establish(path);
+qp.post_send(ibv.send_wr(
+   opcode=ibv.IBV_WR_SEND,ah=pd.ah(path),
+   remote_qpn=path.dqpn,remote_qkey=path.qkey));
+</pre>
+<ul class="simple">
+<li>Caches AH construction</li>
+<li>Verbs modify_qp draws information from the path (eg pkey, qkey,
+psn, etc)</li>
+<li>Works for UD, UC and RC,</li>
+<li>Can also get a path from a WC</li>
+</ul>
+</div>
+<div class="slide" id="summary">
+<h1>Summary</h1>
+<ul class="big simple">
+<li>Great for writing management tools</li>
+<li>Very time efficient for test development, training and prototyping</li>
+<li><em>ibtool</em> is an improved, simpler and more maintainable version of
+the diags programs</li>
+</ul>
+</div>
+<div class="slide" id="thanks">
+<h1>Thanks!</h1>
+<div class="center big line-block">
+<div class="line">Get it at GitHub <a class="reference external" href="http://github.com/jgunthorpe/python-rdma">http://github.com/jgunthorpe/python-rdma</a></div>
+<div class="line">Read the manual!</div>
+<div class="line">Try it out!</div>
+</div>
+<pre class="incremental center literal-block">
+          (__)
+          (oo)
+   /------\/
+ / |    ||
+*  /\---/\
+   ~~   ~~
+</pre>
+</div>
+</div>
+</body>
+</html>
